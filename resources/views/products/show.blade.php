@@ -44,10 +44,10 @@
                     <a href="{{ route('products.index') }}" class="btn" style="background: #f8f9fa; color: #1a1d29; padding: 10px 24px; border-radius: 6px; border: 1px solid #e9ecef; text-decoration: none; font-weight: 600;">
                         <i class="fas fa-arrow-left"></i> Back
                     </a>
-                    <form action="{{ route('products.destroy', $product) }}" method="POST" style="display: inline;">
+                    <form action="{{ route('products.destroy', $product) }}" method="POST" style="display: inline;" data-delete="Product" data-item-name="{{ $product->name }}">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn" style="background: #f8d7da; color: #721c24; padding: 10px 24px; border-radius: 6px; border: 1px solid #f5c6cb; font-weight: 600; cursor: pointer;" onclick="return confirm('Are you sure?')">
+                        <button type="submit" class="btn" style="background: #f8d7da; color: #721c24; padding: 10px 24px; border-radius: 6px; border: 1px solid #f5c6cb; font-weight: 600; cursor: pointer;">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </form>

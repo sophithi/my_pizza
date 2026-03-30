@@ -32,7 +32,33 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        $order = Order::create($request->validated());
+        $validated = $request->validated();
+        
+        // Create the order
+        $order = Order::create([
+            'customer_id' => $validated['customer_id'],
+            'order_date' => $validated['order_date'],
+            'subtotal' => $validated['subtotal'],
+            'tax_amount' => $validated['tax_amount'] ?? 0,
+            'discount_amount' => $validated['discount_amount'] ?? 0,
+            'total_amount' => $validated['total_amount'],
+            'status' => $validated['status'] ?? 'pending',
+            'payment_status' => $validated['payment_status'] ?? 'unpaid',
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        // Parse and create order items
+        $orderItems = json_decode($validated['order_items'], true);
+        foreach ($orderItems as $item) {
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'total_price' => $item['total_price'],
+            ]);
+        }
+
         return redirect()->route('orders.show', $order)->with('success', 'Order created successfully.');
     }
 

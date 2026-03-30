@@ -25,9 +25,14 @@ class StoreOrderRequest extends FormRequest
         return [
             'customer_id' => 'required|exists:customers,id',
             'order_date' => 'required|date',
+            'subtotal' => 'required|numeric|min:0',
+            'tax_amount' => 'nullable|numeric|min:0',
+            'discount_amount' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'in:pending,processing,completed,cancelled',
             'payment_status' => 'in:unpaid,partial,paid',
+            'notes' => 'nullable|string',
+            'order_items' => 'required|json',
         ];
     }
 }

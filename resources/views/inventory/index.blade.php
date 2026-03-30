@@ -2,138 +2,124 @@
 
 @section('title', 'Inventory')
 
+@push('styles')
+<style>
+    body { background: #f5f6fa; }
+    .header { background: white; padding: 32px; margin-bottom: 32px; border-radius: 12px; border-bottom: 3px solid #e85d24; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 28px; font-weight: 800; color: #1a1d29; margin: 0; }
+    .header p { font-size: 13px; color: #999; margin: 8px 0 0 0; }
+    .btn-add { background: #e85d24; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease; }
+    .btn-add:hover { background: #d94a10; transform: translateY(-2px); }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat { background: white; padding: 16px; border-radius: 6px; text-align: center; border-left: 4px solid #e85d24; font-size: 24px; font-weight: 800; color: #1a1d29; }
+    .stat p { margin: 4px 0 0 0; font-size: 11px; color: #999; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .card { background: white; border-radius: 6px; overflow: hidden; border: 1px solid #e8e8e8; transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+    .card-img { width: 100%; height: 160px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 40px; }
+    .card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .card-body { padding: 14px; }
+    .card-title { font-weight: 700; font-size: 15px; color: #1a1d29; margin: 0 0 4px 0; }
+    .card-cat { font-size: 12px; color: #999; margin: 0 0 8px 0; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+    .badge-good { background: #e8f5e9; color: #2e7d32; }
+    .badge-warn { background: #fff3e0; color: #e65100; }
+    .badge-bad { background: #ffebee; color: #c62828; }
+    .info { font-size: 13px; margin: 8px 0; color: #666; }
+    .price { display: flex; gap: 6px; margin: 8px 0; }
+    .price span { font-size: 12px; padding: 4px 8px; background: #f5f6fa; border-radius: 4px; font-weight: 700; flex: 1; }
+    .btns { display: flex; gap: 6px; margin-top: 10px; }
+    .btns a { flex: 1; padding: 6px 8px; border: 1px solid #e8e8e8; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 700; text-align: center; color: #1a1d29; transition: all 0.3s ease; }
+    .btns a:first-child { background: #e85d24; color: white; border-color: #e85d24; }
+    .btns a:hover { border-color: #e85d24; color: #e85d24; }
+    .empty { text-align: center; padding: 40px; background: white; border-radius: 6px; color: #999; }
+    .empty i { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.2; }
+    @media (max-width: 768px) { .header { flex-direction: column; gap: 12px; text-align: center; } .grid { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
+</style>
+@endpush
+
 @section('content')
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">Inventory Management</h2>
-                <a href="{{ route('inventory.create') }}" class="btn" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                    <i class="fas fa-plus"></i> Add Inventory
-                </a>
-            </div>
+<div style="max-width: 1200px; margin: 0 auto; padding: 16px;">
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1>📦 Inventory</h1>
+            <p>Manage your stock levels</p>
         </div>
+        <a href="{{ route('inventory.create') }}" class="btn-add"><i class="fas fa-plus"></i> Add</a>
     </div>
 
     @if($message = Session::get('success'))
-    <div class="alert alert-success" style="border-radius: 8px; padding: 16px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
-        <i class="fas fa-check-circle"></i> {{ $message }}
+    <div style="background: #e8f5e9; color: #2e7d32; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #2e7d32;">
+        {{ $message }}
     </div>
     @endif
 
     @if($inventories->count() > 0)
-    <div class="row">
-        @forelse($inventories as $inv)
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden; transition: all 0.3s ease;">
-                <!-- Product Image -->
-                <div style="height: 200px; background: linear-gradient(135deg, #e85d24 0%, #d94a10 100%); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                    @if($inv->product->image)
-                        <img src="{{ asset('storage/' . $inv->product->image) }}" alt="{{ $inv->product->name }}" 
-                            style="width: 100%; height: 100%; object-fit: cover;">
-                    @else
-                        <div style="text-align: center; color: white;">
-                            <i class="fas fa-box" style="font-size: 48px; margin-bottom: 8px;"></i>
-                            <p style="margin: 0; font-weight: 600;">No Image</p>
-                        </div>
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat">{{ $inventories->count() }}<p>Total</p></div>
+        <div class="stat">{{ $inventories->where('quantity', '>', 0)->where('quantity', '>', DB::raw('reorder_level'))->count() }}<p>In Stock</p></div>
+        <div class="stat">{{ $inventories->where('quantity', '<=', DB::raw('reorder_level'))->where('quantity', '>', 0)->count() }}<p>Low</p></div>
+        <div class="stat">{{ $inventories->where('quantity', 0)->count() }}<p>Out</p></div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid">
+        @foreach($inventories as $inv)
+        <div class="card">
+            <div class="card-img">
+                @if($inv->product->image)
+                    <img src="{{ asset('storage/' . $inv->product->image) }}" alt="{{ $inv->product->name }}">
+                @else
+                    <i class="fas fa-image"></i>
+                @endif
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ $inv->product->name }}</h3>
+                <p class="card-cat">{{ $inv->product->category }}</p>
+                
+                @php
+                    $isOut = $inv->quantity == 0;
+                    $isLow = !$isOut && $inv->quantity <= $inv->reorder_level;
+                @endphp
+                <span class="badge {{ $isOut ? 'badge-bad' : ($isLow ? 'badge-warn' : 'badge-good') }}">
+                    {{ $isOut ? '✕ Out' : ($isLow ? '⚠ Low' : '✓ In Stock') }}
+                </span>
+
+                <div class="info">Qty: <strong>{{ $inv->quantity }}</strong> {{ $inv->product->unit }}</div>
+                <div class="info">Min: <strong>{{ $inv->reorder_level }}</strong></div>
+                <div class="info">📍 {{ $inv->warehouse_location ?? '—' }}</div>
+
+                <div class="price">
+                    @if($inv->product->price_usd)
+                    <span>${{ number_format($inv->product->price_usd, 2) }}</span>
+                    @endif
+                    @if($inv->product->price_khr)
+                    <span>៛{{ number_format($inv->product->price_khr, 0) }}</span>
                     @endif
                 </div>
 
-                <!-- Card Body -->
-                <div class="card-body" style="padding: 20px;">
-                    <!-- Product Name & Category -->
-                    <div style="margin-bottom: 12px;">
-                        <h5 style="color: #333; font-weight: 600; margin: 0 0 4px 0; font-size: 16px;">{{ $inv->product->name }}</h5>
-                        <p style="color: #666; font-size: 12px; margin: 0;">
-                            <i class="fas fa-tag" style="margin-right: 4px;"></i>{{ $inv->product->category }}
-                        </p>
-                    </div>
-
-                    <!-- Stock Information -->
-                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="color: #666; font-size: 12px;">Quantity in Stock:</span>
-                            <span style="color: #333; font-weight: 600;">{{ $inv->quantity }} {{ $inv->product->unit }}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #666; font-size: 12px;">Warehouse:</span>
-                            <span style="color: #333; font-weight: 500;">{{ $inv->warehouse_location ?? 'N/A' }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Status Badge -->
-                    <div style="margin-bottom: 12px;">
-                        <span style="padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600;
-                            background: {{ $inv->quantity == 0 ? '#f8d7da' : ($inv->quantity <= $inv->reorder_level ? '#fff3cd' : '#d4edda') }};
-                            color: {{ $inv->quantity == 0 ? '#721c24' : ($inv->quantity <= $inv->reorder_level ? '#856404' : '#155724') }};">
-                            @if($inv->quantity == 0)
-                                <i class="fas fa-exclamation-circle"></i> Out of Stock
-                            @elseif($inv->quantity <= $inv->reorder_level)
-                                <i class="fas fa-exclamation-triangle"></i> Low Stock (Min: {{ $inv->reorder_level }})
-                            @else
-                                <i class="fas fa-check-circle"></i> In Stock
-                            @endif
-                        </span>
-                    </div>
-
-                    <!-- Pricing Section -->
-                    <div style="border-top: 1px solid #e9ecef; padding-top: 12px; margin-top: 12px;">
-                        <p style="color: #666; font-size: 11px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Pricing</p>
-                        
-                        @if($inv->product->price)
-                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e9ecef;">
-                            <span style="color: #666; font-size: 12px;">PHP:</span>
-                            <span style="color: #e85d24; font-weight: 600;">₱{{ number_format($inv->product->price, 2) }}</span>
-                        </div>
-                        @endif
-
-                        @if($inv->product->price_usd)
-                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e9ecef;">
-                            <span style="color: #666; font-size: 12px;">USD:</span>
-                            <span style="color: #17a2b8; font-weight: 600;">${{ number_format($inv->product->price_usd, 2) }}</span>
-                        </div>
-                        @endif
-
-                        @if($inv->product->price_khr)
-                        <div style="display: flex; justify-content: space-between; padding: 6px 0;">
-                            <span style="color: #666; font-size: 12px;">KHR:</span>
-                            <span style="color: #28a745; font-weight: 600;">៛{{ number_format($inv->product->price_khr, 0) }}</span>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Footer Actions -->
-                <div class="card-footer" style="background: #f8f9fa; padding: 12px 20px; border-top: 1px solid #e9ecef; display: flex; gap: 8px;">
-                    <a href="{{ route('inventory.show', $inv) }}" class="btn btn-sm" 
-                        style="background: #e85d24; color: white; border: none; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; flex: 1; text-align: center;">
-                        <i class="fas fa-eye"></i> View
-                    </a>
-                    <a href="{{ route('inventory.edit', $inv) }}" class="btn btn-sm" 
-                        style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; flex: 1; text-align: center;">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
+                <div class="btns">
+                    <a href="{{ route('inventory.show', $inv) }}"><i class="fas fa-eye"></i> View</a>
+                    <a href="{{ route('inventory.edit', $inv) }}"><i class="fas fa-edit"></i> Edit</a>
                 </div>
             </div>
         </div>
-        @empty
-        <div class="col-12">
-            <div class="alert alert-info" style="border-radius: 8px; padding: 24px; background: #cce5ff; color: #004085; border: 1px solid #b6d4fe; text-align: center;">
-                <i class="fas fa-info-circle"></i> No inventory records found. <a href="{{ route('inventory.create') }}" style="color: #004085; font-weight: 600;">Add one now</a>
-            </div>
-        </div>
-        @endforelse
+        @endforeach
     </div>
 
-    <div style="margin-top: 20px;">
-        {{ $inventories->links() }}
-    </div>
+    @if($inventories->hasPages())
+    <div style="margin-top: 24px;">{{ $inventories->links() }}</div>
+    @endif
+
     @else
-    <div class="alert alert-info" style="border-radius: 8px; padding: 24px; background: #cce5ff; color: #004085; border: 1px solid #b6d4fe; text-align: center;">
-        <i class="fas fa-info-circle"></i> No inventory records found. <a href="{{ route('inventory.create') }}" style="color: #004085; font-weight: 600;">Add one now</a>
+    <div class="empty">
+        <i class="fas fa-box-open"></i>
+        <h3>No Inventory Yet</h3>
+        <p>Add your first product inventory</p>
     </div>
     @endif
 </div>
-
 @endsection

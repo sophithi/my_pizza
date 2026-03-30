@@ -73,10 +73,10 @@
                         <td style="padding: 12px;">
                             <a href="{{ route('customers.show', $customer) }}" class="btn-action" title="View" style="color: #0d6efd; text-decoration: none; font-size: 12px; margin-right: 10px;"><i class="fas fa-eye"></i></a>
                             <a href="{{ route('customers.edit', $customer) }}" class="btn-action" title="Edit" style="color: #0d6efd; text-decoration: none; font-size: 12px; margin-right: 10px;"><i class="fas fa-edit"></i></a>
-                            <form action="{{ route('customers.destroy', $customer) }}" method="POST" style="display: inline;">
+                            <form action="{{ route('customers.destroy', $customer) }}" method="POST" style="display: inline;" data-delete="Customer" data-item-name="{{ $customer->name }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" title="Delete" style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 12px;" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i></button>
+                                <button type="submit" title="Delete" style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 12px;"><i class="fas fa-trash"></i></button>
                             </form>
                         </td>
                     </tr>

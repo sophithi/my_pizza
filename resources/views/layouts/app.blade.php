@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
     <!-- Custom styles -->
     <style>
@@ -207,6 +209,9 @@
             </a>
 
             <div class="nav-label">Warehouse</div>
+            <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}">
+                <i class="fas fa-pizza-slice"></i> Products
+            </a>
             <a href="/inventory" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
                 <i class="fas fa-boxes"></i> Inventory
             </a>
@@ -254,6 +259,78 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    
+    <script>
+        // Improved delete confirmation dialog
+        function confirmDelete(itemName = 'this item', itemType = 'Item') {
+            return Swal.fire({
+                title: 'Are you sure?',
+                html: `<div style="text-align: left;">
+                    <p style="margin-bottom: 15px;">Do you really want to delete this <strong>${itemType.toLowerCase()}</strong>?</p>
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                        <p style="margin: 0; font-size: 13px; color: #856404;">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> This action cannot be undone.
+                        </p>
+                    </div>
+                </div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash"></i> Yes, Delete',
+                cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+                allowOutsideClick: false,
+                allowEscapeKey: true,
+                reverseButtons: true
+            }).then((result) => {
+                return result.isConfirmed;
+            });
+        }
+
+        // Helper function for delete forms
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find all delete forms with the data-delete attribute
+            document.querySelectorAll('[data-delete]').forEach(form => {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const itemType = form.dataset.delete || 'Item';
+                    const itemName = form.dataset.itemName || itemType;
+                    
+                    const result = await Swal.fire({
+                        title: 'Delete ' + itemType + '?',
+                        html: `<div style="text-align: left;">
+                            <p style="margin-bottom: 15px;">You are about to delete: <strong>${itemName}</strong></p>
+                            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+                                <p style="margin: 0; font-size: 13px; color: #856404;">
+                                    <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="fas fa-trash"></i> Yes, Delete Permanently',
+                        cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+                        allowOutsideClick: false,
+                        allowEscapeKey: true,
+                        reverseButtons: true,
+                        didOpen: (modal) => {
+                            const confirmBtn = modal.querySelector('.swal2-confirm');
+                            confirmBtn.innerHTML = '<i class="fas fa-trash" style="margin-right: 5px;"></i> Delete Permanently';
+                        }
+                    });
+                    
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

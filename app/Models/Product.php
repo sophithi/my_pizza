@@ -6,18 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable = [
-        'name',
-        'description',
-        'sku',
-       'price_usd',
-        'price_khr',
-       
-        'image',
-        'category',
-        'unit',
-        'supplier',
-    ];
+   protected $fillable = [
+    'name',
+    'sku',
+    'description',
+    'image',
+    'category',
+    'unit',
+    'price_usd',
+    'price_khr',
+    'supplier',
+];
 
     protected $casts = [
         'price_khr' => 'decimal:2',

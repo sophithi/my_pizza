@@ -43,7 +43,7 @@
                             <a href="{{ route('invoices.show', $invoice) }}" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
                                 Cancel
                             </a>
-                            <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                            <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" style="display: inline;" data-delete="Invoice" data-item-name="Invoice #{{ $invoice->id }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">

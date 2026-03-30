@@ -308,26 +308,7 @@
                 </a>
             </div>
         </div>
-
-        <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
-            <div class="card-body" style="padding: 24px;">
-                <h6 class="section-title mb-3">Quick Actions</h6>
-                <div class="d-grid gap-2">
-                    <a href="/orders/create" class="btn-action btn-primary-custom" style="display: block; text-align: center; text-decoration: none;">
-                        <i class="fas fa-plus-circle"></i> New Order
-                    </a>
-                    <a href="/customers/create" class="btn-action" style="background: #f8f9fa; color: #1a1d29; text-decoration: none; border: 1px solid #e9ecef; display: block; text-align: center;">
-                        <i class="fas fa-user-plus"></i> Add Customer
-                    </a>
-                    <a href="/reports" class="btn-action" style="background: #f8f9fa; color: #1a1d29; text-decoration: none; border: 1px solid #e9ecef; display: block; text-align: center;">
-                        <i class="fas fa-chart-bar"></i> View Reports
-                    </a>
-                    <a href="/invoices" class="btn-action" style="background: #f8f9fa; color: #1a1d29; text-decoration: none; border: 1px solid #e9ecef; display: block; text-align: center;">
-                        <i class="fas fa-file-invoice"></i> Invoices
-                    </a>
-                </div>
-            </div>
-        </div>
+       
     </div>
 </div>
 
