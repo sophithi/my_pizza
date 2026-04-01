@@ -155,7 +155,7 @@
                                 <tr style="border-bottom: 1px solid #e9ecef;">
                                     <td style="padding: 8px; color: #333; font-weight: 500;">#{{ $order->id }}</td>
                                     <td style="padding: 8px; color: #666;">{{ $order->customer->name }}</td>
-                                    <td style="padding: 8px; color: #333; font-weight: 500; text-align: right;">₱{{ number_format($order->total_amount, 2) }}</td>
+                                    <td style="padding: 8px; color: #333; font-weight: 500; text-align: right;">${{ number_format($order->total_amount, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -239,7 +239,7 @@
                 labels: dates,
                 datasets: [
                     {
-                        label: 'Revenue (₱)',
+                        label: 'Revenue ($)',
                         data: revenues,
                         borderColor: '#e85d24',
                         backgroundColor: 'rgba(232, 93, 36, 0.1)',
@@ -286,7 +286,7 @@
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'Revenue (₱)',
+                            text: 'Revenue ($)',
                             font: {
                                 weight: '600'
                             }

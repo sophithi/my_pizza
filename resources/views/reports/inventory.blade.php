@@ -62,7 +62,7 @@
             <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #17a2b8;">
                 <div class="card-body" style="padding: 24px;">
                     <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Total Inventory Value</p>
-                    <h3 style="color: #17a2b8; font-size: 32px; font-weight: 700; margin: 0;">₱{{ number_format($totalInventoryValue, 2) }}</h3>
+                    <h3 style="color: #17a2b8; font-size: 32px; font-weight: 700; margin: 0;">${{ number_format($totalInventoryValue, 2) }}</h3>
                     <p style="color: #999; font-size: 12px; margin-top: 8px; margin-bottom: 0;">Current stock value at cost price</p>
                 </div>
             </div>
@@ -137,7 +137,7 @@
                             <td style="padding: 12px; color: #666; text-align: right;">{{ $inv->quantity }}</td>
                             <td style="padding: 12px; color: #666; text-align: right;">{{ $inv->reorder_level }}</td>
                             <td style="padding: 12px; color: #333; font-weight: 500; text-align: right;">
-                                ₱{{ number_format(($inv->cost_per_unit ?? 0) * $inv->quantity, 2) }}
+                                ${{ number_format(($inv->cost_per_unit ?? 0) * $inv->quantity, 2) }}
                             </td>
                             <td style="padding: 12px; text-align: center;">
                                 @if ($inv->quantity == 0)

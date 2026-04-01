@@ -5,7 +5,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">Invoices</h2>
+                <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">វិក្ក័យប័ត្រ</h2>
                 <a href="{{ route('invoices.create') }}" class="btn" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
                     <i class="fas fa-plus"></i> Create Invoice
                 </a>
@@ -35,7 +35,7 @@
                             <td style="padding: 12px; color: #333; font-weight: 500;">{{ $invoice->invoice_number }}</td>
                             <td style="padding: 12px; color: #666;">{{ $invoice->order->customer->name }}</td>
                             <td style="padding: 12px; color: #666;">#{{ $invoice->order->id }}</td>
-                            <td style="padding: 12px; color: #333; font-weight: 500;">₱{{ number_format($invoice->total_amount, 2) }}</td>
+                            <td style="padding: 12px; color: #333; font-weight: 500;">${{ number_format($invoice->total_amount, 2) }}</td>
                             <td style="padding: 12px; color: #666;">{{ $invoice->invoice_date->format('M d, Y') }}</td>
                             <td style="padding: 12px;">
                                 <span style="padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;

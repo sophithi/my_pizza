@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('role', ['admin', 'manager', 'staff'])->default('staff')->after('password');
-            $table->text('profile')->nullable()->after('role');
-            $table->boolean('is_active')->default(true)->after('profile');
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->enum('role', ['admin', 'manager', 'staff'])->default('staff')->after('password');
+            }
+            if (!Schema::hasColumn('users', 'profile')) {
+                $table->text('profile')->nullable()->after('role');
+            }
+            if (!Schema::hasColumn('users', 'is_active')) {
+                $table->boolean('is_active')->default(true)->after('profile');
+            }
         });
     }
 

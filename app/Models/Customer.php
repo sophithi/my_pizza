@@ -11,9 +11,17 @@ class Customer extends Model
         'type',
         'email',
         'phone',
+        'address',
+        'city',
+        'postal_code',
         'location',
+        'company_name',
         'contact_person',
+        'credit_limit',
         'status',
+        'notes',
+        'facebook_id',
+        'telegram_id',
     ];
 
     protected $casts = [

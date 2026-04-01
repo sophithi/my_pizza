@@ -162,21 +162,19 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🍕 Pizza POS</div>
+            <div class="logo">PizzaHappyFamily</div>
             <div class="invoice-details">
                 <div class="invoice-number">{{ $invoice->invoice_number }}</div>
-                <p>Invoice Date: {{ $invoice->invoice_date->format('M d, Y') }}</p>
-                <p>Due Date: {{ $invoice->due_date ? $invoice->due_date->format('M d, Y') : 'N/A' }}</p>
+                <p>កាលបរិច្ឆេទ: {{ $invoice->invoice_date->format('M d, Y') }}</p>
             </div>
         </div>
 
         <div class="section">
             <div class="customer-info">
-                <div class="section-title">Bill To</div>
+                <div class="section-title">ព័ត៌មានអតិថិជន</div>
                 <p class="customer-name">{{ $invoice->order->customer->name }}</p>
                 <p>{{ $invoice->order->customer->address }}</p>
                 <p>{{ $invoice->order->customer->city }}, {{ $invoice->order->customer->postal_code }}</p>
-                <p>{{ $invoice->order->customer->email }}</p>
                 <p>{{ $invoice->order->customer->phone }}</p>
             </div>
             <div class="invoice-info">
@@ -189,10 +187,10 @@
         <table>
             <thead>
                 <tr>
-                    <th>Product</th>
-                    <th class="text-right">Qty</th>
-                    <th class="text-right">Unit Price</th>
-                    <th class="text-right">Total</th>
+                    <th>រាយនាមមុខទំនិញ</th>
+                    <th class="text-right">ចំនួន</th>
+                    <th class="text-right">តម្លៃ</th>
+                    <th class="text-right">សរុប</th>
                 </tr>
             </thead>
             <tbody>
@@ -200,8 +198,8 @@
                 <tr>
                     <td>{{ $item->product->name }}</td>
                     <td class="text-right">{{ $item->quantity }}</td>
-                    <td class="text-right">₱{{ number_format($item->unit_price, 2) }}</td>
-                    <td class="text-right">₱{{ number_format($item->total_price, 2) }}</td>
+                    <td class="text-right">${{ number_format($item->unit_price, 2) }}</td>
+                    <td class="text-right">${{ number_format($item->total_price, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -211,19 +209,15 @@
             <div class="totals-box">
                 <div class="total-row">
                     <span>Subtotal:</span>
-                    <span>₱{{ number_format($invoice->subtotal, 2) }}</span>
+                    <span>${{ number_format($invoice->subtotal, 2) }}</span>
                 </div>
                 <div class="total-row">
-                    <span>Tax:</span>
-                    <span>₱{{ number_format($invoice->tax_amount, 2) }}</span>
-                </div>
-                <div class="total-row">
-                    <span>Discount:</span>
-                    <span>-₱{{ number_format($invoice->discount_amount, 2) }}</span>
+                    <span>បញ្ចុះតម្លៃ:</span>
+                    <span>-${{ number_format($invoice->discount_amount, 2) }}</span>
                 </div>
                 <div class="grand-total">
-                    <span>Total Amount:</span>
-                    <span class="amount">₱{{ number_format($invoice->total_amount, 2) }}</span>
+                    <span>តម្លៃសរុបទាំងអស់:</span>
+                    <span class="amount">${{ number_format($invoice->total_amount, 2) }}</span>
                 </div>
             </div>
         </div>
@@ -236,20 +230,19 @@
         @endif
 
         <div class="footer">
-            <p>Thank you for your business!</p>
-            <p>This invoice was generated on {{ now()->format('M d, Y \a\t H:i A') }}</p>
+            <p>Thank you for order!</p>
+            <p>វិក្ក័យប័ត្របានធ្វើនៅ {{ now()->format('M d, Y \a\t H:i A') }}</p>
         </div>
     </div>
 
     <div class="no-print" style="text-align: center; margin-top: 20px;">
         <button onclick="window.print()" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-            <i class="fas fa-print"></i> Print Invoice
+            <i class="fas fa-print"></i> Print វិក្ក័យប័ត្រ
         </button>
     </div>
 
     <script>
-        // Auto print on page load (optional)
-        // window.print();
+      
     </script>
 </body>
 </html>

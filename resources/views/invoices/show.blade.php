@@ -61,8 +61,8 @@
                                 <tr style="border-bottom: 1px solid #e9ecef;">
                                     <td style="padding: 8px; color: #333;">{{ $item->product->name }}</td>
                                     <td style="padding: 8px; color: #666; text-align: right;">{{ $item->quantity }}</td>
-                                    <td style="padding: 8px; color: #666; text-align: right;">₱{{ number_format($item->unit_price, 2) }}</td>
-                                    <td style="padding: 8px; color: #333; font-weight: 500; text-align: right;">₱{{ number_format($item->total_price, 2) }}</td>
+                                    <td style="padding: 8px; color: #666; text-align: right;">${{ number_format($item->unit_price, 2) }}</td>
+                                    <td style="padding: 8px; color: #333; font-weight: 500; text-align: right;">${{ number_format($item->total_price, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -73,19 +73,15 @@
                         <div style="width: 300px;">
                             <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e9ecef;">
                                 <span style="color: #666;">Subtotal:</span>
-                                <span style="color: #333; font-weight: 500;">₱{{ number_format($invoice->subtotal, 2) }}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e9ecef;">
-                                <span style="color: #666;">Tax:</span>
-                                <span style="color: #333; font-weight: 500;">₱{{ number_format($invoice->tax_amount, 2) }}</span>
+                                <span style="color: #333; font-weight: 500;">${{ number_format($invoice->subtotal, 2) }}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e9ecef;">
                                 <span style="color: #666;">Discount:</span>
-                                <span style="color: #333; font-weight: 500;">-₱{{ number_format($invoice->discount_amount, 2) }}</span>
+                                <span style="color: #333; font-weight: 500;">${{ number_format($invoice->discount_amount, 2) }}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; padding: 12px 0; background: #f8f9fa; padding: 12px;">
                                 <span style="color: #333; font-weight: 600;">Total:</span>
-                                <span style="color: #e85d24; font-weight: 700; font-size: 18px;">₱{{ number_format($invoice->total_amount, 2) }}</span>
+                                <span style="color: #e85d24; font-weight: 700; font-size: 18px;">${{ number_format($invoice->total_amount, 2) }}</span>
                             </div>
                         </div>
                     </div>

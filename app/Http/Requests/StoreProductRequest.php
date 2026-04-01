@@ -19,7 +19,7 @@ class StoreProductRequest extends FormRequest
             'price_usd'   => 'required|numeric|min:0',
             'price_khr'   => 'nullable|numeric|min:0',
             'category'    => 'required|string|max:255',
-            'unit'        => 'nullable|string|max:50',
+            'unit'        => 'required|string|in:kg,g,L,ml,pcs,box,pack,bag',
             'supplier'    => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|max:2048',
@@ -35,6 +35,8 @@ class StoreProductRequest extends FormRequest
             'price_usd.required' => 'Price (USD) is required.',
             'price_usd.numeric'  => 'Price must be a number.',
             'category.required'  => 'Category is required.',
+            'unit.required'      => 'Unit is required.',
+            'unit.in'            => 'Invalid unit selected.',
         ];
     }
 

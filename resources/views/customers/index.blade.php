@@ -7,7 +7,7 @@
 <div class="mb-4 d-flex justify-content-between align-items-center">
     <h2 style="font-size: 24px; font-weight: 700; color: #1a1d29; margin: 0;">Customers</h2>
     <a href="{{ route('customers.create') }}" class="btn" style="background: linear-gradient(135deg, #e85d24 0%, #d94a10 100%); color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
-        <i class="fas fa-plus"></i> Add Customer
+        <i class="fas fa-plus"></i> បន្ថែមអតិថិជនថ្មី
     </a>
 </div>
 
@@ -24,11 +24,11 @@
             <table class="table table-hover mb-0">
                 <thead style="background: #f8f9fa;">
                     <tr>
-                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Type</th>
-                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Name</th>
-                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Phone</th>
-                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Location</th>
-                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Orders History</th>
+                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Type of Customer</th>
+                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">ឈ្មោះអតិថិជន</th>
+                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">លេខទំនាក់ទំនង</th>
+                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">ទីតាំង</th>
+                        <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">ការកម្មង់</th>
                         <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Status</th>
                         <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Actions</th>
                     </tr>
@@ -61,12 +61,16 @@
                         </td>
                         <td style="padding: 12px;">
                             @if($customer->status == 'active')
-                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #d4edda; color: #155724;">
-                                    Active
+                                <span style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #d4edda; color: #155724; display: inline-flex; align-items: center; gap: 6px; cursor: help;" title="{{ $customer->notes ?? 'input data by user' }}">
+                                    <i class="fas fa-check-circle"></i> Active
                                 </span>
                             @elseif($customer->status == 'inactive')
-                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #f8d7da; color: #721c24;">
-                                    Inactive
+                                <span style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #f8d7da; color: #721c24; display: inline-flex; align-items: center; gap: 6px; cursor: help;" title="{{ $customer->notes ?? 'note customer' }}">
+                                    <i class="fas fa-times-circle"></i> Inactive
+                                </span>
+                            @else
+                                <span style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #e2e3e5; color: #383d41;" title="{{ $customer->notes ?? '' }}">
+                                    {{ ucfirst($customer->status ?? 'Pending') }}
                                 </span>
                             @endif
                         </td>

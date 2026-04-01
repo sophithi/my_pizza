@@ -50,7 +50,7 @@
             <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #e85d24;">
                 <div class="card-body" style="padding: 24px;">
                     <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Total Revenue</p>
-                    <h3 style="color: #e85d24; font-size: 32px; font-weight: 700; margin: 0;">₱{{ number_format($totalRevenue, 2) }}</h3>
+                    <h3 style="color: #e85d24; font-size: 32px; font-weight: 700; margin: 0;">${{ number_format($totalRevenue, 2) }}</h3>
                 </div>
             </div>
         </div>
@@ -74,7 +74,7 @@
             <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #ffc107;">
                 <div class="card-body" style="padding: 24px;">
                     <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Avg Order Value</p>
-                    <h3 style="color: #ffc107; font-size: 32px; font-weight: 700; margin: 0;">₱{{ number_format($averageOrderValue, 2) }}</h3>
+                    <h3 style="color: #ffc107; font-size: 32px; font-weight: 700; margin: 0;">${{ number_format($averageOrderValue, 2) }}</h3>
                 </div>
             </div>
         </div>
@@ -125,7 +125,7 @@
                                         </span>
                                     </td>
                                     <td style="padding: 8px; color: #666; text-align: right;">{{ $stat->count }}</td>
-                                    <td style="padding: 8px; color: #333; font-weight: 500; text-align: right;">₱{{ number_format($stat->total ?? 0, 2) }}</td>
+                                    <td style="padding: 8px; color: #333; font-weight: 500; text-align: right;">${{ number_format($stat->total ?? 0, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -183,7 +183,7 @@
                                 @foreach ($customerRevenue as $customer)
                                 <tr style="border-bottom: 1px solid #e9ecef;">
                                     <td style="padding: 12px; color: #333;">{{ $customer->name }}</td>
-                                    <td style="padding: 12px; color: #333; font-weight: 500; text-align: right;">₱{{ number_format($customer->orders_sum_total_amount ?? 0, 2) }}</td>
+                                    <td style="padding: 12px; color: #333; font-weight: 500; text-align: right;">${{ number_format($customer->orders_sum_total_amount ?? 0, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -231,7 +231,7 @@
                 labels: dates,
                 datasets: [
                     {
-                        label: 'Revenue (₱)',
+                        label: 'Revenue ($)',
                         data: revenues,
                         backgroundColor: 'rgba(232, 93, 36, 0.7)',
                         borderColor: '#e85d24',
@@ -273,7 +273,7 @@
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'Revenue (₱)'
+                            text: 'Revenue ($)'
                         }
                     },
                     y1: {

@@ -19,7 +19,7 @@ class UpdateProductRequest extends FormRequest
             'price_usd'   => 'required|numeric|min:0',
             'price_khr'   => 'nullable|numeric|min:0',
             'category'    => 'required|string|max:255',
-            'unit'        => 'nullable|string|max:50',
+            'unit'        => 'required|string|in:kg,g,L,ml,pcs,box,pack,bag',
             'supplier'    => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|max:2048',

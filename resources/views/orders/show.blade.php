@@ -20,19 +20,13 @@
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                     <div>
-                        <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px;">Status</p>
-                        <span style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #d4edda; color: #155724;">
-                            {{ ucfirst($order->status) }}
-                        </span>
-                    </div>
-                    <div>
                         <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px;">Payment Status</p>
                         <span style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: {{ $order->payment_status === 'paid' ? '#d4edda' : '#fff3cd' }}; color: {{ $order->payment_status === 'paid' ? '#155724' : '#856404' }};">
                             {{ ucfirst($order->payment_status) }}
                         </span>
                     </div>
                     <div>
-                        <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px;">Subtotal</p>
+                        <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px;">តម្លៃសរុបទាំងអស់</p>
                         <p style="color: #1a1d29; font-weight: 600; margin: 0;">${{ number_format($order->subtotal, 2) }}</p>
                     </div>
                 </div>
@@ -63,10 +57,10 @@
                     <table class="table table-hover">
                         <thead style="background: #f8f9fa;">
                             <tr>
-                                <th style="padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">Product</th>
-                                <th style="padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">Quantity</th>
-                                <th style="padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">Price</th>
-                                <th style="padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">Total</th>
+                                <th style="padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">រាយនាមមុខទំនិញ</th>
+                                <th style="padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">ចំនួន</th>
+                                <th style="padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">តម្លៃនៃទំនិញ</th>
+                                <th style="padding: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">តម្លៃសរុប</th>
                             </tr>
                         </thead>
                         <tbody>

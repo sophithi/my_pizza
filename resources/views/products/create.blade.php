@@ -92,7 +92,7 @@
                                 <label class="form-label fw-semibold">Unit <span class="text-danger">*</span></label>
                                 <select name="unit" class="form-select @error('unit') is-invalid @enderror">
                                     <option value="">-- Select unit --</option>
-                                    @foreach(['kg','g','L','ml','pcs','box','pack','bag'] as $u)
+                                    @foreach(['គីឡូក្រាម','ក្រាម','លីត្រ','មីលីលីត្រ','ដើម','ប្រអប់','កេស','កញ្ចប់'] as $u)
                                     <option value="{{ $u }}" {{ old('unit', $product->unit ?? '') == $u ? 'selected' : '' }}>
                                         {{ $u }}
                                     </option>

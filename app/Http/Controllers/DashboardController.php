@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Inventory;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -11,41 +18,97 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Mock data - Replace with actual database queries
+        $today = Carbon::today();
+
+        // Real database queries for statistics
         $stats = [
-            'today_sales' => 2450.00,
-            'total_orders' => 127,
-            'orders_today' => 34,
-            'stock_alerts' => 5,
-            'overdue_invoices' => 3,
-            'customers' => 84,
-            'low_inventory_items' => 8,
-            'recovery_rate' => 98.5,
+            'today_sales' => Order::whereDate('order_date', $today)
+                ->where('status', 'completed')
+                ->sum('total_amount') ?? 0,
+            
+            'total_orders' => Order::count(),
+            
+            'orders_today' => Order::whereDate('order_date', $today)->count(),
+            
+            'stock_alerts' => Inventory::whereColumn('quantity', '<=', 'reorder_level')
+                ->count(),
+            
+            'overdue_invoices' => Invoice::where('status', '!=', 'paid')
+                ->where('due_date', '<', $today)
+                ->count(),
+            
+            'customers' => Customer::count(),
+            
+            'low_inventory_items' => Inventory::whereColumn('quantity', '<=', 'reorder_level')
+                ->count(),
+            
+            'recovery_rate' => $this->calculateRecoveryRate(),
         ];
 
-        $recent_orders = [
-            ['id' => 'ORD-001', 'customer' => 'John Restaurant', 'amount' => 450.00, 'status' => 'Completed', 'date' => '2026-03-26'],
-            ['id' => 'ORD-002', 'customer' => 'Pizza Italia', 'amount' => 320.50, 'status' => 'Pending', 'date' => '2026-03-26'],
-            ['id' => 'ORD-003', 'customer' => 'Quick Bite Cafe', 'amount' => 280.75, 'status' => 'Processing', 'date' => '2026-03-25'],
-            ['id' => 'ORD-004', 'customer' => 'Family Bistro', 'amount' => 560.00, 'status' => 'Completed', 'date' => '2026-03-25'],
-            ['id' => 'ORD-005', 'customer' => 'Gourmet Hub', 'amount' => 410.25, 'status' => 'Pending', 'date' => '2026-03-25'],
-        ];
+        // Recent orders from database (last 5)
+        $recent_orders = Order::with('customer')
+            ->latest('order_date')
+            ->limit(5)
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'customer' => $order->customer?->name ?? 'Unknown',
+                    'amount' => floatval($order->total_amount),
+                    'status' => ucfirst($order->status),
+                    'date' => $order->order_date->format('Y-m-d'),
+                ];
+            })
+            ->toArray();
 
-        $top_products = [
-            ['name' => 'Regular Pizza Dough', 'quantity' => 245, 'amount' => 1225.00],
-            ['name' => 'Mozzarella Cheese 1kg', 'quantity' => 180, 'amount' => 900.00],
-            ['name' => 'Tomato Sauce 5L', 'quantity' => 95, 'amount' => 475.00],
-            ['name' => 'Olive Oil Premium', 'quantity' => 42, 'amount' => 525.00],
-            ['name' => 'Fresh Basil Bundle', 'quantity' => 67, 'amount' => 335.00],
-        ];
+        // Top selling products (by quantity)
+        $top_products = DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->selectRaw('products.name, SUM(order_items.quantity) as quantity, SUM(order_items.total_price) as amount')
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('quantity')
+            ->limit(5)
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'name' => $product->name,
+                    'quantity' => (int) $product->quantity,
+                    'amount' => floatval($product->amount),
+                ];
+            })
+            ->toArray();
 
-        $inventory_alerts = [
-            ['item' => 'Buffalo Mozzarella', 'current' => 2, 'minimum' => 10, 'status' => 'critical'],
-            ['item' => 'San Marzano Tomatoes', 'current' => 5, 'minimum' => 15, 'status' => 'warning'],
-            ['item' => 'Extra Virgin Olive Oil', 'current' => 3, 'minimum' => 8, 'status' => 'critical'],
-            ['item' => 'Fresh Basil', 'current' => 4, 'minimum' => 12, 'status' => 'warning'],
-        ];
+        // Inventory alerts (low stock items)
+        $inventory_alerts = Inventory::with('product')
+            ->whereColumn('quantity', '<=', 'reorder_level')
+            ->get()
+            ->map(function ($inventory) {
+                $status = $inventory->quantity <= 0 ? 'critical' : 'warning';
+                return [
+                    'item' => $inventory->product?->name ?? 'Unknown',
+                    'current' => (int) $inventory->quantity,
+                    'minimum' => (int) $inventory->reorder_level,
+                    'status' => $status,
+                ];
+            })
+            ->toArray();
 
         return view('dashboard', compact('stats', 'recent_orders', 'top_products', 'inventory_alerts'));
+    }
+
+    /**
+     * Calculate recovery/completion rate
+     */
+    private function calculateRecoveryRate()
+    {
+        $total_orders = Order::count();
+        
+        if ($total_orders == 0) {
+            return 0;
+        }
+
+        $completed_orders = Order::where('status', 'completed')->count();
+        
+        return round(($completed_orders / $total_orders) * 100, 1);
     }
 }

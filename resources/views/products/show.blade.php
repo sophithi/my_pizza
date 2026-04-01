@@ -14,7 +14,7 @@
                         <p style="color: #6c757d; margin: 8px 0 0 0;">SKU: <strong>{{ $product->sku }}</strong></p>
                     </div>
                     <div style="text-align: right;">
-                        <h3 style="font-size: 24px; color: #e85d24; font-weight: 700; margin: 0;">${{ number_format($product->price, 2) }}</h3>
+                        <h3 style="font-size: 24px; color: #e85d24; font-weight: 700; margin: 0;">${{ number_format($product->price_usd, 2) }}</h3>
                         <p style="color: #6c757d; font-size: 12px; margin: 4px 0 0 0;">Unit: {{ $product->unit }}</p>
                     </div>
                 </div>
