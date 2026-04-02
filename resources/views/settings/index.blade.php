@@ -123,6 +123,13 @@
                         </div>
 
                         <div class="form-group" style="margin-bottom: 20px;">
+                            <label style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">Exchange Rate (KHR per 1 USD) *</label>
+                            <input type="number" name="exchange_rate" class="form-control @error('exchange_rate') is-invalid @enderror" 
+                                value="{{ old('exchange_rate', $settings->exchange_rate ?? 4000) }}" step="0.0001" style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;">
+                            @error('exchange_rate') <span style="color: #dc3545; font-size: 12px;">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
                             <label style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">Invoice Prefix *</label>
                             <input type="text" name="invoice_prefix" class="form-control @error('invoice_prefix') is-invalid @enderror" 
                                 value="{{ old('invoice_prefix', $settings->invoice_prefix) }}" style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;">

@@ -43,11 +43,27 @@ class SettingController extends Controller
             'mail_encryption' => 'required|string|in:tls,ssl',
             'timezone' => 'required|string|timezone',
             'date_format' => 'required|string|max:20',
+            'exchange_rate' => 'required|numeric|min:0',
         ]);
 
         $settings = Setting::get();
         $settings->update($validated);
 
         return redirect()->route('settings.index')->with('success', 'Settings updated successfully.');
+    }
+
+    /**
+     * Update only the exchange rate (AJAX)
+     */
+    public function updateExchangeRate(Request $request)
+    {
+        $validated = $request->validate([
+            'exchange_rate' => 'required|numeric|min:0',
+        ]);
+
+        $settings = Setting::get();
+        $settings->update(['exchange_rate' => $validated['exchange_rate']]);
+
+        return response()->json(['success' => true, 'exchange_rate' => (float) $settings->exchange_rate]);
     }
 }

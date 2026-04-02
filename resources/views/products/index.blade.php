@@ -55,7 +55,8 @@
                         <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">SKU</th>
                         <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Name</th>
                         <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Category</th>
-                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Price</th>
+                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Unit</th>
+                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Price (USD / KHR)</th>
                         <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Stock</th>
                         <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Actions</th>
                     </tr>
@@ -66,7 +67,28 @@
                         <td style="padding: 12px; color: #e85d24; font-weight: 600;">{{ $product->sku }}</td>
                         <td style="padding: 12px; color: #1a1d29;">{{ $product->name }}</td>
                         <td style="padding: 12px; color: #6c757d;">{{ $product->category }}</td>
-                        <td style="padding: 12px; color: #1a1d29; font-weight: 600;">${{ number_format($product->price, 2) }}</td>
+                        @php
+                            $unitLabels = [
+                                'kg' => 'គីឡូក្រាម',
+                                'g' => 'ក្រាម',
+                                'L' => 'លីត្រ',
+                                'ml' => 'មីលីលីត្រ',
+                                'pcs' => 'បន្ទះ',
+                                'bag' => 'ដើម',
+                                'box' => 'ប្រអប់',
+                                'pack' => 'កញ្ចប់',
+                            ];
+                        @endphp
+                        <td style="padding: 12px; color: #6c757d;">{{ $unitLabels[$product->unit] ?? $product->unit }}</td>
+                        @php
+                            // Use stored fields directly (no recalculation)
+                            $usd = $product->price_usd ?? 0;
+                            $khr = $product->price_khr ?? 0;
+                        @endphp
+                        <td style="padding: 12px; color: #1a1d29; font-weight: 600;">
+                            ${{ rtrim(rtrim(number_format($usd, 3, '.', ''), '0'), '.') }}/<span style="color:#6c757d;font-weight:600;">៛{{ number_format((int)round($khr)) }}</span>
+                        </td>
+                      
                         <td style="padding: 12px;">
                             @if($product->inventory)
                                 <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; 
@@ -88,7 +110,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" style="padding: 32px; text-align: center; color: #6c757d;">No products found. <a href="{{ route('products.create') }}">Create one now</a></td>
+                        <td colspan="7" style="padding: 32px; text-align: center; color: #6c757d;">No products found. <a href="{{ route('products.create') }}">Create one now</a></td>
                     </tr>
                     @endforelse
                 </tbody>

@@ -16,8 +16,9 @@ class UpdateProductRequest extends FormRequest
         return [
             'name'        => 'required|string|max:255',
             'sku'         => 'required|string|unique:products,sku,' . $this->product->id,
-            'price_usd'   => 'required|numeric|min:0',
-            'price_khr'   => 'nullable|numeric|min:0',
+            // Either KHR or USD is required; KHR is considered the base
+            'price_khr'   => 'required_without:price_usd|numeric|min:0',
+            'price_usd'   => 'required_without:price_khr|numeric|min:0',
             'category'    => 'required|string|max:255',
             'unit'        => 'required|string|in:kg,g,L,ml,pcs,box,pack,bag',
             'supplier'    => 'nullable|string|max:255',
@@ -28,9 +29,16 @@ class UpdateProductRequest extends FormRequest
 
     protected function passedValidation(): void
     {
+        $rate = 4000;
         if (!$this->price_khr && $this->price_usd) {
             $this->merge([
-                'price_khr' => round($this->price_usd * 4100, 2),
+                'price_khr' => (int) round($this->price_usd * $rate),
+            ]);
+        }
+
+        if (!$this->price_usd && $this->price_khr) {
+            $this->merge([
+                'price_usd' => round($this->price_khr / $rate, 3),
             ]);
         }
     }

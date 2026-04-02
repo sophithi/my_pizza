@@ -28,6 +28,7 @@ class Setting extends Model
         'mail_encryption',
         'timezone',
         'date_format',
+        'exchange_rate',
     ];
 
     protected $casts = [
@@ -45,6 +46,7 @@ class Setting extends Model
             'business_name' => 'Pizza Happy Family',
             'currency' => 'PHP',
             'tax_rate' => 10,
+            'exchange_rate' => 4000,
         ]);
     }
 }

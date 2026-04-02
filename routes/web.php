@@ -11,6 +11,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 
+
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/dashboard', [DashboardController::class, 'index']);
 
@@ -20,9 +21,11 @@ Route::resource('customers', CustomerController::class);
 Route::resource('orders', OrderController::class);
 Route::resource('inventory', InventoryController::class);
 
+
 // Invoice routes
 Route::resource('invoices', InvoiceController::class);
 Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+
 
 // Report routes
 Route::prefix('reports')->name('reports.')->group(function () {
@@ -35,6 +38,9 @@ Route::prefix('reports')->name('reports.')->group(function () {
 // Settings routes
 Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
 Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+Route::post('/settings/exchange-rate', [SettingController::class, 'updateExchangeRate'])->name('settings.exchange_rate');
 
 // User management routes
 Route::resource('users', UserController::class);
+
+// Payment routes

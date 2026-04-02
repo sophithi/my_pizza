@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Pizza Happy Family</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Khmer&family=Hanuman&family=Battambang&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
     <style>
-        * { font-family: 'Poppins', sans-serif; }
+        * { font-family: 'Poppins', 'Noto Sans Khmer', 'Hanuman', 'Battambang', 'Khmer OS', sans-serif; }
 
         body {
             background: #f5f7fa;
@@ -451,6 +452,14 @@
             .user-name { display: none; }
             .topbar { padding: 12px 16px; }
             .topbar .page-title { font-size: 17px; }
+        }
+
+        /* Khmer helper class */
+        .kh {
+            font-family: 'Noto Sans Khmer', 'Hanuman', 'Battambang', 'Khmer OS', sans-serif;
+            /* slightly larger for Khmer readability */
+            font-size: 14px;
+            line-height: 1.6;
         }
     </style>
     @stack('styles')

@@ -15,7 +15,8 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::with('inventory')->paginate(15);
-        return view('products.index', compact('products'));
+        $settings = \App\Models\Setting::get();
+        return view('products.index', compact('products', 'settings'));
     }
 
     /**
@@ -23,7 +24,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('products.create');
+        $settings = \App\Models\Setting::get();
+        return view('products.create', compact('settings'));
     }
 
     /**
@@ -57,7 +59,8 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        return view('products.edit', compact('product'));
+        $settings = \App\Models\Setting::get();
+        return view('products.edit', compact('product', 'settings'));
     }
 
     /**
