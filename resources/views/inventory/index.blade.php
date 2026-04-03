@@ -32,6 +32,8 @@
     .btns a { flex: 1; padding: 6px 8px; border: 1px solid #e8e8e8; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 700; text-align: center; color: #1a1d29; transition: all 0.3s ease; }
     .btns a:first-child { background: #e85d24; color: white; border-color: #e85d24; }
     .btns a:hover { border-color: #e85d24; color: #e85d24; }
+    .btn-delete { width: 100%; padding: 6px 8px; border: 1px solid #e8e8e8; border-radius: 4px; font-size: 12px; font-weight: 700; text-align: center; color: #c62828; background: white; cursor: pointer; }
+    .btn-delete:hover { border-color: #c62828; background: #ffebee; }
     .empty { text-align: center; padding: 40px; background: white; border-radius: 6px; color: #999; }
     .empty i { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.2; }
     @media (max-width: 768px) { .header { flex-direction: column; gap: 12px; text-align: center; } .grid { grid-template-columns: 1fr; } .stats { grid-template-columns: repeat(2, 1fr); } }
@@ -60,8 +62,8 @@
     <!-- Stats -->
     <div class="stats">
         <div class="stat">{{ $inventories->count() }}<p>Total</p></div>
-        <div class="stat">{{ $inventories->where('quantity', '>', 0)->where('quantity', '>', DB::raw('reorder_level'))->count() }}<p>In Stock</p></div>
-        <div class="stat">{{ $inventories->where('quantity', '<=', DB::raw('reorder_level'))->where('quantity', '>', 0)->count() }}<p>Low</p></div>
+        <div class="stat">{{ $inventories->filter(fn($i) => $i->quantity > 0 && $i->quantity > $i->reorder_level)->count() }}<p>In Stock</p></div>
+        <div class="stat">{{ $inventories->filter(fn($i) => $i->quantity > 0 && $i->quantity <= $i->reorder_level)->count() }}<p>Low</p></div>
         <div class="stat">{{ $inventories->where('quantity', 0)->count() }}<p>Out</p></div>
     </div>
 
@@ -104,6 +106,13 @@
                 <div class="btns">
                     <a href="{{ route('inventory.show', $inv) }}"><i class="fas fa-eye"></i> View</a>
                     <a href="{{ route('inventory.edit', $inv) }}"><i class="fas fa-edit"></i> Edit</a>
+                    <form action="{{ route('inventory.destroy', $inv) }}" method="POST" style="flex:1;" onsubmit="return confirm('Delete this inventory record?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn-delete">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
