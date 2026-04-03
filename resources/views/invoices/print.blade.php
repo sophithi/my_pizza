@@ -231,7 +231,7 @@
 
         <div class="footer">
             <p>Thank you for order!</p>
-            <p>វិក្ក័យប័ត្របានធ្វើនៅ {{ now()->format('M d, Y \a\t H:i A') }}</p>
+            <p>វិក្ក័យប័ត្របានធ្វើនៅ{{ now()->format('M d, Y') }}</p>
         </div>
     </div>
 

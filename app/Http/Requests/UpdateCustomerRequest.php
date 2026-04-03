@@ -12,7 +12,8 @@ class UpdateCustomerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        // Only admins can update customers
+        return auth()->check() && auth()->user()->isAdmin();
     }
 
     /**

@@ -69,4 +69,15 @@ class InventoryController extends Controller
         $inventory->delete();
         return redirect()->route('inventory.index')->with('success', 'Inventory record deleted successfully.');
     }
+
+    /**
+     * Quick update the quantity of an inventory item.
+     */
+    public function quickUpdate($id)
+    {
+        $inventory = Inventory::findOrFail($id);
+        $quantity = request()->validate(['quantity' => 'required|numeric|min:0'])['quantity'];
+        $inventory->update(['quantity' => $quantity]);
+        return redirect()->route('inventory.index')->with('success', 'Inventory quantity updated successfully.');
+    }
 }

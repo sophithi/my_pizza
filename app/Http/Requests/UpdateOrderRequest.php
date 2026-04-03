@@ -12,7 +12,9 @@ class UpdateOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        // Staff, Managers, and Admins can update orders
+        $user = auth()->user();
+        return $user && in_array($user->role, ['staff', 'manager', 'admin']);
     }
 
     /**

@@ -7,7 +7,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">វិក្ក័យប័ត្រ</h2>
                 <a href="{{ route('invoices.create') }}" class="btn" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                    <i class="fas fa-plus"></i> Create Invoice
+                    <i class="fas fa-plus"></i> ចេញវិក្ក័យបត្រ
                 </a>
             </div>
         </div>
@@ -21,10 +21,10 @@
                     <thead style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
                         <tr>
                             <th style="padding: 12px; color: #666; font-weight: 600;">Invoice #</th>
-                            <th style="padding: 12px; color: #666; font-weight: 600;">Customer</th>
-                            <th style="padding: 12px; color: #666; font-weight: 600;">Order</th>
+                            <th style="padding: 12px; color: #666; font-weight: 600;">អតិថិជន</th>
+                            <th style="padding: 12px; color: #666; font-weight: 600;">ការកម្មង់</th>
                             <th style="padding: 12px; color: #666; font-weight: 600;">Amount</th>
-                            <th style="padding: 12px; color: #666; font-weight: 600;">Date</th>
+                            <th style="padding: 12px; color: #666; font-weight: 600;">កាលបរិច្ឆេទ</th>
                             <th style="padding: 12px; color: #666; font-weight: 600;">Status</th>
                             <th style="padding: 12px; color: #666; font-weight: 600;">Actions</th>
                         </tr>
@@ -33,8 +33,8 @@
                         @foreach ($invoices as $invoice)
                         <tr style="border-bottom: 1px solid #e9ecef;">
                             <td style="padding: 12px; color: #333; font-weight: 500;">{{ $invoice->invoice_number }}</td>
-                            <td style="padding: 12px; color: #666;">{{ $invoice->order->customer->name }}</td>
-                            <td style="padding: 12px; color: #666;">#{{ $invoice->order->id }}</td>
+                            <td style="padding: 12px; color: #666;">{{ $invoice->order?->customer?->name ?? 'N/A' }}</td>
+                            <td style="padding: 12px; color: #666;">##{{ $invoice->order?->id }}
                             <td style="padding: 12px; color: #333; font-weight: 500;">${{ number_format($invoice->total_amount, 2) }}</td>
                             <td style="padding: 12px; color: #666;">{{ $invoice->invoice_date->format('M d, Y') }}</td>
                             <td style="padding: 12px;">
@@ -70,7 +70,7 @@
     </div>
     @else
     <div class="alert alert-info" role="alert" style="border-radius: 8px; padding: 16px; background: #cce5ff; color: #004085; border: 1px solid #b6d4fe;">
-        <i class="fas fa-info-circle"></i> No invoices found. <a href="{{ route('invoices.create') }}" style="color: #004085; font-weight: 600;">Create one now</a>
+        <i class="fas fa-info-circle"></i> No invoices found. <a href="{{ route('invoices.create') }}" style="color: #004085; font-weight: 600;">បង្កើតថ្មី</a>
     </div>
     @endif
 </div>

@@ -207,6 +207,8 @@
         <div class="stat-meta" style="color:#0284c7"><i class="fas fa-calendar-day" style="font-size:9px"></i> {{ $todayOrders ?? 0 }} today</div>
     </div>
 
+    {{-- Only admins see customer stats --}}
+    @if(auth()->user()->isAdmin())
     <div class="stat-card">
         <div class="stat-accent" style="background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div>
         <div class="stat-icon" style="background:#faf5ff;color:#7c3aed"><i class="fas fa-users"></i></div>
@@ -215,6 +217,7 @@
         <div class="stat-meta" style="color:#7c3aed"><i class="fas fa-user-check" style="font-size:9px"></i> Active</div>
     </div>
 
+    {{-- Only admins see product stats --}}
     <div class="stat-card">
         <div class="stat-accent" style="background:linear-gradient(90deg,#10b981,#34d399)"></div>
         <div class="stat-icon" style="background:#f0fdf4;color:#059669"><i class="fas fa-boxes"></i></div>
@@ -222,22 +225,40 @@
         <div class="stat-value">{{ $totalProducts ?? 0 }}</div>
         <div class="stat-meta" style="color:#059669"><i class="fas fa-tag" style="font-size:9px"></i> In catalog</div>
     </div>
+    @endif
 
+    {{-- Deliveries visible to managers+ --}}
+    @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+    <div class="stat-card">
+        <div class="stat-accent" style="background:linear-gradient(90deg,#06b6d4,#22d3ee)"></div>
+        <div class="stat-icon" style="background:#f0f9fa;color:#0891b2"><i class="fas fa-truck"></i></div>
+        <div class="stat-label">Deliveries Today</div>
+        <div class="stat-value">{{ $stats['today_delivered'] ?? 0 }}</div>
+        <div class="stat-meta" style="color:#0891b2"><i class="fas fa-check-circle" style="font-size:9px"></i> Completed</div>
+    </div>
+    @endif
+
+    {{-- Low stock visible to admins only --}}
+    @if(auth()->user()->isAdmin())
     <div class="stat-card">
         <div class="stat-accent" style="background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
         <div class="stat-icon" style="background:#fffbeb;color:#d97706"><i class="fas fa-exclamation-triangle"></i></div>
         <div class="stat-label">Low Stock</div>
-        <div class="stat-value">{{ $lowStockCount ?? 0 }}</div>
+        <div class="stat-value">{{ $stats['low_inventory_items'] ?? 0 }}</div>
         <div class="stat-meta" style="color:#d97706"><i class="fas fa-bell" style="font-size:9px"></i> Attention</div>
     </div>
+    @endif
 
+    {{-- Pending payments visible to managers+ --}}
+    @if(auth()->user()->isAdmin() || auth()->user()->isManager())
     <div class="stat-card">
         <div class="stat-accent" style="background:linear-gradient(90deg,#ef4444,#f87171)"></div>
         <div class="stat-icon" style="background:#fef2f2;color:#dc2626"><i class="fas fa-file-invoice-dollar"></i></div>
-        <div class="stat-label">Overdue</div>
-        <div class="stat-value">{{ $overdueInvoices ?? 0 }}</div>
-        <div class="stat-meta" style="color:#dc2626"><i class="fas fa-exclamation-circle" style="font-size:9px"></i> Invoices</div>
+        <div class="stat-label">Pending Payments</div>
+        <div class="stat-value">${{ number_format($stats['pending_payments'] ?? 0, 2) }}</div>
+        <div class="stat-meta" style="color:#dc2626"><i class="fas fa-clock" style="font-size:9px"></i> Needs follow-up</div>
     </div>
+    @endif
 
 </div>
 
@@ -286,51 +307,110 @@
                 <h2 class="panel-title">⚡ Quick Actions</h2>
             </div>
             <div class="qa-grid">
-                <a href="{{ route('products.create') }}"  class="qa-btn qa-orange"><i class="fas fa-plus"></i> Add Product</a>
+                {{-- All roles can create orders --}}
                 <a href="{{ route('orders.create') }}"    class="qa-btn qa-blue"><i class="fas fa-shopping-cart"></i> New Order</a>
+
+                {{-- Managers and above can manage deliveries --}}
+                @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+                <a href="{{ route('deliveries.create') }}"  class="qa-btn qa-teal"><i class="fas fa-truck"></i> Schedule Delivery</a>
+                <a href="{{ route('payments.create') }}"  class="qa-btn qa-red"><i class="fas fa-credit-card"></i> Record Payment</a>
+                @endif
+
+                {{-- Only admins can manage products and customers --}}
+                @if(auth()->user()->isAdmin())
+                <a href="{{ route('products.create') }}"  class="qa-btn qa-orange"><i class="fas fa-plus"></i> Add Product</a>
                 <a href="{{ route('inventory.index') }}"  class="qa-btn qa-green"><i class="fas fa-warehouse"></i> Inventory</a>
                 <a href="{{ route('customers.create') }}" class="qa-btn qa-purple"><i class="fas fa-user-plus"></i> Add Customer</a>
-                <a href="{{ route('invoices.create') }}"  class="qa-btn qa-red"><i class="fas fa-file-invoice"></i> Invoice</a>
-     
+                @endif
             </div>
-        </div>
-
-        {{-- Inventory Alerts --}}
-        <div class="panel" style="flex:1">
-            <div class="panel-header">
-                <h2 class="panel-title">🚨 Inventory Alerts</h2>
-                <a href="{{ route('inventory.index') }}" class="panel-link">Manage →</a>
-            </div>
-            @if(isset($lowStockItems) && $lowStockItems->count())
-                @foreach($lowStockItems as $item)
-                @php
-                    $pct   = $item->reorder_level > 0 ? min(100, round(($item->quantity / $item->reorder_level) * 100)) : 0;
-                    $color = $item->status === 'out_of_stock' ? '#ef4444' : ($pct < 30 ? '#f59e0b' : '#10b981');
-                @endphp
-                <div class="alert-row">
-                    <div class="alert-dot" style="background:{{ $color }}"></div>
-                    <div style="flex:1;min-width:0">
-                        <div class="alert-name">{{ $item->product->name ?? 'Unknown' }}</div>
-                        <div class="alert-bar-wrap" style="width:100%">
-                            <div class="alert-bar" style="width:{{ $pct }}%;background:{{ $color }}"></div>
-                        </div>
-                        <div style="font-size:11px;color:#b0b8c4;margin-top:3px">{{ $item->quantity }} / {{ $item->reorder_level }} units</div>
-                    </div>
-                    <div class="alert-pct" style="color:{{ $color }}">{{ $pct }}%</div>
-                </div>
-                @endforeach
-            @else
-            <div class="empty" style="padding:30px">
-                <div class="empty-ico">✅</div>
-                <div class="empty-txt">All stock levels OK</div>
-            </div>
-            @endif
         </div>
 
     </div>
 </div>
 
 {{-- Bottom Grid --}}
+@if(auth()->user()->isAdmin() || auth()->user()->isManager())
+<div class="bottom-grid">
+
+    {{-- Recent Deliveries --}}
+    <div class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title"> Recent Deliveries</h2>
+            <a href="{{ route('deliveries.index') }}" class="panel-link">View all →</a>
+        </div>
+        @if(isset($recent_deliveries) && count($recent_deliveries))
+        <table class="dash-table">
+            <thead><tr>
+                <th>Order</th><th>Customer</th><th>Status</th><th>Scheduled</th>
+            </tr></thead>
+            <tbody>
+            @foreach($recent_deliveries as $d)
+            <tr>
+                <td style="font-weight:700;color:#e85d24">#{{ str_pad($d['order_id'], 4, '0', STR_PAD_LEFT) }}</td>
+                <td>{{ $d['customer'] }}</td>
+                <td>
+                    <span class="badge" style="
+                        @if($d['status'] === 'pending') background:#fff7ed;color:#c2410c;
+                        @elseif($d['status'] === 'out_for_delivery') background:#f0f9ff;color:#1d4ed8;
+                        @elseif($d['status'] === 'delivered') background:#f0fdf4;color:#15803d;
+                        @else background:#fef2f2;color:#dc2626;
+                        @endif
+                    ">{{ ucfirst(str_replace('_', ' ', $d['status'])) }}</span>
+                </td>
+                <td style="color:#b0b8c4">{{ $d['scheduled'] }}</td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @else
+        <div class="empty">
+            <div class="empty-ico">🚗</div>
+            <div class="empty-txt">No deliveries yet</div>
+            <p style="font-size:12px;margin-top:6px;color:#c0c8d4"><a href="{{ route('deliveries.create') }}" style="color:#e85d24">Schedule first delivery</a></p>
+        </div>
+        @endif
+    </div>
+
+    {{-- Pending Payments --}}
+    <div class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">💰 Pending Payments</h2>
+            <a href="{{ route('payments.index') }}" class="panel-link">View all →</a>
+        </div>
+        @if(isset($pending_payments) && count($pending_payments))
+        <table class="dash-table">
+            <thead><tr>
+                <th>Order</th><th>Customer</th><th>Amount</th><th>Status</th>
+            </tr></thead>
+            <tbody>
+            @foreach($pending_payments as $p)
+            <tr>
+                <td style="font-weight:700;color:#e85d24">#{{ str_pad($p['id'], 4, '0', STR_PAD_LEFT) }}</td>
+                <td>{{ $p['customer'] }}</td>
+                <td style="font-weight:700;color:#e85d24">${{ number_format($p['amount'], 2) }}</td>
+                <td>
+                    <span class="badge" style="@if($p['payment_status'] === 'unpaid') background:#fef2f2;color:#dc2626;@elseif($p['payment_status'] === 'partial') background:#fff7ed;color:#c2410c;@endif">
+                        {{ ucfirst($p['payment_status']) }}
+                    </span>
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @else
+        <div class="empty">
+            <div class="empty-ico">💳</div>
+            <div class="empty-txt">All payments collected!</div>
+            <p style="font-size:12px;margin-top:6px;color:#c0c8d4">Great job keeping cash flow healthy</p>
+        </div>
+        @endif
+    </div>
+
+</div>
+@endif
+
+{{-- Top Products and Customers (Admin only) --}}
+@if(auth()->user()->isAdmin())
 <div class="bottom-grid">
 
     {{-- Top Products --}}
@@ -406,6 +486,7 @@
     </div>
 
 </div>
+@endif
 
 </div>
 @endsection

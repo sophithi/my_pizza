@@ -486,10 +486,16 @@
         <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}">
             <i class="fas fa-shopping-cart"></i><span>Orders</span>
         </a>
+
+        {{-- Only admins see customers menu --}}
+        @if(auth()->user()->isAdmin())
         <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
             <i class="fas fa-users"></i><span>Customers</span>
         </a>
+        @endif
 
+        {{-- Only admins see warehouse section --}}
+        @if(auth()->user()->isAdmin())
         <div class="nav-label">Warehouse</div>
         <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}">
             <i class="fas fa-pizza-slice"></i><span>Products</span>
@@ -500,7 +506,11 @@
         <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}">
             <i class="fas fa-file-invoice"></i><span>Purchasing</span>
         </a>
-        <a href="/delivery" class="nav-link {{ request()->is('delivery*') ? 'active' : '' }}">
+        @endif
+
+        {{-- Managers+ see delivery section --}}
+        @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+        <a href="/deliveries" class="nav-link {{ request()->is('deliveries*') ? 'active' : '' }}">
             <i class="fas fa-truck"></i><span>Delivery</span>
         </a>
 
@@ -508,10 +518,18 @@
         <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
             <i class="fas fa-receipt"></i><span>Invoices</span>
         </a>
+        <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}">
+            <i class="fas fa-credit-card"></i><span>Payments</span>
+        </a>
+        @endif
+
+        {{-- All users see reports --}}
         <a href="/reports" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}">
             <i class="fas fa-chart-bar"></i><span>Reports</span>
         </a>
 
+        {{-- Only admins see system section --}}
+        @if(auth()->user()->isAdmin())
         <div class="nav-label">System</div>
         <a href="/users" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
             <i class="fas fa-users-cog"></i><span>Users</span>
@@ -519,6 +537,7 @@
         <a href="/settings" class="nav-link {{ request()->is('settings*') ? 'active' : '' }}">
             <i class="fas fa-cog"></i><span>Settings</span>
         </a>
+        @endif
     </nav>
 </div>
 
@@ -542,7 +561,26 @@
             <i class="fas fa-bell"></i>
             <span class="notification-count" id="notificationCount">3</span>
         </button>
-        <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</div>
+        <div style="position: relative;">
+            <button class="user-avatar" id="userDropdownToggle" title="User menu" style="border: none; cursor: pointer;">
+                {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+            </button>
+            <div class="user-dropdown-menu" id="userDropdownMenu" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #e9ecef; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 220px; z-index: 1000;">
+                <div style="padding: 12px 16px; border-bottom: 1px solid #e9ecef;">
+                    <div style="font-size: 13px; font-weight: 600; color: #1a1d29;">{{ auth()->user()->name ?? 'Admin' }}</div>
+                    <div style="font-size: 12px; color: #6c757d; margin-top: 4px;">{{ auth()->user()->email }}</div>
+                </div>
+                <a href="{{ route('activity-log') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #1a1d29; text-decoration: none; font-size: 14px; transition: all 0.2s ease;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-history" style="width: 16px; text-align: center;"></i> Activity Log
+                </a>
+                <form action="{{ route('logout') }}" method="POST" style="display: contents;">
+                    @csrf
+                    <button type="submit" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #dc2626; background: transparent; border: none; text-decoration: none; font-size: 14px; cursor: pointer; font-family: inherit; transition: all 0.2s ease;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                        <i class="fas fa-sign-out-alt" style="width: 16px; text-align: center;"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
         <p class="user-name">{{ auth()->user()->name ?? 'Admin' }}</p>
     </div>
 </div>
@@ -693,6 +731,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     renderNotifications();
     updateCount();
+
+    // ===== USER DROPDOWN =====
+    const userDropdownToggle = document.getElementById('userDropdownToggle');
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+
+    // Toggle dropdown on avatar click
+    userDropdownToggle?.addEventListener('click', e => {
+        e.stopPropagation();
+        userDropdownMenu.style.display = userDropdownMenu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', e => {
+        if (!userDropdownToggle?.contains(e.target) && !userDropdownMenu?.contains(e.target)) {
+            userDropdownMenu.style.display = 'none';
+        }
+    });
 
     // ===== DELETE CONFIRMATION =====
     document.querySelectorAll('[data-delete]').forEach(form => {

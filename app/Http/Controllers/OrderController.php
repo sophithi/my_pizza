@@ -57,6 +57,12 @@ class OrderController extends Controller
                 'unit_price' => $item['unit_price'],
                 'total_price' => $item['total_price'],
             ]);
+
+            // Decrement inventory quantity
+            $inventory = \App\Models\Inventory::where('product_id', $item['product_id'])->first();
+            if ($inventory) {
+                $inventory->decrement('quantity', $item['quantity']);
+            }
         }
 
         return redirect()->route('orders.show', $order)->with('success', 'Order created successfully.');
@@ -94,6 +100,14 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
+        // Restore inventory quantities when order is deleted
+        foreach ($order->items as $item) {
+            $inventory = \App\Models\Inventory::where('product_id', $item->product_id)->first();
+            if ($inventory) {
+                $inventory->increment('quantity', $item->quantity);
+            }
+        }
+        
         $order->delete();
         return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
     }

@@ -25,6 +25,10 @@ class User extends Authenticatable
         'profile',
         'profile_image',
         'is_active',
+        'last_login_at',
+        'last_logout_at',
+        'last_login_ip',
+        'last_login_user_agent',
     ];
 
     /**
@@ -48,6 +52,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
+            'last_logout_at' => 'datetime',
         ];
     }
 
@@ -86,5 +92,29 @@ class User extends Authenticatable
             'staff' => 'Staff',
             default => 'Unknown',
         };
+    }
+
+    /**
+     * Get user's activity logs
+     */
+    public function activities()
+    {
+        return $this->hasMany(UserActivity::class);
+    }
+
+    /**
+     * Get user's login activities
+     */
+    public function loginActivities()
+    {
+        return $this->activities()->where('activity_type', 'login')->latest();
+    }
+
+    /**
+     * Get user's logout activities
+     */
+    public function logoutActivities()
+    {
+        return $this->activities()->where('activity_type', 'logout')->latest();
     }
 }

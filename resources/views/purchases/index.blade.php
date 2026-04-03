@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Payment Management')
+@section('title', 'Purchases Management')
 
 @push('styles')
 <style>
@@ -14,7 +14,6 @@
         --success: #28a745;
         --warning: #ffc107;
         --danger: #dc3545;
-        --info: #0d6efd;
     }
 
     body { background: var(--bg); }
@@ -42,7 +41,6 @@
         cursor: pointer;
         text-decoration: none;
         font-weight: 600;
-        display: inline-block;
         transition: background 0.2s;
     }
 
@@ -61,7 +59,7 @@
         font-weight: 600;
     }
 
-    .payment-table {
+    .purchase-table {
         width: 100%;
         border-collapse: collapse;
         background: var(--surface);
@@ -70,12 +68,12 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    .payment-table thead {
+    .purchase-table thead {
         background: #f8f9fa;
         border-bottom: 2px solid var(--border);
     }
 
-    .payment-table thead th {
+    .purchase-table thead th {
         padding: 16px;
         text-align: left;
         font-weight: 600;
@@ -85,36 +83,27 @@
         letter-spacing: 0.5px;
     }
 
-    .payment-table tbody tr {
+    .purchase-table tbody tr {
         border-bottom: 1px solid var(--border);
         transition: background 0.2s;
     }
 
-    .payment-table tbody tr:hover {
+    .purchase-table tbody tr:hover {
         background: #f8f9fa;
     }
 
-    .payment-table tbody td {
+    .purchase-table tbody td {
         padding: 16px;
         color: var(--text);
     }
 
-    .payment-amount {
+    .purchase-amount {
         font-weight: 600;
         font-size: 16px;
-        color: var(--success);
+        color: var(--accent);
     }
 
-    .payment-method {
-        display: inline-block;
-        padding: 4px 12px;
-        background: #f0f0f0;
-        border-radius: 4px;
-        font-size: 12px;
-        color: var(--text-muted);
-    }
-
-    .payment-status {
+    .purchase-status {
         display: inline-block;
         padding: 6px 12px;
         border-radius: 4px;
@@ -122,17 +111,17 @@
         font-weight: 600;
     }
 
-    .payment-status.confirmed {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .payment-status.pending {
+    .purchase-status.pending {
         background: #fff3cd;
         color: #856404;
     }
 
-    .payment-status.failed {
+    .purchase-status.received {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .purchase-status.cancelled {
         background: #f8d7da;
         color: #721c24;
     }
@@ -184,33 +173,6 @@
         font-weight: 700;
         color: var(--text);
     }
-
-    .pagination {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        margin-top: 32px;
-    }
-
-    .pagination a, .pagination span {
-        padding: 8px 12px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        text-decoration: none;
-        color: var(--text);
-    }
-
-    .pagination a:hover {
-        background: var(--accent);
-        color: white;
-        border-color: var(--accent);
-    }
-
-    .pagination .active {
-        background: var(--accent);
-        color: white;
-        border-color: var(--accent);
-    }
 </style>
 @endpush
 
@@ -219,8 +181,8 @@
 <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
     <!-- Page Header -->
     <div class="page-header">
-        <h1 class="page-title">💳 Payment Management</h1>
-        <a href="{{ route('payments.create') }}" class="btn-primary">+ New Payment</a>
+        <h1 class="page-title">📦 Purchases Management</h1>
+        <a href="{{ route('purchases.create') }}" class="btn-primary">+ New Purchase</a>
     </div>
 
     <!-- Success Message -->
@@ -233,67 +195,55 @@
     <!-- Statistics -->
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label">Total Payments</div>
-            <div class="stat-value">{{ $payments->total() }}</div>
+            <div class="stat-label">Total Purchases</div>
+            <div class="stat-value">{{ $purchases->total() }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Total Amount</div>
-            <div class="stat-value">${{ number_format($payments->sum('amount'), 2) }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Confirmed</div>
-            <div class="stat-value" style="color: #28a745;">{{ $payments->where('status', 'confirmed')->count() }}</div>
+            <div class="stat-value">${{ number_format($purchases->sum('total_amount'), 2) }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Pending</div>
-            <div class="stat-value" style="color: #ffc107;">{{ $payments->where('status', 'pending')->count() }}</div>
+            <div class="stat-value" style="color: #ffc107;">{{ $purchases->where('status', 'pending')->count() }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Received</div>
+            <div class="stat-value" style="color: #28a745;">{{ $purchases->where('status', 'received')->count() }}</div>
         </div>
     </div>
 
-    <!-- Payments Table -->
-    @if($payments->count() > 0)
-    <table class="payment-table">
+    <!-- Purchases Table -->
+    @if($purchases->count() > 0)
+    <table class="purchase-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Type</th>
                 <th>Reference</th>
+                <th>Supplier</th>
+                <th>Purchase Date</th>
                 <th>Amount</th>
-                <th>Method</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($payments as $payment)
+            @foreach($purchases as $purchase)
             <tr>
-                <td>{{ $payment->created_at->format('M d, Y H:i') }}</td>
                 <td>
-                    @if($payment->order_id)
-                        <a href="{{ route('orders.show', $payment->order) }}" style="color: var(--accent); text-decoration: none;">
-                            Order #{{ str_pad($payment->order->id, 4, '0', STR_PAD_LEFT) }}
-                        </a>
-                    @elseif($payment->invoice_id)
-                        <a href="{{ route('invoices.show', $payment->invoice) }}" style="color: var(--accent); text-decoration: none;">
-                            Invoice #{{ str_pad($payment->invoice->id, 4, '0', STR_PAD_LEFT) }}
-                        </a>
-                    @else
-                        <span style="color: var(--text-muted);">Unknown</span>
-                    @endif
+                    <strong>#{{ $purchase->reference_number ?? str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</strong>
                 </td>
-                <td>{{ $payment->reference ?? '-' }}</td>
-                <td class="payment-amount">${{ number_format($payment->amount, 2) }}</td>
+                <td>{{ $purchase->supplier_name }}</td>
+                <td>{{ $purchase->purchase_date->format('M d, Y') }}</td>
+                <td class="purchase-amount">${{ number_format($purchase->total_amount, 2) }}</td>
                 <td>
-                    <span class="payment-method">{{ ucfirst(str_replace('_', ' ', $payment->method)) }}</span>
+                    <span class="purchase-status {{ $purchase->status }}">{{ ucfirst($purchase->status) }}</span>
                 </td>
                 <td>
-                    <span class="payment-status {{ $payment->status }}">{{ ucfirst($payment->status) }}</span>
-                </td>
-                <td>
-                    <form action="{{ route('payments.destroy', $payment) }}" method="POST" style="display: inline;" onsubmit="return confirm('Delete this payment?');">
+                    <a href="{{ route('purchases.show', $purchase) }}" style="color: var(--accent); text-decoration: none; margin-right: 12px;">View</a>
+                    <a href="{{ route('purchases.edit', $purchase) }}" style="color: var(--accent); text-decoration: none; margin-right: 12px;">Edit</a>
+                    <form action="{{ route('purchases.destroy', $purchase) }}" method="POST" style="display: inline;" onsubmit="return confirm('Delete this purchase?');">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn-danger">Delete</button>
+                        <button type="submit" class="btn-danger" style="padding: 4px 8px;">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -302,14 +252,14 @@
     </table>
 
     <!-- Pagination -->
-    <div class="pagination">
-        {{ $payments->links() }}
+    <div style="margin-top: 32px;">
+        {{ $purchases->links() }}
     </div>
     @else
     <div class="empty-state">
-        <div class="empty-state-icon">💳</div>
-        <div class="empty-state-text">No payments recorded yet</div>
-        <a href="{{ route('payments.create') }}" class="btn-primary">Record First Payment</a>
+        <div class="empty-state-icon">📦</div>
+        <div class="empty-state-text">No purchases recorded yet</div>
+        <a href="{{ route('purchases.create') }}" class="btn-primary">Record First Purchase</a>
     </div>
     @endif
 </div>

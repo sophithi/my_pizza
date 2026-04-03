@@ -61,4 +61,20 @@ class Order extends Model
     {
         return $this->hasOne(Invoice::class);
     }
+
+    /**
+     * Get all payments for this order.
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Get the delivery for this order.
+     */
+    public function delivery()
+    {
+        return $this->hasOne(Delivery::class);
+    }
 }

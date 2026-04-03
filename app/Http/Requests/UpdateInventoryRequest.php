@@ -12,7 +12,8 @@ class UpdateInventoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        // Only admins can update inventory
+        return auth()->check() && auth()->user()->isAdmin();
     }
 
     /**

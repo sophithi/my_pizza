@@ -7,6 +7,8 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Inventory;
 use App\Models\Product;
+use App\Models\Delivery;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -43,6 +45,20 @@ class DashboardController extends Controller
                 ->count(),
             
             'recovery_rate' => $this->calculateRecoveryRate(),
+            
+            // Delivery Stats
+            'pending_deliveries' => Delivery::where('status', 'pending')->count(),
+            'out_for_delivery' => Delivery::where('status', 'out_for_delivery')->count(),
+            'today_delivered' => Delivery::whereDate('actual_delivery_at', $today)
+                ->where('status', 'delivered')
+                ->count(),
+            
+            // Payment Stats
+            'unpaid_orders' => Order::where('payment_status', '!=', 'paid')->count(),
+            'pending_payments' => Payment::where('status', 'pending')->sum('amount') ?? 0,
+            'today_payments' => Payment::whereDate('created_at', $today)
+                ->where('status', 'completed')
+                ->sum('amount') ?? 0,
         ];
 
         // Recent orders from database (last 5)
@@ -62,21 +78,24 @@ class DashboardController extends Controller
             ->toArray();
 
         // Top selling products (by quantity)
-        $top_products = DB::table('order_items')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->selectRaw('products.name, SUM(order_items.quantity) as quantity, SUM(order_items.total_price) as amount')
-            ->groupBy('products.id', 'products.name')
-            ->orderByDesc('quantity')
+        $topProducts = Product::with('inventory')
             ->limit(5)
             ->get()
-            ->map(function ($product) {
-                return [
-                    'name' => $product->name,
-                    'quantity' => (int) $product->quantity,
-                    'amount' => floatval($product->amount),
-                ];
+            ->sortByDesc(function ($product) {
+                return $product->orderItems()->sum('quantity');
             })
-            ->toArray();
+            ->values();
+
+        // Keep array format for recent recent_orders, top_products, etc
+        $top_products_array = $topProducts->map(function ($product) {
+            return [
+                'name' => $product->name,
+                'category' => $product->category,
+                'price_usd' => floatval($product->price_usd),
+                'quantity' => (int) ($product->inventory->quantity ?? 0),
+                'sales' => (int) ($product->orderItems()->sum('quantity') ?? 0),
+            ];
+        })->toArray();
 
         // Inventory alerts (low stock items)
         $inventory_alerts = Inventory::with('product')
@@ -92,8 +111,50 @@ class DashboardController extends Controller
                 ];
             })
             ->toArray();
+        
+        // Recent Deliveries (for staff to track deliveries)
+        $recent_deliveries = Delivery::with(['order.customer'])
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(function ($delivery) {
+                return [
+                    'id' => $delivery->id,
+                    'order_id' => $delivery->order->id,
+                    'customer' => $delivery->order->customer?->name ?? 'Unknown',
+                    'address' => $delivery->delivery_address,
+                    'scheduled' => $delivery->scheduled_delivery_at->format('d M, H:i'),
+                    'status' => $delivery->status,
+                    'driver' => $delivery->driver_name,
+                ];
+            })
+            ->toArray();
+        
+        // Pending Payments (Orders that need payment follow-up)
+        $pending_payments = Order::with('customer')
+            ->where('payment_status', '!=', 'paid')
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'customer' => $order->customer?->name ?? 'Unknown',
+                    'amount' => floatval($order->total_amount),
+                    'payment_status' => $order->payment_status,
+                    'date' => $order->order_date->format('d M'),
+                ];
+            })
+            ->toArray();
 
-        return view('dashboard', compact('stats', 'recent_orders', 'top_products', 'inventory_alerts'));
+        return view('dashboard', compact(
+            'stats', 
+            'recent_orders', 
+            'topProducts',
+            'inventory_alerts',
+            'recent_deliveries',
+            'pending_payments'
+        ));
     }
 
     /**

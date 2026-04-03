@@ -8,11 +8,8 @@ class StoreProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
-    }
-
-    public function rules(): array
-    {
+            // Only admins can create products
+            return auth()->check() && auth()->user()->isAdmin();
         return [
             'name'        => 'required|string|max:255',
             'sku'         => 'required|string|unique:products,sku',
