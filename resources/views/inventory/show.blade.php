@@ -31,6 +31,8 @@
     .btn-edit:hover { background: #d94a10; }
     .btn-back { flex: 1; padding: 10px; background: #f0f0f0; color: #1a1d29; border: 1px solid #e8e8e8; border-radius: 6px; font-weight: 700; cursor: pointer; text-decoration: none; text-align: center; transition: all 0.3s; }
     .btn-back:hover { background: #e8e8e8; }
+    .btn-delete { flex: 1; padding: 10px; background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; border-radius: 6px; font-weight: 700; cursor: pointer; }
+    .btn-delete:hover { background: #ffcdd2; }
     @media (max-width: 768px) { .show-grid { grid-template-columns: 1fr; } .show-header { flex-direction: column; text-align: center; gap: 8px; } }
 </style>
 @endpush
@@ -104,6 +106,13 @@
             <div class="btns">
                 <a href="{{ route('inventory.edit', $inventory) }}" class="btn-edit"><i class="fas fa-edit"></i> Edit</a>
                 <a href="{{ route('inventory.index') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+                <form action="{{ route('inventory.destroy', $inventory) }}" method="POST" style="flex:1;" onsubmit="return confirm('Delete this inventory record?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-delete">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>
             </div>
         </div>
     </div>
