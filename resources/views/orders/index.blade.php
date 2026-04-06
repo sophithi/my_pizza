@@ -295,7 +295,7 @@
 <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
     <h2 style="font-size: 28px; font-weight: 700; color: var(--text); margin: 0;"><i class="fas fa-receipt" style="margin-right: 12px;"></i>Orders</h2>
     <a href="{{ route('orders.create') }}" class="btn" style="background: linear-gradient(135deg, var(--accent) 0%, #d94a10 100%); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; gap: 8px; align-items: center;">
-        <i class="fas fa-plus"></i> Create Order
+        បង្កើតការកាម្មង់
     </a>
 </div>
 
@@ -366,10 +366,10 @@
             <thead>
                 <tr>
                     <th onclick="sortTable('id')">#Order ID <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
-                    <th onclick="sortTable('customer')">💑 Customer <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
-                    <th onclick="sortTable('items')">📦 Items <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
-                    <th onclick="sortTable('date')">📅 Date <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
-                    <th onclick="sortTable('amount')">💰 Amount <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
+                    <th onclick="sortTable('customer')"> Customer <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
+                    <th onclick="sortTable('items')"> Items <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
+                    <th onclick="sortTable('date')"> Date <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
+                    <th onclick="sortTable('amount')"> Amount <i class="fas fa-sort" style="margin-left: 6px; opacity: 0.6;"></i></th>
                     <th>Status</th>
                     <th>Payment</th>
                     <th>Actions</th>

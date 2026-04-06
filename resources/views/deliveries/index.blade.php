@@ -179,8 +179,8 @@
 <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
     <!-- Page Header -->
     <div class="page-header">
-        <h1 class="page-title">🚗 Deliveries Management</h1>
-        <a href="{{ route('deliveries.create') }}" class="btn-primary">+ Schedule Delivery</a>
+        <h1 class="page-title">ការដឹកជញ្ជូនទំនិញ</h1>
+        <a href="{{ route('deliveries.create') }}" class="btn-primary">បន្ថែម</a>
     </div>
 
     <!-- Success Message -->
@@ -193,23 +193,18 @@
     <!-- Statistics -->
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label">Total Deliveries</div>
+            <div class="stat-label">ការដឹកជញ្ជូនទំនិញ</div>
             <div class="stat-value">{{ $deliveries->total() }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Pending</div>
+            <div class="stat-label">កំពុងរងចាំ</div>
             <div class="stat-value" style="color: #ffc107;">
                 {{ $deliveries->where('status', 'pending')->count() }}
             </div>
         </div>
+   
         <div class="stat-card">
-            <div class="stat-label">Out for Delivery</div>
-            <div class="stat-value" style="color: #0d6efd;">
-                {{ $deliveries->where('status', 'out_for_delivery')->count() }}
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Delivered</div>
+            <div class="stat-label">បានដឹករួចរាល់</div>
             <div class="stat-value" style="color: #28a745;">
                 {{ $deliveries->where('status', 'delivered')->count() }}
             </div>
@@ -223,6 +218,8 @@
             <tr>
                 <th>Order</th>
                 <th>Address</th>
+                <th>Delivery Type</th>
+                <th>Service</th>
                 <th>Driver</th>
                 <th>Scheduled</th>
                 <th>Status</th>
@@ -239,6 +236,8 @@
                     </a>
                 </td>
                 <td>{{ Str::limit($delivery->delivery_address, 40) }}</td>
+                <td><strong>{{ $delivery->delivery_type }}</strong></td>
+                <td>{{ $delivery->name_service ?? '—' }}<br><small style="color: var(--text-muted);">${{ number_format($delivery->price_of_delivery, 2) }}</small></td>
                 <td>{{ $delivery->driver_name ?? '-' }}</td>
                 <td>{{ $delivery->scheduled_delivery_at->format('M d, Y H:i') }}</td>
                 <td>
@@ -273,7 +272,7 @@
     @else
     <div class="empty-state">
         <div class="empty-state-icon">🚗</div>
-        <div class="empty-state-text">No deliveries scheduled yet</div>
+        <div class="empty-state-text">មិនទាន់មានការដឹកជញ្ជូន</div>
         <a href="{{ route('deliveries.create') }}" class="btn-primary">Schedule First Delivery</a>
     </div>
     @endif

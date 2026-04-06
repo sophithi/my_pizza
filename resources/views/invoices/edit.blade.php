@@ -43,14 +43,15 @@
                             <a href="{{ route('invoices.show', $invoice) }}" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
                                 Cancel
                             </a>
-                            <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" style="display: inline;" data-delete="Invoice" data-item-name="Invoice #{{ $invoice->id }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </form>
+                            <button type="button" onclick="if(confirm('លុបវិក្កយបត្រនេះ?')) document.getElementById('delete-invoice-form').submit();" class="btn" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
                         </div>
+                    </form>
+
+                    <form id="delete-invoice-form" action="{{ route('invoices.destroy', $invoice) }}" method="POST" style="display: none;">
+                        @csrf
+                        @method('DELETE')
                     </form>
                 </div>
             </div>

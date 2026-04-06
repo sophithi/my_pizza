@@ -10,7 +10,7 @@
             <div class="card-body" style="padding: 36px;">
                 <div style="margin-bottom: 28px;">
                     <h2 style="font-size: 28px; font-weight: 700; color: #1a1d29; margin: 0 0 8px 0;">
-                        <i class="fas fa-user-plus" style="color: #e85d24; margin-right: 10px;"></i>អតិថិជនថ្មី
+                       អតិថិជនថ្មី
                     </h2>
                     <p style="color: #6c757d; margin: 0; font-size: 14px;">បំពេញព័ត៏មានភ្ញៀវខាងក្រោម</p>
                 </div>
@@ -90,7 +90,7 @@
                     <!-- Notes Section -->
                     <div style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #e9ecef;">
                         <h5 style="font-size: 16px; font-weight: 700; color: #1a1d29; margin-bottom: 20px;">
-                            <i class="fas fa-sticky-note" style="color: #e85d24; margin-right: 8px;"></i>Notes & Descriptions
+                            <i class="fas fa-sticky-note" style="color: #e85d24; margin-right: 8px;"></i>ផ្សេងៗ
                         </h5>
 
                         <div class="mb-3">

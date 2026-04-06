@@ -183,6 +183,35 @@
                 </select>
             </div>
 
+            <!-- Delivery Type -->
+            <div class="form-group">
+                <label class="form-label">Delivery Type *</label>
+                <select name="delivery_type" class="form-select" id="deliveryType" required>
+                    <option value="">-- Select delivery type --</option>
+                    @foreach(\App\Models\Delivery::getDeliveryTypes() as $key => $label)
+                    <option value="{{ $key }}" {{ old('delivery_type') === $key ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Service Name -->
+            <div class="form-group">
+                <label class="form-label">Service Name (Optional)</label>
+                <input type="text" name="name_service" class="form-input"
+                    placeholder="e.g., Fast Logistic, Taxi XYZ, Your Team, etc."
+                    value="{{ old('name_service') }}">
+            </div>
+
+            <!-- Price of Delivery -->
+            <div class="form-group">
+                <label class="form-label">Price of Delivery Service ($) (Optional)</label>
+                <input type="number" name="price_of_delivery" class="form-input"
+                    min="0" step="0.01" placeholder="0.00"
+                    value="{{ old('price_of_delivery', '0.00') }}">
+            </div>
+
             <!-- Delivery Address -->
             <div class="form-group">
                 <label class="form-label">Delivery Address *</label>

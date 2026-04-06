@@ -425,49 +425,48 @@
 
         <div class="card">
             
-            
-            <div class="card-body">
-                 <!-- Customer Section Below Products -->
+            <!-- Customer Selection (Inside Form!) -->
+            <div class="card">
+                <div class="card-body">
                    <h4 class="product-section-title">
-                    សូមជ្រើសរើសអតិថិជន
-                </h4>
-        <div class="card">
-            <div class="card-body">
-               
+                        សូមជ្រើសរើសអតិថិជន
+                    </h4>
 
-                <div class="mb-3">
-                   
-                    <select name="customer_id" id="customer_id" class="form-control select2-customer" required>
-                        <option value="">Search and select a customer</option>
-                        @foreach($customers as $customer)
-                            <option value="{{ $customer->id }}"
-                                data-name="{{ $customer->name }}"
-                                data-phone="{{ $customer->phone }}"
-                                data-location="{{ $customer->location }}"
-                                {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
-                                {{ $customer->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    <div class="mb-3">
+                        <select name="customer_id" id="customer_id" class="form-control select2-customer" required>
+                            <option value="">សូមស្វែងរកអតិថិជន</option>
+                            @foreach($customers as $customer)
+                                <option value="{{ $customer->id }}"
+                                    data-name="{{ $customer->name }}"
+                                    data-phone="{{ $customer->phone }}"
+                                    data-location="{{ $customer->location }}"
+                                    {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                    {{ $customer->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                <div id="customer_info_card" class="customer-info-card" style="display: none;">
-                    <div class="customer-info-item">
-                        <strong>👤 Name:</strong> <span id="customer_name">-</span>
-                    </div>
-                    <div class="customer-info-item">
-                        <strong>📱 Phone:</strong> <span id="customer_phone">-</span>
-                    </div>
-                    <div class="customer-info-item">
-                        <strong>📍 Location:</strong> <span id="customer_location">-</span>
+                    <div id="customer_info_card" class="customer-info-card" style="display: none;">
+                        <div class="customer-info-item">
+                            <strong>ឈ្មោះ:</strong> <span id="customer_name">-</span>
+                        </div>
+                        <div class="customer-info-item">
+                            <strong>លេខទំនាក់ទំនង:</strong> <span id="customer_phone">-</span>
+                        </div>
+                        <div class="customer-info-item">
+                            <strong>ទីតាំង:</strong> <span id="customer_location">-</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="product-section-title">
-            <div class="mb-6">សូមជ្រើសរើសទំនិញ</div>
-        </div>
+            
+            <div class="card-body">
+                 <!-- Products Section -->
+                <h4 class="product-section-title">
+                    <div class="mb-6">សូមជ្រើសរើសទំនិញ</div>
+                </h4>
 
         <div class="products-grid" id="productsGrid">
                     @forelse($products as $product)
@@ -484,19 +483,18 @@
                             <div style="color: var(--accent); font-weight: 700;">${{ number_format($product->price_usd, 2) }}</div>
                             <div style="color: var(--text-muted); font-weight: 600;">៛{{ number_format($product->price_khr, 0) }}</div>
                         </div>
-                    </div>
+                    </div>  
                     @empty
                     <div class="empty-state" style="grid-column: 1 / -1;">
-                        <div class="empty-state-icon">📦</div>
-                        <div class="empty-state-text">No products available</div>
-                        <a href="{{ route('products.index') }}" style="color: var(--accent); text-decoration: none; font-weight: 600;">Add Products →</a>
+                        <div class="empty-state-icon"></div>
+                        <div class="empty-state-text">មិនមានផលិតផលទេ</div>
+                        <a href="{{ route('products.index') }}" style="color: var(--accent); text-decoration: none; font-weight: 600;">បន្ថែមផលិតផល →</a>
                     </div>
                     @endforelse
                 </div>
             </div>
         </div>
 
-       
     </div>
 
     <!-- Right Section: Order Form -->
@@ -514,13 +512,13 @@
                     <div class="invoice-items" id="invoiceItems">
                         <div class="empty-state">
                             <div class="empty-state-icon">🛒</div>
-                            <div class="empty-state-text">No items added yet</div>
+                            <div class="empty-state-text">មិនទាន់បន្ថែមមុខទំនិញនៅឡើយទេ</div>
                         </div>
                     </div>
 
                     <div class="invoice-summary">
                         <div class="summary-row">
-                            <span>Subtotal (USD / KHR):</span>
+                            <span>សរុប (USD / KHR):</span>
                             <div style="text-align: right;">
                                 <div style="font-weight: 600;">$<span id="subtotal">0.00</span></div>
                                 <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="subtotal_khr">0</span></div>
@@ -528,7 +526,7 @@
                         </div>
 
                         <div class="summary-row" id="discountAmountRow">
-                            <span style="font-weight: 600;">Total Discount:</span>
+                            <span style="font-weight: 600;">បញ្ចុះតម្លៃសរុប:</span>
                             <div style="text-align: right;">
                                 <div style="font-weight: 600; color: var(--danger);">-$<span id="discountAmount">0.00</span></div>
                                 <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">-៛<span id="discountAmount_khr">0</span></div>
@@ -537,7 +535,7 @@
 
                     
                         <div class="summary-row total">
-                            <span>💰 Total:</span>
+                            <span>តម្លៃសរុប:</span>
                             <div style="text-align: right;">
                                 <div>$<span id="totalAmount">0.00</span></div>
                                 <div style="color: var(--accent); font-size: 13px;">៛<span id="totalAmount_khr">0</span></div>
@@ -548,6 +546,7 @@
             </div>
 
             <!-- Hidden inputs for form submission -->
+             <input type="hidden" id="customer_id" name="customer_name"
             <input type="hidden" id="order_items" name="order_items" value="[]">
             <input type="hidden" id="subtotal_amount" name="subtotal">
             
@@ -558,42 +557,53 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="product-section-title">
-                        <i class="fas fa-cog"></i> Order Details
+                        <i class="fas fa-cog"></i> ព័ត៌មានការបញ្ជាទិញ
                     </h4>
 
                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-control">
-                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>Processing</option>
-                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                </select>
+                                <label class="form-label">កាលបរិច្ឆេទ *</label>
+                                <input type="datetime-local" name="order_date" class="form-control" required 
+                                    value="{{ old('order_date', now()->format('Y-m-d\TH:i')) }}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Payment Status</label>
-                                <select name="payment_status" class="form-control">
-                                    <option value="unpaid" {{ old('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
-                                    <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
-                                    <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                <label class="form-label">ស្ថានភាព</label>
+                                <select name="status" class="form-control">
+                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>រង់ចាំ</option>
+                                    <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>កំពុងដំណើរការ</option>
+                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>បានបញ្ចប់</option>
+                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>បានលុបចោល</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">ស្ថានភាពបង់ប្រាក់</label>
+                                <select name="payment_status" class="form-control">
+                                    <option value="unpaid" {{ old('payment_status') == 'unpaid' ? 'selected' : '' }}>មិនទាន់បង់</option>
+                                    <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
+                                    <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>បានបង់</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6"></div>
+                    </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Notes</label>
+                        <label class="form-label">កំណត់ចំណាំ</label>
                         <textarea name="notes" class="form-control" rows="2" style="resize: none;">{{ old('notes') }}</textarea>
                     </div>
 
                     <div class="button-group">
                         <button type="submit" class="btn-primary">
-                            <i class="fas fa-check-circle"></i> បញ្ជាក់ការទិញ
+                            <i class="fas fa-check-circle"></i> បញ្ជាក់
                         </button>
                         <a href="{{ route('orders.index') }}" class="btn-secondary">
                             <i class="fas fa-times"></i> បោះបង់
@@ -613,7 +623,7 @@
     $(document).ready(function() {
         // Initialize Select2
         $('.select2-customer').select2({
-            placeholder: 'Search and select a customer',
+            placeholder: 'សូមស្វែងរកអតិថិជន',
             allowClear: true,
             width: '100%'
         });
@@ -622,6 +632,9 @@
         $('#customer_id').on('change', function() {
             const selectedOption = $(this).find('option:selected');
             const customerId = selectedOption.val();
+
+            // Sync to hidden input inside form
+            $('#hidden_customer_id').val(customerId);
 
             if (customerId) {
                 const name = selectedOption.data('name') || '-';

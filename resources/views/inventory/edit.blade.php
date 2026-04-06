@@ -171,10 +171,7 @@
                 <input type="text" name="warehouse_location" class="form-input" value="{{ old('warehouse_location', $inventory->warehouse_location) }}" placeholder="e.g., Shelf A2">
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Cost Per Unit</label>
-                <input type="number" name="cost_per_unit" step="0.01" class="form-input" value="{{ old('cost_per_unit', $inventory->cost_per_unit) }}" placeholder="0.00">
-            </div>
+        
 
             <div class="form-actions">
                 <button type="submit" class="btn-primary">

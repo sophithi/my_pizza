@@ -8,12 +8,14 @@ class StoreProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-            // Only admins can create products
-            return auth()->check() && auth()->user()->isAdmin();
+        return auth()->check() && auth()->user()->isAdmin();
+    }
+
+    public function rules(): array
+    {
         return [
             'name'        => 'required|string|max:255',
             'sku'         => 'required|string|unique:products,sku',
-            // Either KHR or USD is required; KHR is considered the base
             'price_khr'   => 'required_without:price_usd|numeric|min:0',
             'price_usd'   => 'required_without:price_khr|numeric|min:0',
             'category'    => 'required|string|max:255',

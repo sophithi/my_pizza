@@ -1,747 +1,638 @@
 @extends('layouts.app')
 
-@section('title', 'Order #' . str_pad($order->id, 4, '0', STR_PAD_LEFT))
+@section('title', 'បញ្ជាទិញ #' . str_pad($order->id, 4, '0', STR_PAD_LEFT))
 
 @push('styles')
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
     :root {
         --accent: #e85d24;
-        --bg: #f4f5f7;
+        --accent-dark: #d14a10;
+        --bg: #f0f2f5;
         --surface: #ffffff;
-        --border: #e9ecef;
-        --text: #1a1d29;
-        --text-muted: #6c757d;
-        --success: #28a745;
-        --warning: #ffc107;
-        --danger: #dc3545;
-        --info: #0d6efd;
+        --border: #e5e7eb;
+        --text: #111827;
+        --text-secondary: #4b5563;
+        --text-muted: #9ca3af;
+        --success: #059669;
+        --success-bg: #ecfdf5;
+        --warning: #d97706;
+        --warning-bg: #fffbeb;
+        --info: #2563eb;
+        --info-bg: #eff6ff;
+        --danger: #dc2626;
+        --danger-bg: #fef2f2;
+        --radius: 16px;
+        --radius-sm: 10px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
     }
 
-    body { background: var(--bg); }
+    .order-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 24px 64px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
 
-    .page-header {
+    /* ─── Header ─── */
+    .order-hero {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        color: white;
+        padding: 48px 40px;
+        border-radius: var(--radius);
+        margin-bottom: 28px;
+        box-shadow: 0 12px 40px rgba(232, 93, 36, 0.25);
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 40px;
-        gap: 24px;
+        align-items: center;
+        gap: 32px;
+        position: relative;
+        overflow: hidden;
     }
 
-    .header-info {
-        flex: 1;
+    .order-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 50%;
     }
 
-    .order-title {
-        font-size: 32px;
-        font-weight: 800;
-        color: var(--text);
-        margin: 0 0 8px 0;
+    .order-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        right: 15%;
+        width: 180px;
+        height: 180px;
+        background: rgba(255,255,255,0.04);
+        border-radius: 50%;
     }
 
-    .order-meta {
+    .hero-left { position: relative; z-index: 1; }
+
+    .hero-order-id {
+        font-size: 36px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        margin: 0 0 12px;
+        line-height: 1;
+    }
+
+    .hero-meta {
         display: flex;
-        gap: 16px;
-        color: var(--text-muted);
-        font-size: 14px;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        opacity: 0.92;
+        font-weight: 500;
+        flex-wrap: wrap;
     }
 
-    .header-amount {
+    .hero-meta .sep {
+        width: 4px;
+        height: 4px;
+        background: rgba(255,255,255,0.5);
+        border-radius: 50%;
+    }
+
+    .hero-right {
         text-align: right;
+        position: relative;
+        z-index: 1;
     }
 
-    .order-amount {
-        font-size: 38px;
-        font-weight: 800;
-        color: var(--accent);
-        margin: 0 0 4px 0;
+    .hero-total {
+        font-size: 44px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        line-height: 1.1;
     }
 
-    .order-currency {
-        font-size: 14px;
-        color: var(--text-muted);
+    .hero-total-khr {
+        font-size: 15px;
+        opacity: 0.8;
+        margin-top: 6px;
         font-weight: 600;
     }
 
-    .card {
+    /* ─── Quick Stats ─── */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .stat-card {
         background: var(--surface);
+        padding: 22px 24px;
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-sm);
         border: 1px solid var(--border);
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 32px;
-        transition: all 0.3s ease;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
     }
 
-    .card-body {
-        padding: 32px;
+    .stat-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
     }
 
-    .card-title {
-        font-size: 18px;
+    .stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
+
+    .stat-content {
+        font-size: 15px;
         font-weight: 700;
         color: var(--text);
-        margin: 0 0 28px 0;
+    }
+
+    /* ─── Badges ─── */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-warning { background: var(--warning-bg); color: var(--warning); }
+    .badge-info { background: var(--info-bg); color: var(--info); }
+    .badge-danger { background: var(--danger-bg); color: var(--danger); }
+
+    /* ─── Section Card ─── */
+    .section {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        margin-bottom: 24px;
+        overflow: hidden;
+        animation: fadeUp 0.5s ease-out both;
+    }
+
+    .section:nth-child(2) { animation-delay: 0.05s; }
+    .section:nth-child(3) { animation-delay: 0.1s; }
+    .section:nth-child(4) { animation-delay: 0.15s; }
+
+    .section-header {
+        padding: 20px 28px;
+        border-bottom: 1px solid var(--border);
         display: flex;
         align-items: center;
         gap: 10px;
     }
 
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 32px;
-    }
-
-    .stat-box {
-        background: linear-gradient(135deg, rgba(232, 93, 36, 0.05) 0%, rgba(232, 93, 36, 0.02) 100%);
-        padding: 20px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        border-left: 4px solid var(--accent);
-    }
-
-    .stat-label {
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        margin-bottom: 8px;
-        letter-spacing: 0.5px;
-    }
-
-    .stat-value {
-        font-size: 24px;
+    .section-header h3 {
+        margin: 0;
+        font-size: 16px;
         font-weight: 700;
         color: var(--text);
-        margin-bottom: 4px;
     }
 
-    .stat-secondary {
-        font-size: 13px;
-        color: var(--text-muted);
-        font-weight: 600;
-    }
-
-    .status-badge {
-        display: inline-flex;
+    .section-header .icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
         align-items: center;
-        gap: 6px;
-        padding: 8px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
+        justify-content: center;
+        font-size: 15px;
+        background: linear-gradient(135deg, rgba(232,93,36,0.1) 0%, rgba(232,93,36,0.05) 100%);
     }
 
-    .status-pending {
-        background: rgba(255, 193, 7, 0.15);
-        color: #856404;
+    .section-body {
+        padding: 28px;
     }
 
-    .status-processing {
-        background: rgba(13, 110, 253, 0.15);
-        color: #0c5de4;
-    }
-
-    .status-completed {
-        background: rgba(40, 167, 69, 0.15);
-        color: #1e7e34;
-    }
-
-    .status-cancelled {
-        background: rgba(220, 53, 69, 0.15);
-        color: #b02622;
-    }
-
-    .payment-paid {
-        background: rgba(40, 167, 69, 0.15);
-        color: #1e7e34;
-    }
-
-    .payment-unpaid {
-        background: rgba(255, 193, 7, 0.15);
-        color: #856404;
-    }
-
-    .payment-partial {
-        background: rgba(13, 110, 253, 0.15);
-        color: #0c5de4;
-    }
-
-    .table {
+    /* ─── Items Table ─── */
+    .items-table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 0;
     }
 
-    .table thead {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    }
-
-    .table thead th {
-        padding: 16px;
+    .items-table thead th {
+        padding: 14px 20px;
+        text-align: left;
+        font-size: 11px;
         font-weight: 700;
-        font-size: 12px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--text);
-        border-bottom: 2px solid var(--border);
-    }
-
-    .table tbody tr {
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        background: #fafafa;
         border-bottom: 1px solid var(--border);
-        transition: background 0.2s ease;
     }
 
-    .table tbody tr:hover {
-        background: rgba(232, 93, 36, 0.02);
+    .items-table tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s ease;
     }
 
-    .table tbody td {
-        padding: 16px;
+    .items-table tbody tr:last-child { border-bottom: none; }
+
+    .items-table tbody tr:hover {
+        background: #fafbfc;
+    }
+
+    .items-table tbody td {
+        padding: 18px 20px;
+        font-size: 14px;
+        color: var(--text);
+    }
+
+    .item-num {
+        width: 40px;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .item-name {
+        font-weight: 600;
         color: var(--text);
         font-size: 14px;
     }
 
-    .product-name {
-        font-weight: 600;
+    .item-qty {
+        font-weight: 700;
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    .item-price {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 14px;
+    }
+
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+
+    /* ─── Summary Footer ─── */
+    .summary-footer {
+        background: #f9fafb;
+        border-top: 1px solid var(--border);
+        padding: 24px 28px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .summary-table {
+        width: 320px;
+    }
+
+    .summary-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .summary-line .label { font-weight: 500; }
+    .summary-line .value { font-weight: 700; color: var(--text); }
+
+    .summary-line.discount .value {
+        color: var(--danger);
+    }
+
+    .summary-line.total {
+        border-top: 2px solid var(--border);
+        margin-top: 8px;
+        padding-top: 16px;
+    }
+
+    .summary-line.total .label {
+        font-size: 15px;
+        font-weight: 700;
         color: var(--text);
     }
 
-    .price {
-        font-weight: 600;
+    .summary-line.total .value {
+        font-size: 22px;
+        font-weight: 900;
         color: var(--accent);
     }
 
-    .notes-section {
-        background: linear-gradient(135deg, rgba(232, 93, 36, 0.05) 0%, rgba(232, 93, 36, 0.02) 100%);
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 4px solid var(--accent);
-        margin-bottom: 32px;
+    /* ─── Customer Grid ─── */
+    .customer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
     }
 
-    .notes-title {
-        font-size: 13px;
+    .customer-field .field-label {
+        font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
+        letter-spacing: 0.8px;
         color: var(--text-muted);
-        margin-bottom: 10px;
-        letter-spacing: 0.5px;
+        margin-bottom: 8px;
     }
 
-    .notes-content {
+    .customer-field .field-value {
+        font-size: 15px;
+        font-weight: 600;
         color: var(--text);
-        line-height: 1.6;
+        line-height: 1.5;
+    }
+
+    .customer-field .field-value.empty {
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    /* ─── Notes ─── */
+    .notes-content {
+        background: #fefce8;
+        border: 1px solid #fef08a;
+        border-radius: var(--radius-sm);
+        padding: 20px 24px;
+        color: var(--text);
+        line-height: 1.7;
         font-size: 14px;
     }
 
-    .action-buttons {
+    /* ─── Actions ─── */
+    .actions-bar {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         flex-wrap: wrap;
+        margin-top: 32px;
     }
 
     .btn {
         padding: 12px 24px;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
         font-weight: 600;
+        font-size: 13px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        letter-spacing: 0.1px;
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, var(--accent) 0%, #d94a10 100%);
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
         color: white;
+        box-shadow: 0 4px 14px rgba(232, 93, 36, 0.3);
     }
 
     .btn-primary:hover {
-        box-shadow: 0 8px 20px rgba(232, 93, 36, 0.3);
         transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(232, 93, 36, 0.35);
+        color: white;
+        text-decoration: none;
     }
 
-    .btn-secondary {
-        background: var(--bg);
-        color: var(--text);
-        border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover {
+    .btn-outline {
         background: var(--surface);
+        color: var(--text-secondary);
+        border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover {
         border-color: var(--accent);
         color: var(--accent);
+        background: rgba(232, 93, 36, 0.03);
+        text-decoration: none;
     }
 
-    .btn-danger {
-        background: linear-gradient(135deg, var(--danger) 0%, #bb2d3b 100%);
-        color: white;
+    .btn-danger-outline {
+        background: var(--surface);
+        color: var(--danger);
+        border: 1.5px solid #fecaca;
     }
 
-    .btn-danger:hover {
-        box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
-        transform: translateY(-2px);
+    .btn-danger-outline:hover {
+        background: var(--danger-bg);
+        border-color: var(--danger);
+        text-decoration: none;
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 60px 24px;
-        color: var(--text-muted);
-    }
-
-    @keyframes slideUp {
-        from { opacity: 0; transform: translateY(20px); }
+    /* ─── Animations ─── */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    .card { animation: slideUp 0.6s ease-out; }
-
-    .section-divider {
-        border-bottom: 2px solid var(--border);
-        margin: 32px 0;
-    }
-
+    /* ─── Responsive ─── */
     @media (max-width: 768px) {
-        .page-header {
-            flex-direction: column;
-        }
-
-        .header-amount {
-            text-align: left;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .order-title {
-            font-size: 24px;
-        }
-
-        .order-amount {
-            font-size: 28px;
-        }
+        .order-page { padding: 16px 12px 48px; }
+        .order-hero { flex-direction: column; padding: 32px 24px; text-align: center; }
+        .hero-right { text-align: center; }
+        .hero-order-id { font-size: 28px; }
+        .hero-total { font-size: 32px; }
+        .hero-meta { justify-content: center; }
+        .stats-row { grid-template-columns: 1fr 1fr; }
+        .customer-grid { grid-template-columns: 1fr; }
+        .summary-footer { justify-content: stretch; }
+        .summary-table { width: 100%; }
+        .actions-bar { flex-direction: column; }
+        .btn { justify-content: center; }
     }
 </style>
 @endpush
 
 @section('content')
+<div class="order-page">
 
-<style>
-    .order-container {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        overflow: hidden;
-        margin-bottom: 24px;
-    }
-    
-    .order-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        gap: 0;
-        min-height: fit-content;
-    }
-    
-    .order-section {
-        padding: 24px;
-        border-right: 1px solid #f0f0f0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .order-section:nth-child(4n) { border-right: none; }
-    .order-section:nth-last-child(-n+4) { border-bottom: none; }
-    
-    .section-header { font-size: 12px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; }
-    .section-value { font-size: 16px; font-weight: 700; color: #1a1d29; }
-    .section-sub { font-size: 12px; color: #666; margin-top: 4px; }
-    
-    .items-section {
-        grid-column: 1 / -1;
-        padding: 24px;
-        background: #fafafa;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .items-header { font-size: 12px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px; }
-    
-    .item-row {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr;
-        gap: 16px;
-        padding: 12px 0;
-        border-bottom: 1px solid #e9ecef;
-        align-items: center;
-    }
-    
-    .item-row:last-child { border-bottom: none; }
-    
-    .item-name { font-weight: 600; color: #1a1d29; font-size: 14px; }
-    .item-unit { font-size: 12px; color: #999; }
-    .item-qty { font-weight: 700; text-align: center; }
-    .item-price { font-size: 14px; }
-    .item-total { font-weight: 700; color: #e85d24; text-align: right; }
-    
-    .summary-section {
-        grid-column: 1 / -1;
-        padding: 24px;
-    }
-    
-    .summary-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 32px;
-        padding: 16px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .summary-row:last-child { border-bottom: none; }
-    
-    .summary-label { font-size: 12px; font-weight: 600; color: #666; }
-    .summary-amount { font-size: 20px; font-weight: 800; color: #e85d24; }
-    .summary-currency { font-size: 12px; color: #999; margin-top: 2px; }
-    
-    .action-section {
-        grid-column: 1 / -1;
-        padding: 24px;
-        display: flex;
-        gap: 12px;
-        background: #fafafa;
-    }
-    
-    .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: #e85d24; color: white; }
-    .btn-primary:hover { background: #d04a1a; }
-    .btn-danger { background: #dc3545; color: white; }
-    .btn-danger:hover { background: #c82333; }
-    .btn-secondary { background: #6c757d; color: white; }
-    .btn-secondary:hover { background: #5a6268; }
-    
-    .badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-success { background: #d4edda; color: #155724; }
-    .badge-warning { background: #fff3cd; color: #856404; }
-    .badge-danger { background: #f8d7da; color: #721c24; }
-    .badge-info { background: #d1ecf1; color: #0c5460; }
-</style>
+    <!-- Hero Header -->
+    <div class="order-hero">
+        <div class="hero-left">
+            <h1 class="hero-order-id">#{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</h1>
+            <div class="hero-meta">
+                <span>{{ $order->customer->name }}</span>
+                <span class="sep"></span>
+                <span>{{ $order->order_date->format('d M Y') }}</span>
+                <span class="sep"></span>
+                <span>{{ $order->order_date->format('h:i A') }}</span>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="hero-total">${{ number_format($order->total_amount, 2) }}</div>
+            <div class="hero-total-khr">៛{{ number_format($order->total_amount * 4000, 0) }}</div>
+        </div>
+    </div>
 
-<div class="order-container">
-    <!-- Header Row -->
-    <div class="order-grid">
-        <div class="order-section">
-            <div class="section-header">📋 Order Number</div>
-            <div class="section-value">ORD-{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</div>
-        </div>
-        <div class="order-section">
-            <div class="section-header">👤 Customer</div>
-            <div class="section-value" style="font-size: 14px;">{{ $order->customer->name }}</div>
-        </div>
-        <div class="order-section">
-            <div class="section-header">📅 Date</div>
-            <div class="section-value" style="font-size: 14px;">{{ $order->order_date->format('M d, Y') }}</div>
-        </div>
-        <div class="order-section">
-            <div class="section-header">⏰ Time</div>
-            <div class="section-value" style="font-size: 14px;">{{ $order->order_date->format('h:i A') }}</div>
-        </div>
-        
-        <!-- Status Row -->
-        <div class="order-section">
-            <div class="section-header">Order Status</div>
-            <div>
+    <!-- Quick Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">ស្ថានភាពបញ្ជាទិញ</div>
+            <div class="stat-content">
                 @if($order->status === 'completed')
-                    <span class="badge badge-success">✓ Completed</span>
+                    <span class="badge badge-success">✓ បានបញ្ចប់</span>
                 @elseif($order->status === 'processing')
-                    <span class="badge badge-info">⟳ Processing</span>
+                    <span class="badge badge-info">⟳ កំពុងដំណើរការ</span>
                 @elseif($order->status === 'cancelled')
-                    <span class="badge badge-danger">✕ Cancelled</span>
+                    <span class="badge badge-danger">✕ បានបោះបង់</span>
                 @else
-                    <span class="badge badge-warning">⏱ Pending</span>
+                    <span class="badge badge-warning">⏱ រង់ចាំ</span>
                 @endif
             </div>
         </div>
-        <div class="order-section">
-            <div class="section-header">Payment Status</div>
-            <div>
+        <div class="stat-card">
+            <div class="stat-label">ស្ថានភាពបង់ប្រាក់</div>
+            <div class="stat-content">
                 @if($order->payment_status === 'paid')
-                    <span class="badge badge-success">✓ Paid</span>
+                    <span class="badge badge-success">✓ បានបង់</span>
                 @elseif($order->payment_status === 'partial')
-                    <span class="badge badge-info">⟳ Partial</span>
+                    <span class="badge badge-info">⟳ បង់មួយផ្នែក</span>
                 @else
-                    <span class="badge badge-warning">⏱ Unpaid</span>
+                    <span class="badge badge-warning">⏱ មិនទាន់បង់</span>
                 @endif
             </div>
         </div>
-        <div class="order-section">
-            <div class="section-header">Items Count</div>
-            <div class="section-value">{{ $order->items->count() }}</div>
+        <div class="stat-card">
+            <div class="stat-label">ចំនួនមុខទំនិញ</div>
+            <div class="stat-content" style="font-size: 24px; font-weight: 800;">{{ $order->items->count() }}</div>
         </div>
-        <div class="order-section">
-            <div class="section-header">Total Amount</div>
-            <div class="section-value">${{ number_format($order->total_amount, 2) }}</div>
-            <div class="section-sub">៛{{ number_format($order->total_amount * 4000, 0) }}</div>
-        </div>
-    </div>
-    
-    <!-- Items Section -->
-    @if($order->items->count())
-    <div class="items-section">
-        <div class="items-header">📦 Order Items</div>
-        @foreach($order->items as $item)
-        <div class="item-row">
-            <div>
-                <div class="item-name">{{ $item->product->name }}</div>
-                <div class="item-unit">{{ $item->product->unit }}</div>
-            </div>
-            <div class="item-qty">{{ $item->quantity }} x</div>
-            <div class="item-price">
-                <div style="font-weight: 600;">${{ number_format($item->unit_price, 2) }}</div>
-                <div style="font-size: 12px; color: #999;">៛{{ number_format($item->unit_price * 4000, 0) }}</div>
-            </div>
-            <div class="item-total">
-                <div>${{ number_format($item->total_price, 2) }}</div>
-                <div style="font-size: 12px; color: #999;">៛{{ number_format($item->total_price * 4000, 0) }}</div>
-            </div>
-        </div>
-        @endforeach
-    </div>
-    @endif
-    
-    <!-- Summary Section -->
-    <div class="summary-section">
-        <div style="font-size: 12px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.5px;">💰 Amount Breakdown</div>
-        
-        <div class="summary-row">
-            <div>
-                <div class="summary-label">Subtotal (USD)</div>
-                <div class="summary-amount" style="font-size: 18px;">${{ number_format($order->subtotal, 2) }}</div>
-            </div>
-            <div>
-                <div class="summary-label">Subtotal (KHR)</div>
-                <div class="summary-amount" style="font-size: 18px;">៛{{ number_format($order->subtotal * 4000, 0) }}</div>
-            </div>
-            @if($order->discount_amount > 0)
-            <div>
-                <div class="summary-label">Discount (USD)</div>
-                <div class="summary-amount" style="color: #dc3545;">-${{ number_format($order->discount_amount, 2) }}</div>
-            </div>
-            <div>
-                <div class="summary-label">Discount (KHR)</div>
-                <div class="summary-amount" style="color: #dc3545;">-៛{{ number_format($order->discount_amount * 4000, 0) }}</div>
-            </div>
-            @else
-            <div colspan="2"></div>
-            @endif
-        </div>
-        
-        @if($order->tax_amount > 0)
-        <div class="summary-row">
-            <div>
-                <div class="summary-label">Tax (USD)</div>
-                <div class="summary-amount" style="color: #28a745; font-size: 18px;">+${{ number_format($order->tax_amount, 2) }}</div>
-            </div>
-            <div>
-                <div class="summary-label">Tax (KHR)</div>
-                <div class="summary-amount" style="color: #28a745; font-size: 18px;">+៛{{ number_format($order->tax_amount * 4000, 0) }}</div>
-            </div>
-            <div colspan="2"></div>
-        </div>
-        @endif
-        
-        <div class="summary-row" style="background: #f8f9fa; padding: 16px; margin: 0 -24px -24px -24px; border: none;">
-            <div>
-                <div class="summary-label">TOTAL (USD)</div>
-                <div class="summary-amount" style="font-size: 24px;">${{ number_format($order->total_amount, 2) }}</div>
-            </div>
-            <div>
-                <div class="summary-label">TOTAL (KHR)</div>
-                <div class="summary-amount" style="font-size: 24px;">៛{{ number_format($order->total_amount * 4000, 0) }}</div>
-            </div>
-            <div colspan="2"></div>
+        <div class="stat-card">
+            <div class="stat-label">សរុបរង</div>
+            <div class="stat-content" style="font-size: 20px; font-weight: 800;">${{ number_format($order->subtotal, 2) }}</div>
         </div>
     </div>
-    
-    <!-- Payment Section -->
-    <div style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e9ecef; margin-bottom: 24px;">
-        <div style="font-size: 14px; font-weight: 700; color: #1a1d29; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-            💳 Payment Management
+
+    <!-- Order Items -->
+    <div class="section">
+        <div class="section-header">
+            <div class="icon">📦</div>
+            <h3>រាយនាមទំនិញ</h3>
         </div>
-        
-        <!-- Payment Status & Amount Due -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #e9ecef;">
-            <div>
-                <div style="font-size: 12px; color: #6c757d; margin-bottom: 6px;">Payment Status</div>
-                <div>
-                    @if($order->payment_status === 'paid')
-                        <span style="display: inline-block; background: #28a745; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">✓ PAID</span>
-                    @elseif($order->payment_status === 'partial')
-                        <span style="display: inline-block; background: #ffc107; color: #1a1d29; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">⟳ PARTIAL</span>
-                    @else
-                        <span style="display: inline-block; background: #dc3545; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">✕ UNPAID</span>
+        @if($order->items->count())
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th class="item-num">#</th>
+                        <th>ផលិតផល</th>
+                        <th class="text-center">ចំនួន</th>
+                        <th class="text-right">តម្លៃឯកតា</th>
+                        <th class="text-right">សរុប</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($order->items as $i => $item)
+                    <tr>
+                        <td class="item-num">{{ $i + 1 }}</td>
+                        <td><span class="item-name">{{ $item->product->name }}</span></td>
+                        <td class="text-center"><span class="item-qty">{{ $item->quantity }}</span></td>
+                        <td class="text-right"><span class="item-price">${{ number_format($item->unit_price, 2) }}</span></td>
+                        <td class="text-right"><span class="item-price">${{ number_format($item->total_price, 2) }}</span></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div class="summary-footer">
+                <div class="summary-table">
+                    <div class="summary-line">
+                        <span class="label">សរុបរង</span>
+                        <span class="value">${{ number_format($order->subtotal, 2) }}</span>
+                    </div>
+                    @if($order->discount_amount > 0)
+                    <div class="summary-line discount">
+                        <span class="label">បញ្ចុះតម្លៃ</span>
+                        <span class="value">-${{ number_format($order->discount_amount, 2) }}</span>
+                    </div>
                     @endif
-                </div>
-            </div>
-            <div>
-                <div style="font-size: 12px; color: #6c757d; margin-bottom: 6px;">Amount Due</div>
-                <div style="font-size: 18px; font-weight: 700; color: #dc3545;">
-                    ${{ number_format($order->total_amount - $order->payments->sum('amount'), 2) }}
-                </div>
-                <div style="font-size: 12px; color: #6c757d;">៛{{ number_format(($order->total_amount - $order->payments->sum('amount')) * 4000, 0) }}</div>
-            </div>
-        </div>
-        
-        <!-- Record Payment Form -->
-        <div style="margin-bottom: 24px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
-            <div style="font-size: 13px; font-weight: 600; color: #1a1d29; margin-bottom: 16px;">Record Payment</div>
-            <form id="paymentForm" style="display: grid; gap: 12px;">
-                @csrf
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
-                    <div>
-                        <label style="font-size: 12px; color: #6c757d; display: block; margin-bottom: 6px;">Amount ($)</label>
-                        <input type="number" id="paymentAmount" name="amount" min="0.01" step="0.01" placeholder="0.00" 
-                            style="width: 100%; padding: 10px; border: 1px solid #e9ecef; border-radius: 6px; font-size: 14px; box-sizing: border-box;"
-                            max="{{ $order->total_amount - $order->payments->sum('amount') }}">
-                    </div>
-                    <div>
-                        <label style="font-size: 12px; color: #6c757d; display: block; margin-bottom: 6px;">Payment Method</label>
-                        <select id="paymentMethod" name="method" required style="width: 100%; padding: 10px; border: 1px solid #e9ecef; border-radius: 6px; font-size: 14px; box-sizing: border-box; background: white;">
-                            <option value="">Select method</option>
-                            <option value="cash">💵 Cash</option>
-                            <option value="card">💳 Card</option>
-                            <option value="bank_transfer">🏦 Bank Transfer</option>
-                            <option value="check">✓ Check</option>
-                            <option value="other">📝 Other</option>
-                        </select>
+                    <div class="summary-line total">
+                        <span class="label">តម្លៃសរុប</span>
+                        <span class="value">${{ number_format($order->total_amount, 2) }}</span>
                     </div>
                 </div>
-                <div>
-                    <label style="font-size: 12px; color: #6c757d; display: block; margin-bottom: 6px;">Reference (Optional)</label>
-                    <input type="text" id="paymentReference" name="reference" placeholder="Check #, Credit Card last 4, etc."
-                        style="width: 100%; padding: 10px; border: 1px solid #e9ecef; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                </div>
-                <button type="submit" style="padding: 10px 16px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
-                    Record Payment
-                </button>
-            </form>
-        </div>
-        
-        <!-- Payment History -->
-        @if($order->payments->count() > 0)
-        <div>
-            <div style="font-size: 13px; font-weight: 600; color: #1a1d29; margin-bottom: 12px;">Payment History</div>
-            <div style="max-height: 300px; overflow-y: auto;">
-                @foreach($order->payments as $payment)
-                <div style="padding: 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; color: #28a745;">${{ number_format($payment->amount, 2) }}</div>
-                        <div style="font-size: 12px; color: #6c757d;">{{ ucfirst(str_replace('_', ' ', $payment->method)) }} • {{ $payment->created_at->format('M d, Y H:i') }}</div>
-                        @if($payment->reference)
-                        <div style="font-size: 11px; color: #6c757d;">Ref: {{ $payment->reference }}</div>
-                        @endif
-                    </div>
-                    <form action="{{ route('payments.destroy', $payment) }}" method="POST" style="display: inline;" onsubmit="return confirm('Delete this payment?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 18px; padding: 0;">
-                            🗑️
-                        </button>
-                    </form>
-                </div>
-                @endforeach
             </div>
-        </div>
         @else
-        <div style="padding: 20px; text-align: center; color: #6c757d; background: #f8f9fa; border-radius: 8px;">
-            No payments recorded yet
-        </div>
+            <div class="section-body" style="text-align: center; color: var(--text-muted); padding: 48px;">
+                មិនមានទំនិញនៅឡើយទេ
+            </div>
         @endif
     </div>
-    
-    <!-- Actions Section -->
-    <div class="action-section">
-        <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary">
-            ✏️ Edit Order
-        </a>
-        <button onclick="deleteOrder({{ $order->id }}, 'ORD-{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}')" class="btn btn-danger">
-            🗑️ Delete Order
-        </button>
-        <a href="{{ route('orders.index') }}" class="btn btn-secondary">
-            ← Back to Orders
-        </a>
+
+    <!-- Customer Info -->
+    <div class="section">
+        <div class="section-header">
+            <div class="icon">👤</div>
+            <h3>ព័ត៌មានអតិថិជន</h3>
+        </div>
+        <div class="section-body">
+            <div class="customer-grid">
+                <div class="customer-field">
+                    <div class="field-label">ឈ្មោះ</div>
+                    <div class="field-value">{{ $order->customer->name }}</div>
+                </div>
+                <div class="customer-field">
+                    <div class="field-label">ទូរសព្ទ</div>
+                    <div class="field-value {{ !$order->customer->phone ? 'empty' : '' }}">{{ $order->customer->phone ?? '—' }}</div>
+                </div>
+                <div class="customer-field">
+                    <div class="field-label">អ៊ីមែល</div>
+                    <div class="field-value {{ !$order->customer->email ? 'empty' : '' }}">{{ $order->customer->email ?? '—' }}</div>
+                </div>
+                <div class="customer-field">
+                    <div class="field-label">ទីតាំង</div>
+                    <div class="field-value {{ !$order->customer->location ? 'empty' : '' }}">{{ $order->customer->location ?? '—' }}</div>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
+    <!-- Notes -->
     @if($order->notes)
-    <div style="padding: 24px; border-top: 1px solid #f0f0f0; background: #fafafa;">
-        <div style="font-size: 12px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">📝 Notes</div>
-        <div style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #e85d24; color: #1a1d29; line-height: 1.6;">
-            {{ $order->notes }}
+    <div class="section">
+        <div class="section-header">
+            <div class="icon">📝</div>
+            <h3>កំណត់ចំណាំ</h3>
+        </div>
+        <div class="section-body">
+            <div class="notes-content">{{ $order->notes }}</div>
         </div>
     </div>
     @endif
+
+    <!-- Actions -->
+    <div class="actions-bar">
+        <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary">
+            ✏️ កែសម្រួល
+        </a>
+        <a href="{{ route('deliveries.create') }}" class="btn btn-primary">
+            🚚 កំណត់ការដឹកជញ្ជូន
+        </a>
+        <a href="{{ route('invoices.create', ['order_id' => $order->id]) }}" class="btn btn-outline">
+            🧾 បង្កើតវិក្កយបត្រ
+        </a>
+        <a href="{{ route('orders.index') }}" class="btn btn-outline">
+            ← ត្រឡប់ក្រោយ
+        </a>
+        <form action="{{ route('orders.destroy', $order) }}" method="POST" style="display:inline;" onsubmit="return confirm('លុបការបញ្ជាទិញនេះ?')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger-outline">
+                🗑️ លុប
+            </button>
+        </form>
+    </div>
+
 </div>
-
-@push('scripts')
-<script>
-    function deleteOrder(id, orderNum) {
-        if (confirm(`Delete order "${orderNum}"? This will restore inventory quantities.`)) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/orders/' + id;
-            form.innerHTML = '<input type="hidden" name="_token" value="' + document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') + '"><input type="hidden" name="_method" value="DELETE">';
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-
-    // Payment form submission
-    document.getElementById('paymentForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const amount = document.getElementById('paymentAmount').value;
-        const method = document.getElementById('paymentMethod').value;
-        const reference = document.getElementById('paymentReference').value;
-
-        if (!amount || amount <= 0) {
-            alert('Please enter a valid amount');
-            return;
-        }
-
-        if (!method) {
-            alert('Please select a payment method');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/orders/{{ $order->id }}/payments`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    amount: parseFloat(amount),
-                    method: method,
-                    reference: reference
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert(data.message || 'Error recording payment');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error recording payment');
-        }
-    });
-</script>
-@endpush
-
 @endsection

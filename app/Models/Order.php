@@ -9,8 +9,7 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'order_date',
-        'subtotal',
-        'tax_amount',
+        'subtotal',       
         'discount_amount',
         'total_amount',
         'status',
@@ -23,7 +22,6 @@ class Order extends Model
         'order_date' => 'datetime',
         'delivery_date' => 'datetime',
         'subtotal' => 'decimal:2',
-        'tax_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
     ];

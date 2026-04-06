@@ -47,12 +47,11 @@ class InvoiceController extends Controller
             'order_id' => $order->id,
             'invoice_number' => $invoiceNumber,
             'invoice_date' => $validated['invoice_date'],
-            'due_date' => $validated['due_date'],
+            'due_date' => $validated['due_date'] ?? null,
             'subtotal' => $order->subtotal,
-            'tax_amount' => $order->tax_amount,
             'discount_amount' => $order->discount_amount,
             'total_amount' => $order->total_amount,
-            'notes' => $validated['notes'],
+            'notes' => $validated['notes'] ?? null,
         ]);
 
         return redirect()->route('invoices.show', $invoice)->with('success', 'Invoice created successfully.');

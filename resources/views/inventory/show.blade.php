@@ -227,8 +227,8 @@
     <!-- Header -->
     <div class="show-header">
         <div>
-            <h1>📦 {{ $inventory->product->name ?? 'Unknown Product' }}</h1>
-            <p>Inventory Details</p>
+            <h1> {{ $inventory->product->name ?? 'Unknown Product' }}</h1>
+        
         </div>
     </div>
 
@@ -249,7 +249,7 @@
         <!-- RIGHT: Details -->
         <div class="info-box">
             <h2 class="title">{{ $inventory->product->name ?? '—' }}</h2>
-            <p class="cat">📁 {{ $inventory->product->category ?? '—' }}</p>
+            <p class="cat"> {{ $inventory->product->category ?? '—' }}</p>
 
             @php
                 $isOut = $inventory->quantity == 0;
@@ -280,9 +280,6 @@
                 @endif
                 @if($inventory->product->price_khr)
                 <div class="price">៛{{ number_format($inventory->product->price_khr, 0) }}<br><small>KHR</small></div>
-                @endif
-                @if($inventory->cost_per_unit)
-                <div class="price">${{ number_format($inventory->cost_per_unit, 2) }}<br><small>Cost</small></div>
                 @endif
             </div>
 

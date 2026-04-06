@@ -239,6 +239,34 @@
                     value="{{ old('scheduled_delivery_at', $delivery->scheduled_delivery_at->format('Y-m-d\TH:i')) }}" required>
             </div>
 
+            <!-- Delivery Type -->
+            <div class="form-group">
+                <label class="form-label">Delivery Type *</label>
+                <select name="delivery_type" class="form-select" required>
+                    @foreach(\App\Models\Delivery::getDeliveryTypes() as $key => $label)
+                    <option value="{{ $key }}" {{ old('delivery_type', $delivery->delivery_type) === $key ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Service Name -->
+            <div class="form-group">
+                <label class="form-label">Service Name (Optional)</label>
+                <input type="text" name="name_service" class="form-input"
+                    placeholder="e.g., Fast Logistic, Taxi XYZ, Your Team, etc."
+                    value="{{ old('name_service', $delivery->name_service) }}">
+            </div>
+
+            <!-- Price of Delivery -->
+            <div class="form-group">
+                <label class="form-label">Price of Delivery Service ($) (Optional)</label>
+                <input type="number" name="price_of_delivery" class="form-input"
+                    min="0" step="0.01" placeholder="0.00"
+                    value="{{ old('price_of_delivery', $delivery->price_of_delivery) }}">
+            </div>
+
             <!-- Driver Section -->
             <div style="padding: 20px; background: #f8f9fa; border-radius: 8px; margin-bottom: 24px;">
                 <div style="font-size: 12px; font-weight: 700; color: #6c757d; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">👨‍🚗 Driver Information</div>

@@ -39,7 +39,6 @@ class OrderController extends Controller
             'customer_id' => $validated['customer_id'],
             'order_date' => $validated['order_date'],
             'subtotal' => $validated['subtotal'],
-            'tax_amount' => $validated['tax_amount'] ?? 0,
             'discount_amount' => $validated['discount_amount'] ?? 0,
             'total_amount' => $validated['total_amount'],
             'status' => $validated['status'] ?? 'pending',

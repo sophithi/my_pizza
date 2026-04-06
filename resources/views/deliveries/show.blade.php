@@ -381,6 +381,18 @@
                 <div class="info-value">{{ $delivery->scheduled_delivery_at->format('M d, Y H:i') }}</div>
             </div>
             <div class="info-group">
+                <div class="info-label">Delivery Type</div>
+                <div class="info-value"><strong>{{ $delivery->delivery_type }}</strong></div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Service Name</div>
+                <div class="info-value">{{ $delivery->name_service ?? '—' }}</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Service Price</div>
+                <div class="info-value">${{ number_format($delivery->price_of_delivery, 2) }}</div>
+            </div>
+            <div class="info-group">
                 <div class="info-label">Actual Delivery</div>
                 <div class="info-value">
                     @if($delivery->actual_delivery_at)
