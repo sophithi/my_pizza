@@ -669,7 +669,7 @@
             </select>
 
             <select id="warehouseFilter" style="padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; background: var(--surface); color: var(--text); font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 140px;">
-                <option value="">📍 All Warehouse</option>
+                <option value="">📍 ទាំងអស់    </option>
                 @foreach($inventories->pluck('warehouse_location')->unique()->reject(fn($x) => !$x) as $warehouse)
                 <option value="{{ strtolower($warehouse) }}">{{ $warehouse }}</option>
                 @endforeach
@@ -685,11 +685,11 @@
         <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: var(--surface);">
             <thead style="background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); border-bottom: 2px solid var(--border);">
                 <tr>
-                    <th style="text-align: left; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); cursor: pointer;" onclick="sortTable('name')">📦 Product <i class="fas fa-sort" style="font-size: 10px; margin-left: 6px; opacity: 0.6;"></i></th>
-                    <th style="text-align: left; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); cursor: pointer;" onclick="sortTable('category')">🏷️ Category <i class="fas fa-sort" style="font-size: 10px; margin-left: 6px; opacity: 0.6;"></i></th>
-                    <th style="text-align: left; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%);">📍 Warehouse</th>
-                    <th style="text-align: center; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); cursor: pointer;" onclick="sortTable('qty')">📊 Qty <i class="fas fa-sort" style="font-size: 10px; margin-left: 6px; opacity: 0.6;"></i></th>
-                    <th style="text-align: center; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); cursor: pointer;" onclick="sortTable('min')">⚠️ Min <i class="fas fa-sort" style="font-size: 10px; margin-left: 6px; opacity: 0.6;"></i></th>
+                    <th style="text-align: left; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); cursor: pointer;" onclick="sortTable('name')">ទំនិញ <i class="fas fa-sort" style="font-size: 10px; margin-left: 6px; opacity: 0.6;"></i></th>
+                    <th style="text-align: left; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); cursor: pointer;" onclick="sortTable('category')"> ប្រភេទ <i class="fas fa-sort" style="font-size: 10px; margin-left: 6px; opacity: 0.6;"></i></th>
+                    <th style="text-align: left; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%);">📍 ស្តុក</th>
+                    <th style="text-align: center; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); cursor: pointer;" onclick="sortTable('qty')">ចំនួន<i class="fas fa-sort" style="font-size: 10px; margin-left: 6px; opacity: 0.6;"></i></th>
+                    <th style="text-align: center; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%); cursor: pointer;" onclick="sortTable(' <i class="fas fa-sort" style="font-size: 10px; margin-left: 6px; opacity: 0.6;"></i></th>
                     <th style="text-align: center; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%);">Status</th>
                     <th style="text-align: center; font-weight: 700; color: var(--text); padding: 18px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; background: linear-gradient(135deg, #fafbfc 0%, #f5f6f9 100%);">Action</th>
                 </tr>
@@ -703,7 +703,7 @@
                     $color  = $isOut ? '#dc2626' : ($isLow ? '#d97706' : '#16a34a');
                     $bgColor = $isOut ? '#fee2e2' : ($isLow ? '#fffbeb' : '#f0fdf4');
                 @endphp
-                <tr data-name="{{ strtolower($inv->product?->name) }}" data-status="{{ $status }}" style="border-bottom: 1px solid var(--border); transition: all 0.25s ease; background: transparent;" onmouseenter="this.style.background='#fafbfc'; this.style.transform='none'" onmouseleave="this.style.background='transparent'">
+                <tr data-name="{{ strtolower($inv->product?->name) }}" data-status="{{ $status }}" data-warehouse="{{ strtolower($inv->warehouse_location ?? '') }}" style="border-bottom: 1px solid var(--border); transition: all 0.25s ease; background: transparent;" onmouseenter="this.style.background='#fafbfc'; this.style.transform='none'" onmouseleave="this.style.background='transparent'">
                     <td style="padding: 16px; color: var(--text); font-size: 14px; font-weight: 600;">
                         {{ $inv->product?->name ?? '—' }}
                     </td>
@@ -720,7 +720,7 @@
                     <td style="padding: 16px; text-align: center; color: var(--text); font-weight: 700; font-size: 15px;" data-qty="{{ $inv->quantity }}">
                         <span id="qty-{{ $inv->id }}" onclick="openQuickUpdate({{ $inv->id }}, {{ $inv->quantity }})">{{ $inv->quantity }}</span>
                     </td>
-                    <td style="padding: 16px; text-align: center; color: var(--muted); font-size: 13px; font-weight: 600;" data-warehouse="{{ strtolower($inv->warehouse_location ?? '') }}">{{ $inv->reorder_level }}</td>
+                    <td style="padding: 16px; text-align: center; color: var(--muted); font-size: 13px; font-weight: 600;">{{ $inv->reorder_level }}</td>
                     <td style="padding: 16px; text-align: center;">
                         <span style="display: inline-block; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; color: {{ $color }}; background: {{ $bgColor }}; transition: all 0.2s;">
                             <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>{{ $status }}

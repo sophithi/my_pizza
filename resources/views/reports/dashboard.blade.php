@@ -217,7 +217,7 @@
     if (ctx) {
         const dates = [
             @foreach($chartData as $data)
-                '{{ date("M d", strtotime($data->date)) }}',
+                '{{ \Carbon\Carbon::parse($data->date)->translatedFormat('M d') }}','
             @endforeach
         ];
         

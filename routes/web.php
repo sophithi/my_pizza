@@ -64,10 +64,6 @@ Route::middleware('auth')->group(function () {
 
         // Delivery management
         Route::resource('deliveries', DeliveryController::class);
-        Route::post('deliveries/{delivery}/mark-out-for-delivery', [DeliveryController::class, 'markOutForDelivery'])->name('deliveries.mark-out');
-        Route::post('deliveries/{delivery}/mark-delivered', [DeliveryController::class, 'markDelivered'])->name('deliveries.mark-delivered');
-        Route::post('deliveries/{delivery}/cancel', [DeliveryController::class, 'cancel'])->name('deliveries.cancel');
-        Route::get('deliveries/by-date', [DeliveryController::class, 'byDate'])->name('deliveries.by-date');
 
         // Order management (full CRUD)
         Route::resource('orders', OrderController::class);

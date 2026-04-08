@@ -267,7 +267,7 @@
         <tbody>
             @foreach($payments as $payment)
             <tr>
-                <td>{{ $payment->created_at->format('M d, Y H:i') }}</td>
+                <td>{{ $payment->created_at->translatedFormat('M d, Y H:i') }}</td>
                 <td>
                     @if($payment->order_id)
                         <a href="{{ route('orders.show', $payment->order) }}" style="color: var(--accent); text-decoration: none;">

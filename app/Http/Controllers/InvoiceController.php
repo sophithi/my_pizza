@@ -41,7 +41,9 @@ class InvoiceController extends Controller
         ]);
 
         $order = Order::find($validated['order_id']);
-        $invoiceNumber = 'INV-' . str_pad(Invoice::count() + 1, 6, '0', STR_PAD_LEFT);
+        $lastInvoice = Invoice::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
+        $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
+        $invoiceNumber = 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
 
         $invoice = Invoice::create([
             'order_id' => $order->id,
@@ -62,7 +64,7 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        $invoice->load('order.customer', 'order.items.product');
+        $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
         return view('invoices.show', compact('invoice'));
     }
 
@@ -103,7 +105,7 @@ class InvoiceController extends Controller
      */
     public function print(Invoice $invoice)
     {
-        $invoice->load('order.customer', 'order.items.product');
+        $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
         return view('invoices.print', compact('invoice'));
     }
 }

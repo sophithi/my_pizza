@@ -168,7 +168,7 @@
 
             <div class="form-group">
                 <label class="form-label">Warehouse Location</label>
-                <input type="text" name="warehouse_location" class="form-input" value="{{ old('warehouse_location', $inventory->warehouse_location) }}" placeholder="e.g., Shelf A2">
+                <input type="text" name="warehouse_location" class="form-input" value="{{ old('warehouse_location', $inventory->warehouse_location) }}" placeholder="......">
             </div>
 
         

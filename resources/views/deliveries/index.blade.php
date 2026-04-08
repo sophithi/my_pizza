@@ -1,20 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Deliveries Management')
+@section('title', 'Deliveries')
 
 @push('styles')
 <style>
     :root {
         --accent: #e85d24;
+        --accent-light: #fff5f0;
         --bg: #f4f5f7;
         --surface: #ffffff;
         --border: #e9ecef;
         --text: #1a1d29;
         --text-muted: #6c757d;
-        --success: #28a745;
-        --warning: #ffc107;
-        --danger: #dc3545;
-        --info: #0d6efd;
     }
 
     body { background: var(--bg); }
@@ -23,259 +20,217 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 32px;
     }
 
     .page-title {
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 800;
         color: var(--text);
         margin: 0;
     }
 
-    .btn-primary {
-        background: var(--accent);
-        color: white;
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-top: 4px;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg, var(--accent) 0%, #d94a10 100%);
+        color: #fff;
         padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
+        border-radius: 10px;
         text-decoration: none;
-        font-weight: 600;
-        transition: background 0.2s;
-    }
-
-    .btn-primary:hover { background: #d64a1a; }
-
-    .btn-small {
-        padding: 6px 12px;
-        font-size: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
         border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 600;
-        text-decoration: none;
     }
 
-    .btn-info {
-        background: var(--info);
-        color: white;
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(232, 93, 36, 0.3);
+        color: #fff;
     }
 
-    .btn-warning {
-        background: var(--warning);
-        color: #1a1d29;
+    .search-bar {
+        margin-bottom: 24px;
     }
 
-    .btn-danger {
-        background: var(--danger);
-        color: white;
+    .search-bar input {
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+        width: 300px;
+        background: var(--surface);
+        color: var(--text);
     }
 
-    .delivery-table {
+    .search-bar input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .table-card {
+        background: var(--surface);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .table-card table {
         width: 100%;
         border-collapse: collapse;
-        background: var(--surface);
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    .delivery-table thead {
-        background: #f8f9fa;
+    .table-card th {
+        padding: 14px 16px;
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        background: #fafbfc;
         border-bottom: 2px solid var(--border);
     }
 
-    .delivery-table thead th {
-        padding: 16px;
-        text-align: left;
-        font-weight: 600;
-        color: var(--text-muted);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .delivery-table tbody tr {
+    .table-card td {
+        padding: 14px 16px;
+        font-size: 14px;
+        color: var(--text);
         border-bottom: 1px solid var(--border);
-        transition: background 0.2s;
+        vertical-align: middle;
     }
 
-    .delivery-table tbody tr:hover {
-        background: #f8f9fa;
-    }
+    .table-card tr:hover { background: #fafbfc; }
 
-    .delivery-table tbody td {
-        padding: 16px;
-        color: var(--text);
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .status-pending { background: #fff3cd; color: #856404; }
-    .status-preparing { background: #e2e3e5; color: #383d41; }
-    .status-out_for_delivery { background: #cce5ff; color: #004085; }
-    .status-delivered { background: #d4edda; color: #155724; }
-    .status-cancelled { background: #f8d7da; color: #721c24; }
-
-    .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 40px;
-    }
-
-    .stat-card {
-        background: var(--surface);
-        padding: 24px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .stat-label {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-    }
-
-    .stat-value {
-        font-size: 28px;
+    .price-tag {
         font-weight: 700;
-        color: var(--text);
+        color: var(--accent);
+        font-size: 15px;
     }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+        gap: 4px;
+    }
+
+    .btn-view { background: #28a745; color: #fff; }
+    .btn-view:hover { background: #218838; color: #fff; }
+    .btn-edit { background: #0d6efd; color: #fff; }
+    .btn-edit:hover { background: #0a58ca; color: #fff; }
+    .btn-delete { background: #dc3545; color: #fff; border: none; cursor: pointer; }
+    .btn-delete:hover { background: #b02a37; }
 
     .empty-state {
         text-align: center;
         padding: 60px 20px;
         color: var(--text-muted);
-        background: var(--surface);
-        border-radius: 8px;
     }
 
-    .empty-state-icon {
-        font-size: 48px;
-        margin-bottom: 16px;
-    }
-
-    .empty-state-text {
-        font-size: 16px;
-        margin-bottom: 16px;
-    }
+    .empty-state i { font-size: 48px; margin-bottom: 16px; color: #dee2e6; }
 </style>
 @endpush
 
 @section('content')
+<div style="max-width: 1000px; margin: 0 auto; padding: 24px;">
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1 class="page-title">ការដឹកជញ្ជូនទំនិញ</h1>
-        <a href="{{ route('deliveries.create') }}" class="btn-primary">បន្ថែម</a>
-    </div>
-
-    <!-- Success Message -->
     @if(session('success'))
-    <div style="background: #d4edda; color: #155724; padding: 16px; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #28a745;">
-        ✓ {{ session('success') }}
+    <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
+        <i class="fas fa-check-circle"></i> {{ session('success') }}
     </div>
     @endif
 
-    <!-- Statistics -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-label">ការដឹកជញ្ជូនទំនិញ</div>
-            <div class="stat-value">{{ $deliveries->total() }}</div>
+    <div class="page-header">
+        <div>
+            <p class="page-subtitle">ការដឹកជញ្ជូន</p>
+            <h1 class="page-title">Delivery</h1>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">កំពុងរងចាំ</div>
-            <div class="stat-value" style="color: #ffc107;">
-                {{ $deliveries->where('status', 'pending')->count() }}
-            </div>
-        </div>
-   
-        <div class="stat-card">
-            <div class="stat-label">បានដឹករួចរាល់</div>
-            <div class="stat-value" style="color: #28a745;">
-                {{ $deliveries->where('status', 'delivered')->count() }}
-            </div>
-        </div>
+        <a href="{{ route('deliveries.create') }}" class="btn-add">
+            <i class="fas fa-plus"></i> បង្កើតថ្មី
+        </a>
     </div>
 
-    <!-- Deliveries Table -->
-    @if($deliveries->count() > 0)
-    <table class="delivery-table">
-        <thead>
-            <tr>
-                <th>Order</th>
-                <th>Address</th>
-                <th>Delivery Type</th>
-                <th>Service</th>
-                <th>Driver</th>
-                <th>Scheduled</th>
-                <th>Status</th>
-                <th>Fee</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($deliveries as $delivery)
-            <tr>
-                <td>
-                    <a href="{{ route('orders.show', $delivery->order) }}" style="color: var(--accent); font-weight: 600; text-decoration: none;">
-                        #{{ str_pad($delivery->order->id, 4, '0', STR_PAD_LEFT) }}
-                    </a>
-                </td>
-                <td>{{ Str::limit($delivery->delivery_address, 40) }}</td>
-                <td><strong>{{ $delivery->delivery_type }}</strong></td>
-                <td>{{ $delivery->name_service ?? '—' }}<br><small style="color: var(--text-muted);">${{ number_format($delivery->price_of_delivery, 2) }}</small></td>
-                <td>{{ $delivery->driver_name ?? '-' }}</td>
-                <td>{{ $delivery->scheduled_delivery_at->format('M d, Y H:i') }}</td>
-                <td>
-                    <span class="status-badge status-{{ $delivery->status }}">
-                        @if($delivery->status === 'pending')
-                            ⏱ Pending
-                        @elseif($delivery->status === 'preparing')
-                            👨‍🍳 Preparing
-                        @elseif($delivery->status === 'out_for_delivery')
-                            🚗 Out
-                        @elseif($delivery->status === 'delivered')
-                            ✓ Delivered
-                        @else
-                            ✕ Cancelled
-                        @endif
-                    </span>
-                </td>
-                <td>${{ number_format($delivery->delivery_fee, 2) }}</td>
-                <td>
-                    <a href="{{ route('deliveries.show', $delivery) }}" class="btn-small btn-info">View</a>
-                    <a href="{{ route('deliveries.edit', $delivery) }}" class="btn-small btn-info">Edit</a>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 ស្វែងរកការដឹកជញ្ជូន..." onkeyup="filterTable()">
+    </div>
 
-    <!-- Pagination -->
-    <div style="margin-top: 32px;">
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ឈ្មោះដឹកជញ្ជូន</th>
+                    <th>តម្លៃ</th>
+                    <th>ផ្សេងៗ</th>
+                    <th>សកម្មភាព</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                @forelse($deliveries as $delivery)
+                <tr data-search="{{ strtolower($delivery->delivery_name . ' ' . $delivery->delivery_desc) }}">
+                    <td style="font-weight: 700; color: var(--accent);">{{ $delivery->id }}</td>
+                    <td style="font-weight: 700;">{{ $delivery->delivery_name }}</td>
+                    <td>
+                        <span class="price-tag">៛{{ number_format($delivery->delivery_price_khr, 0) }}</span>
+                    </td>
+                    <td style="color: var(--text-muted); max-width: 300px;">{{ Str::limit($delivery->delivery_desc, 60) ?? '—' }}</td>
+                    <td>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="{{ route('deliveries.show', $delivery) }}" class="action-btn btn-view"><i class="fas fa-eye"></i> View</a>
+                            <a href="{{ route('deliveries.edit', $delivery) }}" class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
+                            <form action="{{ route('deliveries.destroy', $delivery) }}" method="POST" style="display:inline;" onsubmit="return confirm('លុបការដឹកជញ្ជូននេះ?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="action-btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="fas fa-truck"></i>
+                            <p style="font-size: 16px; font-weight: 600;">មិនមានការដឹកជញ្ជូន</p>
+                            <p>ចុច "បង្កើតថ្មី" ដើម្បីចាប់ផ្តើម</p>
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 20px;">
         {{ $deliveries->links() }}
     </div>
-    @else
-    <div class="empty-state">
-        <div class="empty-state-icon">🚗</div>
-        <div class="empty-state-text">មិនទាន់មានការដឹកជញ្ជូន</div>
-        <a href="{{ route('deliveries.create') }}" class="btn-primary">Schedule First Delivery</a>
-    </div>
-    @endif
 </div>
-
 @endsection
+
+@push('scripts')
+<script>
+function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#tableBody tr[data-search]').forEach(row => {
+        row.style.display = row.getAttribute('data-search').includes(search) ? '' : 'none';
+    });
+}
+</script>
+@endpush

@@ -128,11 +128,11 @@
 
 <div class="container mt-4 mb-4" style="max-width: 600px;">
     <div class="form-card">
-        <h3 class="form-card__title">Create Inventory Record</h3>
+        <h3 class="form-card__title">បង្កើតការស្តុកទំនិញ</h3>
 
         @if ($errors->any())
         <div class="alert-error">
-            <ul>
+            <ul>    
                 @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
                 @endforeach
@@ -144,7 +144,7 @@
             @csrf
 
             <div class="form-group">
-                <label class="form-label">Product *</label>
+                <label class="form-label">ទំនិញ *</label>
                 <select name="product_id" class="form-select" required>
                     <option value="">Select a product</option>
                     @foreach($products as $product)
@@ -157,7 +157,7 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Quantity *</label>
+                    <label class="form-label">ចំនួន *</label>
                     <input type="number" name="quantity" class="form-input" value="{{ old('quantity', '0') }}" required>
                 </div>
                 <div class="form-group">
@@ -167,8 +167,8 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Warehouse Location</label>
-                <input type="text" name="warehouse_location" class="form-input" value="{{ old('warehouse_location') }}" placeholder="e.g., Shelf A2">
+                <label class="form-label"> ទីតាំងស្តុកទំនិញ </label>
+                <input type="text" name="warehouse_location" class="form-input" value="{{ old('warehouse_location') }}" placeholder="......">
             </div>
 
          

@@ -209,7 +209,7 @@
     if (ctx) {
         const dates = [
             @foreach($dailyRevenue as $daily)
-                '{{ date("M d", strtotime($daily->date)) }}',
+                '{{ \Carbon\Carbon::parse($daily->date)->translatedFormat('M d') }}',
             @endforeach
         ];
         

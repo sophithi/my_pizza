@@ -123,7 +123,7 @@
                             @foreach($customer->orders as $order)
                             <tr style="border-bottom: 1px solid #e9ecef;">
                                 <td style="padding: 12px; color: #e85d24; font-weight: 700; font-size: 14px;">#{{ $order->id }}</td>
-                                <td style="padding: 12px; color: #6c757d; font-size: 14px;">{{ $order->order_date->format('M d, Y') }}</td>
+                                <td style="padding: 12px; color: #6c757d; font-size: 14px;">{{ $order->order_date->translatedFormat('M d, Y') }}</td>
                                 <td style="padding: 12px; color: #1a1d29; font-size: 14px;">{{ $order->items->count() }} item(s)</td>
                                 <td style="padding: 12px; color: #1a1d29; font-weight: 700; font-size: 14px;">${{ number_format($order->total_amount, 2) }}</td>
                                 <td style="padding: 12px;">

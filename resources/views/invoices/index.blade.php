@@ -36,7 +36,7 @@
                             <td style="padding: 12px; color: #666;">{{ $invoice->order?->customer?->name ?? 'N/A' }}</td>
                             <td style="padding: 12px; color: #666;">##{{ $invoice->order?->id }}
                             <td style="padding: 12px; color: #333; font-weight: 500;">${{ number_format($invoice->total_amount, 2) }}</td>
-                            <td style="padding: 12px; color: #666;">{{ $invoice->invoice_date->format('M d, Y') }}</td>
+                            <td style="padding: 12px; color: #666;">{{ $invoice->invoice_date->translatedFormat('M d, Y') }}</td>
                             <td style="padding: 12px;">
                                 <span style="padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
                                     background: {{ $invoice->status === 'paid' ? '#d4edda' : ($invoice->status === 'sent' ? '#cce5ff' : ($invoice->status === 'cancelled' ? '#f8d7da' : '#fff3cd')) }};

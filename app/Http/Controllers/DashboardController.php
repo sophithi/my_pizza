@@ -46,13 +46,7 @@ class DashboardController extends Controller
             
             'recovery_rate' => $this->calculateRecoveryRate(),
             
-            // Delivery Stats
-            'pending_deliveries' => Delivery::where('status', 'pending')->count(),
-            'out_for_delivery' => Delivery::where('status', 'out_for_delivery')->count(),
-            'today_delivered' => Delivery::whereDate('actual_delivery_at', $today)
-                ->where('status', 'delivered')
-                ->count(),
-            
+        
             // Payment Stats
             'unpaid_orders' => Order::where('payment_status', '!=', 'paid')->count(),
             'pending_payments' => Payment::where('status', 'pending')->sum('amount') ?? 0,
@@ -111,25 +105,6 @@ class DashboardController extends Controller
                 ];
             })
             ->toArray();
-        
-        // Recent Deliveries (for staff to track deliveries)
-        $recent_deliveries = Delivery::with(['order.customer'])
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(function ($delivery) {
-                return [
-                    'id' => $delivery->id,
-                    'order_id' => $delivery->order->id,
-                    'customer' => $delivery->order->customer?->name ?? 'Unknown',
-                    'address' => $delivery->delivery_address,
-                    'scheduled' => $delivery->scheduled_delivery_at->format('d M, H:i'),
-                    'status' => $delivery->status,
-                    'driver' => $delivery->driver_name,
-                ];
-            })
-            ->toArray();
-        
         // Pending Payments (Orders that need payment follow-up)
         $pending_payments = Order::with('customer')
             ->where('payment_status', '!=', 'paid')
@@ -152,7 +127,7 @@ class DashboardController extends Controller
             'recent_orders', 
             'topProducts',
             'inventory_alerts',
-            'recent_deliveries',
+    
             'pending_payments'
         ));
     }

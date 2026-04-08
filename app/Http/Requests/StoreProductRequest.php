@@ -19,7 +19,7 @@ class StoreProductRequest extends FormRequest
             'price_khr'   => 'required_without:price_usd|numeric|min:0',
             'price_usd'   => 'required_without:price_khr|numeric|min:0',
             'category'    => 'required|string|max:255',
-            'unit'        => 'required|string|in:kg,g,L,ml,pcs,box,pack,bag',
+            'unit'        => 'required|string|in:kg,g,L,ml,pcs,box,box1,box2,pack,bag',
             'supplier'    => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|max:2048',

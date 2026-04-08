@@ -37,8 +37,8 @@
                         </div>
                         <div>
                             <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Invoice Details</p>
-                            <p style="color: #333; margin: 8px 0;"><strong>Invoice Date:</strong> {{ $invoice->invoice_date->format('M d, Y') }}</p>
-                            <p style="color: #333; margin: 8px 0;"><strong>Due Date:</strong> {{ $invoice->due_date ? $invoice->due_date->format('M d, Y') : 'N/A' }}</p>
+                            <p style="color: #333; margin: 8px 0;"><strong>Invoice Date:</strong> {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</p>
+                            <p style="color: #333; margin: 8px 0;"><strong>Due Date:</strong> {{ $invoice->due_date ? $invoice->due_date->translatedFormat('M d, Y') : 'N/A' }}</p>
                             <p style="color: #333; margin: 8px 0;"><strong>Status:</strong>
                                 <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
                                     background: {{ $invoice->status === 'paid' ? '#d4edda' : ($invoice->status === 'sent' ? '#cce5ff' : ($invoice->status === 'cancelled' ? '#f8d7da' : '#fff3cd')) }};

@@ -181,7 +181,7 @@
             
             <div class="invoice-details">
                 <div class="invoice-number">{{ $invoice->invoice_number }}</div>
-                <p>កាលបរិច្ឆេទ: {{ $invoice->invoice_date->format('M d, Y') }}</p>
+                <p>កាលបរិច្ឆេទ: {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</p>
             </div>
         </div>
 
@@ -193,6 +193,17 @@
                 <p>{{ $invoice->order->customer->address ?? '-' }}</p>
                 <p>{{ ($invoice->order->customer->city ?? '') . ' ' . ($invoice->order->customer->postal_code ?? '') }}</p>
                 <p>{{ $invoice->order->customer->phone ?? '-' }}</p>
+                @php
+                    $deliveryItems = $invoice->order->items->filter(fn($item) => $item->delivery_id);
+                @endphp
+                @if($deliveryItems->count())
+                <div style="margin-top: 6px;">
+                    <strong>ការដឹកជញ្ជូន:</strong>
+                    @foreach($deliveryItems as $dItem)
+                    <p style="margin: 2px 0;">{{ $dItem->product->name }} → {{ $dItem->delivery->delivery_name }}</p>
+                    @endforeach
+                </div>
+                @endif
                 @else
                 <p class="customer-name">N/A</p>
                 <p>Customer information not available</p>

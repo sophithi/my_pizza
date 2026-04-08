@@ -48,20 +48,20 @@
                         <div class="card border-0 shadow-sm" style="border-radius: 12px; background: #f8f9fa;">
                             <div class="card-body" style="padding: 20px;">
                                 <h5 style="font-size: 16px; font-weight: 700; color: #1a1d29; margin-bottom: 16px;">
-                                    <i class="fas fa-user-circle"></i> Customer Information
+                                    <i class="fas fa-user-circle"></i> ព័ត៌មានអតិថិជន
                                 </h5>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                                     <div>
-                                        <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px; font-size: 12px;">Name</p>
+                                        <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px; font-size: 12px;">ឈ្មោះ</p>
                                         <p style="color: #1a1d29; margin: 0; font-weight: 600;" id="customer_name">-</p>
                                     </div>
                                     <div>
-                                        <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px; font-size: 12px;">Phone</p>
+                                        <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px; font-size: 12px;">លេខទំនាក់ទំនង</p>
                                         <p style="color: #1a1d29; margin: 0;" id="customer_phone">-</p>
                                     </div>
                                 </div>
                                 <div style="margin-top: 12px;">
-                                    <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px; font-size: 12px;">Location</p>
+                                    <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px; font-size: 12px;">ទីតាំង</p>
                                     <p style="color: #1a1d29; margin: 0;" id="customer_location">-</p>
                                 </div>
                             </div>
@@ -71,13 +71,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" style="font-weight: 600;">Order Date *</label>
+                                <label class="form-label" style="font-weight: 600;">កាលបរិច្ឆេទកម្មង់ *</label>
                                 <input type="datetime-local" name="order_date" class="form-control" value="{{ old('order_date', $order->order_date->format('Y-m-d\TH:i')) }}" required style="border-radius: 6px; border: 1px solid #e9ecef; padding: 10px 12px;">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" style="font-weight: 600;">Total Amount *</label>
+                                <label class="form-label" style="font-weight: 600;">សរុបតម្លៃ *</label>
                                 <input type="number" name="total_amount" step="0.01" class="form-control" value="{{ old('total_amount', $order->total_amount) }}" required style="border-radius: 6px; border: 1px solid #e9ecef; padding: 10px 12px;">
                             </div>
                         </div>
@@ -108,7 +108,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 600;">Notes</label>
+                        <label class="form-label" style="font-weight: 600;">ផ្សេងៗ</label>
                         <textarea name="notes" class="form-control" rows="3" style="border-radius: 6px; border: 1px solid #e9ecef; padding: 10px 12px;">{{ old('notes', $order->notes) }}</textarea>
                     </div>
 

@@ -232,7 +232,7 @@
                     <strong>#{{ $purchase->reference_number ?? str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</strong>
                 </td>
                 <td>{{ $purchase->supplier_name }}</td>
-                <td>{{ $purchase->purchase_date->format('M d, Y') }}</td>
+                <td>{{ $purchase->purchase_date->translatedFormat('M d, Y') }}</td>
                 <td class="purchase-amount">${{ number_format($purchase->total_amount, 2) }}</td>
                 <td>
                     <span class="purchase-status {{ $purchase->status }}">{{ ucfirst($purchase->status) }}</span>

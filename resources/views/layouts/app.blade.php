@@ -20,16 +20,21 @@
             overflow-x: hidden;
         }
 
+        html {
+            background: #f5f7fa;
+        }
+
         /* ===== SIDEBAR ===== */
         .sidebar {
             width: 260px;
-            min-height: 100vh;
+            height: 100vh;
             background: linear-gradient(180deg, #1a1d29 0%, #0f1117 100%);
             position: fixed;
             top: 0; left: 0;
             z-index: 1000;
             transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             overflow: hidden;
+            overflow-y: auto;
         }
 
         .sidebar.collapsed { width: 80px; }
@@ -290,6 +295,9 @@
             margin-left: 260px;
             padding: 28px;
             min-height: calc(100vh - 65px);
+            background: #f5f7fa;
+            position: relative;
+            z-index: 1;
             transition: margin-left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
@@ -479,60 +487,60 @@
         </button>
     </div>
     <nav>
-        <div class="nav-label">Main</div>
+      
         <a href="/" class="nav-link {{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
-            <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+            <i class="fas fa-tachometer-alt"></i><span>ទំព័រដើម</span>
         </a>
         <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}">
-            <i class="fas fa-shopping-cart"></i><span>Orders</span>
+            <i class="fas fa-shopping-cart"></i><span>ការកម្មង់</span>
         </a>
 
         {{-- Only admins see customers menu --}}
         @if(auth()->user()->isAdmin())
         <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
-            <i class="fas fa-users"></i><span>Customers</span>
+            <i class="fas fa-users"></i><span>អតិថិជន</span>
         </a>
         @endif
 
         {{-- Only admins see warehouse section --}}
         @if(auth()->user()->isAdmin())
-        <div class="nav-label">Warehouse</div>
+      
         <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}">
-            <i class="fas fa-pizza-slice"></i><span>Products</span>
+            <i class="fas fa-pizza-slice"></i><span>ទំនិញ</span>
         </a>
         <a href="/inventory" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
-            <i class="fas fa-boxes"></i><span>Inventory</span>
+            <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
         </a>
         <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}">
-            <i class="fas fa-file-invoice"></i><span>Purchasing</span>
+            <i class="fas fa-file-invoice"></i><span>ការចំណាយ</span>
         </a>
         @endif
 
         {{-- Managers+ see delivery section --}}
         @if(auth()->user()->isAdmin() || auth()->user()->isManager())
         <a href="/deliveries" class="nav-link {{ request()->is('deliveries*') ? 'active' : '' }}">
-            <i class="fas fa-truck"></i><span>Delivery</span>
+            <i class="fas fa-truck"></i><span>ការដឹកជញ្ចូន</span>
         </a>
 
-        <div class="nav-label">Finance</div>
+       
         <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
-            <i class="fas fa-receipt"></i><span>Invoices</span>
+            <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
         </a>
         <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}">
-            <i class="fas fa-credit-card"></i><span>Payments</span>
+            <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
         </a>
         @endif
 
         {{-- All users see reports --}}
         <a href="/reports" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}">
-            <i class="fas fa-chart-bar"></i><span>Reports</span>
+            <i class="fas fa-chart-bar"></i><span>របាយការណ៍</span>
         </a>
 
         {{-- Only admins see system section --}}
         @if(auth()->user()->isAdmin())
-        <div class="nav-label">System</div>
+       
         <a href="/users" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
-            <i class="fas fa-users-cog"></i><span>Users</span>
+            <i class="fas fa-users-cog"></i><span>បុគ្គលិក</span>
         </a>
         <a href="/settings" class="nav-link {{ request()->is('settings*') ? 'active' : '' }}">
             <i class="fas fa-cog"></i><span>Settings</span>
@@ -576,7 +584,7 @@
                 <form action="{{ route('logout') }}" method="POST" style="display: contents;">
                     @csrf
                     <button type="submit" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #dc2626; background: transparent; border: none; text-decoration: none; font-size: 14px; cursor: pointer; font-family: inherit; transition: all 0.2s ease;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
-                        <i class="fas fa-sign-out-alt" style="width: 16px; text-align: center;"></i> Logout
+                        <i class="fas fa-sign-out-alt" style="width: 16px; text-align: center;"></i> ចាកចេញ
                     </button>
                 </form>
             </div>

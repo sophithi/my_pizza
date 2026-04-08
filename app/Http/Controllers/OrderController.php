@@ -24,7 +24,8 @@ class OrderController extends Controller
     {
         $customers = \App\Models\Customer::all();
         $products = \App\Models\Product::all();
-        return view('orders.create', compact('customers', 'products'));
+        $deliveries = \App\Models\Delivery::all();
+        return view('orders.create', compact('customers', 'products', 'deliveries'));
     }
 
     /**
@@ -52,6 +53,7 @@ class OrderController extends Controller
             \App\Models\OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $item['product_id'],
+                'delivery_id' => $item['delivery_id'] ?? null,
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['unit_price'],
                 'total_price' => $item['total_price'],
@@ -72,7 +74,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load('customer', 'items.product');
+        $order->load('customer', 'items.product', 'items.delivery');
         return view('orders.show', compact('order'));
     }
 

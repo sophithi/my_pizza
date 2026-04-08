@@ -467,9 +467,9 @@
             <div class="hero-meta">
                 <span>{{ $order->customer->name }}</span>
                 <span class="sep"></span>
-                <span>{{ $order->order_date->format('d M Y') }}</span>
+                <span>{{ $order->order_date->translatedFormat('d M Y') }}</span>
                 <span class="sep"></span>
-                <span>{{ $order->order_date->format('h:i A') }}</span>
+                <span>{{ $order->order_date->translatedFormat('h:i A') }}</span>
             </div>
         </div>
         <div class="hero-right">
@@ -511,7 +511,7 @@
             <div class="stat-content" style="font-size: 24px; font-weight: 800;">{{ $order->items->count() }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">សរុបរង</div>
+            <div class="stat-label">សរុប</div>
             <div class="stat-content" style="font-size: 20px; font-weight: 800;">${{ number_format($order->subtotal, 2) }}</div>
         </div>
     </div>
@@ -519,7 +519,7 @@
     <!-- Order Items -->
     <div class="section">
         <div class="section-header">
-            <div class="icon">📦</div>
+          
             <h3>រាយនាមទំនិញ</h3>
         </div>
         @if($order->items->count())
@@ -529,7 +529,7 @@
                         <th class="item-num">#</th>
                         <th>ផលិតផល</th>
                         <th class="text-center">ចំនួន</th>
-                        <th class="text-right">តម្លៃឯកតា</th>
+                        <th class="text-right">តម្លៃ</th>
                         <th class="text-right">សរុប</th>
                     </tr>
                 </thead>
@@ -548,7 +548,7 @@
             <div class="summary-footer">
                 <div class="summary-table">
                     <div class="summary-line">
-                        <span class="label">សរុបរង</span>
+                        <span class="label">សរុប</span>
                         <span class="value">${{ number_format($order->subtotal, 2) }}</span>
                     </div>
                     @if($order->discount_amount > 0)
@@ -569,11 +569,10 @@
             </div>
         @endif
     </div>
-
     <!-- Customer Info -->
     <div class="section">
         <div class="section-header">
-            <div class="icon">👤</div>
+          
             <h3>ព័ត៌មានអតិថិជន</h3>
         </div>
         <div class="section-body">
@@ -587,22 +586,31 @@
                     <div class="field-value {{ !$order->customer->phone ? 'empty' : '' }}">{{ $order->customer->phone ?? '—' }}</div>
                 </div>
                 <div class="customer-field">
-                    <div class="field-label">អ៊ីមែល</div>
-                    <div class="field-value {{ !$order->customer->email ? 'empty' : '' }}">{{ $order->customer->email ?? '—' }}</div>
-                </div>
-                <div class="customer-field">
                     <div class="field-label">ទីតាំង</div>
                     <div class="field-value {{ !$order->customer->location ? 'empty' : '' }}">{{ $order->customer->location ?? '—' }}</div>
                 </div>
             </div>
+            @php
+                $deliveryItems = $order->items->filter(fn($item) => $item->delivery_id);
+            @endphp
+            @if($deliveryItems->count())
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 10px;">ការដឹកជញ្ជូន</div>
+                @foreach($deliveryItems as $dItem)
+                <div style="font-size: 14px; color: var(--text); margin-bottom: 6px;">
+                    <span style="font-weight: 600;">{{ $dItem->product->name }}</span>
+                    <span style="color: var(--text-muted);"> → {{ $dItem->delivery->delivery_name }} — ៛{{ number_format($dItem->delivery->delivery_price_khr, 0) }}</span>
+                </div>
+                @endforeach
+            </div>
+            @endif
         </div>
     </div>
-
     <!-- Notes -->
     @if($order->notes)
     <div class="section">
         <div class="section-header">
-            <div class="icon">📝</div>
+         
             <h3>កំណត់ចំណាំ</h3>
         </div>
         <div class="section-body">
@@ -610,17 +618,16 @@
         </div>
     </div>
     @endif
-
     <!-- Actions -->
     <div class="actions-bar">
         <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary">
-            ✏️ កែសម្រួល
+             កែសម្រួល
         </a>
         <a href="{{ route('deliveries.create') }}" class="btn btn-primary">
-            🚚 កំណត់ការដឹកជញ្ជូន
+            កំណត់ការដឹកជញ្ជូន
         </a>
         <a href="{{ route('invoices.create', ['order_id' => $order->id]) }}" class="btn btn-outline">
-            🧾 បង្កើតវិក្កយបត្រ
+             បង្កើតវិក្កយបត្រ
         </a>
         <a href="{{ route('orders.index') }}" class="btn btn-outline">
             ← ត្រឡប់ក្រោយ
@@ -629,10 +636,10 @@
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-danger-outline">
-                🗑️ លុប
+                 លុប
             </button>
         </form>
     </div>
 
 </div>
-@endsection
+@endsection 

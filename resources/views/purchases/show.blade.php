@@ -188,7 +188,7 @@
         <div class="header-info">
             <h1 class="purchase-title">📦 Purchase #{{ str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</h1>
             <div class="purchase-meta">
-                <span>📅 {{ $purchase->purchase_date->format('M d, Y') }}</span>
+                <span>📅 {{ $purchase->purchase_date->translatedFormat('M d, Y') }}</span>
                 <span>🏢 {{ $purchase->supplier_name }}</span>
             </div>
         </div>
@@ -237,11 +237,11 @@
             </div>
             <div class="info-group">
                 <div class="info-label">Purchase Date</div>
-                <div class="info-value">{{ $purchase->purchase_date->format('M d, Y') }}</div>
+                <div class="info-value">{{ $purchase->purchase_date->translatedFormat('M d, Y') }}</div>
             </div>
             <div class="info-group">
                 <div class="info-label">Created</div>
-                <div class="info-value">{{ $purchase->created_at->format('M d, Y H:i') }}</div>
+                <div class="info-value">{{ $purchase->created_at->translatedFormat('M d, Y H:i') }}</div>
             </div>
         </div>
     </div>

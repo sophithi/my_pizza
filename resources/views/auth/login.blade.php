@@ -13,7 +13,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #a72121 0%, #09070b 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -204,7 +204,7 @@
     <div class="login-card">
         <!-- Header -->
         <div class="login-header">
-            <div class="login-icon">🍕</div>
+            <div class="login_log"></div>
             <h1>Pizza Happy Family</h1>
         </div>
 
@@ -213,7 +213,7 @@
             <!-- Error Messages -->
             @if($errors->any())
             <div class="error-box">
-                <strong>❌ Login Failed</strong>
+                <strong> Login Failed</strong>
                 @foreach($errors->all() as $err)
                 <div style="margin-top: 4px;">{{ $err }}</div>
                 @endforeach
@@ -232,7 +232,7 @@
                         id="email"
                         name="email"
                         class="form-control @error('email') is-invalid @enderror"
-                        placeholder="admin@pizza.com"
+                        placeholder="user1@pizzahappyfamily.com"
                         value="{{ old('email') }}"
                         required
                         autofocus
@@ -258,33 +258,13 @@
                     @enderror
                 </div>
 
-                <!-- Remember Me -->
-                <div class="form-check">
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        name="remember"
-                        id="remember"
-                    >
-                    <label class="form-check-label" for="remember">
-                        Remember me
-                    </label>
-                </div>
 
                 <!-- Submit Button -->
                 <button type="submit" class="btn-login">
-                    Sign In
+                    ចូលប្រើប្រាស់
                 </button>
             </form>
 
-            <!-- Demo Info -->
-            <div class="demo-box">
-                <div class="demo-title">Demo Account</div>
-                <div class="demo-text">
-                    Email: <span class="demo-code">admin@pizza.com</span><br>
-                    Password: <span class="demo-code">password</span>
-                </div>
-            </div>
         </div>
     </div>
 </div>

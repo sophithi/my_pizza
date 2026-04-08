@@ -31,7 +31,7 @@
                                     <td style="padding: 12px; color: #333; font-weight: 500;">#{{ $order->id }}</td>
                                     <td style="padding: 12px; color: #666;">{{ $order->customer->name }}</td>
                                     <td style="padding: 12px; color: #333; font-weight: 500;">${{ number_format($order->total_amount, 2) }}</td>
-                                    <td style="padding: 12px; color: #666;">{{ $order->order_date->format('M d, Y') }}</td>
+                                    <td style="padding: 12px; color: #666;">{{ $order->order_date->translatedFormat('M d, Y') }}</td>
                                     <td style="padding: 12px;">
                                         <form action="{{ route('invoices.store') }}" method="POST" style="display: inline;">
                                             @csrf

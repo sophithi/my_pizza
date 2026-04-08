@@ -398,11 +398,116 @@
     .col-lg-7 { animation: slideUp 0.6s ease-out; }
     .col-lg-5 { animation: slideUp 0.6s ease-out 0.1s both; }
 
+    /* Order Details Fields */
+    .od-field {
+        margin-bottom: 18px;
+        position: relative;
+    }
+
+    .od-label {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .od-label i {
+        color: var(--accent);
+        font-size: 13px;
+        width: 16px;
+        text-align: center;
+    }
+
+    .od-select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236c757d' d='M6 8.825L0.375 3.175 1.275 2.275 6 7 10.725 2.275 11.625 3.175z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 36px;
+    }
+
     @media (max-width: 992px) {
         .products-grid {
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         }
     }
+
+    /* Toast Notification */
+    .toast-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 9998;
+        opacity: 0;
+        transition: opacity 0.3s;
+        display: none;
+    }
+    .toast-overlay.show { display: block; opacity: 1; }
+
+    .toast-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 32px 36px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        z-index: 9999;
+        text-align: center;
+        min-width: 320px;
+        max-width: 400px;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: none;
+    }
+    .toast-box.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    .toast-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 24px;
+    }
+    .toast-icon.warning { background: #fff3cd; color: #d97706; }
+    .toast-icon.error { background: #fee2e2; color: #dc2626; }
+    .toast-icon.success { background: #d1fae5; color: #059669; }
+
+    .toast-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+    .toast-message {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+    .toast-btn {
+        background: linear-gradient(135deg, var(--accent) 0%, #d94a10 100%);
+        color: #fff;
+        border: none;
+        padding: 10px 32px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .toast-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(232,93,36,0.3); }
 </style>
 @endpush
 
@@ -546,7 +651,7 @@
             </div>
 
             <!-- Hidden inputs for form submission -->
-             <input type="hidden" id="customer_id" name="customer_name"
+            <input type="hidden" id="hidden_customer_id" name="customer_id">
             <input type="hidden" id="order_items" name="order_items" value="[]">
             <input type="hidden" id="subtotal_amount" name="subtotal">
             
@@ -557,26 +662,25 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="product-section-title">
-                        <i class="fas fa-cog"></i> ព័ត៌មានការបញ្ជាទិញ
+                        <i class="fas fa-cog" style="color: var(--accent);"></i> ព័ត៌មានការបញ្ជាទិញ
                     </h4>
 
-                   
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">កាលបរិច្ឆេទ *</label>
-                                <input type="datetime-local" name="order_date" class="form-control" required 
-                                    value="{{ old('order_date', now()->format('Y-m-d\TH:i')) }}">
+                            <div class="od-field">
+                                <label class="od-label"><i class="fas fa-calendar-alt"></i> កាលបរិច្ឆេទ *</label>
+                                <input type="date" name="order_date" class="form-control" required 
+                                    value="{{ old('order_date', now()->format('Y-m-d')) }}">
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">ស្ថានភាព</label>
-                                <select name="status" class="form-control">
-                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>រង់ចាំ</option>
-                                    <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>កំពុងដំណើរការ</option>
-                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>បានបញ្ចប់</option>
-                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>បានលុបចោល</option>
+                            <div class="od-field">
+                                <label class="od-label"><i class="fas fa-info-circle"></i> ស្ថានភាព</label>
+                                <select name="status" class="form-control od-select">
+                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>🟡 រង់ចាំ</option>
+                                    <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>🔵 កំពុងដំណើរការ</option>
+                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>🟢 បានបញ្ចប់</option>
+                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>🔴 បានលុបចោល</option>
                                 </select>
                             </div>
                         </div>
@@ -584,21 +688,33 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">ស្ថានភាពបង់ប្រាក់</label>
-                                <select name="payment_status" class="form-control">
-                                    <option value="unpaid" {{ old('payment_status') == 'unpaid' ? 'selected' : '' }}>មិនទាន់បង់</option>
-                                    <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
-                                    <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>បានបង់</option>
+                            <div class="od-field">
+                                <label class="od-label"><i class="fas fa-money-bill-wave"></i> ស្ថានភាពបង់ប្រាក់</label>
+                                <select name="payment_status" class="form-control od-select">
+                                    <option value="unpaid" {{ old('payment_status') == 'unpaid' ? 'selected' : '' }}>🔴 មិនទាន់បង់</option>
+                                    <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>🟡 បង់មួយផ្នែក</option>
+                                    <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>🟢 បានបង់</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+                            <div class="od-field">
+                                <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន</label>
+                                <select id="delivery_select" class="form-control od-select">
+                                    <option value="">គ្មាន</option>
+                                    @foreach($deliveries as $delivery)
+                                        <option value="{{ $delivery->id }}" data-name="{{ $delivery->delivery_name }}" data-price="{{ $delivery->delivery_price_khr }}">
+                                            🚚 {{ $delivery->delivery_name }} — ៛{{ number_format($delivery->delivery_price_khr, 0) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">កំណត់ចំណាំ</label>
-                        <textarea name="notes" class="form-control" rows="2" style="resize: none;">{{ old('notes') }}</textarea>
+                    
+                    <div class="od-field">
+                        <label class="od-label"><i class="fas fa-sticky-note"></i> កំណត់ចំណាំ</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="បញ្ចូលកំណត់ចំណាំ..." style="resize: none;">{{ old('notes') }}</textarea>
                     </div>
 
                     <div class="button-group">
@@ -619,6 +735,9 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     let cart = {};
+
+    // Delivery options from server
+    const deliveryOptions = @json($deliveries->map(fn($d) => ['id' => $d->id, 'name' => $d->delivery_name, 'price_khr' => $d->delivery_price_khr]));
 
     $(document).ready(function() {
         // Initialize Select2
@@ -741,7 +860,7 @@
                             </div>
                         </div>
                         <div class="invoice-item-actions">
-                            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px;">
+                            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
                                 <label style="font-size: 11px; white-space: nowrap;">Qty:</label>
                                 <input type="number" class="qty-input" value="${item.qty}" onchange="updateQuantity(${productId}, this.value)" min="1" style="width: 50px;">
                                 <label style="font-size: 11px; white-space: nowrap; margin-left: 8px;">Discount %:</label>
@@ -767,6 +886,13 @@
             renderInvoice();
         }
     }
+
+    // Update cart data when delivery selection changes
+    $(document).ready(function() {
+        $('#delivery_select').on('change', function() {
+            updateCartData();
+        });
+    });
 
     function calculateTotal() {
         // Calculate subtotal with per-item discounts already applied
@@ -820,6 +946,7 @@
     }
 
     function updateCartData() {
+        const deliveryId = $('#delivery_select').val() || null;
         const orderItems = [];
         Object.entries(cart).forEach(([productId, item]) => {
             const discountPercent = parseFloat(item.discount || 0);
@@ -829,7 +956,8 @@
                 quantity: item.qty,
                 unit_price: item.price,
                 discount_percent: discountPercent,
-                total_price: discountedPrice * item.qty
+                total_price: discountedPrice * item.qty,
+                delivery_id: deliveryId ? parseInt(deliveryId) : null
             });
         });
         $('#order_items').val(JSON.stringify(orderItems));
@@ -837,17 +965,46 @@
 
     // Form validation
     document.getElementById('orderForm').addEventListener('submit', function(e) {
-        if (!document.getElementById('customer_id').value) {
+        if (!document.getElementById('hidden_customer_id').value) {
             e.preventDefault();
-            alert('Please select a customer');
+            showToast('warning', '⚠️', 'សូមជ្រើសរើសអតិថិជន', 'សូមជ្រើសរើសអតិថិជនមុននឹងបញ្ជាទិញ');
             return false;
         }
         if (Object.keys(cart).length === 0) {
             e.preventDefault();
-            alert('Please add at least one product');
+            showToast('warning', '🛒', 'សូមបន្ថែមទំនិញ', 'សូមជ្រើសរើសផលិតផលអាតិចមួយ');
             return false;
         }
     });
+
+    function showToast(type, icon, title, message) {
+        // Remove any existing toast
+        $('.toast-overlay, .toast-box').remove();
+
+        const overlay = $('<div class="toast-overlay"></div>');
+        const box = $(`
+            <div class="toast-box">
+                <div class="toast-icon ${type}">${icon}</div>
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+                <button class="toast-btn" onclick="closeToast()">ភ្លាម</button>
+            </div>
+        `);
+
+        $('body').append(overlay).append(box);
+        requestAnimationFrame(() => {
+            overlay.addClass('show');
+            box.addClass('show');
+        });
+
+        overlay.on('click', closeToast);
+    }
+
+    function closeToast() {
+        $('.toast-overlay').removeClass('show');
+        $('.toast-box').removeClass('show');
+        setTimeout(() => { $('.toast-overlay, .toast-box').remove(); }, 300);
+    }
 </script>
 @endpush
 

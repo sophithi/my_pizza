@@ -71,8 +71,5 @@ class Order extends Model
     /**
      * Get the delivery for this order.
      */
-    public function delivery()
-    {
-        return $this->hasOne(Delivery::class);
-    }
+
 }

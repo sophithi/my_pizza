@@ -194,12 +194,12 @@
 
     <!-- Page Header -->
     <div class="page-header">
-        <h1 class="page-title">📋 My Activity Log</h1>
+        <h1 class="page-title"> My Activity Log</h1>
     </div>
 
     <!-- User Info Card -->
     <div class="user-info-card">
-        <h2 style="font-size: 16px; font-weight: 700; margin: 0 0 20px 0; color: var(--text);">👤 Your Profile</h2>
+        <h2 style="font-size: 16px; font-weight: 700; margin: 0 0 20px 0; color: var(--text);"> Your Profile</h2>
         <div class="user-info-grid">
             <div class="info-group">
                 <div class="info-label">Name</div>
@@ -217,7 +217,7 @@
                 <div class="info-label">Last Login</div>
                 <div class="info-value">
                     @if(auth()->user()->last_login_at)
-                        {{ auth()->user()->last_login_at->format('M d, Y H:i:s') }}
+                        {{ auth()->user()->last_login_at->translatedFormat('M d, Y H:i:s') }}
                     @else
                         <span style="color: var(--text-muted);">Never</span>
                     @endif
@@ -277,7 +277,7 @@
                     </span>
                 </td>
                 <td>
-                    <div>{{ $activity->activity_at->format('M d, Y H:i:s') }}</div>
+                    <div>{{ $activity->activity_at->translatedFormat('M d, Y H:i:s') }}</div>
                     <div class="time-ago" title="{{ $activity->activity_at->format('Y-m-d H:i:s') }}">
                         {{ $activity->activity_at->diffForHumans() }}
                     </div>

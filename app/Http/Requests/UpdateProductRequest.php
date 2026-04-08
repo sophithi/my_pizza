@@ -8,16 +8,18 @@ class UpdateProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-            // Only admins can update products
-            return auth()->check() && auth()->user()->isAdmin();
+        return auth()->check() && auth()->user()->isAdmin();
+    }
+
+    public function rules(): array
+    {
         return [
             'name'        => 'required|string|max:255',
             'sku'         => 'required|string|unique:products,sku,' . $this->product->id,
-            // Either KHR or USD is required; KHR is considered the base
             'price_khr'   => 'required_without:price_usd|numeric|min:0',
             'price_usd'   => 'required_without:price_khr|numeric|min:0',
             'category'    => 'required|string|max:255',
-            'unit'        => 'required|string|in:kg,g,L,ml,pcs,box,pack,bag',
+            'unit'        => 'required|string',
             'supplier'    => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|max:2048',
