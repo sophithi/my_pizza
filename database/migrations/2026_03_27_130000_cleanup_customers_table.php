@@ -9,17 +9,27 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+public function up(): void
 {
+    // Drop ALL problematic unique indexes FIRST (SQLite requires this)
+    $indexesToDrop = [
+        'customers_facebook_id_unique',
+        'customers_telegram_id_unique',
+    ];
+
+    foreach ($indexesToDrop as $index) {
+        try {
+            Schema::table('customers', function (Blueprint $table) use ($index) {
+                $table->dropUnique($index);
+            });
+        } catch (\Exception $e) {
+            // Index doesn't exist, skip
+        }
+    }
+
+    // Now safely drop columns
     Schema::table('customers', function (Blueprint $table) {
         $columns = Schema::getColumnListing('customers');
-        $indexes = Schema::getIndexes('customers');
-        $indexNames = array_column($indexes, 'name');
-
-        // Drop the unique index FIRST (SQLite requires this)
-        if (in_array('customers_facebook_id_unique', $indexNames)) {
-            $table->dropUnique('customers_facebook_id_unique');
-        }
 
         $unusedColumns = [
             'facebook_id', 'telegram_id', 'total_orders_count',
@@ -28,10 +38,12 @@ return new class extends Migration
             'company_name', 'credit_limit'
         ];
 
-        $toDrop = array_filter($unusedColumns, fn($col) => in_array($col, $columns));
+        $toDrop = array_values(array_filter(
+            $unusedColumns, fn($col) => in_array($col, $columns)
+        ));
 
         if (!empty($toDrop)) {
-            $table->dropColumn(array_values($toDrop));
+            $table->dropColumn($toDrop);
         }
     });
 }
