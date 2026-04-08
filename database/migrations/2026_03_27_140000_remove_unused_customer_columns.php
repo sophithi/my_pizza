@@ -9,32 +9,40 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('customers', function (Blueprint $table) {
-            // Get existing columns
-            $columns = Schema::getColumnListing('customers');
-            
-            // Drop unused columns
-            $unusedColumns = [
-                'facebook_id', 'telegram_id', 'total_orders_count', 
-                'total_spent', 'last_order_date', 'preferred_contact_method', 
-                'notes', 'is_vip', 'rating', 'address', 'city', 'postal_code', 
-                'company_name', 'credit_limit'
-            ];
-            
-            $columnsToDropFlip = [];
-            foreach ($unusedColumns as $col) {
-                if (in_array($col, $columns)) {
-                    $columnsToDropFlip[] = $col;
-                }
+   public function up(): void
+{
+    Schema::table('customers', function (Blueprint $table) {
+        // Get existing columns
+        $columns = Schema::getColumnListing('customers');
+
+        // Drop the unique index FIRST before dropping the column (SQLite requirement)
+        $indexes = Schema::getIndexes('customers');
+        $indexNames = array_column($indexes, 'name');
+
+        if (in_array('customers_facebook_id_unique', $indexNames)) {
+            $table->dropUnique('customers_facebook_id_unique');
+        }
+
+        // Drop unused columns
+        $unusedColumns = [
+            'facebook_id', 'telegram_id', 'total_orders_count',
+            'total_spent', 'last_order_date', 'preferred_contact_method',
+            'notes', 'is_vip', 'rating', 'address', 'city', 'postal_code',
+            'company_name', 'credit_limit'
+        ];
+
+        $columnsToDropFlip = [];
+        foreach ($unusedColumns as $col) {
+            if (in_array($col, $columns)) {
+                $columnsToDropFlip[] = $col;
             }
-            
-            if (!empty($columnsToDropFlip)) {
-                $table->dropColumn($columnsToDropFlip);
-            }
-        });
-    }
+        }
+
+        if (!empty($columnsToDropFlip)) {
+            $table->dropColumn($columnsToDropFlip);
+        }
+    });
+}
 
     /**
      * Reverse the migrations.
