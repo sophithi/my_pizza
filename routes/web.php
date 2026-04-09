@@ -15,6 +15,28 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\AuthController;
 
+// Health check route
+Route::get('/health', function () {
+    $dbStatus = 'unknown';
+    try {
+        \DB::connection()->getPDO();
+        $dbStatus = 'connected (' . \DB::connection()->getDatabaseName() . ')';
+    } catch (\Exception $e) {
+        $dbStatus = 'ERROR: ' . $e->getMessage();
+    }
+    return response()->json([
+        'status' => 'ok',
+        'php' => PHP_VERSION,
+        'laravel' => app()->version(),
+        'db' => $dbStatus,
+        'env' => app()->environment(),
+        'debug' => config('app.debug'),
+        'key_set' => !empty(config('app.key')),
+        'session' => config('session.driver'),
+        'cache' => config('cache.default'),
+    ]);
+});
+
 // Authentication routes (accessible to everyone)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
