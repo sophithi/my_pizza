@@ -175,10 +175,10 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-primary">
-                    <i class="fas fa-save"></i> Create
+                    <i class="fas fa-save"></i> បញ្ជាក់
                 </button>
                 <a href="{{ route('inventory.index') }}" class="btn-secondary">
-                    <i class="fas fa-times"></i> Cancel
+                    <i class="fas fa-times"></i> បោះបង់
                 </a>
             </div>
         </form>
