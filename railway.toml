@@ -3,4 +3,4 @@ builder = "nixpacks"
 buildCommand = "composer install --no-dev --optimize-autoloader && mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache && php artisan package:discover --ansi || true"
 
 [deploy]
-startCommand = "php artisan migrate --force; php artisan storage:link --force; php artisan serve --host=0.0.0.0 --port=$PORT"
+startCommand = "rm -f .env && php artisan migrate --force && php artisan storage:link --force && php artisan serve --host=0.0.0.0 --port=$PORT"
