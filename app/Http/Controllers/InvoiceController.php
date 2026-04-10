@@ -123,4 +123,22 @@ class InvoiceController extends Controller
         $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
         return view('invoices.print', compact('invoice'));
     }
+
+    /**
+     * Print preparation sticker for staff inventory.
+     */
+    public function stickerPrep(Invoice $invoice)
+    {
+        $invoice->load('order.customer', 'order.items.product');
+        return view('invoices.sticker-prep', compact('invoice'));
+    }
+
+    /**
+     * Print customer sticker.
+     */
+    public function stickerCustomer(Invoice $invoice)
+    {
+        $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
+        return view('invoices.sticker-customer', compact('invoice'));
+    }
 }

@@ -32,7 +32,7 @@
             position: fixed;
             top: 0; left: 0;
             z-index: 1000;
-            transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 0.15s ease;
             overflow: hidden;
             overflow-y: auto;
         }
@@ -121,7 +121,7 @@
             gap: 12px;
             text-decoration: none;
             white-space: nowrap;
-            transition: all 0.25s ease;
+            transition: all 0.15s ease;
         }
 
         .sidebar .nav-link:hover {
@@ -229,7 +229,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: margin-left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: margin-left 0.15s ease;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
@@ -263,7 +263,7 @@
             transition: all 0.3s ease;
         }
 
-        .user-avatar:hover { transform: scale(1.1); }
+        .user-avatar:hover { transform: scale(1.05); }
 
         .user-name {
             font-size: 14px;
@@ -303,7 +303,7 @@
             transition: all 0.3s ease;
         }
 
-        .notification-toggle:hover { transform: scale(1.08); }
+        .notification-toggle:hover { transform: scale(1.05); }
 
         .notification-count {
             position: absolute;
@@ -328,7 +328,7 @@
             background: #f5f7fa;
             position: relative;
             z-index: 1;
-            transition: margin-left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: margin-left 0.15s ease;
         }
 
         .main-content.sidebar-collapsed { margin-left: 80px; }
@@ -342,7 +342,7 @@
             background: #fff;
             box-shadow: -4px 0 20px rgba(0,0,0,0.1);
             z-index: 1002;
-            transition: right 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: right 0.2s ease;
             overflow-y: auto;
         }
 
@@ -501,8 +501,9 @@
         }
     </style>
     @stack('styles')
+    <style>.no-transition,.no-transition *{transition:none!important}</style>
 </head>
-<body>
+<body class="no-transition">
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="notification-overlay" id="notificationOverlay"></div>
@@ -649,6 +650,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Remove no-transition class after layout is set
+    requestAnimationFrame(() => document.body.classList.remove('no-transition'));
     const sidebar        = document.getElementById('sidebar');
     const topbar         = document.getElementById('topbar');
     const mainContent    = document.getElementById('mainContent');

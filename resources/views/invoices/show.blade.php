@@ -6,10 +6,18 @@
         <div class="col-12">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">{{ $invoice->invoice_number }}</h2>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <a href="{{ route('invoices.print', $invoice) }}" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                        <i class="fas fa-print"></i> Print
+                        <i class="fas fa-print"></i> Print Invoice
                     </a>
+                    @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isStaffInventory())
+                    <a href="{{ route('invoices.sticker-prep', $invoice) }}" class="btn" style="background: #1a1d29; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500;">
+                        Prep Sticker
+                    </a>
+                    <a href="{{ route('invoices.sticker-customer', $invoice) }}" class="btn" style="background: #e85d24; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500;">
+                        Customer Sticker
+                    </a>
+                    @endif
                     @if ($invoice->status !== 'paid')
                     <a href="{{ route('invoices.edit', $invoice) }}" class="btn" style="background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500;">
                         <i class="fas fa-edit"></i> Edit

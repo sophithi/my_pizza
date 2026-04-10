@@ -460,6 +460,31 @@
 @section('content')
 <div class="order-page">
 
+    @if(session('success'))
+    <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 12px 20px; border-radius: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+        <span>✓ {{ session('success') }}</span>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #065f46; font-size: 18px; cursor: pointer;">&times;</button>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 20px; border-radius: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+        <span>✗ {{ session('error') }}</span>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #991b1b; font-size: 18px; cursor: pointer;">&times;</button>
+    </div>
+    @endif
+
+    @if(session('stockWarnings'))
+    <div style="background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 12px 20px; border-radius: 10px; margin-bottom: 16px; font-size: 14px;">
+        <strong>⚠ ការព្រមានស្តុក:</strong>
+        <ul style="margin: 8px 0 0 20px; padding: 0;">
+            @foreach(session('stockWarnings') as $warning)
+                <li>{{ $warning }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <!-- Hero Header -->
     <div class="order-hero">
         <div class="hero-left">

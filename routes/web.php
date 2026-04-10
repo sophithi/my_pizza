@@ -79,13 +79,9 @@ Route::middleware('auth')->group(function () {
         // Product management
         Route::resource('products', ProductController::class);
 
-        // Inventory management
+        // Inventory management (full CRUD)
         Route::resource('inventory', InventoryController::class);
         Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
-
-        // Invoice management
-        Route::resource('invoices', InvoiceController::class);
-        Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
 
         // Settings management
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
@@ -102,63 +98,74 @@ Route::middleware('auth')->group(function () {
         // Delivery management
         Route::resource('deliveries', DeliveryController::class);
 
-        // Order management (full CRUD)
-        Route::resource('orders', OrderController::class);
-        Route::post('orders/{order}/payments', [PaymentController::class, 'recordOrderPayment'])->name('orders.payments.store');
-
-        // All reports
-        Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/', [ReportController::class, 'dashboard'])->name('dashboard');
-            Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
-            Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');
-            Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
-        });
+        // Order delete (only admin/manager)
+        Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     });
 
     // ============================================
-    // STAFF (OFFICE) - Create orders & view reports
+    // ALL USERS - Orders (view, create, edit)
     // ============================================
-    Route::middleware('role:staff,manager,admin')->group(function () {
-        // Customer management
-        Route::resource('customers', CustomerController::class);
-
-        // Create orders only (view & store)
+    Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/create', [OrderController::class, 'create'])->name('orders.create');
         Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+        Route::put('orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+        Route::post('orders/{order}/payments', [PaymentController::class, 'recordOrderPayment'])->name('orders.payments.store');
 
-        // View reports only
+        // Preparation workflow
+        Route::post('orders/{order}/prepare', [OrderController::class, 'prepare'])->name('orders.prepare');
+        Route::post('orders/{order}/ready', [OrderController::class, 'ready'])->name('orders.ready');
+    });
+
+    // ============================================
+    // INVOICES - Admin, Manager, Staff Inventory can create; all can view
+    // ============================================
+    Route::middleware('role:admin,manager,staff_inventory')->group(function () {
+        Route::resource('invoices', InvoiceController::class);
+        Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+        Route::get('invoices/{invoice}/sticker-prep', [InvoiceController::class, 'stickerPrep'])->name('invoices.sticker-prep');
+        Route::get('invoices/{invoice}/sticker-customer', [InvoiceController::class, 'stickerCustomer'])->name('invoices.sticker-customer');
+    });
+
+    // Staff (office) - view invoices only
+    Route::middleware('role:staff')->group(function () {
+        Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+    });
+
+    // ============================================
+    // STAFF (OFFICE) - Customers
+    // ============================================
+    Route::middleware('role:staff,manager,admin')->group(function () {
+        Route::resource('customers', CustomerController::class);
+    });
+
+    // ============================================
+    // STAFF (INVENTORY) - View inventory
+    // ============================================
+    Route::middleware('role:staff_inventory')->group(function () {
+        Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
+        Route::get('inventory/{inventory}', [InventoryController::class, 'show'])->name('inventory.show');
+    });
+
+    // ============================================
+    // ALL USERS - Reports
+    // ============================================
+    Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/', [ReportController::class, 'dashboard'])->name('dashboard');
             Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
         });
     });
 
-    // ============================================
-    // STAFF (INVENTORY) - View orders, invoices, inventory
-    // ============================================
-    Route::middleware('role:staff_inventory,manager,admin')->group(function () {
-        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-
-        // Preparation workflow
-        Route::post('orders/{order}/prepare', [OrderController::class, 'prepare'])->name('orders.prepare');
-        Route::post('orders/{order}/ready', [OrderController::class, 'ready'])->name('orders.ready');
-
-        // View & print invoices
-        Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-        Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
-        Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
-
-        // View inventory
-        Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
-        Route::get('inventory/{inventory}', [InventoryController::class, 'show'])->name('inventory.show');
-
-        // View reports
+    // Admin & Manager - Extra reports
+    Route::middleware('role:admin,manager')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/', [ReportController::class, 'dashboard'])->name('dashboard');
-            Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
+            Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');
+            Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
         });
     });
 });

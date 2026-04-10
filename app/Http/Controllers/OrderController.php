@@ -65,12 +65,6 @@ class OrderController extends Controller
                 'unit_price' => $item['unit_price'],
                 'total_price' => $item['total_price'],
             ]);
-
-            // Decrement inventory quantity
-            $inventory = \App\Models\Inventory::where('product_id', $item['product_id'])->first();
-            if ($inventory) {
-                $inventory->decrement('quantity', $item['quantity']);
-            }
         }
 
         return redirect()->route('orders.show', $order)->with('success', 'Order created successfully.');
@@ -108,11 +102,13 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        // Restore inventory quantities when order is deleted
-        foreach ($order->items as $item) {
-            $inventory = \App\Models\Inventory::where('product_id', $item->product_id)->first();
-            if ($inventory) {
-                $inventory->increment('quantity', $item->quantity);
+        // Only restore inventory if order was already prepared (stock was deducted)
+        if (in_array($order->status, ['processing', 'completed'])) {
+            foreach ($order->items as $item) {
+                $inventory = \App\Models\Inventory::where('product_id', $item->product_id)->first();
+                if ($inventory) {
+                    $inventory->increment('quantity', $item->quantity);
+                }
             }
         }
         
@@ -121,12 +117,28 @@ class OrderController extends Controller
     }
 
     /**
-     * Mark order as processing (being prepared).
+     * Mark order as processing (being prepared) and deduct stock.
      */
     public function prepare(Order $order)
     {
         if ($order->status !== 'pending') {
             return back()->with('error', 'មានតែការបញ្ជាទិញដែលកំពុងរង់ចាំប៉ុណ្ណោះដែលអាចរៀបចំបាន។');
+        }
+
+        $order->load('items.product');
+        $warnings = [];
+
+        // Deduct inventory for each order item
+        foreach ($order->items as $item) {
+            $inventory = \App\Models\Inventory::where('product_id', $item->product_id)->first();
+            if ($inventory) {
+                $inventory->decrement('quantity', $item->quantity);
+                if ($inventory->fresh()->quantity < 0) {
+                    $warnings[] = $item->product->name . ' ស្តុកអស់ (នៅសល់: ' . $inventory->fresh()->quantity . ')';
+                } elseif ($inventory->fresh()->quantity <= 5) {
+                    $warnings[] = $item->product->name . ' ស្តុកជិតអស់ (នៅសល់: ' . $inventory->fresh()->quantity . ')';
+                }
+            }
         }
 
         $order->update([
@@ -135,7 +147,12 @@ class OrderController extends Controller
             'prepared_at' => now(),
         ]);
 
-        return back()->with('success', 'ការបញ្ជាទិញកំពុងរៀបចំ។');
+        $message = 'ការបញ្ជាទិញកំពុងរៀបចំ។ ស្តុកត្រូវបានកាត់រួចហើយ។';
+        if (!empty($warnings)) {
+            return back()->with('success', $message)->with('stockWarnings', $warnings);
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
