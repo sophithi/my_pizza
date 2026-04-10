@@ -8,6 +8,9 @@ class Order extends Model
 {
     protected $fillable = [
         'customer_id',
+        'user_id',
+        'prepared_by',
+        'prepared_at',
         'order_date',
         'subtotal',       
         'discount_amount',
@@ -21,6 +24,7 @@ class Order extends Model
     protected $casts = [
         'order_date' => 'datetime',
         'delivery_date' => 'datetime',
+        'prepared_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
@@ -32,6 +36,14 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * Get the user (staff) who created this order.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -72,4 +84,11 @@ class Order extends Model
      * Get the delivery for this order.
      */
 
+    /**
+     * Get the user who prepared this order.
+     */
+    public function preparer()
+    {
+        return $this->belongsTo(User::class, 'prepared_by');
+    }
 }

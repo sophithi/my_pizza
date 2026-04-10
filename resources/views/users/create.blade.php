@@ -54,7 +54,8 @@
                             <option value="">Select Role</option>
                             <option value="admin">Administrator (Full Access)</option>
                             <option value="manager">Manager</option>
-                            <option value="staff">Staff</option>
+                            <option value="staff">Staff (Office)</option>
+                            <option value="staff_inventory">Staff (Inventory)</option>
                         </select>
                     </div>
 

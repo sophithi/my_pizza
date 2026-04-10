@@ -11,9 +11,24 @@ class InvoiceController extends Controller
     /**
      * Display a listing of invoices.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $invoices = Invoice::with('order.customer')->paginate(15);
+        $query = Invoice::with('order.customer');
+        $period = $request->get('period');
+
+        if ($period === 'today') {
+            $query->whereDate('invoice_date', today());
+        } elseif ($period === 'yesterday') {
+            $query->whereDate('invoice_date', today()->subDay());
+        } elseif ($period === 'month') {
+            $query->whereMonth('invoice_date', now()->month)->whereYear('invoice_date', now()->year);
+        } elseif ($period === 'year') {
+            $query->whereYear('invoice_date', now()->year);
+        } elseif ($request->filled('date')) {
+            $query->whereDate('invoice_date', $request->date);
+        }
+
+        $invoices = $query->latest('invoice_date')->paginate(15);
         return view('invoices.index', compact('invoices'));
     }
 

@@ -6,9 +6,11 @@
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
     <h2 style="font-size: 24px; font-weight: 700; color: #1a1d29; margin: 0;">Users</h2>
+    @if(auth()->user()->isAdmin())
     <a href="{{ route('users.create') }}" class="btn" style="background: linear-gradient(135deg, #e85d24 0%, #d94a10 100%); color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
         <i class="fas fa-plus"></i> Add User
     </a>
+    @endif
 </div>
 
 @if($message = Session::get('success'))
@@ -55,9 +57,13 @@
                                 <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #e3f2fd; color: #1976d2;">
                                     <i class="fas fa-chart-line"></i> Manager
                                 </span>
+                            @elseif($user->role == 'staff_inventory')
+                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #fff3e0; color: #e65100;">
+                                    <i class="fas fa-boxes"></i> Staff (Inventory)
+                                </span>
                             @else
                                 <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #f3e5f5; color: #7b1fa2;">
-                                    <i class="fas fa-user"></i> Staff
+                                    <i class="fas fa-user"></i> Staff (Office)
                                 </span>
                             @endif
                         </td>
@@ -74,12 +80,14 @@
                         </td>
                         <td style="padding: 12px;">
                             <a href="{{ route('users.show', $user) }}" class="btn-action" style="color: #0d6efd; text-decoration: none; font-size: 12px; margin-right: 10px;"><i class="fas fa-eye"></i></a>
+                            @if(auth()->user()->isAdmin())
                             <a href="{{ route('users.edit', $user) }}" class="btn-action" style="color: #0d6efd; text-decoration: none; font-size: 12px; margin-right: 10px;"><i class="fas fa-edit"></i></a>
                             <form action="{{ route('users.destroy', $user) }}" method="POST" style="display: inline;" data-delete="User" data-item-name="{{ $user->name }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 12px;"><i class="fas fa-trash"></i></button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

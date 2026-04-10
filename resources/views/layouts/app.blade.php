@@ -121,13 +121,17 @@
             gap: 12px;
             text-decoration: none;
             white-space: nowrap;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
         }
 
         .sidebar .nav-link:hover {
             color: #fff;
             background: rgba(255,255,255,0.08);
             border-left-color: #e85d24;
+        }
+
+        .sidebar .nav-link:hover i {
+            color: #e85d24;
         }
 
         .sidebar .nav-link.active {
@@ -142,7 +146,7 @@
             width: 20px;
             text-align: center;
             flex-shrink: 0;
-            transition: all 0.3s ease;
+            transition: color 0.25s ease;
         }
 
         .sidebar .nav-link span {
@@ -155,6 +159,7 @@
             padding: 14px;
             justify-content: center;
             border-left: 4px solid transparent;
+            position: relative;
         }
 
         .sidebar.collapsed .nav-link span {
@@ -168,10 +173,35 @@
             width: auto;
         }
 
+        /* Tooltip on hover when collapsed */
+        .sidebar.collapsed .nav-link::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%) translateX(8px);
+            background: #1a1d29;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .sidebar.collapsed .nav-link:hover::after {
+            opacity: 1;
+            transform: translateY(-50%) translateX(12px);
+        }
+
         .sidebar.collapsed .nav-link:hover {
             background: rgba(232,93,36,0.15);
             border-left-color: #e85d24;
-            transform: scale(1.1);
         }
 
         /* Sidebar close btn (mobile only) */
@@ -488,61 +518,73 @@
     </div>
     <nav>
       
-        <a href="/" class="nav-link {{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
+        <a href="/" class="nav-link {{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}" data-tooltip="ទំព័រដើម">
             <i class="fas fa-tachometer-alt"></i><span>ទំព័រដើម</span>
         </a>
-        <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}">
+        <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}" data-tooltip="ការកម្មង់">
             <i class="fas fa-shopping-cart"></i><span>ការកម្មង់</span>
         </a>
 
-        {{-- Only admins see customers menu --}}
-        @if(auth()->user()->isAdmin())
-        <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
+        {{-- Admin, Manager, Staff (Office) see customers menu --}}
+        @if(!auth()->user()->isStaffInventory())
+        <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}" data-tooltip="អតិថិជន">
             <i class="fas fa-users"></i><span>អតិថិជន</span>
         </a>
         @endif
 
         {{-- Only admins see warehouse section --}}
-        @if(auth()->user()->isAdmin())
+        @if(auth()->user()->isAdmin() || auth()->user()->isManager())
       
-        <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}">
+        <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}" data-tooltip="ទំនិញ">
             <i class="fas fa-pizza-slice"></i><span>ទំនិញ</span>
         </a>
-        <a href="/inventory" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
+        <a href="/inventory" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}" data-tooltip="ស្តុកទំនិញ">
             <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
         </a>
-        <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}">
+        <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}" data-tooltip="ការចំណាយ">
             <i class="fas fa-file-invoice"></i><span>ការចំណាយ</span>
         </a>
         @endif
 
         {{-- Managers+ see delivery section --}}
         @if(auth()->user()->isAdmin() || auth()->user()->isManager())
-        <a href="/deliveries" class="nav-link {{ request()->is('deliveries*') ? 'active' : '' }}">
+        <a href="/deliveries" class="nav-link {{ request()->is('deliveries*') ? 'active' : '' }}" data-tooltip="ការដឹកជញ្ចូន">
             <i class="fas fa-truck"></i><span>ការដឹកជញ្ចូន</span>
         </a>
 
        
-        <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
+        <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}" data-tooltip="វិក័្កយបត្រ">
             <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
         </a>
-        <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}">
+        <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}" data-tooltip="ការទូទាត់">
             <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
         </a>
         @endif
 
+        {{-- Staff inventory sees invoices & inventory --}}
+        @if(auth()->user()->isStaffInventory())
+        <a href="/inventory" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}" data-tooltip="ស្តុកទំនិញ">
+            <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
+        </a>
+        <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}" data-tooltip="វិក័្កយបត្រ">
+            <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
+        </a>
+        @endif
+
         {{-- All users see reports --}}
-        <a href="/reports" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}">
+        <a href="/reports" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}" data-tooltip="របាយការណ៍">
             <i class="fas fa-chart-bar"></i><span>របាយការណ៍</span>
         </a>
 
-        {{-- Only admins see system section --}}
-        @if(auth()->user()->isAdmin())
-       
-        <a href="/users" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
+        {{-- Admin & Manager see users --}}
+        @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+        <a href="/users" class="nav-link {{ request()->is('users*') ? 'active' : '' }}" data-tooltip="បុគ្គលិក">
             <i class="fas fa-users-cog"></i><span>បុគ្គលិក</span>
         </a>
-        <a href="/settings" class="nav-link {{ request()->is('settings*') ? 'active' : '' }}">
+        @endif
+
+        @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+        <a href="/settings" class="nav-link {{ request()->is('settings*') ? 'active' : '' }}" data-tooltip="Settings">
             <i class="fas fa-cog"></i><span>Settings</span>
         </a>
         @endif
@@ -578,6 +620,9 @@
                     <div style="font-size: 13px; font-weight: 600; color: #1a1d29;">{{ auth()->user()->name ?? 'Admin' }}</div>
                     <div style="font-size: 12px; color: #6c757d; margin-top: 4px;">{{ auth()->user()->email }}</div>
                 </div>
+                <a href="{{ route('profile.edit') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #1a1d29; text-decoration: none; font-size: 14px; transition: all 0.2s ease;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-user-edit" style="width: 16px; text-align: center; color: #e85d24;"></i> ព័ត៌មានផ្ទាល់ខ្លួន
+                </a>
                 <a href="{{ route('activity-log') }}" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #1a1d29; text-decoration: none; font-size: 14px; transition: all 0.2s ease;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
                     <i class="fas fa-history" style="width: 16px; text-align: center;"></i> Activity Log
                 </a>

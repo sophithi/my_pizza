@@ -13,7 +13,13 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::with('customer')->latest()->paginate(15);
+        $query = Order::with('customer')->latest();
+
+        if (request('status')) {
+            $query->where('status', request('status'));
+        }
+
+        $orders = $query->paginate(15)->withQueryString();
         return view('orders.index', compact('orders'));
     }
 
@@ -38,6 +44,7 @@ class OrderController extends Controller
         // Create the order
         $order = Order::create([
             'customer_id' => $validated['customer_id'],
+            'user_id' => auth()->id(),
             'order_date' => $validated['order_date'],
             'subtotal' => $validated['subtotal'],
             'discount_amount' => $validated['discount_amount'] ?? 0,
@@ -74,7 +81,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load('customer', 'items.product', 'items.delivery');
+        $order->load('customer', 'items.product', 'items.delivery', 'preparer');
         return view('orders.show', compact('order'));
     }
 
@@ -111,5 +118,39 @@ class OrderController extends Controller
         
         $order->delete();
         return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
+    }
+
+    /**
+     * Mark order as processing (being prepared).
+     */
+    public function prepare(Order $order)
+    {
+        if ($order->status !== 'pending') {
+            return back()->with('error', 'មានតែការបញ្ជាទិញដែលកំពុងរង់ចាំប៉ុណ្ណោះដែលអាចរៀបចំបាន។');
+        }
+
+        $order->update([
+            'status' => 'processing',
+            'prepared_by' => auth()->id(),
+            'prepared_at' => now(),
+        ]);
+
+        return back()->with('success', 'ការបញ្ជាទិញកំពុងរៀបចំ។');
+    }
+
+    /**
+     * Mark order as completed (ready).
+     */
+    public function ready(Order $order)
+    {
+        if ($order->status !== 'processing') {
+            return back()->with('error', 'មានតែការបញ្ជាទិញដែលកំពុងដំណើរការប៉ុណ្ណោះដែលអាចបញ្ចប់បាន។');
+        }
+
+        $order->update([
+            'status' => 'completed',
+        ]);
+
+        return back()->with('success', 'ការបញ្ជាទិញបានបញ្ចប់។');
     }
 }

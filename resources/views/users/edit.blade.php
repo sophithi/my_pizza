@@ -54,7 +54,8 @@
                         <select name="role" class="form-control" required style="border-radius: 6px; border: 1px solid #e9ecef; padding: 10px 12px;">
                             <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Administrator (Full Access)</option>
                             <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager</option>
-                            <option value="staff" {{ old('role', $user->role) == 'staff' ? 'selected' : '' }}>Staff</option>
+                            <option value="staff" {{ old('role', $user->role) == 'staff' ? 'selected' : '' }}>Staff (Office)</option>
+                            <option value="staff_inventory" {{ old('role', $user->role) == 'staff_inventory' ? 'selected' : '' }}>Staff (Inventory)</option>
                         </select>
                     </div>
 

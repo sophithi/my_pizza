@@ -287,6 +287,33 @@
     .alert-success .btn-close {
         opacity: 0.5;
     }
+
+    .status-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .status-tab {
+        padding: 8px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-muted);
+        transition: all 0.2s ease;
+    }
+    .status-tab:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+    .status-tab.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
 </style>
 @endpush
 
@@ -305,6 +332,25 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif
+
+<!-- Status Tabs -->
+<div class="status-tabs">
+    <a href="{{ route('orders.index') }}" class="status-tab {{ !request('status') ? 'active' : '' }}">
+        📋 ទាំងអស់
+    </a>
+    <a href="{{ route('orders.index', ['status' => 'pending']) }}" class="status-tab {{ request('status') === 'pending' ? 'active' : '' }}">
+        ⏱ រង់ចាំ
+    </a>
+    <a href="{{ route('orders.index', ['status' => 'processing']) }}" class="status-tab {{ request('status') === 'processing' ? 'active' : '' }}">
+        ⟳ កំពុងរៀបចំ
+    </a>
+    <a href="{{ route('orders.index', ['status' => 'completed']) }}" class="status-tab {{ request('status') === 'completed' ? 'active' : '' }}">
+        ✓ បានបញ្ចប់
+    </a>
+    <a href="{{ route('orders.index', ['status' => 'cancelled']) }}" class="status-tab {{ request('status') === 'cancelled' ? 'active' : '' }}">
+        ✕ បានបោះបង់
+    </a>
+</div>
 
 <!-- Stats Cards -->
 <div class="stats-row">

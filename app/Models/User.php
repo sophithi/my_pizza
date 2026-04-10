@@ -74,11 +74,27 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is staff
+     * Check if user is staff (office)
      */
     public function isStaff(): bool
     {
         return $this->role === 'staff';
+    }
+
+    /**
+     * Check if user is staff (inventory)
+     */
+    public function isStaffInventory(): bool
+    {
+        return $this->role === 'staff_inventory';
+    }
+
+    /**
+     * Check if user is any staff type
+     */
+    public function isAnyStaff(): bool
+    {
+        return in_array($this->role, ['staff', 'staff_inventory']);
     }
 
     /**
@@ -89,7 +105,8 @@ class User extends Authenticatable
         return match($this->role) {
             'admin' => 'Administrator',
             'manager' => 'Manager',
-            'staff' => 'Staff',
+            'staff' => 'Staff (Office)',
+            'staff_inventory' => 'Staff (Inventory)',
             default => 'Unknown',
         };
     }
@@ -100,6 +117,14 @@ class User extends Authenticatable
     public function activities()
     {
         return $this->hasMany(UserActivity::class);
+    }
+
+    /**
+     * Get user's orders (orders created by this user)
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 
     /**

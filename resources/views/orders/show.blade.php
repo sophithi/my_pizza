@@ -618,8 +618,46 @@
         </div>
     </div>
     @endif
+
+    <!-- Preparation Info -->
+    @if($order->prepared_by)
+    <div class="detail-section" style="margin-bottom: 1.5rem;">
+        <h3 class="section-title" style="font-size: 1rem;">🧑‍🍳 ព័ត៌មានរៀបចំ</h3>
+        <div style="display: flex; gap: 2rem; padding: 1rem; background: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;">
+            <div>
+                <span style="color: #6b7280; font-size: 0.85rem;">រៀបចំដោយ</span><br>
+                <strong>{{ $order->preparer->name ?? 'N/A' }}</strong>
+            </div>
+            <div>
+                <span style="color: #6b7280; font-size: 0.85rem;">ពេលវេលា</span><br>
+                <strong>{{ $order->prepared_at ? $order->prepared_at->translatedFormat('d/M/Y h:i A') : 'N/A' }}</strong>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Actions -->
     <div class="actions-bar">
+        {{-- Preparation workflow buttons --}}
+        @if($order->status === 'pending' && (auth()->user()->isStaffInventory() || auth()->user()->isManager() || auth()->user()->isAdmin()))
+            <form action="{{ route('orders.prepare', $order) }}" method="POST" style="display:inline;">
+                @csrf
+                <button type="submit" class="btn btn-primary" style="background: #2563eb;">
+                    🔧 ចាប់ផ្តើមរៀបចំ
+                </button>
+            </form>
+        @endif
+
+        @if($order->status === 'processing' && (auth()->user()->isStaffInventory() || auth()->user()->isManager() || auth()->user()->isAdmin()))
+            <form action="{{ route('orders.ready', $order) }}" method="POST" style="display:inline;">
+                @csrf
+                <button type="submit" class="btn btn-primary" style="background: #16a34a;">
+                    ✓ រួចរាល់
+                </button>
+            </form>
+        @endif
+
+        @if(!auth()->user()->isStaffInventory())
         <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary">
              កែសម្រួល
         </a>
@@ -629,9 +667,11 @@
         <a href="{{ route('invoices.create', ['order_id' => $order->id]) }}" class="btn btn-outline">
              បង្កើតវិក្កយបត្រ
         </a>
+        @endif
         <a href="{{ route('orders.index') }}" class="btn btn-outline">
             ← ត្រឡប់ក្រោយ
         </a>
+        @if(!auth()->user()->isStaffInventory())
         <form action="{{ route('orders.destroy', $order) }}" method="POST" style="display:inline;" onsubmit="return confirm('លុបការបញ្ជាទិញនេះ?')">
             @csrf
             @method('DELETE')
@@ -639,6 +679,7 @@
                  លុប
             </button>
         </form>
+        @endif
     </div>
 
 </div>

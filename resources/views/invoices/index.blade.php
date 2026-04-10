@@ -13,6 +13,47 @@
         </div>
     </div>
 
+    <!-- Date Filter -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-body" style="padding: 16px 24px;">
+            <form method="GET" action="{{ route('invoices.index') }}" id="invoiceFilter" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                
+                <input type="hidden" name="period" id="periodInput" value="{{ request('period') }}">
+
+                <a href="{{ route('invoices.index', ['period' => 'today']) }}"
+                    style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'today' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'today' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'today' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
+                    <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
+                </a>
+                <a href="{{ route('invoices.index', ['period' => 'yesterday']) }}"
+                    style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'yesterday' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'yesterday' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'yesterday' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
+                    <i class="fas fa-calendar-minus"></i> ម្សិលមិញ
+                </a>
+                <a href="{{ route('invoices.index', ['period' => 'month']) }}"
+                    style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'month' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'month' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'month' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
+                    <i class="fas fa-calendar-alt"></i> ខែនេះ
+                </a>
+                <a href="{{ route('invoices.index', ['period' => 'year']) }}"
+                    style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'year' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'year' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'year' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
+                    <i class="fas fa-calendar"></i> ឆ្នាំនេះ
+                </a>
+
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                    <input type="date" name="date" value="{{ request('date') }}"
+                        style="padding: 8px 14px; border-radius: 8px; border: 1.5px solid #e9ecef; font-size: 13px; font-weight: 600; color: #1a1d29;">
+                    <button type="submit" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; background: #e85d24; color: #fff; cursor: pointer;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+                @if(request('period') || request('date'))
+                <a href="{{ route('invoices.index') }}" style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid #e9ecef; background: #fff; color: #6c757d; text-decoration: none;">
+                    <i class="fas fa-times"></i> សម្អាត
+                </a>
+                @endif
+            </form>
+        </div>
+    </div>
+
     @if ($invoices->count() > 0)
     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
         <div class="card-body" style="padding: 24px;">
@@ -66,7 +107,7 @@
     </div>
 
     <div style="margin-top: 20px;">
-        {{ $invoices->links() }}
+        {{ $invoices->appends(request()->query())->links() }}
     </div>
     @else
     <div class="alert alert-info" role="alert" style="border-radius: 8px; padding: 16px; background: #cce5ff; color: #004085; border: 1px solid #b6d4fe;">
