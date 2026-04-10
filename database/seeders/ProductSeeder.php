@@ -138,16 +138,21 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            $createdProduct = Product::create($product);
+            $createdProduct = Product::firstOrCreate(
+                ['sku' => $product['sku']],
+                $product
+            );
 
-            Inventory::create([
-                'product_id' => $createdProduct->id,
-                'quantity' => rand(50, 200),
-                'reorder_level' => rand(10, 30),
-                'reorder_quantity' => rand(50, 150),
-                'cost_per_unit' => $createdProduct->price_usd * 0.6,
-                'warehouse_location' => 'Section ' . chr(65 + rand(0, 5)),
-            ]);
+            Inventory::firstOrCreate(
+                ['product_id' => $createdProduct->id],
+                [
+                    'quantity' => rand(50, 200),
+                    'reorder_level' => rand(10, 30),
+                    'reorder_quantity' => rand(50, 150),
+                    'cost_per_unit' => $createdProduct->price_usd * 0.6,
+                    'warehouse_location' => 'Section ' . chr(65 + rand(0, 5)),
+                ]
+            );
         }
     }
 }

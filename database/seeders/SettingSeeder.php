@@ -13,7 +13,7 @@ class SettingSeeder extends Seeder
      */
     public function run(): void
     {
-        Setting::create([
+        Setting::firstOrCreate(['business_email' => 'info@pizzahappyfamily.com'], [
             'business_name' => 'Pizza Happy Family',
             'business_email' => 'info@pizzahappyfamily.com',
             'business_phone' => '+63 (02) 1234 5678',

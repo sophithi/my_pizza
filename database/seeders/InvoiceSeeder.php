@@ -14,12 +14,16 @@ class InvoiceSeeder extends Seeder
      */
     public function run(): void
     {
-        $orders = Order::all();
+        $orders = Order::doesntHave('invoice')->get();
+        if ($orders->isEmpty()) {
+            return;
+        }
 
+        $startIndex = Invoice::count();
         foreach ($orders as $index => $order) {
             Invoice::create([
                 'order_id' => $order->id,
-                'invoice_number' => 'INV-' . str_pad($index + 1, 6, '0', STR_PAD_LEFT),
+                'invoice_number' => 'INV-' . str_pad($startIndex + $index + 1, 6, '0', STR_PAD_LEFT),
                 'invoice_date' => $order->order_date,
                 'due_date' => $order->order_date->addDays(30),
                 'subtotal' => $order->subtotal,

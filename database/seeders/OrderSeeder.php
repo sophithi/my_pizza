@@ -22,6 +22,10 @@ class OrderSeeder extends Seeder
         $statuses = ['pending', 'processing', 'completed'];
         $paymentStatuses = ['unpaid', 'partial', 'paid'];
 
+        if (Order::count() > 0) {
+            return;
+        }
+
         for ($i = 0; $i < 15; $i++) {
             $customer = $customers->random();
             $numItems = rand(2, 5);
