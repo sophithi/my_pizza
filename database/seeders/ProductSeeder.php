@@ -145,7 +145,7 @@ class ProductSeeder extends Seeder
                 'quantity' => rand(50, 200),
                 'reorder_level' => rand(10, 30),
                 'reorder_quantity' => rand(50, 150),
-                'cost_per_unit' => $createdProduct->price * 0.6,
+                'cost_per_unit' => $createdProduct->price_usd * 0.6,
                 'warehouse_location' => 'Section ' . chr(65 + rand(0, 5)),
             ]);
         }

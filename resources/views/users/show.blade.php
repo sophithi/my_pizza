@@ -221,7 +221,7 @@
     </form>
 
     <!-- Period Label -->
-    <div style="margin-bottom: 16px;">
+    <div style="margin-bottom: 16px;"> 
         <span class="period-label">
             <i class="fas fa-clock"></i>
             {{ $start->translatedFormat('d M Y') }} — {{ $end->translatedFormat('d M Y') }}

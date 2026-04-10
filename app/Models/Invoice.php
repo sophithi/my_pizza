@@ -13,6 +13,7 @@ class Invoice extends Model
         'invoice_date',
         'due_date',
         'subtotal',
+        'tax_amount',
         'discount_amount',
         'total_amount',
         'status',
