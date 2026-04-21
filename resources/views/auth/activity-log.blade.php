@@ -217,7 +217,7 @@
                 <div class="info-label">Last Login</div>
                 <div class="info-value">
                     @if(auth()->user()->last_login_at)
-                        {{ auth()->user()->last_login_at->translatedFormat('M d, Y H:i:s') }}
+                        {{ auth()->user()->last_login_at ? auth()->user()->last_login_at->setTimezone('Asia/Phnom_Penh')->translatedFormat('M d, Y h:i:s A') : '' }}
                     @else
                         <span style="color: var(--text-muted);">Never</span>
                     @endif
@@ -277,8 +277,8 @@
                     </span>
                 </td>
                 <td>
-                    <div>{{ $activity->activity_at->translatedFormat('M d, Y H:i:s') }}</div>
-                    <div class="time-ago" title="{{ $activity->activity_at->format('Y-m-d H:i:s') }}">
+                    <div>{{ $activity->activity_at ? $activity->activity_at->setTimezone('Asia/Phnom_Penh')->translatedFormat('M d, Y h:i:s A') : '' }}</div>
+                    <div class="time-ago" title="{{ $activity->activity_at ? $activity->activity_at->setTimezone('Asia/Phnom_Penh')->format('Y-m-d H:i:s') : '' }}">
                         {{ $activity->activity_at->diffForHumans() }}
                     </div>
                 </td>

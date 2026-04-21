@@ -8,19 +8,22 @@
                 <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">{{ $invoice->invoice_number }}</h2>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <a href="{{ route('invoices.print', $invoice) }}" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                        <i class="fas fa-print"></i> Print Invoice
-                    </a>
-                    @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isStaffInventory())
-                    <a href="{{ route('invoices.sticker-prep', $invoice) }}" class="btn" style="background: #1a1d29; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                        Prep Sticker
-                    </a>
-                    <a href="{{ route('invoices.sticker-customer', $invoice) }}" class="btn" style="background: #e85d24; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                        Customer Sticker
+                        <i class="fas fa-print"></i> Print វិក្ក័យបត្រ
+                                <tr>
+                                    <td style="padding: 8px; color: #333;">{{ $item->product->name }}</td>
+                                    <td style="padding: 8px; color: #666; text-align: right;">{{ $item->quantity }}</td>
+                                    <td style="padding: 8px; text-align: right;"><span style="color: #666;">${{ number_format($item->unit_price, 2) }}</span><br><span style="color: #999; font-size: 12px;">៛{{ number_format($item->unit_price * 4000, 0) }}</span></td>
+                                    <td style="padding: 8px; text-align: right;"><span style="color: #333; font-weight: 500;">${{ number_format($item->total_price, 2) }}</span><br><span style="color: #999; font-size: 12px;">៛{{ number_format($item->total_price * 4000, 0) }}</span></td>
+                                    @unless($allSameDelivery)
+                                    <td style="padding: 8px; color: #666; text-align: left;">{{ optional($item->delivery)->delivery_name ?? 'N/A' }}</td>
+                                    @endunless
+                                </tr>
+                        វិក្ក័យបត្រភ្ញៀវ
                     </a>
                     @endif
                     @if ($invoice->status !== 'paid')
                     <a href="{{ route('invoices.edit', $invoice) }}" class="btn" style="background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                        <i class="fas fa-edit"></i> Edit
+                        <i class="fas fa-edit"></i> កែប្រែ
                     </a>
                     @endif
                 </div>
@@ -49,11 +52,19 @@
                             <p style="color: #333; margin: 8px 0;"><strong>Due Date:</strong> {{ $invoice->due_date ? $invoice->due_date->translatedFormat('M d, Y') : 'N/A' }}</p>
                             <p style="color: #333; margin: 8px 0;"><strong>Status:</strong>
                                 <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
-                                    background: {{ $invoice->status === 'paid' ? '#d4edda' : ($invoice->status === 'sent' ? '#cce5ff' : ($invoice->status === 'cancelled' ? '#f8d7da' : '#fff3cd')) }};
-                                    color: {{ $invoice->status === 'paid' ? '#155724' : ($invoice->status === 'sent' ? '#004085' : ($invoice->status === 'cancelled' ? '#721c24' : '#856404')) }};">
+                                    background: {{ $invoice->status === 'បានបង់ប្រាក់' ? '#d4edda' : ($invoice->status === 'cancel' ? '#f8d7da' : '#fff3cd') }};
+                                    color: {{ $invoice->status === 'បានបង់ប្រាក់' ? '#155724' : ($invoice->status === 'cancel' ? '#721c24' : '#856404') }};">
                                     {{ ucfirst($invoice->status) }}
                                 </span>
                             </p>
+                            @php
+                                $items = $invoice->order->items ?? collect();
+                                $allSameDelivery = $items->count() > 0 && $items->pluck('delivery_id')->filter()->unique()->count() === 1;
+                                $commonDelivery = $allSameDelivery ? optional($items->first()->delivery)->delivery_name : null;
+                            @endphp
+                            @if($allSameDelivery)
+                            <p style="color: #333; margin: 8px 0;"><strong>Delivery Location:</strong> {{ $commonDelivery ?? 'N/A' }}</p>
+                            @endif
                         </div>
                     </div>
 
@@ -67,6 +78,9 @@
                                     <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">Qty</th>
                                     <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">Price</th>
                                     <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">Total</th>
+                                    @unless($allSameDelivery)
+                                    <th style="padding: 8px; color: #666; font-weight: 600;">Delivery</th>
+                                    @endunless
                                 </tr>
                             </thead>
                             <tbody>

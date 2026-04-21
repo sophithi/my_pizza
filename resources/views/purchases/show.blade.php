@@ -241,7 +241,7 @@
             </div>
             <div class="info-group">
                 <div class="info-label">Created</div>
-                <div class="info-value">{{ $purchase->created_at->translatedFormat('M d, Y H:i') }}</div>
+                <div class="info-value">{{ $purchase->created_at ? $purchase->created_at->setTimezone('Asia/Phnom_Penh')->translatedFormat('M d, Y h:i A') : '' }}</div>
             </div>
         </div>
     </div>

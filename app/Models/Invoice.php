@@ -59,4 +59,30 @@ class Invoice extends Model
     {
         $this->update(['status' => 'cancelled']);
     }
+
+    /**
+     * Generate next invoice number.
+     */
+    public static function generateInvoiceNumber(): string
+    {
+        $lastInvoice = self::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
+        $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
+        return 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Create invoice from order (auto-generate).
+     */
+    public static function createFromOrder(Order $order): self
+    {
+        return self::create([
+            'order_id' => $order->id,
+            'invoice_number' => self::generateInvoiceNumber(),
+            'invoice_date' => now()->toDateString(),
+            'subtotal' => $order->subtotal,
+            'discount_amount' => $order->discount_amount,
+            'total_amount' => $order->total_amount,
+            'notes' => $order->notes ?? null,
+        ]);
+    }
 }

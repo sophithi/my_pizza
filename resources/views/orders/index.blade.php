@@ -286,7 +286,7 @@
 
 <!-- Header -->
 <div class="page-header">
-    <h2>Orders</h2>
+    <h2>បញ្ជីការកម្មង់ទំនិញទាំងអស់</h2>
     <a href="{{ route('orders.create') }}" class="btn-create">បង្កើតការកាម្មង់</a>
 </div>
 
@@ -300,51 +300,44 @@
 <!-- Summary Cards -->
 <div class="summary-row">
     <div class="summary-card accent">
-        <div class="label">Total Orders</div>
+        <div class="label">ចំនួនកម្មង់</div>
         <div class="value">{{ $orders->total() }}</div>
         <div class="sub">All time</div>
     </div>
     <div class="summary-card green">
-        <div class="label">Total Revenue</div>
+        <div class="label">ចំនួនទឹកប្រាក់</div>
         <div class="value">${{ number_format($orders->sum('total_amount'), 2) }}</div>
         <div class="sub">All orders</div>
     </div>
     <div class="summary-card amber">
-        <div class="label">Pending</div>
+        <div class="label">កំពុងដំណើរការ</div>
         <div class="value">{{ $orders->where('status', 'pending')->count() }}</div>
         <div class="sub">Awaiting completion</div>
     </div>
     <div class="summary-card blue">
-        <div class="label">Completed</div>
+        <div class="label">រួចរាល់</div>
         <div class="value">{{ $orders->where('status', 'completed')->count() }}</div>
         <div class="sub">Successfully processed</div>
     </div>
 </div>
 
-<!-- Status Tabs -->
-<div class="status-tabs">
-    <a href="{{ route('orders.index') }}" class="status-tab {{ !request('status') ? 'active' : '' }}">ទាំងអស់</a>
-    <a href="{{ route('orders.index', ['status' => 'pending']) }}" class="status-tab {{ request('status') === 'pending' ? 'active' : '' }}">រង់ចាំ</a>
-    <a href="{{ route('orders.index', ['status' => 'processing']) }}" class="status-tab {{ request('status') === 'processing' ? 'active' : '' }}">កំពុងរៀបចំ</a>
-    <a href="{{ route('orders.index', ['status' => 'completed']) }}" class="status-tab {{ request('status') === 'completed' ? 'active' : '' }}">បានបញ្ចប់</a>
-    <a href="{{ route('orders.index', ['status' => 'cancelled']) }}" class="status-tab {{ request('status') === 'cancelled' ? 'active' : '' }}">បានបោះបង់</a>
-</div>
+<!-- Status tabs removed: orders no longer use status filter -->
 
 <!-- Toolbar -->
 <div class="toolbar">
-    <input type="text" id="searchInput" class="search-box" placeholder="Search by customer, order ID...">
-    <select id="statusFilter">
-        <option value="">All Status</option>
-        <option value="pending">Pending</option>
-        <option value="processing">Processing</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
+    <input type="text" id="searchInput" class="search-box" 
+           placeholder="Search by customer, order ID...">
+
+           
+     <select id="realtime">
+        <option value="">time</option>
     </select>
+    <!-- status filter removed -->
     <select id="paymentFilter">
         <option value="">All Payment</option>
-        <option value="paid">Paid</option>
-        <option value="unpaid">Unpaid</option>
-        <option value="partial">Partial</option>
+        <option value="paid">បានបង់ប្រាក់</option>
+        <option value="unpaid">មិនទាន់បានបង់ប្រាក់</option>
+        <option value="partial">រងចាំ</option>
     </select>
     <button onclick="exportToCSV()" class="btn-export">Export CSV</button>
 </div>
@@ -355,40 +348,43 @@
         <table class="orders-table">
             <thead>
                 <tr>
-                    <th onclick="sortTable('id')">Order ID</th>
-                    <th onclick="sortTable('customer')">Customer</th>
-                    <th onclick="sortTable('items')">Items</th>
-                    <th onclick="sortTable('date')">Date</th>
-                    <th onclick="sortTable('amount')">Amount</th>
-                    <th>Status</th>
-                    <th>Payment</th>
-                    <th>Actions</th>
+                    <th onclick="sortTable('id')">កូដការកម្មង់</th>
+                    <th onclick="sortTable('customer')">ឈ្មោះអតិថិជន</th>
+                    <th onclick="sortTable('items')">ចំនួនទំនិញ</th>
+                    <th onclick="sortTable('date')">កាលបរិច្ឆេទ</th>
+                    <th onclick="sortTable('amount')">ចំនួនទឹកប្រាក់</th>
+                    <th>ការបង់ប្រាក់</th>
+                    <th>ផ្សេងៗ</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
                 @forelse($orders as $order)
-                <tr data-id="{{ $order->id }}" data-customer="{{ $order->customer->name }}" data-status="{{ strtolower($order->status) }}" data-payment="{{ strtolower($order->payment_status) }}">
+                <tr data-id="{{ $order->id }}" 
+                    data-customer="{{ $order->customer->name }}" 
+                    data-payment="{{ strtolower($order->payment_status) }}">
                     <td class="oid">ORD-{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</td>
                     <td class="cname">{{ $order->customer->name }}</td>
                     <td>{{ $order->items->count() }} item{{ $order->items->count() !== 1 ? 's' : '' }}</td>
                     <td>
-                        {{ $order->order_date->translatedFormat('M d, Y') }}
-                        <div class="date-sub">{{ $order->order_date->translatedFormat('h:i A') }}</div>
+                        {{ $order->order_date->format('d/m/Y') }}
+                        <div class="date-sub">{{ $order->order_date->setTimezone('Asia/Phnom_Penh')->format('h:i A') }}</div>
                     </td>
                     <td class="amt">${{ number_format($order->total_amount, 2) }}</td>
-                    <td><span class="s-badge {{ strtolower($order->status) }}">{{ ucfirst($order->status) }}</span></td>
-                    <td><span class="s-badge {{ strtolower($order->payment_status) }}">{{ ucfirst($order->payment_status) }}</span></td>
+                    <td>
+                        <span class="s-badge {{ strtolower($order->payment_status) }}">{{ ucfirst($order->payment_status) }}</span>
+                    </td>
                     <td>
                         <div class="actions">
                             <a href="{{ route('orders.show', $order) }}" class="act-link view">View</a>
                             <a href="{{ route('orders.edit', $order) }}" class="act-link edit">Edit</a>
-                            <button onclick="deleteOrder({{ $order->id }}, 'ORD-{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}')" class="act-link del">Del</button>
+                            <button onclick="deleteOrder({{ $order->id }}, 'ORD-{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}')" 
+                                    class="act-link del">Del</button>
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" style="border: none;">
+                    <td colspan="7" style="border: none;">
                         <div class="empty-box">
                             <div class="big">No orders yet</div>
                             <p>Get started by creating your first order.</p>
@@ -411,46 +407,73 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
-        const statusFilter = document.getElementById('statusFilter');
         const paymentFilter = document.getElementById('paymentFilter');
         const tableBody = document.getElementById('tableBody');
 
-        if (!searchInput || !statusFilter || !tableBody) return;
+        if (!searchInput || !tableBody) return;
 
         function filterTable() {
             const searchTerm = searchInput.value.toLowerCase();
-            const statusVal = statusFilter.value.toLowerCase();
             const paymentVal = paymentFilter.value.toLowerCase();
             const rows = tableBody.querySelectorAll('tr');
 
             rows.forEach(row => {
                 const id = row.getAttribute('data-id') || '';
                 const customer = row.getAttribute('data-customer') || '';
-                const status = row.getAttribute('data-status') || '';
                 const payment = row.getAttribute('data-payment') || '';
 
                 const matchesSearch = id.includes(searchTerm) || customer.toLowerCase().includes(searchTerm);
-                const matchesStatus = !statusVal || status === statusVal;
                 const matchesPayment = !paymentVal || payment === paymentVal;
 
-                row.style.display = (matchesSearch && matchesStatus && matchesPayment) ? '' : 'none';
+                row.style.display = (matchesSearch && matchesPayment) ? '' : 'none';
             });
         }
 
         searchInput.addEventListener('keyup', filterTable);
-        statusFilter.addEventListener('change', filterTable);
         paymentFilter.addEventListener('change', filterTable);
     });
 
     // Export to CSV
+    // function exportToCSV() {
+    //     const table = document.getElementById('tableBody');
+    //     if (!table) return;
+
+    //     let csv = "Order ID,Customer,Items,Date,Amount,Status,Payment\n";
+
+    //     table.querySelectorAll('tr').forEach(row => {
+    //         if (row.style.display === 'none') return;
+    //         const cells = row.querySelectorAll('td');
+    //         if (cells.length > 0) {
+    //             const orderId = cells[0]?.textContent.trim() || '';
+    //             const customer = cells[1]?.textContent.trim() || '';
+    //             const items = cells[2]?.textContent.trim() || '';
+    //             const date = cells[3]?.textContent.trim().split('\n')[0] || '';
+    //             const amount = cells[4]?.textContent.trim() || '';
+    //             const status = cells[5]?.textContent.trim().replace(/[^\w\s]/g, '') || '';
+    //             const payment = cells[6]?.textContent.trim().replace(/[^\w\s]/g, '') || '';
+
+    //             csv += `"${orderId}","${customer}","${items}","${date}","${amount}","${status}","${payment}"\n`;
+    //         }
+    //     });
+
+    //     const blob = new Blob([csv], { type: 'text/csv' });
+    //     const url = window.URL.createObjectURL(blob);
+    //     const a = document.createElement('a');
+    //     a.href = url;
+    //     a.download = 'orders_' + new Date().toISOString().slice(0, 10) + '.csv';
+    //     a.click();
+    //     window.URL.revokeObjectURL(url);
+    // }
+  // Export to CSV
     function exportToCSV() {
         const table = document.getElementById('tableBody');
         if (!table) return;
-        
-        let csv = "Order ID,Customer,Items,Date,Amount,Status,Payment\n";
-        
+
+        let csv = "Order ID,Customer,Items,Date,Amount,Payment\n";
+
         table.querySelectorAll('tr').forEach(row => {
             if (row.style.display === 'none') return;
+
             const cells = row.querySelectorAll('td');
             if (cells.length > 0) {
                 const orderId = cells[0]?.textContent.trim() || '';
@@ -458,40 +481,46 @@
                 const items = cells[2]?.textContent.trim() || '';
                 const date = cells[3]?.textContent.trim().split('\n')[0] || '';
                 const amount = cells[4]?.textContent.trim() || '';
-                const status = cells[5]?.textContent.trim().replace(/[^\w\s]/g, '') || '';
-                const payment = cells[6]?.textContent.trim().replace(/[^\w\s]/g, '') || '';
-                
-                csv += `"${orderId}","${customer}","${items}","${date}","${amount}","${status}","${payment}"\n`;
+                const payment = cells[5]?.textContent.trim().replace(/[^\w\s]/g, '') || '';
+
+                csv += `"${orderId}","${customer}","${items}","${date}","${amount}","${payment}"\n`;
             }
         });
-        
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'orders_' + new Date().toISOString().slice(0,10) + '.csv';
-        a.click();
-        window.URL.revokeObjectURL(url);
+
+        //  ADD UTF-8 BOM (FIX KHMER)
+        const BOM = "\uFEFF";
+
+        //  Create blob with UTF-8
+        const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+
+        //  Download file
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "orders_" + new Date().toISOString().slice(0,10) + ".csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     // Sorting
     let sortColumn = null;
     let sortOrder = 'asc';
-    
+
     function sortTable(column) {
         const table = document.getElementById('tableBody');
         const rows = Array.from(table.querySelectorAll('tr'));
-        
+
         if (sortColumn === column) {
             sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
         } else {
             sortOrder = 'asc';
             sortColumn = column;
         }
-        
+
         rows.sort((a, b) => {
             let aVal, bVal;
-            
+
             if (column === 'id') {
                 aVal = parseInt(a.getAttribute('data-id') || 0);
                 bVal = parseInt(b.getAttribute('data-id') || 0);
@@ -508,14 +537,14 @@
                 aVal = parseFloat(a.querySelectorAll('td')[4]?.textContent.replace('$', '') || 0);
                 bVal = parseFloat(b.querySelectorAll('td')[4]?.textContent.replace('$', '') || 0);
             }
-            
+
             if (typeof aVal === 'number') {
                 return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
             } else {
                 return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
             }
         });
-        
+
         table.innerHTML = '';
         rows.forEach(row => table.appendChild(row));
     }

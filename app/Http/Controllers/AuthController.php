@@ -111,7 +111,7 @@ class AuthController extends Controller
             'user_id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'last_login_at' => $user->last_login_at?->format('Y-m-d H:i:s'),
+            'last_login_at' => $user->last_login_at?->setTimezone('Asia/Phnom_Penh')->format('Y-m-d H:i:s'),
             'last_login_ip' => $user->last_login_ip,
             'current_ip' => request()->ip(),
             'current_user_agent' => request()->userAgent(),

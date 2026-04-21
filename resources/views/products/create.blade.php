@@ -7,8 +7,8 @@
 <div class="row">
     <div class="col-md-8">
         <div class="card border-0 shadow-sm" style="border-radius:12px">
-            <div class="card-body" style="padding:28px">
-                <h3 style="font-size:20px;font-weight:700;color:#1a1d29;margin-bottom:24px">
+            <div class="card-body" style="padding:16px">
+                <h3 style="font-size:18px;font-weight:700;color:#1a1d29;margin-bottom:14px">
                     {{ isset($product) ? 'Edit Product' : 'Create New Product' }}
                 </h3>
 
@@ -135,7 +135,7 @@
                     </div>
 
                     {{-- Buttons --}}
-                    <div class="d-flex gap-2 mt-4">
+                    <div class="d-flex gap-2 mt-3">
                         <button type="submit" class="btn" style="background:#e85d24;color:#fff;padding:10px 24px;border-radius:6px;font-weight:600">
                             {{ isset($product) ? 'Update Product' : 'Create Product' }}
                         </button>

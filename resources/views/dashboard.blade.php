@@ -181,7 +181,7 @@
     <div style="position:relative;z-index:1">
         <h1 class="dash-hero-title"> Pizza Happy Family</h1>
         <p class="dash-hero-sub">ស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រង — Welcome back, <strong style="color:#fff">{{ auth()->user()->name ?? 'Admin' }}</strong></p>
-        <p class="dash-hero-time"><i class="fas fa-clock" style="margin-right:4px"></i>{{ now()->translatedFormat('l, d F Y • H:i') }}</p>
+        <p class="dash-hero-time"><i class="fas fa-clock" style="margin-right:4px"></i>{{ now()->setTimezone('Asia/Phnom_Penh')->translatedFormat('l, d F Y • h:i A') }}</p>
     </div>
     
  

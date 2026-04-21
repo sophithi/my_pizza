@@ -19,17 +19,13 @@
                         <div class="form-group" style="margin-bottom: 20px;">
                             <label for="status" style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">Status</label>
                             <select name="status" id="status" class="form-control" style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
-                                <option value="draft" {{ $invoice->status === 'draft' ? 'selected' : '' }}>Draft</option>
-                                <option value="sent" {{ $invoice->status === 'sent' ? 'selected' : '' }}>Sent</option>
-                                <option value="paid" {{ $invoice->status === 'paid' ? 'selected' : '' }}>Paid</option>
-                                <option value="cancelled" {{ $invoice->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="draft" {{ $invoice->status === 'draft' ? 'selected' : '' }}>មិនទាន់បង់ប្រាក់</option>
+        
+                                <option value="paid" {{ $invoice->status === 'paid' ? 'selected' : '' }}>បានបង់ប្រាក់</option>
+                                <option value="cancelled" {{ $invoice->status === 'cancelled' ? 'selected' : '' }}>Cancel</option>
                             </select>
                         </div>
 
-                        <div class="form-group" style="margin-bottom: 20px;">
-                            <label for="due_date" style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">Due Date</label>
-                            <input type="date" name="due_date" id="due_date" class="form-control" value="{{ $invoice->due_date?->format('Y-m-d') }}" style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
-                        </div>
 
                         <div class="form-group" style="margin-bottom: 20px;">
                             <label for="notes" style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">Notes</label>
@@ -38,7 +34,7 @@
 
                         <div style="display: flex; gap: 8px;">
                             <button type="submit" class="btn" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                                <i class="fas fa-save"></i> Update Invoice
+                                <i class="fas fa-save"></i> Update
                             </button>
                             <a href="{{ route('invoices.show', $invoice) }}" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
                                 Cancel

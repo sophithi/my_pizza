@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $invoice->invoice_number }}</title>
+    <title>Customer Sticker - {{ $invoice->invoice_number }}</title>
     <style>
         @page {
             size: A5 portrait;
             margin: 10mm;
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
@@ -21,7 +17,7 @@
             padding: 20px;
             font-size: 14px;
         }
-        .container {
+        .sticker {
             max-width: 148mm;
             margin: 0 auto;
             background: white;
@@ -41,22 +37,10 @@
             font-weight: bold;
             color: #e85d24;
         }
-        .invoice-details {
-            text-align: right;
-        }
-        .invoice-details p {
-            margin: 2px 0;
-            color: #666;
-            font-size: 14px;
-        }
-        .invoice-number {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-        }
-        .section {
-            margin-bottom: 14px;
-        }
+        .invoice-details { text-align: right; }
+        .invoice-details p { margin: 2px 0; color: #666; font-size: 14px; }
+        .invoice-number { font-size: 18px; font-weight: 600; color: #333; }
+        .section { margin-bottom: 14px; }
         .section-title {
             font-size: 14px;
             font-weight: 700;
@@ -69,18 +53,9 @@
             width: 48%;
             vertical-align: top;
         }
-        .invoice-info {
-            text-align: right;
-        }
-        .customer-info p, .invoice-info p {
-            margin: 2px 0;
-            font-size: 14px;
-        }
-        .customer-name {
-            font-weight: 600;
-            font-size: 16px;
-            color: #333;
-        }
+        .invoice-info { text-align: right; }
+        .customer-info p, .invoice-info p { margin: 2px 0; font-size: 14px; }
+        .customer-name { font-weight: 600; font-size: 16px; color: #333; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -103,17 +78,9 @@
             border-bottom: 1px solid #eee;
             font-size: 14px;
         }
-        .text-right {
-            text-align: right;
-        }
-        .totals {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 10px;
-        }
-        .totals-box {
-            width: 220px;
-        }
+        .text-right { text-align: right; }
+        .totals { display: flex; justify-content: flex-end; margin-top: 10px; }
+        .totals-box { width: 220px; }
         .total-row {
             display: flex;
             justify-content: space-between;
@@ -157,28 +124,32 @@
             color: #999;
             font-size: 14px;
         }
+        .sticker-label {
+            display: inline-block;
+           
+            color: #000000;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
         @media print {
-            body {
-                padding: 0;
-            }
-            .container {
-                border: none;
-                padding: 0;
-                max-width: 100%;
-            }
-            .no-print {
-                display: none !important;
-            }
+            body { padding: 0; }
+            .sticker { border: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="sticker">
         <div class="header">
-            <div class="logo">PizzaHappyFamily
-                
+            <div>
+                <div class="logo">PizzaHappyFamily</div>
+                <span class="sticker-label">វិក្ក័យបត្រអតិថិជន</span>
             </div>
-            
             <div class="invoice-details">
                 <div class="invoice-number">{{ $invoice->invoice_number }}</div>
                 <p>កាលបរិច្ឆេទ: {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</p>
@@ -193,6 +164,9 @@
                 <p>{{ $invoice->order->customer->address ?? '-' }}</p>
                 <p>{{ ($invoice->order->customer->city ?? '') . ' ' . ($invoice->order->customer->postal_code ?? '') }}</p>
                 <p>{{ $invoice->order->customer->phone ?? '-' }}</p>
+                @if($invoice->order->customer->email)
+                <p>{{ $invoice->order->customer->email }}</p>
+                @endif
                 @php
                     $deliveryItems = $invoice->order->items->filter(fn($item) => $item->delivery_id);
                 @endphp
@@ -206,12 +180,11 @@
                 @endif
                 @else
                 <p class="customer-name">N/A</p>
-                <p>Customer information not available</p>
                 @endif
             </div>
             <div class="invoice-info">
                 <div class="section-title">Invoice Info</div>
-                <p><strong>Order:</strong> {{ $invoice->order->id ?? 'N/A' }}</p>
+                <p><strong>Order:</strong> ORD-{{ str_pad($invoice->order->id ?? 0, 4, '0', STR_PAD_LEFT) }}</p>
                 <p><strong>Status:</strong> {{ ucfirst($invoice->status) }}</p>
             </div>
         </div>
@@ -269,8 +242,8 @@
             </div>
         </div>
 
-        @if ($invoice->notes)
-        <div >
+        @if($invoice->notes)
+        <div class="notes">
             <div class="notes-title">Notes</div>
             {{ $invoice->notes }}
         </div>
@@ -278,20 +251,16 @@
 
         <div class="footer">
             <p>@PizzaHappyFamily សូមអគុណអតិថិជនសម្រាប់ការកម្មង់</p>
-          
         </div>
     </div>
 
     <div class="no-print" style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 12px;">
-        <button onclick="window.print()" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-            <i class="fas fa-print"></i> Print 
+        <button onclick="window.print()" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Print Sticker អតិថិជន
         </button>
-        <a href="{{ route('invoices.show', $invoice->id) }}" style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-            ← back
+        <a href="{{ route('print.index') }}" style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            ← Back
         </a>
     </div>
-    <script>
-
-    </script>
 </body>
 </html>

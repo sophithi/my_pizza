@@ -67,7 +67,22 @@ class OrderController extends Controller
             ]);
         }
 
-        return redirect()->route('orders.show', $order)->with('success', 'Order created successfully.');
+        // Auto-create invoice
+        $lastInvoice = \App\Models\Invoice::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
+        $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
+        $invoiceNumber = 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+
+        \App\Models\Invoice::create([
+            'order_id' => $order->id,
+            'invoice_number' => $invoiceNumber,
+            'invoice_date' => now()->toDateString(),
+            'subtotal' => $order->subtotal,
+            'discount_amount' => $order->discount_amount,
+            'total_amount' => $order->total_amount,
+            'notes' => $order->notes ?? null,
+        ]);
+
+        return redirect()->route('orders.show', $order)->with('success', 'Order created successfully with invoice ' . $invoiceNumber . '.');
     }
 
     /**
@@ -156,7 +171,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Mark order as completed (ready).
+     * Mark order as completed (ready) and auto-create invoice.
      */
     public function ready(Order $order)
     {
@@ -167,6 +182,25 @@ class OrderController extends Controller
         $order->update([
             'status' => 'completed',
         ]);
+
+        // Auto-create invoice if not already created
+        if (!$order->invoice) {
+            $lastInvoice = \App\Models\Invoice::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
+            $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
+            $invoiceNumber = 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+
+            \App\Models\Invoice::create([
+                'order_id' => $order->id,
+                'invoice_number' => $invoiceNumber,
+                'invoice_date' => now()->toDateString(),
+                'subtotal' => $order->subtotal,
+                'discount_amount' => $order->discount_amount,
+                'total_amount' => $order->total_amount,
+                'notes' => $order->notes ?? null,
+            ]);
+
+            return back()->with('success', 'ការបញ្ជាទិញបានបញ្ចប់ និងវិក្ក័យបត្រ ' . $invoiceNumber . ' បានបង្កើត។');
+        }
 
         return back()->with('success', 'ការបញ្ជាទិញបានបញ្ចប់។');
     }

@@ -6,8 +6,8 @@
         <div class="col-12">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">វិក្ក័យប័ត្រ</h2>
-                <a href="{{ route('invoices.create') }}" class="btn" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                    <i class="fas fa-plus"></i> ចេញវិក្ក័យបត្រ
+                <a href="{{ route('orders.create') }}" class="btn" style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
+                    <i class="fas fa-plus"></i> បង្កើតបញ្ជាទិញ
                 </a>
             </div>
         </div>
@@ -111,7 +111,7 @@
     </div>
     @else
     <div class="alert alert-info" role="alert" style="border-radius: 8px; padding: 16px; background: #cce5ff; color: #004085; border: 1px solid #b6d4fe;">
-        <i class="fas fa-info-circle"></i> No invoices found. <a href="{{ route('invoices.create') }}" style="color: #004085; font-weight: 600;">បង្កើតថ្មី</a>
+        <i class="fas fa-info-circle"></i> មិនមាន វិក្ក័យប័ត្រ។ <a href="{{ route('orders.create') }}" style="color: #004085; font-weight: 600;">បង្កើតបញ្ជាទិញ</a>
     </div>
     @endif
 </div>

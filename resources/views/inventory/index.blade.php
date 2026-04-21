@@ -800,35 +800,45 @@
     });
 
     // Export to CSV
-    function exportToCSV() {
-        const table = document.getElementById('tableBody');
-        if (!table) return;
+   function exportToCSV() {
+    const table = document.getElementById('tableBody');
+    if (!table) return;
+
+    let csv = "Product,Category,Warehouse,Quantity,Min,Status\n";
+
+    table.querySelectorAll('tr').forEach(row => {
+        if (row.style.display === 'none') return;
+
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 0) {
+            const product = cells[0]?.textContent.trim() || '';
+            const category = cells[1]?.textContent.trim() || '';
+            const warehouse = cells[2]?.textContent.trim() || '';
+            const qty = cells[3]?.textContent.trim() || '';
+            const min = cells[4]?.textContent.trim() || '';
+            const status = cells[5]?.textContent.trim() || '';
+
+            csv += `"${product}","${category}","${warehouse}","${qty}","${min}","${status}"\n`;
+        }
+    });
+
+    //  ADD UTF-8 BOM (FIX KHMER)
+    const BOM = "\uFEFF";
+
+    //  Create blob with UTF-8
+    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+
+    //  Download file
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "inventory.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
         
-        let csv = "Product,Category,Warehouse,Quantity,Min,Status\n";
-        
-        table.querySelectorAll('tr').forEach(row => {
-            if (row.style.display === 'none') return;
-            const cells = row.querySelectorAll('td');
-            if (cells.length > 0) {
-                const product = cells[0]?.textContent.trim() || '';
-                const category = cells[1]?.textContent.trim() || '';
-                const warehouse = cells[2]?.textContent.trim() || '';
-                const qty = cells[3]?.textContent.trim() || '';
-                const min = cells[4]?.textContent.trim() || '';
-                const status = cells[5]?.textContent.trim() || '';
-                
-                csv += `"${product}","${category}","${warehouse}","${qty}","${min}","${status}"\n`;
-            }
-        });
-        
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'inventory_' + new Date().toISOString().slice(0,10) + '.csv';
-        a.click();
-        window.URL.revokeObjectURL(url);
-    }
+  
 
     // Sorting
     let sortColumn = null;

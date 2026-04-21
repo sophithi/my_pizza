@@ -72,7 +72,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" style="font-weight: 600;">កាលបរិច្ឆេទកម្មង់ *</label>
-                                <input type="datetime-local" name="order_date" class="form-control" value="{{ old('order_date', $order->order_date->format('Y-m-d\TH:i')) }}" required style="border-radius: 6px; border: 1px solid #e9ecef; padding: 10px 12px;">
+                                <input type="datetime-local" name="order_date" class="form-control" value="{{ old('order_date', $order->order_date->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}" required style="border-radius: 6px; border: 1px solid #e9ecef; padding: 10px 12px;">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -83,18 +83,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label" style="font-weight: 600;">Status</label>
-                                <select name="status" class="form-control" style="border-radius: 6px; border: 1px solid #e9ecef; padding: 10px 12px;">
-                                    <option value="pending" {{ old('status', $order->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="processing" {{ old('status', $order->status) == 'processing' ? 'selected' : '' }}>Processing</option>
-                                    <option value="completed" {{ old('status', $order->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="cancelled" {{ old('status', $order->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                </select>
-                            </div>
-                        </div>
+                    <div class="row">    
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" style="font-weight: 600;">Payment Status</label>

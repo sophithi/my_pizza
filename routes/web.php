@@ -55,7 +55,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard', [DashboardController::class, 'index']);
 
     // ============================================
     // ADMIN ONLY - User create/edit/delete
@@ -83,6 +82,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('inventory', InventoryController::class);
         Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
 
+
         // Settings management
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
     // ============================================
     // ALL USERS - Orders (view, create, edit)
     // ============================================
-    Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
+    Route::middleware('role:admin,manager,staff,')->group(function () {
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/create', [OrderController::class, 'create'])->name('orders.create');
         Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
@@ -125,15 +125,19 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,manager,staff_inventory')->group(function () {
         Route::resource('invoices', InvoiceController::class);
         Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
-        Route::get('invoices/{invoice}/sticker-prep', [InvoiceController::class, 'stickerPrep'])->name('invoices.sticker-prep');
-        Route::get('invoices/{invoice}/sticker-customer', [InvoiceController::class, 'stickerCustomer'])->name('invoices.sticker-customer');
+    });
+
+    // Print & Sticker printing (only Admin & Staff Inventory)
+    Route::middleware('role:admin,staff_inventory')->group(function () {
+        Route::get('print/index', [InvoiceController::class, 'printIndex'])->name('print.index');
+        Route::get('print/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('print.prep');
+        Route::get('print/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('print.customer');
     });
 
     // Staff (office) - view invoices only
     Route::middleware('role:staff')->group(function () {
         Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
-        Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     });
 
     // ============================================

@@ -102,10 +102,10 @@
                         <td style="padding: 12px;">
                             <a href="{{ route('products.show', $product) }}" class="btn-action btn-edit" style="margin-right: 4px;"><i class="fas fa-eye"></i> View</a>
                             <a href="{{ route('products.edit', $product) }}" class="btn-action btn-edit"><i class="fas fa-edit"></i> Edit</a>
-                            <form action="{{ route('products.destroy', $product) }}" method="POST" style="display: inline;">
+                            <form action="{{ route('products.destroy', $product) }}" method="POST" style="display: inline;" data-delete="Product" data-item-name="{{ $product->name }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn-action btn-delete" style="border: none; cursor: pointer;" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i> Delete</button>
+                                <button type="submit" class="btn-action btn-delete" style="border: none; cursor: pointer;"><i class="fas fa-trash"></i> Delete</button>
                             </form>
                         </td>
                     </tr>

@@ -522,8 +522,8 @@
         <a href="/" class="nav-link {{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}" data-tooltip="ទំព័រដើម">
             <i class="fas fa-tachometer-alt"></i><span>ទំព័រដើម</span>
         </a>
-        <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}" data-tooltip="ការកម្មង់">
-            <i class="fas fa-shopping-cart"></i><span>ការកម្មង់</span>
+        <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}" data-tooltip="ចេញវិក្ក័យបត្រ">
+            <i class="fas fa-shopping-cart"></i><span>ចេញវិក្ក័យបត្រ</span>
         </a>
 
         {{-- Admin, Manager, Staff (Office) see customers menu --}}
@@ -532,7 +532,6 @@
             <i class="fas fa-users"></i><span>អតិថិជន</span>
         </a>
         @endif
-
         {{-- Only admins see warehouse section --}}
         @if(auth()->user()->isAdmin() || auth()->user()->isManager())
       
@@ -553,7 +552,6 @@
             <i class="fas fa-truck"></i><span>ការដឹកជញ្ចូន</span>
         </a>
 
-       
         <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}" data-tooltip="វិក័្កយបត្រ">
             <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
         </a>
@@ -562,20 +560,24 @@
         </a>
         @endif
 
-        {{-- Staff inventory sees invoices & inventory --}}
-        @if(auth()->user()->isStaffInventory())
+        {{--  Staff inventory sees invoices & inventory --}}
+        @if(auth()->user()->isStaffInventory()) 
         <a href="/inventory" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}" data-tooltip="ស្តុកទំនិញ">
             <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
         </a>
-        <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}" data-tooltip="វិក័្កយបត្រ">
-            <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
-        </a>
         @endif
 
+        {{-- រៀបចំទំនិញ: Admin & Staff Inventory access prep printing page --}}
+        @if(auth()->user()->isAdmin() || auth()->user()->isStaffInventory())
+        <a href="{{ route('print.index') }}" class="nav-link {{ request()->is('print/index') ? 'active' : '' }}" data-tooltip="រៀបចំទំនិញ">
+            <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
+        </a>
+        @endif
+<!-- 
         {{-- All users see reports --}}
         <a href="/reports" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}" data-tooltip="របាយការណ៍">
             <i class="fas fa-chart-bar"></i><span>របាយការណ៍</span>
-        </a>
+        </a> -->
 
         {{-- Admin & Manager see users --}}
         @if(auth()->user()->isAdmin() || auth()->user()->isManager())

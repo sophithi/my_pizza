@@ -66,7 +66,7 @@
             <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #17a2b8;">
                 <div class="card-body" style="padding: 24px;">
                     <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Total Credit Limit</p>
-                    <h3 style="color: #17a2b8; font-size: 32px; font-weight: 700; margin: 0;">₱{{ number_format($totalCreditLimit, 2) }}</h3>
+                    <h3 style="color: #17a2b8; font-size: 32px; font-weight: 700; margin: 0;">${{ number_format($totalCreditLimit, 2) }}</h3>
                 </div>
             </div>
         </div>
@@ -82,11 +82,11 @@
                 <table class="table table-hover" style="margin-bottom: 0;">
                     <thead style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
                         <tr>
-                            <th style="padding: 12px; color: #666; font-weight: 600;">Customer Name</th>
-                            <th style="padding: 12px; color: #666; font-weight: 600;">Contact</th>
-                            <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">Orders</th>
-                            <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">Total Spent</th>
-                            <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">Avg Order Value</th>
+                            <th style="padding: 12px; color: #666; font-weight: 600;">ឈ្មោះអតិថិជន</th>
+                            <th style="padding: 12px; color: #666; font-weight: 600;">ទំនាក់ទំនង</th>
+                            <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">ការកម្មង់</th>
+                            <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">ការចំណាយ</th>
+                            <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">ការចំណាយទូទៅ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,7 +101,7 @@
                             </td>
                             <td style="padding: 12px; color: #333; font-weight: 500; text-align: right;">₱{{ number_format($customer->orders_sum_total_amount ?? 0, 2) }}</td>
                             <td style="padding: 12px; color: #666; text-align: right;">
-                                ₱{{ number_format(($customer->orders_count && $customer->orders_sum_total_amount) ? $customer->orders_sum_total_amount / $customer->orders_count : 0, 2) }}
+                                ${{ number_format(($customer->orders_count && $customer->orders_sum_total_amount) ? $customer->orders_sum_total_amount / $customer->orders_count : 0, 2) }}
                             </td>
                         </tr>
                         @endforeach
@@ -110,11 +110,9 @@
             </div>
         </div>
     </div>
-
     <div style="margin-top: 20px;">
         {{ $customerActivity->links() }}
     </div>
-
     <div style="margin-top: 20px;">
         <a href="{{ route('reports.dashboard') }}" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
             Back to Dashboard

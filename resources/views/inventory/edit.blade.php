@@ -134,7 +134,7 @@
 
 <div class="container mt-4 mb-4" style="max-width: 600px;">
     <div class="form-card">
-        <h3 class="form-card__title">Edit Inventory</h3>
+        <h3 class="form-card__title">ស្តុកទំនិញ</h3>
 
         @if ($errors->any())
         <div class="alert-error">
@@ -151,23 +151,23 @@
             @method('PUT')
 
             <div class="form-group">
-                <label class="form-label">Product</label>
+                <label class="form-label">ទំនិញ</label>
                 <input type="text" class="form-input" value="{{ $inventory->product->name ?? 'Product Not Found' }}" disabled>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Quantity *</label>
+                    <label class="form-label">ចំនួនទំនិញ *</label>
                     <input type="number" name="quantity" class="form-input" value="{{ old('quantity', $inventory->quantity) }}" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Reorder Level *</label>
+                    <label class="form-label">កម្រិតស្តុក *</label>
                     <input type="number" name="reorder_level" class="form-input" value="{{ old('reorder_level', $inventory->reorder_level) }}" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Warehouse Location</label>
+                <label class="form-label">ទីតាំងស្តុក</label>
                 <input type="text" name="warehouse_location" class="form-input" value="{{ old('warehouse_location', $inventory->warehouse_location) }}" placeholder="......">
             </div>
 

@@ -161,7 +161,7 @@
     <div class="page-header">
         <div>
             <p class="page-subtitle">ការដឹកជញ្ជូន</p>
-            <h1 class="page-title">Delivery</h1>
+           
         </div>
         <a href="{{ route('deliveries.create') }}" class="btn-add">
             <i class="fas fa-plus"></i> បង្កើតថ្មី
@@ -169,7 +169,7 @@
     </div>
 
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="🔍 ស្វែងរកការដឹកជញ្ជូន..." onkeyup="filterTable()">
+        <input type="text" id="searchInput" placeholder=" ស្វែងរកការដឹកជញ្ជូន..." onkeyup="filterTable()">
     </div>
 
     <div class="table-card">
@@ -196,7 +196,7 @@
                         <div style="display: flex; gap: 6px;">
                             <a href="{{ route('deliveries.show', $delivery) }}" class="action-btn btn-view"><i class="fas fa-eye"></i> View</a>
                             <a href="{{ route('deliveries.edit', $delivery) }}" class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</a>
-                            <form action="{{ route('deliveries.destroy', $delivery) }}" method="POST" style="display:inline;" onsubmit="return confirm('លុបការដឹកជញ្ជូននេះ?')">
+                            <form action="{{ route('deliveries.destroy', $delivery) }}" method="POST" style="display:inline;" data-delete="Delivery" data-item-name="{{ $delivery->delivery_name }}">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="action-btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
                             </form>

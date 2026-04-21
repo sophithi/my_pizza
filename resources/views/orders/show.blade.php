@@ -494,7 +494,7 @@
                 <span class="sep"></span>
                 <span>{{ $order->order_date->translatedFormat('d M Y') }}</span>
                 <span class="sep"></span>
-                <span>{{ $order->order_date->translatedFormat('h:i A') }}</span>
+                <span>{{ $order->order_date->setTimezone('Asia/Phnom_Penh')->format('h:i A') }}</span>
             </div>
         </div>
         <div class="hero-right">
@@ -503,151 +503,10 @@
         </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-label">ស្ថានភាពបញ្ជាទិញ</div>
-            <div class="stat-content">
-                @if($order->status === 'completed')
-                    <span class="badge badge-success">✓ បានបញ្ចប់</span>
-                @elseif($order->status === 'processing')
-                    <span class="badge badge-info">⟳ កំពុងដំណើរការ</span>
-                @elseif($order->status === 'cancelled')
-                    <span class="badge badge-danger">✕ បានបោះបង់</span>
-                @else
-                    <span class="badge badge-warning">⏱ រង់ចាំ</span>
-                @endif
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">ស្ថានភាពបង់ប្រាក់</div>
-            <div class="stat-content">
-                @if($order->payment_status === 'paid')
-                    <span class="badge badge-success">✓ បានបង់</span>
-                @elseif($order->payment_status === 'partial')
-                    <span class="badge badge-info">⟳ បង់មួយផ្នែក</span>
-                @else
-                    <span class="badge badge-warning">⏱ មិនទាន់បង់</span>
-                @endif
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">ចំនួនមុខទំនិញ</div>
-            <div class="stat-content" style="font-size: 24px; font-weight: 800;">{{ $order->items->count() }}</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">សរុប</div>
-            <div class="stat-content" style="font-size: 20px; font-weight: 800;">${{ number_format($order->subtotal, 2) }}</div>
-        </div>
-    </div>
-
-    <!-- Order Items -->
-    <div class="section">
-        <div class="section-header">
-          
-            <h3>រាយនាមទំនិញ</h3>
-        </div>
-        @if($order->items->count())
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th class="item-num">#</th>
-                        <th>ផលិតផល</th>
-                        <th class="text-center">ចំនួន</th>
-                        <th class="text-right">តម្លៃ</th>
-                        <th class="text-right">សរុប</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($order->items as $i => $item)
-                    <tr>
-                        <td class="item-num">{{ $i + 1 }}</td>
-                        <td><span class="item-name">{{ $item->product->name }}</span></td>
-                        <td class="text-center"><span class="item-qty">{{ $item->quantity }}</span></td>
-                        <td class="text-right"><span class="item-price">${{ number_format($item->unit_price, 2) }}</span></td>
-                        <td class="text-right"><span class="item-price">${{ number_format($item->total_price, 2) }}</span></td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <div class="summary-footer">
-                <div class="summary-table">
-                    <div class="summary-line">
-                        <span class="label">សរុប</span>
-                        <span class="value">${{ number_format($order->subtotal, 2) }}</span>
-                    </div>
-                    @if($order->discount_amount > 0)
-                    <div class="summary-line discount">
-                        <span class="label">បញ្ចុះតម្លៃ</span>
-                        <span class="value">-${{ number_format($order->discount_amount, 2) }}</span>
-                    </div>
-                    @endif
-                    <div class="summary-line total">
-                        <span class="label">តម្លៃសរុប</span>
-                        <span class="value">${{ number_format($order->total_amount, 2) }}</span>
-                    </div>
-                </div>
-            </div>
-        @else
-            <div class="section-body" style="text-align: center; color: var(--text-muted); padding: 48px;">
-                មិនមានទំនិញនៅឡើយទេ
-            </div>
-        @endif
-    </div>
-    <!-- Customer Info -->
-    <div class="section">
-        <div class="section-header">
-          
-            <h3>ព័ត៌មានអតិថិជន</h3>
-        </div>
-        <div class="section-body">
-            <div class="customer-grid">
-                <div class="customer-field">
-                    <div class="field-label">ឈ្មោះ</div>
-                    <div class="field-value">{{ $order->customer->name }}</div>
-                </div>
-                <div class="customer-field">
-                    <div class="field-label">ទូរសព្ទ</div>
-                    <div class="field-value {{ !$order->customer->phone ? 'empty' : '' }}">{{ $order->customer->phone ?? '—' }}</div>
-                </div>
-                <div class="customer-field">
-                    <div class="field-label">ទីតាំង</div>
-                    <div class="field-value {{ !$order->customer->location ? 'empty' : '' }}">{{ $order->customer->location ?? '—' }}</div>
-                </div>
-            </div>
-            @php
-                $deliveryItems = $order->items->filter(fn($item) => $item->delivery_id);
-            @endphp
-            @if($deliveryItems->count())
-            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
-                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 10px;">ការដឹកជញ្ជូន</div>
-                @foreach($deliveryItems as $dItem)
-                <div style="font-size: 14px; color: var(--text); margin-bottom: 6px;">
-                    <span style="font-weight: 600;">{{ $dItem->product->name }}</span>
-                    <span style="color: var(--text-muted);"> → {{ $dItem->delivery->delivery_name }} — ៛{{ number_format($dItem->delivery->delivery_price_khr, 0) }}</span>
-                </div>
-                @endforeach
-            </div>
-            @endif
-        </div>
-    </div>
-    <!-- Notes -->
-    @if($order->notes)
-    <div class="section">
-        <div class="section-header">
-         
-            <h3>កំណត់ចំណាំ</h3>
-        </div>
-        <div class="section-body">
-            <div class="notes-content">{{ $order->notes }}</div>
-        </div>
-    </div>
-    @endif
-
     <!-- Preparation Info -->
     @if($order->prepared_by)
     <div class="detail-section" style="margin-bottom: 1.5rem;">
-        <h3 class="section-title" style="font-size: 1rem;">🧑‍🍳 ព័ត៌មានរៀបចំ</h3>
+        <h3 class="section-title" style="font-size: 1rem;"> ព័ត៌មានរៀបចំ</h3>
         <div style="display: flex; gap: 2rem; padding: 1rem; background: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;">
             <div>
                 <span style="color: #6b7280; font-size: 0.85rem;">រៀបចំដោយ</span><br>
@@ -655,7 +514,7 @@
             </div>
             <div>
                 <span style="color: #6b7280; font-size: 0.85rem;">ពេលវេលា</span><br>
-                <strong>{{ $order->prepared_at ? $order->prepared_at->translatedFormat('d/M/Y h:i A') : 'N/A' }}</strong>
+                        <strong>{{ $order->prepared_at ? $order->prepared_at->setTimezone('Asia/Phnom_Penh')->format('d/m/Y h:i A') : 'N/A' }}</strong>
             </div>
         </div>
     </div>
@@ -663,49 +522,27 @@
 
     <!-- Actions -->
     <div class="actions-bar">
-        {{-- Preparation workflow buttons --}}
-        @if($order->status === 'pending' && (auth()->user()->isStaffInventory() || auth()->user()->isManager() || auth()->user()->isAdmin()))
-            <form action="{{ route('orders.prepare', $order) }}" method="POST" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn btn-primary" style="background: #2563eb;">
-                    🔧 ចាប់ផ្តើមរៀបចំ
-                </button>
-            </form>
-        @endif
+        {{-- Print button --}}
+        <a href="{{ route('invoices.print', $order->invoice ?? $order->id) }}" class="btn btn-primary" style="background: #6c757d;" target="_blank">
+            <i class="fas fa-print"></i> print
+        </a>
 
-        @if($order->status === 'processing' && (auth()->user()->isStaffInventory() || auth()->user()->isManager() || auth()->user()->isAdmin()))
-            <form action="{{ route('orders.ready', $order) }}" method="POST" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn btn-primary" style="background: #16a34a;">
-                    ✓ រួចរាល់
-                </button>
-            </form>
-        @endif
+        {{-- Prepare/Submit button (to /print/index) --}}
+        <a href="{{ route('print.index') }}" class="btn btn-primary" style="background: #e85d24;">
+            ដាក់រៀបចំ
+        </a>
 
-        @if(!auth()->user()->isStaffInventory())
-        <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary">
-             កែសម្រួល
-        </a>
-        <a href="{{ route('deliveries.create') }}" class="btn btn-primary">
-            កំណត់ការដឹកជញ្ជូន
-        </a>
-        <a href="{{ route('invoices.create', ['order_id' => $order->id]) }}" class="btn btn-outline">
-             បង្កើតវិក្កយបត្រ
-        </a>
+        {{-- Edit button --}}
+        @if($order->status === 'pending')
+            <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary" style="background: #2563eb;">
+                <i class="fas fa-edit"></i> កែប្រែ
+            </a>
         @endif
+        
         <a href="{{ route('orders.index') }}" class="btn btn-outline">
             ← ត្រឡប់ក្រោយ
         </a>
-        @if(!auth()->user()->isStaffInventory())
-        <form action="{{ route('orders.destroy', $order) }}" method="POST" style="display:inline;" onsubmit="return confirm('លុបការបញ្ជាទិញនេះ?')">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger-outline">
-                 លុប
-            </button>
-        </form>
-        @endif
     </div>
 
 </div>
-@endsection 
+@endsection

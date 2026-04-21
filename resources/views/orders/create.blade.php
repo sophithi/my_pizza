@@ -20,7 +20,7 @@
     body { background: var(--bg); }
 
     .page-header {
-        margin-bottom: 32px;
+        margin-bottom: 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -34,10 +34,10 @@
     }
 
     .product-section-title {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
         color: var(--text);
-        margin-bottom: 24px;
+        margin-bottom: 14px;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -125,12 +125,12 @@
         border: 1px solid var(--border);
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 24px;
+        margin-bottom: 16px;
         transition: all 0.3s ease;
     }
 
     .card-body {
-        padding: 28px;
+        padding: 16px;
     }
 
     .form-label {
@@ -179,9 +179,9 @@
     }
 
     .invoice-items {
-        max-height: 450px;
+        max-height: 280px;
         overflow-y: auto;
-        margin-bottom: 20px;
+        margin-bottom: 12px;
     }
 
     .invoice-item {
@@ -259,7 +259,7 @@
 
     .invoice-summary {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 20px;
+        padding: 12px 16px;
         border-radius: 10px;
         border: 1px solid var(--border);
     }
@@ -267,7 +267,7 @@
     .summary-row {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         font-size: 13px;
         color: var(--text);
     }
@@ -293,7 +293,7 @@
 
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
+        padding: 20px 12px;
         color: var(--text-muted);
     }
 
@@ -355,7 +355,7 @@
     .button-group {
         display: flex;
         gap: 12px;
-        margin-top: 24px;
+        margin-top: 16px;
     }
 
     .alert-danger {
@@ -400,7 +400,7 @@
 
     /* Order Details Fields */
     .od-field {
-        margin-bottom: 18px;
+        margin-bottom: 12px;
         position: relative;
     }
 
@@ -668,20 +668,9 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="od-field">
-                                <label class="od-label"><i class="fas fa-calendar-alt"></i> កាលបរិច្ឆេទ *</label>
-                                <input type="date" name="order_date" class="form-control" required 
-                                    value="{{ old('order_date', now()->format('Y-m-d')) }}">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="od-field">
-                                <label class="od-label"><i class="fas fa-info-circle"></i> ស្ថានភាព</label>
-                                <select name="status" class="form-control od-select">
-                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>🟡 រង់ចាំ</option>
-                                    <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>🔵 កំពុងដំណើរការ</option>
-                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>🟢 បានបញ្ចប់</option>
-                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>🔴 បានលុបចោល</option>
-                                </select>
+                                <label class="od-label"><i class="fas fa-calendar-alt"></i> កាលបរិច្ឆេទ និងពេល *</label>
+                                <input type="datetime-local" name="order_date" class="form-control" required
+                                    value="{{ old('order_date', now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}">
                             </div>
                         </div>
                     </div>
@@ -704,7 +693,7 @@
                                     <option value="">គ្មាន</option>
                                     @foreach($deliveries as $delivery)
                                         <option value="{{ $delivery->id }}" data-name="{{ $delivery->delivery_name }}" data-price="{{ $delivery->delivery_price_khr }}">
-                                            🚚 {{ $delivery->delivery_name }} — ៛{{ number_format($delivery->delivery_price_khr, 0) }}
+                                             {{ $delivery->delivery_name }} — ៛{{ number_format($delivery->delivery_price_khr, 0) }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -972,7 +961,7 @@
         }
         if (Object.keys(cart).length === 0) {
             e.preventDefault();
-            showToast('warning', '🛒', 'សូមបន្ថែមទំនិញ', 'សូមជ្រើសរើសផលិតផលអាតិចមួយ');
+            showToast('warning', '🛒', 'សូមបន្ថែមទំនិញ', 'សូមជ្រើសរើសទំនិញ');
             return false;
         }
     });
@@ -987,7 +976,7 @@
                 <div class="toast-icon ${type}">${icon}</div>
                 <div class="toast-title">${title}</div>
                 <div class="toast-message">${message}</div>
-                <button class="toast-btn" onclick="closeToast()">ភ្លាម</button>
+                <button class="toast-btn" onclick="closeToast()">ជ្រើសរើស</button>
             </div>
         `);
 

@@ -33,45 +33,32 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Show the form to create a new invoice from an order.
+     * Redirect to create order instead (invoices are auto-created).
      */
     public function create()
     {
-        $orders = Order::whereDoesntHave('invoice')
-            ->with('customer')
-            ->paginate(10);
-        return view('invoices.create', compact('orders'));
+        return redirect()->route('orders.create')->with('info', 'វិក្ក័យប័ត្របានបង្កើតដោយស្វយប្រវត្តិ នៅពេលដែលលទ្ធផលបញ្ចប់។');
+    }
+
+    /**
+     * Display invoices for printing (print index).
+     */
+    public function printIndex()
+    {
+        $invoices = Invoice::with(['order', 'order.customer'])->latest('invoice_date')->paginate(15);
+        return view('prints.index', compact('invoices'));
     }
 
     /**
      * Store a newly created invoice.
      */
+    /**
+     * Store a newly created invoice (kept for API/flexibility but redirects).
+     * Invoices are now auto-created when orders are marked ready.
+     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'order_id' => 'required|exists:orders,id|unique:invoices',
-            'invoice_date' => 'required|date',
-            'due_date' => 'nullable|date|after:invoice_date',
-            'notes' => 'nullable|string',
-        ]);
-
-        $order = Order::find($validated['order_id']);
-        $lastInvoice = Invoice::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
-        $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
-        $invoiceNumber = 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-
-        $invoice = Invoice::create([
-            'order_id' => $order->id,
-            'invoice_number' => $invoiceNumber,
-            'invoice_date' => $validated['invoice_date'],
-            'due_date' => $validated['due_date'] ?? null,
-            'subtotal' => $order->subtotal,
-            'discount_amount' => $order->discount_amount,
-            'total_amount' => $order->total_amount,
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        return redirect()->route('invoices.show', $invoice)->with('success', 'Invoice created successfully.');
+        return redirect()->route('orders.index')->with('info', 'វិក្ក័យប័ត្របានបង្កើតដោយស្វយប្រវត្តិរួចហើយ។');
     }
 
     /**
@@ -121,7 +108,7 @@ class InvoiceController extends Controller
     public function print(Invoice $invoice)
     {
         $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
-        return view('invoices.print', compact('invoice'));
+        return view('prints.sticker-customer', compact('invoice'));
     }
 
     /**
@@ -130,7 +117,7 @@ class InvoiceController extends Controller
     public function stickerPrep(Invoice $invoice)
     {
         $invoice->load('order.customer', 'order.items.product');
-        return view('invoices.sticker-prep', compact('invoice'));
+        return view('prints.sticker-prep', compact('invoice'));
     }
 
     /**
@@ -139,6 +126,8 @@ class InvoiceController extends Controller
     public function stickerCustomer(Invoice $invoice)
     {
         $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
-        return view('invoices.sticker-customer', compact('invoice'));
+        return view('prints.sticker-customer', compact('invoice'));
     }
+
+
 }
