@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -198,76 +199,66 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="login-wrapper">
-    <div class="login-card">
-        <!-- Header -->
-        <div class="login-header">
-            <div class="login_log"></div>
-            <h1>Pizza Happy Family</h1>
-        </div>
-
-        <!-- Body -->
-        <div class="login-body">
-            <!-- Error Messages -->
-            @if($errors->any())
-            <div class="error-box">
-                <strong> Login Failed</strong>
-                @foreach($errors->all() as $err)
-                <div style="margin-top: 4px;">{{ $err }}</div>
-                @endforeach
+    <div class="login-wrapper">
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <div class="login_log"></div>
+                <h1>Pizza Happy Family</h1>
             </div>
-            @endif
 
-            <!-- Login Form -->
-            <form action="{{ route('login.post') }}" method="POST">
-                @csrf
+            <!-- Body -->
+            <div class="login-body">
+                <!-- Error Messages -->
+                @if($errors->any())
+                    <div class="error-box">
+                        <strong> Login Failed</strong>
+                        @foreach($errors->all() as $err)
+                            <div style="margin-top: 4px;">{{ $err }}</div>
+                        @endforeach
+                    </div>
+                @endif
 
-                <!-- Email -->
-                <div class="form-group">
-                    <label class="form-label" for="email">Email</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        class="form-control @error('email') is-invalid @enderror"
-                        placeholder="user1@pizzahappyfamily.com"
-                        value="{{ old('email') }}"
-                        required
-                        autofocus
-                    >
-                    @error('email')
-                    <span class="error-text">{{ $message }}</span>
-                    @enderror
-                </div>
+                <!-- Login Form -->
+                <form action="{{ route('login.post') }}" method="POST">
+                    @csrf
 
-                <!-- Password -->
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-control @error('password') is-invalid @enderror"
-                        placeholder="••••••••"
-                        required
-                    >
-                    @error('password')
-                    <span class="error-text">{{ $message }}</span>
-                    @enderror
-                </div>
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" name="email"
+                            class="form-control @error('email') is-invalid @enderror"
+                            placeholder="user1@pizzahappyfamily.com" value="{{ old('email') }}" required autofocus>
+                        @error('email')
+                            <span class="error-text">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" name="password"
+                            class="form-control @error('password') is-invalid @enderror" placeholder="••••••••"
+                            required>
+                        @error('password')
+                            <span class="error-text">{{ $message }}</span>
+                        @enderror
+                    </div>
 
 
-                <!-- Submit Button -->
-                <button type="submit" class="btn-login">
-                    ចូលប្រើប្រាស់
-                </button>
-            </form>
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-login">
+                        ចូលប្រើប្រាស់
+                    </button>
+                </form>
 
+            </div>
         </div>
     </div>
-</div>
 
 </body>
+
 </html>

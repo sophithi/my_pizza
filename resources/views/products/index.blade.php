@@ -52,11 +52,11 @@
             <table class="table table-hover mb-0">
                 <thead style="background: #f8f9fa; border-top: 1px solid #e9ecef; border-bottom: 2px solid #e9ecef;">
                     <tr>
-                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">SKU</th>
-                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Name</th>
-                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Category</th>
-                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Unit</th>
-                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Price (USD / KHR)</th>
+                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">កូដ</th>
+                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">ឈ្មោះ</th>
+                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">ប្រភេទ</th>
+                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">ខ្នាត</th>
+                        <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">តម្លៃ (USD / KHR)</th>
                         <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Stock</th>
                         <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">Actions</th>
                     </tr>

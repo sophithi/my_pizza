@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Notifications\NewOrderNotification;
+use App\Models\User;
 
 class OrderController extends Controller
 {
@@ -46,6 +48,7 @@ class OrderController extends Controller
             'customer_id' => $validated['customer_id'],
             'user_id' => auth()->id(),
             'order_date' => $validated['order_date'],
+            'code' => 'ORD-' . rand(1000, 9999),
             'subtotal' => $validated['subtotal'],
             'discount_amount' => $validated['discount_amount'] ?? 0,
             'total_amount' => $validated['total_amount'],
@@ -81,6 +84,12 @@ class OrderController extends Controller
             'total_amount' => $order->total_amount,
             'notes' => $order->notes ?? null,
         ]);
+
+        // Send notification to inventory staff + admin
+        $users = User::whereIn('role', ['inventory', 'admin'])->get();
+        foreach ($users as $user) {
+            $user->notify(new NewOrderNotification($order));
+        }
 
         return redirect()->route('orders.show', $order)->with('success', 'Order created successfully with invoice ' . $invoiceNumber . '.');
     }

@@ -92,7 +92,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Unit <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold">ខ្នាត <span class="text-danger">*</span></label>
                                 <select name="unit" class="form-select kh @error('unit') is-invalid @enderror">
                                     <option value="" disabled {{ old('unit', $product->unit ?? '') ? '' : 'selected' }}>— ជ្រើសរើស —</option>
                                     @php

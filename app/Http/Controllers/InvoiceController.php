@@ -128,6 +128,4 @@ class InvoiceController extends Controller
         $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
         return view('prints.sticker-customer', compact('invoice'));
     }
-
-
 }
