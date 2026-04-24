@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
             $table->dateTime('order_date')->default(now());
             $table->decimal('subtotal', 12, 2)->default(0);
-            $table->decimal('tax_amount', 12, 2)->default(0);
+           
             $table->decimal('discount_amount', 12, 2)->default(0);
             $table->decimal('total_amount', 12, 2);
             $table->string('status')->default('pending'); // pending, processing, completed, cancelled

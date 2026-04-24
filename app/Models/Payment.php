@@ -2,29 +2,61 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'customer_name',
         'order_id',
-        'invoice_id',
-        'amount',
+        'order_date',
+        'total_amount',
+        'paid_amount',
         'method',
-        'reference',
-        'status',
+        'status',   // paid | partial | pending
+        'notes',
     ];
 
-    public function invoice()
+    protected $casts = [
+        'order_date'   => 'date',
+        'total_amount' => 'float',
+        'paid_amount'  => 'float',
+    ];
+
+    // ── Scopes ────────────────────────────────────────────────────────────────
+
+    public function scopePaid($query)
     {
-        return $this->belongsTo(Invoice::class);
+        return $query->where('status', 'paid');
     }
 
-    public function order()
+    public function scopePartial($query)
     {
-        return $this->belongsTo(Order::class);
+        return $query->where('status', 'partial');
+    }
+
+    public function scopeUnpaid($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    // ── Accessors ─────────────────────────────────────────────────────────────
+
+    public function getBalanceAttribute(): float
+    {
+        return max(0, $this->total_amount - $this->paid_amount);
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            'paid'    => 'Paid',
+            'partial' => 'Partial',
+            'pending' => 'Unpaid',
+            default   => ucfirst($this->status),
+        };
     }
 }

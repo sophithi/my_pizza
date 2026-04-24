@@ -172,4 +172,19 @@ Route::middleware('auth')->group(function () {
             Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
         });
     });
+
+
+
+    Route::prefix('payments')->name('payments.')->group(function () {
+
+        Route::get('/', [PaymentController::class, 'index'])->name('index');
+        Route::post('/', [PaymentController::class, 'store'])->name('store');
+        Route::put('/{payment}', [PaymentController::class, 'update'])->name('update');
+
+        Route::get('/export/excel', [PaymentController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/export/pdf', [PaymentController::class, 'exportPdf'])->name('export.pdf');
+
+    });
+
+
 });

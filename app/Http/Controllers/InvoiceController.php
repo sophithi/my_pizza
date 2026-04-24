@@ -66,8 +66,11 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
-        return view('invoices.show', compact('invoice'));
+         $invoice->load('items.product');
+
+    $allSameDelivery = false;
+
+    return view('invoices.show', compact('invoice', 'allSameDelivery'));
     }
 
     /**

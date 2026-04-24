@@ -27,32 +27,32 @@ class DashboardController extends Controller
             'today_sales' => Order::whereDate('order_date', $today)
                 ->where('status', 'completed')
                 ->sum('total_amount') ?? 0,
-            
+
             'total_orders' => Order::count(),
-            
+
             'orders_today' => Order::whereDate('order_date', $today)->count(),
-            
+
             'stock_alerts' => Inventory::whereColumn('quantity', '<=', 'reorder_level')
                 ->count(),
-            
+
             'overdue_invoices' => Invoice::where('status', '!=', 'paid')
                 ->where('due_date', '<', $today)
                 ->count(),
-            
+
             'customers' => Customer::count(),
-            
+
             'low_inventory_items' => Inventory::whereColumn('quantity', '<=', 'reorder_level')
                 ->count(),
-            
+
             'recovery_rate' => $this->calculateRecoveryRate(),
-            
-        
+
+
             // Payment Stats
             'unpaid_orders' => Order::where('payment_status', '!=', 'paid')->count(),
-            'pending_payments' => Payment::where('status', 'pending')->sum('amount') ?? 0,
+            'pending_payments' => Payment::where('status', 'pending')->sum('total_amount') ?? 0,
             'today_payments' => Payment::whereDate('created_at', $today)
-                ->where('status', 'completed')
-                ->sum('amount') ?? 0,
+                ->where('status', 'paid')
+                ->sum('paid_amount') ?? 0,
         ];
 
         // Recent orders from database (last 5)
@@ -123,11 +123,11 @@ class DashboardController extends Controller
             ->toArray();
 
         return view('dashboard', compact(
-            'stats', 
-            'recent_orders', 
+            'stats',
+            'recent_orders',
             'topProducts',
             'inventory_alerts',
-    
+
             'pending_payments'
         ));
     }
@@ -138,13 +138,13 @@ class DashboardController extends Controller
     private function calculateRecoveryRate()
     {
         $total_orders = Order::count();
-        
+
         if ($total_orders == 0) {
             return 0;
         }
 
         $completed_orders = Order::where('status', 'completed')->count();
-        
+
         return round(($completed_orders / $total_orders) * 100, 1);
     }
 }

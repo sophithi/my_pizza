@@ -654,14 +654,32 @@
 
             {{-- Customers & Orders (admin, manager, staff office) --}}
             @if(!$isInventory)
-                <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i><span>អតិថិជន</span>
-                </a>
-
+              
                 <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}">
                     <i class="fas fa-shopping-cart"></i><span>ចេញវិក្ក័យបត្រ</span>
                 </a>
+                  <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i><span>អតិថិជន</span>
+                </a>
             @endif
+                  {{-- Invoices & Payments (admin, manager, staff office) --}}
+            @if($isAdminOrManager || $isOfficeStaff)
+                <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
+                    <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
+                </a>
+
+                <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}">
+                    <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
+                </a>
+            @endif
+            {{-- Purchasing (admin & manager only) --}}
+            @if($isAdminOrManager)
+                <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}">
+                    <i class="fas fa-file-invoice"></i><span>ការចំណាយ</span>
+                </a>
+            @endif
+
+
 
             {{-- Products (admin, manager, staff office) --}}
             @if($isAdminOrManager || $isOfficeStaff)
@@ -677,35 +695,21 @@
                 </a>
             @endif
 
-            {{-- Purchasing (admin & manager only) --}}
-            @if($isAdminOrManager)
-                <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}">
-                    <i class="fas fa-file-invoice"></i><span>ការចំណាយ</span>
-                </a>
-            @endif
+            
 
-            {{-- Deliveries (admin, manager, staff office) --}}
-            @if($isAdminOrManager || $isOfficeStaff)
-                <a href="/deliveries" class="nav-link {{ request()->is('deliveries*') ? 'active' : '' }}">
-                    <i class="fas fa-truck"></i><span>ការដឹកជញ្ចូន</span>
-                </a>
-            @endif
-
-            {{-- Invoices & Payments (admin, manager, staff office) --}}
-            @if($isAdminOrManager || $isOfficeStaff)
-                <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
-                    <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
-                </a>
-
-                <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}">
-                    <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
-                </a>
-            @endif
+      
 
             {{-- Print (admin + staff inventory + staff office + manager) --}}
             @if($isAdmin || $isManager || $isStaff || $isInventory)
                 <a href="{{ route('print.index') }}" class="nav-link {{ request()->is('print/index') ? 'active' : '' }}">
                     <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
+                </a>
+            @endif
+            
+            {{-- Deliveries (admin, manager, staff office) --}}
+            @if($isAdminOrManager || $isOfficeStaff)
+                <a href="/deliveries" class="nav-link {{ request()->is('deliveries*') ? 'active' : '' }}">
+                    <i class="fas fa-truck"></i><span>ការដឹកជញ្ចូន</span>
                 </a>
             @endif
 

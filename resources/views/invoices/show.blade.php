@@ -1,221 +1,135 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid py-4">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">{{ $invoice->invoice_number }}
-                    </h2>
-                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-    <a href="{{ route('invoices.print', $invoice) }}" class="btn"
-       style="background: #6c757d; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none;">
-        <i class="fas fa-print"></i> Print វិក្កយបត្រ
-    </a>
-</div>
+<div class="container-fluid py-4">
 
-<table style="width: 100%; border-collapse: collapse;">
-    <thead>
-        <tr>
-            <th style="padding: 8px; text-align: left;">Product</th>
-            <th style="padding: 8px; text-align: right;">Qty</th>
-            <th style="padding: 8px; text-align: right;">Price</th>
-            <th style="padding: 8px; text-align: right;">Total</th>
-            @unless($allSameDelivery)
-                <th style="padding: 8px; text-align: left;">Delivery</th>
-            @endunless
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($invoice->items as $item)
-            <tr>
-                <td style="padding: 8px; color: #333;">
-                    {{ $item->product->name ?? 'No product' }}
-                </td>
+    {{-- HEADER --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">{{ $invoice->invoice_number }}</h2>
+            <small class="text-muted">Invoice Detail</small>
+        </div>
 
-                <td style="padding: 8px; color: #666; text-align: right;">
-                    {{ $item->quantity }}
-                </td>
+        <div class="d-flex gap-2">
+            <a href="{{ route('invoices.index') }}" class="btn btn-light">
+                ← Back
+            </a>
 
-                <td style="padding: 8px; text-align: right;">
-                    <span style="color: #666;">
-                        ${{ number_format($item->unit_price, 2) }}
-                    </span><br>
-                    <span style="color: #999; font-size: 12px;">
-                        ៛{{ number_format($item->unit_price * 4000, 0) }}
-                    </span>
-                </td>
+            <a href="{{ route('invoices.print', $invoice) }}" class="btn btn-dark">
+                🖨 Print
+            </a>
+        </div>
+    </div>
 
-                <td style="padding: 8px; text-align: right;">
-                    <span style="color: #333; font-weight: 500;">
-                        ${{ number_format($item->total_price, 2) }}
-                    </span><br>
-                    <span style="color: #999; font-size: 12px;">
-                        ៛{{ number_format($item->total_price * 4000, 0) }}
-                    </span>
-                </td>
+    {{-- INFO --}}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-3 p-3">
+                <h6 class="text-muted">Customer</h6>
 
-                @unless($allSameDelivery)
-                    <td style="padding: 8px; color: #666; text-align: left;">
-                        {{ $item->delivery_method ?? '-' }}
-                    </td>
-                @endunless
-            </tr>
-        @endforeach
-    </tbody>
-</table>
-                </div>
+                @if($invoice->order && $invoice->order->customer)
+                    <h5>{{ $invoice->order->customer->name }}</h5>
+                    <p class="mb-1">{{ $invoice->order->customer->email }}</p>
+                    <p class="mb-0">{{ $invoice->order->customer->phone }}</p>
+                @else
+                    <p class="text-muted">No customer</p>
+                @endif
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm" style="border-radius: 12px; margin-bottom: 20px;">
-                    <div class="card-body" style="padding: 24px;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-                            <div>
-                                <p
-                                    style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
-                                    Customer</p>
-                                @if($invoice->order && $invoice->order->customer)
-                                    <p style="color: #333; font-size: 16px; font-weight: 600;">
-                                        {{ $invoice->order->customer->name }}</p>
-                                    <p style="color: #666; font-size: 14px; margin: 8px 0;">
-                                        {{ $invoice->order->customer->email }}</p>
-                                    <p style="color: #666; font-size: 14px;">{{ $invoice->order->customer->phone }}</p>
-                                @else
-                                    <p style="color: #999; font-size: 14px;">មិនមានព័ត៍មានអតិថិជន</p>
-                                @endif
-                            </div>
-                            <div>
-                                <p
-                                    style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">
-                                    Invoice Details</p>
-                                <p style="color: #333; margin: 8px 0;"><strong>Invoice Date:</strong>
-                                    {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</p>
-                                <p style="color: #333; margin: 8px 0;"><strong>Due Date:</strong>
-                                    {{ $invoice->due_date ? $invoice->due_date->translatedFormat('M d, Y') : 'N/A' }}</p>
-                                <p style="color: #333; margin: 8px 0;"><strong>Status:</strong>
-                                    <span
-                                        style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
-                                        background: {{ $invoice->status === 'បានបង់ប្រាក់' ? '#d4edda' : ($invoice->status === 'cancel' ? '#f8d7da' : '#fff3cd') }};
-                                        color: {{ $invoice->status === 'បានបង់ប្រាក់' ? '#155724' : ($invoice->status === 'cancel' ? '#721c24' : '#856404') }};">
-                                        {{ ucfirst($invoice->status) }}
-                                    </span>
-                                </p>
-                                @php
-                                    $items = $invoice->order->items ?? collect();
-                                    $allSameDelivery = $items->count() > 0 && $items->pluck('delivery_id')->filter()->unique()->count() === 1;
-                                    $commonDelivery = $allSameDelivery ? optional($items->first()->delivery)->delivery_name : null;
-                                @endphp
-                                @if($allSameDelivery)
-                                    <p style="color: #333; margin: 8px 0;"><strong>ទីតាំំងដឹកជញ្ជូន:</strong>
-                                        {{ $commonDelivery ?? 'N/A' }}</p>
-                                @endif
-                            </div>
-                        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-3 p-3">
+                <h6 class="text-muted">Invoice Details</h6>
 
-                        <h5
-                            style="color: #333; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e9ecef;">
-                            Order Items</h5>
-                        <div class="table-responsive" style="margin-bottom: 20px;">
-                            @if($invoice->order && $invoice->order->items && count($invoice->order->items) > 0)
-                                <table class="table" style="margin-bottom: 0;">
-                                    <thead style="background: #f8f9fa;">
-                                        <tr>
-                                            <th style="padding: 8px; color: #666; font-weight: 600;">ទំនិញ</th>
-                                            <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">ចំនួន</th>
-                                            <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">តម្លៃ
-                                            </th>
-                                            <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">តម្លៃសរុប
-                                            </th>
-                                            @unless($allSameDelivery)
-                                                <th style="padding: 8px; color: #666; font-weight: 600;">ដឹកជញ្ជូន</th>
-                                            @endunless
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($invoice->order->items as $item)
-                                            <tr style="border-bottom: 1px solid #e9ecef;">
-                                                <td style="padding: 8px; color: #333;">{{ $item->product->name }}</td>
-                                                <td style="padding: 8px; color: #666; text-align: right;">{{ $item->quantity }}</td>
-                                                <td style="padding: 8px; text-align: right;"><span
-                                                        style="color: #666;">${{ number_format($item->unit_price, 2) }}</span><br><span
-                                                        style="color: #999; font-size: 12px;">៛{{ number_format($item->unit_price * 4000, 0) }}</span>
-                                                </td>
-                                                <td style="padding: 8px; text-align: right;"><span
-                                                        style="color: #333; font-weight: 500;">${{ number_format($item->total_price, 2) }}</span><br><span
-                                                        style="color: #999; font-size: 12px;">៛{{ number_format($item->total_price * 4000, 0) }}</span>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            @else
-                                <p style="color: #999; padding: 16px; text-align: center;">មិនមានទំនិញ្ក្នុងការកម្មង់</p>
-                            @endif
-                        </div>
+                <p><strong>Date:</strong> {{ $invoice->invoice_date->format('d M Y') }}</p>
+                <p><strong>Due:</strong> {{ $invoice->due_date?->format('d M Y') ?? 'N/A' }}</p>
 
-                        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-                            <div style="width: 300px;">
-                                <div
-                                    style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e9ecef;">
-                                    <span style="color: #666;">Subtotal:</span>
-                                    <div style="text-align: right;"><span
-                                            style="color: #333; font-weight: 500;">${{ number_format($invoice->subtotal, 2) }}</span><br><span
-                                            style="color: #999; font-size: 12px;">៛{{ number_format($invoice->subtotal * 4000, 0) }}</span>
-                                    </div>
-                                </div>
-                                <div
-                                    style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e9ecef;">
-                                    <span style="color: #666;">បញ្ចុះតម្លៃ:</span>
-                                    <div style="text-align: right;"><span
-                                            style="color: #333; font-weight: 500;">${{ number_format($invoice->discount_amount, 2) }}</span><br><span
-                                            style="color: #999; font-size: 12px;">៛{{ number_format($invoice->discount_amount * 4000, 0) }}</span>
-                                    </div>
-                                </div>
-                                <div
-                                    style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 8px;">
-                                    <span style="color: #333; font-weight: 600;">សរុប:</span>
-                                    <div style="text-align: right;"><span
-                                            style="color: #e85d24; font-weight: 700; font-size: 18px;">${{ number_format($invoice->total_amount, 2) }}</span><br><span
-                                            style="color: #999; font-size: 13px;">៛{{ number_format($invoice->total_amount * 4000, 0) }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                       
-                        @if ($invoice->notes)
-                            <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px;">
-                                <p
-                                    style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">
-                                    Notes</p>
-                                <p style="color: #333; margin: 0;">{{ $invoice->notes }}</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-                    <div class="card-body" style="padding: 24px;">
-                        <h5 style="color: #333; font-weight: 600; margin-bottom: 16px;">Quick Actions</h5>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <a href="{{ route('invoices.index') }}" class="btn"
-                                style="background: #6c757d; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center;">
-                                <i class="fas fa-list"></i> ត្រលប់
-                            </a>
-                            @if($invoice->order)
-                                <a href="{{ route('orders.show', $invoice->order) }}" class="btn"
-                                    style="background: #17a2b8; color: white; border: none; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 500; text-align: center;">
-                                    <i class="fas fa-receipt"></i> ពិនិត្យមើលវិក័្កយបត្រ
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                <span class="badge bg-success">
+                    {{ $invoice->status }}
+                </span>
             </div>
         </div>
     </div>
+
+    {{-- ITEMS --}}
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body">
+
+            <h5 class="mb-3">Order Items</h5>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach(($invoice->order->items ?? []) as $item)
+                        <tr>
+                            <td>{{ $item->product->name }}</td>
+
+                            <td class="text-center">{{ $item->quantity }}</td>
+
+                            <td class="text-end">
+                                ${{ number_format($item->unit_price, 2) }}
+                                <br>
+                                <small class="text-muted">
+                                    ៛{{ number_format($item->unit_price * 4000) }}
+                                </small>
+                            </td>
+
+                            <td class="text-end fw-bold">
+                                ${{ number_format($item->total_price, 2) }}
+                                <br>
+                                <small class="text-muted">
+                                    ៛{{ number_format($item->total_price * 4000) }}
+                                </small>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- TOTAL --}}
+            <div class="d-flex justify-content-end mt-4">
+                <div style="width: 300px">
+
+                    <div class="d-flex justify-content-between border-bottom py-2">
+                        <span>Subtotal</span>
+                        <strong>${{ number_format($invoice->subtotal, 2) }}</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between border-bottom py-2">
+                        <span>Discount</span>
+                        <strong>${{ number_format($invoice->discount_amount, 2) }}</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between bg-light p-3 rounded mt-2">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold text-danger fs-5">
+                            ${{ number_format($invoice->total_amount, 2) }}
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {{-- NOTES --}}
+    @if($invoice->notes)
+    <div class="card shadow-sm border-0 rounded-3 mt-3 p-3">
+        <h6 class="text-muted">Notes</h6>
+        <p class="mb-0">{{ $invoice->notes }}</p>
+    </div>
+    @endif
+
+</div>
 @endsection

@@ -35,7 +35,10 @@ class Invoice extends Model
     {
         return $this->belongsTo(Order::class);
     }
-
+   public function items()
+{
+    return $this->hasMany(OrderItem::class, 'order_id', 'order_id');
+}
     /**
      * Mark invoice as sent.
      */
