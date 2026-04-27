@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prep Sticker - {{ $invoice->invoice_number }}</title>
+    <title>Packing Label - {{ $invoice->invoice_number }}</title>
     <style>
         @page {
             size: A5 portrait;
@@ -200,7 +200,7 @@
 <body>
     <div class="sticker">
         <div class="sticker-header">
-            <span class="sticker-title">Preparation</span>
+            <span class="sticker-title">Packing</span>
             <span class="order-id">ORD-{{ str_pad($invoice->order->id, 4, '0', STR_PAD_LEFT) }}</span>
         </div>
 
@@ -246,11 +246,11 @@
 
         <div class="footer-row">
             <span class="total-items">Total: {{ $invoice->order->items->sum('quantity') }} items</span>
-            <span>Printed: {{ now()->setTimezone('Asia/Phnom_Penh')->format('M d, Y h:i A') }}</span>
+            <span>Packed label: {{ now()->setTimezone('Asia/Phnom_Penh')->format('M d, Y h:i A') }}</span>
         </div>
 
         <div class="checkbox-area">
-            <div class="checkbox-row"><span class="box"></span> Items prepared</div>
+            <div class="checkbox-row"><span class="box"></span> Items packed</div>
             <div class="checkbox-row"><span class="box"></span> Quality checked</div>
             <div class="checkbox-row"><span class="box"></span> Ready for delivery</div>
         </div>
@@ -260,9 +260,9 @@
         style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 12px;">
         <button onclick="window.print()"
             style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-            Print Sticker
+            Print Packing Label
         </button>
-        <a href="{{ route('print.index') }}"
+        <a href="{{ route('packing.index') }}"
             style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
             ← Back
         </a>

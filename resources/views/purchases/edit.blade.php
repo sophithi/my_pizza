@@ -1,149 +1,69 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Purchase #' . str_pad($purchase->id, 5, '0', STR_PAD_LEFT))
+@section('title', 'កែប្រែចំណាយ')
 
 @push('styles')
     <style>
-        :root {
-            --accent: #e85d24;
-            --bg: #f4f5f7;
-            --surface: #ffffff;
-            --border: #e9ecef;
-            --text: #1a1d29;
-            --text-muted: #6c757d;
+        .expense-form-wrap {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 28px 20px;
         }
 
-        body {
-            background: var(--bg);
+        .expense-form-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+            padding: 28px;
         }
 
-        .form-container {
-            max-width: 700px;
-            margin: 40px auto;
-            padding: 0 20px;
+        .expense-form-card .form-control,
+        .expense-form-card .form-select {
+            border-color: #d9dee7;
+            border-radius: 6px;
+            min-height: 44px;
         }
 
-        .form-header {
-            margin-bottom: 32px;
+        .expense-form-card .form-control:focus,
+        .expense-form-card .form-select:focus {
+            border-color: #e85d24;
+            box-shadow: 0 0 0 .2rem rgba(232, 93, 36, .14);
         }
 
-        .form-title {
-            font-size: 28px;
+        .expense-submit {
+            background: #e85d24;
+            border: 0;
+            border-radius: 7px;
+            color: #fff;
             font-weight: 700;
-            color: var(--text);
-            margin: 0 0 8px 0;
+            min-height: 44px;
+            padding: 10px 22px;
         }
 
-        .form-subtitle {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .form-card {
-            background: var(--surface);
-            padding: 32px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text);
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(232, 93, 36, 0.1);
-        }
-
-        .form-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 32px;
-        }
-
-        .btn-submit {
-            background: var(--accent);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .btn-submit:hover {
-            background: #d64a1a;
-        }
-
-        .btn-cancel {
-            background: transparent;
-            color: var(--text-muted);
-            padding: 12px 24px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .btn-cancel:hover {
-            background: var(--bg);
-            border-color: var(--text);
-        }
-
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 24px;
-            border-left: 4px solid #dc3545;
+        .expense-submit:hover {
+            background: #d94a10;
+            color: #fff;
         }
     </style>
 @endpush
 
 @section('content')
-
-    <div class="form-container">
-        <!-- Header -->
-        <div class="form-header">
-            <h1 class="form-title">📦 Edit Purchase</h1>
-            <p class="form-subtitle">Update purchase #{{ str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</p>
+    <div class="expense-form-wrap">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+            <div>
+                <h1 class="mb-1" style="font-size: 30px; font-weight: 800; color: #0f172a;">កែប្រែចំណាយ</h1>
+                <p class="text-muted mb-0">{{ $purchase->reference_number ?: 'EXP-' . str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</p>
+            </div>
+            <a href="{{ route('purchases.show', $purchase) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back
+            </a>
         </div>
 
-        <!-- Error Messages -->
         @if($errors->any())
-            <div class="error-message">
+            <div class="alert alert-danger" style="border-radius: 8px;">
                 <strong>Please fix the following errors:</strong>
-                <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                <ul class="mb-0 mt-2">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -151,69 +71,70 @@
             </div>
         @endif
 
-        <!-- Form Card -->
-        <div class="form-card">
-            <form action="{{ route('purchases.update', $purchase) }}" method="POST">
+        <div class="expense-form-card">
+            <form action="{{ route('purchases.update', $purchase) }}" method="POST" autocomplete="off">
                 @csrf
                 @method('PUT')
 
-                <!-- Reference Number -->
-                <div class="form-group">
-                    <label class="form-label">Reference Number (Optional)</label>
-                    <input type="text" name="reference_number" class="form-input" placeholder="PO-001, SUPP-2024-001, etc."
-                        value="{{ old('reference_number', $purchase->reference_number) }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">លេខយោង</label>
+                        <input type="text" name="reference_number" class="form-control"
+                            value="{{ old('reference_number', $purchase->reference_number) }}" placeholder="EXP-001"
+                            autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">ប្រភេទ / អ្នកទទួល <span class="text-danger">*</span></label>
+                        <input type="text" name="supplier_name" class="form-control"
+                            value="{{ old('supplier_name', $purchase->supplier_name) }}"
+                            placeholder="ឧ. ប្រេង, សម្ភារៈ, បុគ្គលិក" required autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">កាលបរិច្ឆេទ <span class="text-danger">*</span></label>
+                        <input type="date" name="purchase_date" class="form-control"
+                            value="{{ old('purchase_date', $purchase->purchase_date->format('Y-m-d')) }}" required autocomplete="off">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">រូបិយប័ណ្ណ</label>
+                        <select name="amount_currency" class="form-select" autocomplete="off">
+                            <option value="USD" {{ old('amount_currency', 'USD') === 'USD' ? 'selected' : '' }}>USD ($)</option>
+                            <option value="KHR" {{ old('amount_currency') === 'KHR' ? 'selected' : '' }}>KHR (៛)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">ចំនួនទឹកប្រាក់ <span class="text-danger">*</span></label>
+                        <input type="number" name="total_amount" class="form-control" min="0.01" step="0.01"
+                            value="{{ old('total_amount', $purchase->total_amount) }}" placeholder="0.00" required autocomplete="off">
+                        <small class="text-muted">Existing records show USD by default. If KHR is selected, it converts using ៛4,000 = $1.</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">ស្ថានភាព <span class="text-danger">*</span></label>
+                        <select name="status" class="form-select" required autocomplete="off">
+                            <option value="pending" {{ old('status', $purchase->status) === 'pending' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>
+                            <option value="received" {{ old('status', $purchase->status) === 'received' ? 'selected' : '' }}>បានទូទាត់</option>
+                            <option value="cancelled" {{ old('status', $purchase->status) === 'cancelled' ? 'selected' : '' }}>បានលុប</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">កំណត់ចំណាំ</label>
+                        <textarea name="notes" class="form-control" rows="4" placeholder="ព័ត៌មានបន្ថែម..." autocomplete="off"
+                            spellcheck="false">{{ old('notes', $purchase->notes) }}</textarea>
+                    </div>
                 </div>
 
-                <!-- Supplier Name -->
-                <div class="form-group">
-                    <label class="form-label">Supplier Name *</label>
-                    <input type="text" name="supplier_name" class="form-input"
-                        placeholder="e.g., Fresh Foods Inc, Local Supplier"
-                        value="{{ old('supplier_name', $purchase->supplier_name) }}" required>
-                </div>
-
-                <!-- Purchase Date -->
-                <div class="form-group">
-                    <label class="form-label">Purchase Date * (Cambodia Time - UTC+7)</label>
-                    <input type="date" name="purchase_date" class="form-input"
-                        value="{{ old('purchase_date', $purchase->purchase_date->format('Y-m-d')) }}" required>
-                </div>
-
-                <!-- Total Amount -->
-                <div class="form-group">
-                    <label class="form-label">Total Amount ($) *</label>
-                    <input type="number" name="total_amount" class="form-input" min="0.01" step="0.01" placeholder="0.00"
-                        value="{{ old('total_amount', $purchase->total_amount) }}" required>
-                </div>
-
-                <!-- Status -->
-                <div class="form-group">
-                    <label class="form-label">Status *</label>
-                    <select name="status" class="form-select" required>
-                        <option value="">-- Select status --</option>
-                        <option value="pending" {{ old('status', $purchase->status) == 'pending' ? 'selected' : '' }}>⏱
-                            Pending</option>
-                        <option value="received" {{ old('status', $purchase->status) == 'received' ? 'selected' : '' }}>✓
-                            Received</option>
-                        <option value="cancelled" {{ old('status', $purchase->status) == 'cancelled' ? 'selected' : '' }}>✕
-                            Cancelled</option>
-                    </select>
-                </div>
-
-                <!-- Notes -->
-                <div class="form-group">
-                    <label class="form-label">Notes (Optional)</label>
-                    <textarea name="notes" class="form-textarea" rows="4"
-                        placeholder="Add any additional notes about this purchase...">{{ old('notes', $purchase->notes) }}</textarea>
-                </div>
-
-                <!-- Actions -->
-                <div class="form-actions">
-                    <button type="submit" class="btn-submit">Update Purchase</button>
-                    <a href="{{ route('purchases.show', $purchase) }}" class="btn-cancel">Cancel</a>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button type="submit" class="expense-submit">
+                        <i class="fas fa-save me-1"></i> រក្សាទុក
+                    </button>
+                    <a href="{{ route('purchases.show', $purchase) }}" class="btn btn-outline-secondary px-4">Cancel</a>
                 </div>
             </form>
         </div>
     </div>
-
 @endsection

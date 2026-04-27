@@ -26,6 +26,11 @@ class Payment extends Model
         'paid_amount'  => 'float',
     ];
 
+    public function lines()
+    {
+        return $this->hasMany(PaymentLine::class);
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────────────
 
     public function scopePaid($query)

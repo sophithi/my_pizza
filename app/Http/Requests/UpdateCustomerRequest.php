@@ -33,6 +33,7 @@ class UpdateCustomerRequest extends FormRequest
             'company_name' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'credit_limit' => 'nullable|numeric|min:0',
+            'status' => 'required|string|in:active,inactive',
             'notes' => 'nullable|string|max:1000',
         ];
     }

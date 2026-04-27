@@ -9,7 +9,6 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DeliveryController;
@@ -83,11 +82,6 @@ Route::middleware('auth')->group(function () {
         Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
 
 
-        // Settings management
-        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
-        Route::post('/settings/exchange-rate', [SettingController::class, 'updateExchangeRate'])->name('settings.exchange_rate');
-
         // Payment management
         Route::resource('payments', PaymentController::class);
 
@@ -106,7 +100,9 @@ Route::middleware('auth')->group(function () {
     // ALL USERS - Orders (view, create, edit)
     // ============================================
     Route::middleware('role:admin,manager,staff,')->group(function () {
-        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders', function () {
+            return redirect()->route('orders.create');
+        })->name('orders.index');
         Route::get('orders/create', [OrderController::class, 'create'])->name('orders.create');
         Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
@@ -127,8 +123,13 @@ Route::middleware('auth')->group(function () {
         Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     });
 
-    // Print & Sticker printing (only Admin & Staff Inventory)
-    Route::middleware('role:admin,staff_inventory')->group(function () {
+    // Packing labels
+    Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
+        Route::get('packing/index', [InvoiceController::class, 'printIndex'])->name('packing.index');
+        Route::get('packing/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('packing.prep');
+        Route::get('packing/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('packing.customer');
+
+        // Legacy URLs kept so older buttons/bookmarks do not break.
         Route::get('print/index', [InvoiceController::class, 'printIndex'])->name('print.index');
         Route::get('print/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('print.prep');
         Route::get('print/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('print.customer');
@@ -172,8 +173,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
         });
     });
-
-
 
     Route::prefix('payments')->name('payments.')->group(function () {
 

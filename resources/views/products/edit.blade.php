@@ -56,8 +56,7 @@
                                         placeholder="0"
                                         oninput="onKhrInput(this.value)">
                                 </div>
-                                <small class="text-muted">អត្រាប្តូរប្រាក់: 1 USD = <span id="exchangeRateText">{{ $settings->exchange_rate ?? 4000 }}</span> KHR</small>
-                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="changeRateBtn" data-bs-toggle="modal" data-bs-target="#exchangeRateModal">Change rate</button>
+                                <small class="text-muted">អត្រាប្តូរប្រាក់: 1 USD = <span id="exchangeRateText">{{ $exchangeRate ?? 4000 }}</span> KHR</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -158,29 +157,14 @@
     </div>
 </div>
 
-{{-- Auto-calculate USD/KHR + exchange-rate modal --}}
+{{-- Auto-calculate USD/KHR --}}
 <script>
-let currentExchangeRate = Number({{ $settings->exchange_rate ?? 4000 }});
+let currentExchangeRate = Number({{ $exchangeRate ?? 4000 }});
 
 function formatRate(n) {
     const num = Number(n);
     if (isNaN(num)) return String(n);
     return num.toLocaleString(undefined, { maximumFractionDigits: 4 });
-}
-
-async function updateExchangeRateOnServer(newRate) {
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const res = await fetch("{{ route('settings.exchange_rate') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': token,
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ exchange_rate: newRate })
-    });
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
 }
 
 function onUsdInput(val) {
@@ -220,64 +204,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (rateTextEl) {
         rateTextEl.textContent = formatRate(rateTextEl.textContent || currentExchangeRate);
     }
-
-    // Build modal
-    const modalWrapper = document.createElement('div');
-    modalWrapper.innerHTML = `
-    <div class="modal fade" id="exchangeRateModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">កំណត់អត្រាប្តូរ</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-2">
-              <label class="form-label">KHR សម្រាប់ 1 USD</label>
-              <input type="number" step="0.0001" min="0" id="exchangeRateInput" class="form-control" />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" id="saveExchangeRateBtn">Save</button>
-          </div>
-        </div>
-      </div>
-    </div>`;
-    document.body.appendChild(modalWrapper);
-
-    const exchangeRateModalEl = document.getElementById('exchangeRateModal');
-    const exchangeRateInput   = document.getElementById('exchangeRateInput');
-    const saveBtn             = document.getElementById('saveExchangeRateBtn');
-
-    exchangeRateModalEl.addEventListener('show.bs.modal', function () {
-        exchangeRateInput.value = currentExchangeRate;
-    });
-
-    saveBtn?.addEventListener('click', async () => {
-        const v = parseFloat(exchangeRateInput.value);
-        if (isNaN(v) || v <= 0) { alert('Please enter a valid positive number.'); return; }
-        try {
-            const json = await updateExchangeRateOnServer(v);
-            if (json.success) {
-                currentExchangeRate = Number(json.exchange_rate);
-                document.getElementById('exchangeRateText').textContent = formatRate(currentExchangeRate);
-
-                const usdVal = parseFloat(usdEl.value);
-                const khrVal = parseFloat(khrEl.value);
-                if (!isNaN(usdVal) && usdVal !== 0) {
-                    khrEl.value = Math.round(usdVal * currentExchangeRate);
-                } else if (!isNaN(khrVal) && khrVal !== 0) {
-                    usdEl.value = parseFloat((khrVal / currentExchangeRate).toFixed(3));
-                }
-
-                bootstrap.Modal.getInstance(exchangeRateModalEl).hide();
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Failed to update exchange rate.');
-        }
-    });
 });
 </script>
 

@@ -27,22 +27,30 @@
     border-radius: 18px 0 0 18px;
     border: none;
     box-shadow: -10px 0 30px rgba(0,0,0,.18);
+    display: flex;
+    flex-direction: column;
 }
 
 .payment-side-panel .modal-header {
     padding: 20px 24px;
     border-bottom: 1px solid #eee;
+    flex: 0 0 auto;
 }
 
 .payment-side-panel .modal-body {
     padding: 24px;
     overflow-y: auto;
+    flex: 1 1 auto;
 }
 
 .payment-side-panel .modal-footer {
     padding: 18px 24px;
     border-top: 1px solid #eee;
     background: #fff;
+    flex: 0 0 auto;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
 }
 
 .badge-paid {
@@ -64,6 +72,61 @@
     color: #991b1b;
     border: 1px solid #f87171;
     font-weight: 700;
+}
+
+.money-stack {
+    line-height: 1.35;
+}
+
+.money-stack .usd {
+    font-weight: 800;
+}
+
+.money-stack .khr {
+    color: #6b7280;
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.currency-input-group {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.currency-input-group + .currency-input-group {
+    margin-top: 10px;
+}
+
+.currency-hint {
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.payment-line {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 12px;
+}
+
+.payment-line-grid {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1.1fr .8fr 1fr auto;
+}
+
+.payment-summary-box {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    color: #9a3412;
+    padding: 12px;
 }
 
 .modal.fade .payment-side-panel {
@@ -88,6 +151,7 @@
 @endpush
 
 @section('content')
+@php($exchangeRate = 4000)
     <div class="container-fluid py-4">
 
         {{-- Page Header --}}
@@ -117,6 +181,7 @@
                     <div class="card-body py-3">
                         <div class="text-muted small text-uppercase mb-1">បានប្រមូល</div>
                         <div class="fs-5 fw-bold text-primary">${{ number_format($stats['collected'], 2) }}</div>
+                        <div class="small text-muted">៛{{ number_format($stats['collected'] * $exchangeRate, 0) }}</div>
                     </div>
                 </div>
             </div>
@@ -125,6 +190,7 @@
                     <div class="card-body py-3">
                         <div class="text-muted small text-uppercase mb-1">នៅសល់</div>
                         <div class="fs-5 fw-bold text-danger">${{ number_format($stats['outstanding'], 2) }}</div>
+                        <div class="small text-muted">៛{{ number_format($stats['outstanding'] * $exchangeRate, 0) }}</div>
                     </div>
                 </div>
             </div>
@@ -235,12 +301,24 @@
                                 </td>
                                 <td class="text-muted small">{{ \Carbon\Carbon::parse($payment->order_date)->format('d M Y') }}
                                 </td>
-                                <td>${{ number_format($payment->total_amount, 2) }}</td>
-                                <td class="text-success fw-semibold">${{ number_format($payment->paid_amount, 2) }}</td>
+                                <td>
+                                    <div class="money-stack">
+                                        <span class="usd">${{ number_format($payment->total_amount, 2) }}</span>
+                                        <span class="khr">៛{{ number_format($payment->total_amount * $exchangeRate, 0) }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-success">
+                                    <div class="money-stack">
+                                        <span class="usd">${{ number_format($payment->paid_amount, 2) }}</span>
+                                        <span class="khr">៛{{ number_format($payment->paid_amount * $exchangeRate, 0) }}</span>
+                                    </div>
+                                </td>
                                 <td>
                                     @if($payment->balance > 0)
-                                        <span
-                                            class="text-danger small">${{ number_format($payment->balance, 2) }}</span>
+                                        <div class="money-stack text-danger">
+                                            <span class="usd">${{ number_format($payment->balance, 2) }}</span>
+                                            <span class="khr">៛{{ number_format($payment->balance * $exchangeRate, 0) }}</span>
+                                        </div>
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
@@ -307,31 +385,44 @@
                             <label class="form-label small text-muted">កាលបរិច្ឆេទបញ្ជាទិញ</label>
                             <input type="date" name="order_date" id="f_order_date" class="form-control" required>
                         </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col">
-                                <label class="form-label small text-muted">សរុបការបញ្ជាទិញ ($)</label>
-                                <input type="number" name="total_amount" id="f_total" class="form-control" step="0.01"
-                                    min="0" placeholder="0.00" oninput="updateStatusBadge()" required>
-                            </div>
-                            <div class="col">
-                                <label class="form-label small text-muted">ចំនួនបានបង់ ($)</label>
-                                <input type="number" name="paid_amount" id="f_paid" class="form-control" step="0.01" min="0"
-                                    placeholder="0.00" oninput="updateStatusBadge()">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">សរុបការបញ្ជាទិញ</label>
+                            <div class="currency-input-group">
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label class="form-label small text-muted">USD ($)</label>
+                                        <input type="number" name="total_amount" id="f_total" class="form-control" step="0.01"
+                                            min="0" placeholder="0.00" oninput="syncTotalFromUsd()" required>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label small text-muted">KHR (៛)</label>
+                                        <input type="number" id="f_total_khr" class="form-control" step="1" min="0"
+                                            placeholder="0" oninput="syncTotalFromKhr()">
+                                    </div>
+                                </div>
+                                <div class="currency-hint">1 USD = ៛{{ number_format($exchangeRate, 0) }}</div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small text-muted">វិធីបង់ប្រាក់</label>
-                            <div class="d-flex gap-2 flex-wrap" id="methodPills">
-                                @foreach(['Cash', 'ABA', 'ACLEDA', 'Wing', 'Other'] as $m)
-                                    <span
-                                        class="badge rounded-pill border px-3 py-2 method-pill {{ $m === 'Cash' ? 'bg-danger text-white border-danger' : 'bg-white text-secondary' }}"
-                                        style="cursor:pointer;font-size:13px" onclick="pickMethod(this, '{{ $m }}')">
-                                        {{ $m }}
-                                    </span>
-                                @endforeach
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label small text-muted mb-0">ចំនួនបានបង់</label>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addPaymentLine()">+ Add</button>
                             </div>
-                            <input type="hidden" name="method" id="f_method" value="Cash">
+                            <div id="paymentLines"></div>
+                            <input type="hidden" name="payment_lines" id="payment_lines_input" value="[]">
+                            <input type="hidden" name="paid_amount" id="f_paid" value="0">
+                            <div class="payment-summary-box">
+                                <div class="d-flex justify-content-between">
+                                    <span>ចំនួនទឹកប្រាក់ដែលបានបង់</span>
+                                    <strong>$<span id="paidSummaryUsd">0.00</span> / ៛<span id="paidSummaryKhr">0</span></strong>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span>ចំនួនទឹកប្រាក់ដែលនៅសល់</span>
+                                    <strong>$<span id="balanceSummaryUsd">0.00</span> / ៛<span id="balanceSummaryKhr">0</span></strong>
+                                </div>
+                            </div>
                         </div>
+                        <input type="hidden" name="method" id="f_method" value="Cash">
                         <div class="mb-3">
                             <label class="form-label small text-muted">កំណត់ចំណាំ (បើមាន)</label>
                             <textarea name="notes" id="f_notes" class="form-control" rows="2"
@@ -354,7 +445,35 @@
 
 @push('scripts')
     <script>
+        const EXCHANGE_RATE = {{ $exchangeRate }};
         const paymentModal = document.getElementById('paymentModal');
+        let syncingCurrency = false;
+        let paymentLines = [];
+        const paymentMethods = ['Cash', 'ABA', 'ACLEDA', 'Wing', 'Other'];
+
+        function usdToKhr(usd) {
+            return Math.round((parseFloat(usd) || 0) * EXCHANGE_RATE);
+        }
+
+        function khrToUsd(khr) {
+            return ((parseFloat(khr) || 0) / EXCHANGE_RATE).toFixed(2);
+        }
+
+        function syncTotalFromUsd() {
+            if (syncingCurrency) return;
+            syncingCurrency = true;
+            document.getElementById('f_total_khr').value = usdToKhr(document.getElementById('f_total').value);
+            syncingCurrency = false;
+            renderPaymentLines(false);
+        }
+
+        function syncTotalFromKhr() {
+            if (syncingCurrency) return;
+            syncingCurrency = true;
+            document.getElementById('f_total').value = khrToUsd(document.getElementById('f_total_khr').value);
+            syncingCurrency = false;
+            renderPaymentLines(false);
+        }
 
         function updateStatusBadge() {
             const total = parseFloat(document.getElementById('f_total').value) || 0;
@@ -366,16 +485,62 @@
             else { badge.classList.add('badge-partial'); badge.textContent = 'បង់ខ្លះ'; }
         }
 
-        function pickMethod(el, method) {
-            document.querySelectorAll('.method-pill').forEach(p => {
-                p.className = 'badge rounded-pill border px-3 py-2 method-pill bg-white text-secondary';
-                p.style.cursor = 'pointer';
-                p.style.fontSize = '13px';
+        function addPaymentLine(line = {}) {
+            paymentLines.push({
+                method: line.method || 'Cash',
+                currency: line.currency || 'USD',
+                amount: Number(line.amount_original ?? line.amount ?? 0)
             });
-            el.className = 'badge rounded-pill border px-3 py-2 method-pill bg-danger text-white border-danger';
-            el.style.cursor = 'pointer';
-            el.style.fontSize = '13px';
-            document.getElementById('f_method').value = method;
+            renderPaymentLines();
+        }
+
+        function removePaymentLine(index) {
+            paymentLines.splice(index, 1);
+            if (!paymentLines.length) addPaymentLine();
+            renderPaymentLines();
+        }
+
+        function updatePaymentLine(index, key, value) {
+            paymentLines[index][key] = key === 'amount' ? Number(value || 0) : value;
+            renderPaymentLines(key !== 'amount');
+        }
+
+        function lineAmountUsd(line) {
+            return line.currency === 'KHR' ? (Number(line.amount || 0) / EXCHANGE_RATE) : Number(line.amount || 0);
+        }
+
+        function renderPaymentLines(rebuild = true) {
+            const wrap = document.getElementById('paymentLines');
+            if (rebuild) {
+                wrap.innerHTML = paymentLines.map((line, index) => `
+                    <div class="payment-line">
+                        <div class="payment-line-grid">
+                            <select class="form-select form-select-sm" onchange="updatePaymentLine(${index}, 'method', this.value)">
+                                ${paymentMethods.map(method => `<option value="${method}" ${line.method === method ? 'selected' : ''}>${method}</option>`).join('')}
+                            </select>
+                            <select class="form-select form-select-sm" onchange="updatePaymentLine(${index}, 'currency', this.value)">
+                                <option value="USD" ${line.currency === 'USD' ? 'selected' : ''}>USD</option>
+                                <option value="KHR" ${line.currency === 'KHR' ? 'selected' : ''}>KHR</option>
+                            </select>
+                            <input type="number" class="form-control form-control-sm" min="0" step="${line.currency === 'KHR' ? '1' : '0.01'}" value="${line.amount || ''}" placeholder="Amount" oninput="updatePaymentLine(${index}, 'amount', this.value)">
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePaymentLine(${index})"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const paidUsd = paymentLines.reduce((sum, line) => sum + lineAmountUsd(line), 0);
+            const totalUsd = parseFloat(document.getElementById('f_total').value) || 0;
+            const balanceUsd = Math.max(0, totalUsd - paidUsd);
+
+            document.getElementById('f_paid').value = paidUsd.toFixed(2);
+            document.getElementById('paidSummaryUsd').textContent = paidUsd.toFixed(2);
+            document.getElementById('paidSummaryKhr').textContent = usdToKhr(paidUsd).toLocaleString();
+            document.getElementById('balanceSummaryUsd').textContent = balanceUsd.toFixed(2);
+            document.getElementById('balanceSummaryKhr').textContent = usdToKhr(balanceUsd).toLocaleString();
+            document.getElementById('payment_lines_input').value = JSON.stringify(paymentLines);
+            document.getElementById('f_method').value = [...new Set(paymentLines.map(line => line.method))].join(' + ') || 'Cash';
+            updateStatusBadge();
         }
 
         function resetModal() {
@@ -388,14 +553,12 @@
             document.getElementById('f_order_id').value = '';
             document.getElementById('f_order_date').value = new Date().toISOString().slice(0, 10);
             document.getElementById('f_total').value = '';
-            document.getElementById('f_paid').value = '';
+            document.getElementById('f_total_khr').value = '';
+            document.getElementById('f_paid').value = '0';
             document.getElementById('f_notes').value = '';
             document.getElementById('f_method').value = 'Cash';
-            document.querySelectorAll('.method-pill').forEach((p, i) => {
-                p.className = 'badge rounded-pill border px-3 py-2 method-pill ' + (i === 0 ? 'bg-danger text-white border-danger' : 'bg-white text-secondary');
-                p.style.cursor = 'pointer'; p.style.fontSize = '13px';
-            });
-            updateStatusBadge();
+            paymentLines = [];
+            addPaymentLine();
         }
 
         function openPaymentForm(payment) {
@@ -412,15 +575,13 @@
             document.getElementById('f_order_id').value = payment.order_id;
             document.getElementById('f_order_date').value = String(payment.order_date).slice(0, 10);
             document.getElementById('f_total').value = payment.total_amount;
-            document.getElementById('f_paid').value = payment.paid_amount;
+            document.getElementById('f_total_khr').value = usdToKhr(payment.total_amount);
             document.getElementById('f_notes').value = payment.notes || '';
             document.getElementById('f_method').value = payment.method === '—' ? 'Cash' : payment.method;
-            document.querySelectorAll('.method-pill').forEach(p => {
-                const isMatch = p.textContent.trim() === (payment.method === '—' ? 'Cash' : payment.method);
-                p.className = 'badge rounded-pill border px-3 py-2 method-pill ' + (isMatch ? 'bg-danger text-white border-danger' : 'bg-white text-secondary');
-                p.style.cursor = 'pointer'; p.style.fontSize = '13px';
-            });
-            updateStatusBadge();
+            paymentLines = payment.lines && payment.lines.length
+                ? payment.lines.map(line => ({ method: line.method, currency: line.currency, amount: line.amount_original }))
+                : [{ method: payment.method === '—' ? 'Cash' : payment.method, currency: 'USD', amount: payment.paid_amount }];
+            renderPaymentLines();
         }
 
         paymentModal?.addEventListener('show.bs.modal', event => {

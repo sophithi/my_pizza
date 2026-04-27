@@ -1,13 +1,184 @@
 @extends('layouts.app')
 
-@section('title', 'Customers')
+@section('title', 'អតិថិជន')
+
+@push('styles')
+<style>
+    .customer-page {
+        --accent: #e85d24;
+        --accent-dark: #d94a10;
+        --surface: #fff;
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+    }
+
+    .customer-header {
+        align-items: center;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .customer-title {
+        color: var(--text);
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .customer-subtitle {
+        color: var(--muted);
+        margin: 6px 0 0;
+    }
+
+    .customer-btn {
+        align-items: center;
+        border: 0;
+        border-radius: 8px;
+        display: inline-flex;
+        font-weight: 800;
+        gap: 8px;
+        justify-content: center;
+        min-height: 40px;
+        padding: 9px 14px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .customer-btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+        color: #fff;
+    }
+
+    .customer-btn-primary:hover {
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(232, 93, 36, .22);
+        transform: translateY(-1px);
+    }
+
+    .stats-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-bottom: 16px;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .stat-label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .stat-value {
+        color: var(--text);
+        font-size: 24px;
+        font-weight: 900;
+        margin-top: 6px;
+    }
+
+    .filter-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 16px;
+        padding: 14px;
+    }
+
+    .customer-table-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+        overflow: hidden;
+    }
+
+    .customer-table th {
+        background: #f9fafb;
+        border-bottom: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+        padding: 14px 16px;
+        text-transform: uppercase;
+    }
+
+    .customer-table td {
+        border-bottom: 1px solid #f1f3f5;
+        color: var(--text);
+        padding: 14px 16px;
+        vertical-align: middle;
+    }
+
+    .channel-pill,
+    .status-pill,
+    .order-pill {
+        align-items: center;
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 800;
+        gap: 6px;
+        padding: 6px 10px;
+    }
+
+    .channel-facebook { background: #e7f3ff; color: #0a66c2; }
+    .channel-telegram { background: #e0f7ff; color: #0088cc; }
+    .status-active { background: #d1fae5; color: #065f46; }
+    .status-inactive { background: #fee2e2; color: #991b1b; }
+    .order-pill { background: #eff6ff; color: #1d4ed8; }
+
+    .action-row {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .icon-action {
+        align-items: center;
+        border: 0;
+        background: transparent;
+        color: #2563eb;
+        display: inline-flex;
+        height: 32px;
+        justify-content: center;
+        text-decoration: none;
+        width: 32px;
+    }
+
+    .icon-danger { color: #dc2626; }
+
+    @media (max-width: 900px) {
+        .customer-header,
+        .filter-row {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
+@endpush
 
 @section('content')
-
-    <div class="mb-4 d-flex justify-content-between align-items-center">
-        <h2 style="font-size: 24px; font-weight: 700; color: #1a1d29; margin: 0;">Customers</h2>
-        <a href="{{ route('customers.create') }}" class="btn"
-            style="background: linear-gradient(135deg, #e85d24 0%, #d94a10 100%); color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
+<div class="container-fluid py-4 customer-page">
+    <div class="customer-header">
+        <div>
+            <h2 class="customer-title">អតិថិជន</h2>
+            <p class="customer-subtitle">ស្វែងរកអតិថិជន មើលប្រវត្តិបញ្ជាទិញ និងបង្កើតការបញ្ជាទិញថ្មីបានរហ័ស។</p>
+        </div>
+        <a href="{{ route('customers.create') }}" class="customer-btn customer-btn-primary">
             <i class="fas fa-plus"></i> បន្ថែមអតិថិជនថ្មី
         </a>
     </div>
@@ -19,110 +190,135 @@
         </div>
     @endif
 
-    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-        <div class="card-body" style="padding: 24px;">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead style="background: #f8f9fa;">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">អតិថិជនសរុប</div>
+            <div class="stat-value">{{ number_format($stats['total']) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">កំពុងប្រើប្រាស់</div>
+            <div class="stat-value text-success">{{ number_format($stats['active']) }}</div>
+        </div>
+    </div>
+
+    <form method="GET" action="{{ route('customers.index') }}" class="filter-card">
+        <div class="d-flex gap-2 filter-row">
+            <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="ស្វែងរកឈ្មោះ លេខទូរស័ព្ទ ខេត្ត/ក្រុង ឬទីតាំង...">
+            <select name="type" class="form-select" style="max-width: 170px;">
+                <option value="all">គ្រប់ប្រភព</option>
+                <option value="facebook" {{ request('type') === 'facebook' ? 'selected' : '' }}>Facebook</option>
+                <option value="telegram" {{ request('type') === 'telegram' ? 'selected' : '' }}>Telegram</option>
+            </select>
+            <select name="status" class="form-select" style="max-width: 160px;">
+                <option value="all">គ្រប់ស្ថានភាព</option>
+                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>សកម្ម</option>
+                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>អសកម្ម</option>
+            </select>
+            <button class="customer-btn customer-btn-primary" type="submit">
+                <i class="fas fa-search"></i> ស្វែងរក
+            </button>
+            <a href="{{ route('customers.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center">សម្អាត</a>
+        </div>
+    </form>
+
+    <div class="customer-table-card">
+        <div class="table-responsive">
+            <table class="table customer-table mb-0">
+                <thead>
+                    <tr>
+                        <th>ប្រភព</th>
+                        <th>អតិថិជន</th>
+                        <th>ទំនាក់ទំនង</th>
+                        <th>ទីតាំង</th>
+                        <th>ការបញ្ជាទិញ</th>
+                        <th>ចំណាយ</th>
+                        <th>បញ្ជាទិញចុងក្រោយ</th>
+                        <th>ស្ថានភាព</th>
+                        <th class="text-end">សកម្មភាព</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($customers as $customer)
                         <tr>
-                            <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Type of
-                                Customer</th>
-                            <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">
-                                ឈ្មោះអតិថិជន</th>
-                            <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">
-                                លេខទំនាក់ទំនង</th>
-                            <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">ទីតាំង
-                            </th>
-                            <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">
-                                ការកម្មង់</th>
-                            <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Status
-                            </th>
-                            <th style="padding: 12px; font-weight: 600; font-size: 12px; text-transform: uppercase;">Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($customers as $customer)
-                            <tr style="border-bottom: 1px solid #e9ecef;">
-                                <td style="padding: 12px;">
-                                    @if($customer->type == 'facebook')
-                                        <span
-                                            style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #e7f3ff; color: #0a66c2; display: inline-flex; align-items: center; gap: 6px;">
-                                            <i class="fab fa-facebook-f"></i> Facebook
-                                        </span>
-                                    @elseif($customer->type == 'telegram')
-                                        <span
-                                            style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #e0f7ff; color: #0088cc; display: inline-flex; align-items: center; gap: 6px;">
-                                            <i class="fab fa-telegram"></i> Telegram
-                                        </span>
-                                    @endif
-                                </td>
-                                <td style="padding: 12px; color: #1a1d29; font-weight: 600;">{{ $customer->name }}</td>
-                                <td style="padding: 12px; color: #6c757d;">{{ $customer->phone ?? 'N/A' }}</td>
-                                <td style="padding: 12px; color: #6c757d;">{{ $customer->city ?? $customer->address ?? 'N/A' }}
-                                </td>
-                                <td style="padding: 12px; color: #1a1d29;">
-                                    @if($customer->orders_count > 0)
-                                        <span
-                                            style="padding: 4px 8px; border-radius: 4px; background: #e3f2fd; color: #1976d2; font-weight: 600; font-size: 12px;">
-                                            {{ $customer->orders_count }} orders
-                                        </span>
-                                    @else
-                                        <span style="color: #999; font-style: italic;">No orders yet</span>
-                                    @endif
-                                </td>
-                                <td style="padding: 12px;">
-                                    @if($customer->status == 'active')
-                                        <span
-                                            style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #d4edda; color: #155724; display: inline-flex; align-items: center; gap: 6px; cursor: help;"
-                                            title="{{ $customer->notes ?? 'input data by user' }}">
-                                            <i class="fas fa-check-circle"></i> Active
-                                        </span>
-                                    @elseif($customer->status == 'inactive')
-                                        <span
-                                            style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #f8d7da; color: #721c24; display: inline-flex; align-items: center; gap: 6px; cursor: help;"
-                                            title="{{ $customer->notes ?? 'note customer' }}">
-                                            <i class="fas fa-times-circle"></i> Inactive
-                                        </span>
-                                    @else
-                                        <span
-                                            style="padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #e2e3e5; color: #383d41;"
-                                            title="{{ $customer->notes ?? '' }}">
-                                            {{ ucfirst($customer->status ?? 'Pending') }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td style="padding: 12px;">
-                                    <a href="{{ route('customers.show', $customer) }}" class="btn-action" title="View"
-                                        style="color: #0d6efd; text-decoration: none; font-size: 12px; margin-right: 10px;"><i
-                                            class="fas fa-eye"></i></a>
-                                    <a href="{{ route('customers.edit', $customer) }}" class="btn-action" title="Edit"
-                                        style="color: #0d6efd; text-decoration: none; font-size: 12px; margin-right: 10px;"><i
-                                            class="fas fa-edit"></i></a>
-                                    <form action="{{ route('customers.destroy', $customer) }}" method="POST"
-                                        style="display: inline;" data-delete="Customer" data-item-name="{{ $customer->name }}">
+                            <td>
+                                @if($customer->type == 'facebook')
+                                    <span class="channel-pill channel-facebook"><i class="fab fa-facebook-f"></i> Facebook</span>
+                                @elseif($customer->type == 'telegram')
+                                    <span class="channel-pill channel-telegram"><i class="fab fa-telegram"></i> Telegram</span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ $customer->name }}</div>
+                                @if($customer->notes)
+                                    <div class="text-muted small">{{ Str::limit($customer->notes, 45) }}</div>
+                                @endif
+                            </td>
+                            <td>
+                                @if($customer->phone)
+                                    <a href="tel:{{ $customer->phone }}" class="text-decoration-none">{{ $customer->phone }}</a>
+                                @else
+                                    <span class="text-muted">មិនមាន</span>
+                                @endif
+                            </td>
+                            <td class="text-muted">{{ $customer->city ?? $customer->address ?? 'មិនមាន' }}</td>
+                            <td>
+                                @if($customer->orders_count > 0)
+                                    <span class="order-pill">{{ $customer->orders_count }} ការបញ្ជាទិញ</span>
+                                @else
+                                    <span class="text-muted fst-italic">មិនទាន់មានការបញ្ជាទិញ</span>
+                                @endif
+                            </td>
+                            <td>
+                                <strong>${{ number_format($customer->total_spent ?? 0, 2) }}</strong>
+                                <div class="text-muted small">៛{{ number_format(($customer->total_spent ?? 0) * 4000, 0) }}</div>
+                            </td>
+                            <td class="text-muted small">
+                                {{ $customer->last_order_at ? \Carbon\Carbon::parse($customer->last_order_at)->format('d M Y') : '—' }}
+                            </td>
+                            <td>
+                                @if($customer->status == 'active')
+                                    <span class="status-pill status-active"><i class="fas fa-check-circle"></i> សកម្ម</span>
+                                @elseif($customer->status == 'inactive')
+                                    <span class="status-pill status-inactive"><i class="fas fa-times-circle"></i> អសកម្ម</span>
+                                @else
+                                    <span class="text-muted">{{ $customer->status ?? 'រង់ចាំ' }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="action-row">
+                                    <a href="{{ route('orders.create', ['customer_id' => $customer->id]) }}" class="icon-action" title="បង្កើតការបញ្ជាទិញថ្មី">
+                                        <i class="fas fa-cart-plus"></i>
+                                    </a>
+                                    <a href="{{ route('customers.show', $customer) }}" class="icon-action" title="មើល">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('customers.edit', $customer) }}" class="icon-action" title="កែប្រែ">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('customers.destroy', $customer) }}" method="POST" data-delete="អតិថិជន" data-item-name="{{ $customer->name }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" title="Delete"
-                                            style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 12px;"><i
-                                                class="fas fa-trash"></i></button>
+                                        <button type="submit" class="icon-action icon-danger" title="លុប">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" style="padding: 32px; text-align: center; color: #6c757d;">No customers found.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-5">រកមិនឃើញអតិថិជនទេ។</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
     <div class="mt-4">
         {{ $customers->links() }}
     </div>
-
+</div>
 @endsection

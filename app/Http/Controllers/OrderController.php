@@ -7,6 +7,7 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Notifications\NewOrderNotification;
 use App\Models\User;
+use App\Models\Delivery;
 
 class OrderController extends Controller
 {
@@ -33,7 +34,8 @@ class OrderController extends Controller
         $customers = \App\Models\Customer::all();
         $products = \App\Models\Product::all();
         $deliveries = \App\Models\Delivery::all();
-        return view('orders.create', compact('customers', 'products', 'deliveries'));
+        $selectedCustomerId = request('customer_id');
+        return view('orders.create', compact('customers', 'products', 'deliveries', 'selectedCustomerId'));
     }
 
     /**
@@ -42,16 +44,25 @@ class OrderController extends Controller
     public function store(StoreOrderRequest $request)
     {
         $validated = $request->validated();
+        $delivery = !empty($validated['delivery_id']) ? Delivery::find($validated['delivery_id']) : null;
+        $deliveryFeeKhr = $delivery ? (float) $delivery->delivery_price_khr : 0;
+        $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
+        $subtotal = (float) $validated['subtotal'];
+        $discountAmount = (float) ($validated['discount_amount'] ?? 0);
+        $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
         
         // Create the order
         $order = Order::create([
             'customer_id' => $validated['customer_id'],
+            'delivery_id' => $delivery?->id,
             'user_id' => auth()->id(),
             'order_date' => $validated['order_date'],
             'code' => 'ORD-' . rand(1000, 9999),
-            'subtotal' => $validated['subtotal'],
-            'discount_amount' => $validated['discount_amount'] ?? 0,
-            'total_amount' => $validated['total_amount'],
+            'subtotal' => $subtotal,
+            'discount_amount' => $discountAmount,
+            'delivery_fee_khr' => $deliveryFeeKhr,
+            'delivery_fee_usd' => $deliveryFeeUsd,
+            'total_amount' => $totalAmount,
             'status' => $validated['status'] ?? 'pending',
             'payment_status' => $validated['payment_status'] ?? 'unpaid',
             'notes' => $validated['notes'] ?? null,
@@ -63,7 +74,7 @@ class OrderController extends Controller
             \App\Models\OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $item['product_id'],
-                'delivery_id' => $item['delivery_id'] ?? null,
+                'delivery_id' => $delivery?->id,
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['unit_price'],
                 'total_price' => $item['total_price'],
@@ -81,6 +92,8 @@ class OrderController extends Controller
             'invoice_date' => now()->toDateString(),
             'subtotal' => $order->subtotal,
             'discount_amount' => $order->discount_amount,
+            'delivery_fee_khr' => $order->delivery_fee_khr,
+            'delivery_fee_usd' => $order->delivery_fee_usd,
             'total_amount' => $order->total_amount,
             'notes' => $order->notes ?? null,
         ]);
@@ -99,7 +112,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load('customer', 'items.product', 'items.delivery', 'preparer');
+        $order->load('customer', 'delivery', 'items.product', 'items.delivery', 'preparer');
         return view('orders.show', compact('order'));
     }
 
@@ -204,6 +217,8 @@ class OrderController extends Controller
                 'invoice_date' => now()->toDateString(),
                 'subtotal' => $order->subtotal,
                 'discount_amount' => $order->discount_amount,
+                'delivery_fee_khr' => $order->delivery_fee_khr,
+                'delivery_fee_usd' => $order->delivery_fee_usd,
                 'total_amount' => $order->total_amount,
                 'notes' => $order->notes ?? null,
             ]);

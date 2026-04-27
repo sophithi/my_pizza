@@ -13,8 +13,17 @@ class InventoryController extends Controller
      */
     public function index()
     {
+        $stats = [
+            'total' => Inventory::count(),
+            'in_stock' => Inventory::whereColumn('quantity', '>', 'reorder_level')->count(),
+            'low_stock' => Inventory::where('quantity', '>', 0)
+                ->whereColumn('quantity', '<=', 'reorder_level')
+                ->count(),
+            'out_stock' => Inventory::where('quantity', '<=', 0)->count(),
+        ];
+
         $inventories = Inventory::with('product')->paginate(15);
-        return view('inventory.index', compact('inventories'));
+        return view('inventory.index', compact('inventories', 'stats'));
     }
 
     /**
@@ -32,7 +41,7 @@ class InventoryController extends Controller
     public function store(StoreInventoryRequest $request)
     {
         $inventory = Inventory::create($request->validated());
-        return redirect()->route('inventory.show', $inventory)->with('success', 'Inventory record created successfully.');
+        return redirect()->route('inventory.show', $inventory)->with('success', 'បានបង្កើតស្តុកទំនិញដោយជោគជ័យ។');
     }
 
     /**
@@ -58,7 +67,7 @@ class InventoryController extends Controller
     public function update(UpdateInventoryRequest $request, Inventory $inventory)
     {
         $inventory->update($request->validated());
-        return redirect()->route('inventory.show', $inventory)->with('success', 'Inventory updated successfully.');
+        return redirect()->route('inventory.show', $inventory)->with('success', 'បានកែប្រែស្តុកទំនិញដោយជោគជ័យ។');
     }
 
     /**
@@ -67,7 +76,7 @@ class InventoryController extends Controller
     public function destroy(Inventory $inventory)
     {
         $inventory->delete();
-        return redirect()->route('inventory.index')->with('success', 'Inventory record deleted successfully.');
+        return redirect()->route('inventory.index')->with('success', 'បានលុបស្តុកទំនិញដោយជោគជ័យ។');
     }
 
     /**
@@ -78,6 +87,6 @@ class InventoryController extends Controller
         $inventory = Inventory::findOrFail($id);
         $quantity = request()->validate(['quantity' => 'required|numeric|min:0'])['quantity'];
         $inventory->update(['quantity' => $quantity]);
-        return redirect()->route('inventory.index')->with('success', 'Inventory quantity updated successfully.');
+        return redirect()->route('inventory.index')->with('success', 'បានកែប្រែចំនួនស្តុកដោយជោគជ័យ។');
     }
 }

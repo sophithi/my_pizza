@@ -31,12 +31,7 @@ class Product extends Model
         static::saving(function ($product) {
             // Only auto-calculate KHR when it's not provided (preserve stored value)
             if ((is_null($product->price_khr) || $product->price_khr === '') && isset($product->price_usd)) {
-                // Prefer configured exchange rate in settings, fallback to 4000
-                try {
-                    $rate = \App\Models\Setting::get()->exchange_rate ?? 4000;
-                } catch (\Throwable $e) {
-                    $rate = 4000;
-                }
+                $rate = 4000;
                 $product->price_khr = (int) round($product->price_usd * $rate);
             }
         });

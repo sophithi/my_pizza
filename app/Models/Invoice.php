@@ -15,6 +15,8 @@ class Invoice extends Model
         'subtotal',
         'tax_amount',
         'discount_amount',
+        'delivery_fee_khr',
+        'delivery_fee_usd',
         'total_amount',
         'status',
         'notes',
@@ -25,6 +27,8 @@ class Invoice extends Model
         'due_date' => 'date',
         'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
+        'delivery_fee_khr' => 'decimal:2',
+        'delivery_fee_usd' => 'decimal:2',
         'total_amount' => 'decimal:2',
     ];
 
@@ -84,6 +88,8 @@ class Invoice extends Model
             'invoice_date' => now()->toDateString(),
             'subtotal' => $order->subtotal,
             'discount_amount' => $order->discount_amount,
+            'delivery_fee_khr' => $order->delivery_fee_khr,
+            'delivery_fee_usd' => $order->delivery_fee_usd,
             'total_amount' => $order->total_amount,
             'notes' => $order->notes ?? null,
         ]);

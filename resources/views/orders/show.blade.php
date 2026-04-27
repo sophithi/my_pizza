@@ -500,6 +500,11 @@
         <div class="hero-right">
             <div class="hero-total">${{ number_format($order->total_amount, 2) }}</div>
             <div class="hero-total-khr">៛{{ number_format($order->total_amount * 4000, 0) }}</div>
+            @if((float) $order->delivery_fee_khr > 0)
+                <div style="font-size: 13px; margin-top: 6px; opacity: .9;">
+                    {{ $order->delivery->delivery_name ?? 'Delivery' }}: ៛{{ number_format($order->delivery_fee_khr, 0) }}
+                </div>
+            @endif
         </div>
     </div>
 
@@ -522,23 +527,30 @@
 
     <!-- Actions -->
     <div class="actions-bar">
-        {{-- Print button --}}
-        <a href="{{ route('invoices.print', $order->invoice ?? $order->id) }}" class="btn btn-primary" style="background: #6c757d;" target="_blank">
-            <i class="fas fa-print"></i> print
-        </a>
+        {{-- 1) Print invoice for customer view --}}
+        @if($order->invoice)
+            <button id="printCustomerBtn" class="btn btn-primary" style="background: #6c757d;" data-url="{{ route('packing.customer', $order->invoice) }}" title="វិក្ក័យបត្រ / ស្លាកភ្ញៀវ">
+                <i class="fas fa-print"></i> ព្រីនវិក្ក័យបត្រ
+            </button>
+        @else
+            <button class="btn btn-primary" style="background: #6c757d;" disabled>
+                <i class="fas fa-print"></i> ព្រីនវិក្ក័យបត្រ
+            </button>
+        @endif
 
-        {{-- Prepare/Submit button (to /print/index) --}}
-        <a href="{{ route('print.index') }}" class="btn btn-primary" style="background: #e85d24;">
-            ដាក់រៀបចំ
-        </a>
+        {{-- 2) "ដាក់រៀបចំ" — show notification only (no navigation) --}}
+        <button id="prepareBtn" class="btn btn-warning" style="background: #e85d24; border:none;">
+            <i class="fas fa-box"></i> ដាក់រៀបចំ
+        </button>
 
-        {{-- Edit button --}}
+        {{-- 3) Edit button --}}
         @if($order->status === 'pending')
             <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary" style="background: #2563eb;">
                 <i class="fas fa-edit"></i> កែប្រែ
             </a>
         @endif
-        
+
+        {{-- 4) Back button --}}
         <a href="{{ route('orders.index') }}" class="btn btn-outline">
             ← ត្រឡប់ក្រោយ
         </a>
@@ -546,3 +558,42 @@
 
 </div>
 @endsection
+
+    {{-- Removed client-only toast; preparation print opens prep sticker in a new tab --}}
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const prepareBtn = document.getElementById('prepareBtn');
+                if (!prepareBtn) return;
+                prepareBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    try {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'ការការបញ្ជាទិញត្រូវបានបញ្ជូលសម្រាប់រៀបចំ',
+                            showConfirmButton: false,
+                            timer: 2200,
+                            timerProgressBar: true
+                        });
+                    } catch (err) {
+                        alert('ការការបញ្ជាទិញត្រូវបានបញ្ជូលសម្រាប់រៀបចំ');
+                    }
+                });
+                // Print customer invoice: open print in a new tab then redirect current page to create order
+                const printCustomerBtn = document.getElementById('printCustomerBtn');
+                if (printCustomerBtn) {
+                    printCustomerBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const url = this.dataset.url;
+                        if (!url) return;
+                        // Open print in a new tab
+                        window.open(url, '_blank');
+                        // Redirect current tab to create order page
+                        window.location.href = '{{ route('orders.create') }}';
+                    });
+                }
+            });
+        </script>
+    @endpush

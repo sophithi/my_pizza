@@ -91,7 +91,7 @@
                                                 style="padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
                                                 background: {{ $invoice->status === 'paid' ? '#d4edda' : ($invoice->status === 'sent' ? '#cce5ff' : ($invoice->status === 'cancelled' ? '#f8d7da' : '#fff3cd')) }};
                                                 color: {{ $invoice->status === 'paid' ? '#155724' : ($invoice->status === 'sent' ? '#004085' : ($invoice->status === 'cancelled' ? '#721c24' : '#856404')) }};">
-                                                {{ ucfirst($invoice->status) }}
+                                                {{ $invoice->status === 'paid' ? 'បានបង់' : ($invoice->status === 'sent' ? 'បានផ្ញើ' : ($invoice->status === 'cancelled' ? 'បានលុបចោល' : ($invoice->status === 'draft' ? 'ព្រាង' : ucfirst($invoice->status)))) }}
                                             </span>
                                         </td>
                                         <td style="padding: 12px;">

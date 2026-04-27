@@ -8,6 +8,7 @@ class Order extends Model
 {
     protected $fillable = [
         'customer_id',
+        'delivery_id',
         'user_id',
         'prepared_by',
         'prepared_at',
@@ -15,6 +16,8 @@ class Order extends Model
         'subtotal',
         'tax_amount',
         'discount_amount',
+        'delivery_fee_khr',
+        'delivery_fee_usd',
         'total_amount',
         'status',
         'payment_status',
@@ -28,6 +31,8 @@ class Order extends Model
         'prepared_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
+        'delivery_fee_khr' => 'decimal:2',
+        'delivery_fee_usd' => 'decimal:2',
         'total_amount' => 'decimal:2',
     ];
 
@@ -84,6 +89,10 @@ class Order extends Model
     /**
      * Get the delivery for this order.
      */
+    public function delivery()
+    {
+        return $this->belongsTo(Delivery::class);
+    }
 
     /**
      * Get the user who prepared this order.

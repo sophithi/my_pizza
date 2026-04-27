@@ -246,13 +246,28 @@
                     @endif
                     @php
                         $deliveryItems = $invoice->order->items->filter(fn($item) => $item->delivery_id);
+                        $deliveryGroups = $deliveryItems->groupBy('delivery_id');
                     @endphp
                     @if($deliveryItems->count())
                         <div style="margin-top: 6px;">
                             <strong>ការដឹកជញ្ជូន:</strong>
-                            @foreach($deliveryItems as $dItem)
-                                <p style="margin: 2px 0;">{{ $dItem->product->name }} → {{ $dItem->delivery->delivery_name }}</p>
-                            @endforeach
+                            @if($deliveryGroups->count() === 1)
+                                @php
+                                    $firstDeliveryItem = $deliveryItems->first();
+                                @endphp
+                                <p style="margin: 2px 0;">{{ $firstDeliveryItem->delivery->delivery_name ?? 'មិនមាន' }}</p>
+                            @else
+                                @foreach($deliveryGroups as $group)
+                                    @php
+                                        $firstDeliveryItem = $group->first();
+                                        $productNames = $group->map(fn($item) => $item->product->name ?? 'ទំនិញ')->join(', ');
+                                    @endphp
+                                    <p style="margin: 2px 0;">
+                                        {{ $firstDeliveryItem->delivery->delivery_name ?? 'មិនមាន' }}:
+                                        {{ $productNames }}
+                                    </p>
+                                @endforeach
+                            @endif
                         </div>
                     @endif
                 @else
@@ -310,6 +325,15 @@
                     <span>បញ្ចុះតម្លៃ:</span>
                     <span>-${{ number_format($invoice->discount_amount, 2) }}</span>
                 </div>
+                @if((float) $invoice->delivery_fee_khr > 0)
+                    <div class="total-row">
+                        <span>ការដឹកជញ្ជូន:</span>
+                        <span>
+                            ${{ number_format($invoice->delivery_fee_usd, 2) }}
+                            <span style="display: block; color: #888; font-size: 13px;">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</span>
+                        </span>
+                    </div>
+                @endif
                 <div class="grand-total">
                     <span>តម្លៃសរុបទាំងអស់:</span>
                     <span class="amount">
@@ -337,9 +361,9 @@
         style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 12px;">
         <button onclick="window.print()"
             style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-            Print Sticker អតិថិជន
+            Print Sticker 
         </button>
-        <a href="{{ route('print.index') }}"
+        <a href="{{ route('packing.index') }}"
             style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
             ← Back
         </a>

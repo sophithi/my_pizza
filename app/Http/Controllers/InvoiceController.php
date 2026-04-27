@@ -41,12 +41,32 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Display invoices for printing (print index).
+     * Display invoices for packing labels.
      */
-    public function printIndex()
+    public function printIndex(Request $request)
     {
-        $invoices = Invoice::with(['order', 'order.customer'])->latest('invoice_date')->paginate(15);
-        return view('prints.index', compact('invoices'));
+        $query = Invoice::with(['order', 'order.customer']);
+        $period = $request->get('period');
+
+        if ($period === 'today') {
+            $query->whereDate('invoice_date', today());
+        } elseif ($period === 'yesterday') {
+            $query->whereDate('invoice_date', today()->subDay());
+        } elseif ($period === 'month') {
+            $query->whereMonth('invoice_date', now()->month)->whereYear('invoice_date', now()->year);
+        } elseif ($period === 'year') {
+            $query->whereYear('invoice_date', now()->year);
+        } elseif ($request->filled('date')) {
+            $query->whereDate('invoice_date', $request->date);
+        }
+        // If no period or date filter provided, default to today's invoices.
+        if (!$period && !$request->filled('date')) {
+            $period = 'today';
+            $query->whereDate('invoice_date', today());
+        }
+
+        $invoices = $query->latest('invoice_date')->paginate(15)->withQueryString();
+        return view('packing.index', compact('invoices'));
     }
 
     /**
@@ -66,7 +86,7 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-         $invoice->load('items.product');
+         $invoice->load('order.delivery', 'items.product');
 
     $allSameDelivery = false;
 
@@ -106,29 +126,29 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Print/export the invoice as PDF view.
+     * Show the customer packing/invoice label.
      */
     public function print(Invoice $invoice)
     {
-        $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
-        return view('prints.sticker-customer', compact('invoice'));
+        $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
+        return view('packing.sticker-customer', compact('invoice'));
     }
 
     /**
-     * Print preparation sticker for staff inventory.
+     * Show the packing preparation label for staff inventory.
      */
     public function stickerPrep(Invoice $invoice)
     {
         $invoice->load('order.customer', 'order.items.product');
-        return view('prints.sticker-prep', compact('invoice'));
+        return view('packing.sticker-prep', compact('invoice'));
     }
 
     /**
-     * Print customer sticker.
+     * Show the customer label.
      */
     public function stickerCustomer(Invoice $invoice)
     {
-        $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
-        return view('prints.sticker-customer', compact('invoice'));
+        $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
+        return view('packing.sticker-customer', compact('invoice'));
     }
 }

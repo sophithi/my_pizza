@@ -397,6 +397,9 @@
 
     .col-lg-7 { animation: slideUp 0.6s ease-out; }
     .col-lg-5 { animation: slideUp 0.6s ease-out 0.1s both; }
+    /* Keep action buttons visible on long forms */
+    .col-lg-5 { position: relative; }
+    form#orderForm .button-group { position: sticky; bottom: 18px; background: transparent; padding-top: 8px; z-index: 40; }
 
     /* Order Details Fields */
     .od-field {
@@ -545,7 +548,7 @@
                                     data-name="{{ $customer->name }}"
                                     data-phone="{{ $customer->phone }}"
                                     data-location="{{ $customer->location }}"
-                                    {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                    {{ (string) old('customer_id', $selectedCustomerId ?? '') === (string) $customer->id ? 'selected' : '' }}>
                                     {{ $customer->name }}
                                 </option>
                             @endforeach
@@ -638,6 +641,14 @@
                             </div>
                         </div>
 
+                        <div class="summary-row" id="deliveryFeeRow">
+                            <span style="font-weight: 600;">ការដឹកជញ្ជូន:</span>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 600;">$<span id="deliveryFeeUsd">0.00</span></div>
+                                <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="deliveryFeeKhr">0</span></div>
+                            </div>
+                        </div>
+
                     
                         <div class="summary-row total">
                             <span>តម្លៃសរុប:</span>
@@ -656,6 +667,7 @@
             <input type="hidden" id="subtotal_amount" name="subtotal">
             
             <input type="hidden" id="discount_amount" name="discount_amount">
+            <input type="hidden" id="delivery_fee_khr" name="delivery_fee_khr" value="0">
             <input type="hidden" id="total_amount_input" name="total_amount">
 
             <!-- Order Details Section -->
@@ -689,7 +701,7 @@
                         <div class="col-md-6">
                             <div class="od-field">
                                 <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន</label>
-                                <select id="delivery_select" class="form-control od-select">
+                                <select id="delivery_select" name="delivery_id" class="form-control od-select">
                                     <option value="">គ្មាន</option>
                                     @foreach($deliveries as $delivery)
                                         <option value="{{ $delivery->id }}" data-name="{{ $delivery->delivery_name }}" data-price="{{ $delivery->delivery_price_khr }}">
@@ -724,6 +736,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     let cart = {};
+    const exchangeRate = 4000;
 
     // Delivery options from server
     const deliveryOptions = @json($deliveries->map(fn($d) => ['id' => $d->id, 'name' => $d->delivery_name, 'price_khr' => $d->delivery_price_khr]));
@@ -879,9 +892,15 @@
     // Update cart data when delivery selection changes
     $(document).ready(function() {
         $('#delivery_select').on('change', function() {
+            calculateTotal();
             updateCartData();
         });
     });
+
+    function getSelectedDeliveryFeeKhr() {
+        const selected = $('#delivery_select option:selected');
+        return parseFloat(selected.data('price') || 0) || 0;
+    }
 
     function calculateTotal() {
         // Calculate subtotal with per-item discounts already applied
@@ -912,25 +931,30 @@
             taxKhr = (subtotalKhr * parseInt($('#taxPercent').val() || 0)) / 100;
         }
 
-        let total = subtotal + tax;
-        let totalKhr = subtotalKhr + taxKhr;
+        const deliveryFeeKhr = getSelectedDeliveryFeeKhr();
+        const deliveryFeeUsd = deliveryFeeKhr / exchangeRate;
+        let total = subtotal + tax + deliveryFeeUsd;
+        let totalKhr = subtotalKhr + taxKhr + deliveryFeeKhr;
 
         // Update USD displays
         $('#subtotal').text(subtotal.toFixed(2));
         $('#discountAmount').text(totalDiscount.toFixed(2));
         $('#taxAmount').text(tax.toFixed(2));
+        $('#deliveryFeeUsd').text(deliveryFeeUsd.toFixed(2));
         $('#totalAmount').text(total.toFixed(2));
 
         // Update KHR displays
         $('#subtotal_khr').text(subtotalKhr.toLocaleString());
         $('#discountAmount_khr').text(Math.round(totalDiscountKhr).toLocaleString());
         $('#taxAmount_khr').text(Math.round(taxKhr).toLocaleString());
+        $('#deliveryFeeKhr').text(Math.round(deliveryFeeKhr).toLocaleString());
         $('#totalAmount_khr').text(Math.round(totalKhr).toLocaleString());
 
         // Update hidden inputs
         $('#subtotal_amount').val(subtotal.toFixed(2));
         $('#tax_amount').val(tax.toFixed(2));
         $('#discount_amount').val(totalDiscount.toFixed(2));
+        $('#delivery_fee_khr').val(deliveryFeeKhr.toFixed(2));
         $('#total_amount_input').val(total.toFixed(2));
     }
 

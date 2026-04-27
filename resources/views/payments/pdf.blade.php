@@ -15,6 +15,7 @@
         .sm:last-child { border-right: none; }
         .sm .sl { font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 4px; }
         .sm .sv { font-size: 16px; font-weight: bold; }
+        .khr { color: #666; display: block; font-size: 10px; font-weight: normal; margin-top: 2px; }
         table { width: 100%; border-collapse: collapse; }
         thead tr { background: #f3f4f6; }
         th { text-align: left; padding: 8px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: #555; border-bottom: 1px solid #e5e7eb; }
@@ -33,6 +34,7 @@
     </style>
 </head>
 <body>
+@php($exchangeRate = 4000)
 
 <div class="header">
     <div>
@@ -49,11 +51,11 @@
 <div class="summary">
     <div class="sm">
         <div class="sl">បានប្រមូលសរុប</div>
-        <div class="sv" style="color:#059669">${{ number_format($stats['collected'], 2) }}</div>
+        <div class="sv" style="color:#059669">${{ number_format($stats['collected'], 2) }}<span class="khr">៛{{ number_format($stats['collected'] * $exchangeRate, 0) }}</span></div>
     </div>
     <div class="sm">
         <div class="sl">ចំនួននៅសល់</div>
-        <div class="sv" style="color:#dc2626">${{ number_format($stats['outstanding'], 2) }}</div>
+        <div class="sv" style="color:#dc2626">${{ number_format($stats['outstanding'], 2) }}<span class="khr">៛{{ number_format($stats['outstanding'] * $exchangeRate, 0) }}</span></div>
     </div>
     <div class="sm">
         <div class="sl">ការបញ្ជាទិញ</div>
@@ -94,11 +96,11 @@
                 <div class="oid">{{ $payment->order_id }}</div>
             </td>
             <td>{{ \Carbon\Carbon::parse($payment->order_date)->format('d M Y') }}</td>
-            <td>${{ number_format($payment->total_amount, 2) }}</td>
-            <td style="color:#059669;font-weight:bold">${{ number_format($payment->paid_amount, 2) }}</td>
+            <td>${{ number_format($payment->total_amount, 2) }}<span class="khr">៛{{ number_format($payment->total_amount * $exchangeRate, 0) }}</span></td>
+            <td style="color:#059669;font-weight:bold">${{ number_format($payment->paid_amount, 2) }}<span class="khr">៛{{ number_format($payment->paid_amount * $exchangeRate, 0) }}</span></td>
             <td style="color:#dc2626">
                 @if($payment->balance > 0)
-                    ${{ number_format($payment->balance, 2) }}
+                    ${{ number_format($payment->balance, 2) }}<span class="khr">៛{{ number_format($payment->balance * $exchangeRate, 0) }}</span>
                 @else
                     —
                 @endif

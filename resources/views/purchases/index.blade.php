@@ -1,273 +1,336 @@
 @extends('layouts.app')
 
-@section('title', 'Purchases Management')
+@section('title', 'ការចំណាយប្រចាំថ្ងៃ')
 
 @push('styles')
     <style>
-        :root {
-            --accent: #e85d24;
-            --bg: #f4f5f7;
-            --surface: #ffffff;
-            --border: #e9ecef;
-            --text: #1a1d29;
-            --text-muted: #6c757d;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
+        .expense-page {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px;
         }
 
-        body {
-            background: var(--bg);
-        }
-
-        .page-header {
+        .expense-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
         }
 
-        .page-title {
-            font-size: 32px;
+        .expense-title {
+            color: #0f172a;
+            font-size: 30px;
             font-weight: 800;
-            color: var(--text);
             margin: 0;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+        .expense-subtitle {
+            color: #64748b;
+            margin: 6px 0 0;
+        }
+
+        .expense-btn {
+            border: 0;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            min-height: 42px;
+            padding: 10px 18px;
             text-decoration: none;
-            font-weight: 600;
-            transition: background 0.2s;
         }
 
-        .btn-primary:hover {
-            background: #d64a1a;
+        .expense-btn-primary {
+            background: #e85d24;
+            color: #fff;
         }
 
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+        .expense-btn-primary:hover {
+            background: #d94a10;
+            color: #fff;
+        }
+
+        .expense-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+        }
+
+        .expense-stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .expense-stat {
+            padding: 18px;
+        }
+
+        .expense-stat-label {
+            color: #64748b;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 800;
+            letter-spacing: .03em;
+            text-transform: uppercase;
         }
 
-        .purchase-table {
+        .expense-stat-value {
+            color: #0f172a;
+            font-size: 26px;
+            font-weight: 800;
+            margin-top: 8px;
+        }
+
+        .expense-stat-help {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .expense-filter {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) 180px 180px auto;
+            gap: 10px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .expense-filter .form-control,
+        .expense-filter .form-select {
+            border-color: #d9dee7;
+            border-radius: 6px;
+            min-height: 42px;
+        }
+
+        .expense-table {
             width: 100%;
             border-collapse: collapse;
-            background: var(--surface);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
-        .purchase-table thead {
-            background: #f8f9fa;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .purchase-table thead th {
-            padding: 16px;
+        .expense-table th {
+            border-bottom: 1px solid #e5e7eb;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 14px 16px;
             text-align: left;
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        .purchase-table tbody tr {
-            border-bottom: 1px solid var(--border);
-            transition: background 0.2s;
+        .expense-table td {
+            border-bottom: 1px solid #edf0f4;
+            color: #0f172a;
+            padding: 14px 16px;
+            vertical-align: middle;
         }
 
-        .purchase-table tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        .purchase-table tbody td {
-            padding: 16px;
-            color: var(--text);
-        }
-
-        .purchase-amount {
-            font-weight: 600;
+        .expense-money {
+            color: #e85d24;
             font-size: 16px;
-            color: var(--accent);
+            font-weight: 800;
         }
 
-        .purchase-status {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 4px;
+        .expense-khr {
+            color: #64748b;
+            display: block;
             font-size: 12px;
             font-weight: 600;
+            margin-top: 2px;
         }
 
-        .purchase-status.pending {
-            background: #fff3cd;
-            color: #856404;
+        .expense-status {
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 6px 11px;
         }
 
-        .purchase-status.received {
-            background: #d4edda;
-            color: #155724;
+        .expense-status.pending {
+            background: #fef3c7;
+            color: #92400e;
         }
 
-        .purchase-status.cancelled {
-            background: #f8d7da;
-            color: #721c24;
+        .expense-status.received {
+            background: #d1fae5;
+            color: #065f46;
         }
 
-        .empty-state {
+        .expense-status.cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .expense-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .expense-action {
+            background: transparent;
+            border: 0;
+            color: #2563eb;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .expense-action-danger {
+            color: #e11d48;
+        }
+
+        .expense-empty {
+            padding: 54px 20px;
             text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-            background: var(--surface);
-            border-radius: 8px;
         }
 
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
+        @media (max-width: 900px) {
+            .expense-stats,
+            .expense-filter {
+                grid-template-columns: 1fr;
+            }
 
-        .empty-state-text {
-            font-size: 16px;
-            margin-bottom: 16px;
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            padding: 24px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text);
+            .expense-header {
+                align-items: stretch;
+                flex-direction: column;
+            }
         }
     </style>
 @endpush
 
 @section('content')
+    @php
+        $statusLabels = [
+            'pending' => 'មិនទាន់ទូទាត់',
+            'received' => 'បានទូទាត់',
+            'cancelled' => 'បានលុប',
+        ];
+    @endphp
 
-    <div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1 class="page-title">📦 Purchases Management</h1>
-            <a href="{{ route('purchases.create') }}" class="btn-primary">+ New Purchase</a>
+    <div class="expense-page">
+        <div class="expense-header">
+            <div>
+                <h1 class="expense-title">ការចំណាយប្រចាំថ្ងៃ</h1>
+                <p class="expense-subtitle">កត់ត្រាថ្លៃចំណាយប្រចាំថ្ងៃ ដូចជា ទិញសម្ភារៈ ប្រេង សេវា និងចំណាយផ្សេងៗ។</p>
+            </div>
+            <a href="{{ route('purchases.create') }}" class="expense-btn expense-btn-primary">
+                <i class="fas fa-plus"></i> បញ្ចូលចំណាយ
+            </a>
         </div>
 
-        <!-- Success Message -->
         @if(session('success'))
-            <div
-                style="background: #d4edda; color: #155724; padding: 16px; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #28a745;">
-                ✓ {{ session('success') }}
-            </div>
+            <div class="alert alert-success" style="border-radius: 8px;">{{ session('success') }}</div>
         @endif
 
-        <!-- Statistics -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-label">Total Purchases</div>
-                <div class="stat-value">{{ $purchases->total() }}</div>
+        <div class="expense-stats">
+            <div class="expense-card expense-stat">
+                <div class="expense-stat-label">ចំនួនប្រតិបត្តិការ</div>
+                <div class="expense-stat-value">{{ $stats['total'] }}</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Amount</div>
-                <div class="stat-value">${{ number_format($purchases->sum('total_amount'), 2) }}</div>
+            <div class="expense-card expense-stat">
+                <div class="expense-stat-label">ចំណាយសរុប</div>
+                <div class="expense-stat-value">${{ number_format($stats['amount'], 2) }}</div>
+                <div class="expense-stat-help">៛{{ number_format($stats['amount'] * $exchangeRate) }}</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Pending</div>
-                <div class="stat-value" style="color: #ffc107;">{{ $purchases->where('status', 'pending')->count() }}</div>
+            <div class="expense-card expense-stat">
+                <div class="expense-stat-label">មិនទាន់ទូទាត់</div>
+                <div class="expense-stat-value" style="color: #d97706;">{{ $stats['pending'] }}</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Received</div>
-                <div class="stat-value" style="color: #28a745;">{{ $purchases->where('status', 'received')->count() }}</div>
+            <div class="expense-card expense-stat">
+                <div class="expense-stat-label">បានទូទាត់</div>
+                <div class="expense-stat-value" style="color: #059669;">{{ $stats['paid'] }}</div>
             </div>
         </div>
 
-        <!-- Purchases Table -->
-        @if($purchases->count() > 0)
-            <table class="purchase-table">
-                <thead>
-                    <tr>
-                        <th>Reference</th>
-                        <th>Supplier</th>
-                        <th>Purchase Date</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($purchases as $purchase)
-                        <tr>
-                            <td>
-                                <strong>#{{ $purchase->reference_number ?? str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</strong>
-                            </td>
-                            <td>{{ $purchase->supplier_name }}</td>
-                            <td>{{ $purchase->purchase_date->translatedFormat('M d, Y') }}</td>
-                            <td class="purchase-amount">${{ number_format($purchase->total_amount, 2) }}</td>
-                            <td>
-                                <span class="purchase-status {{ $purchase->status }}">{{ ucfirst($purchase->status) }}</span>
-                            </td>
-                            <td>
-                                <a href="{{ route('purchases.show', $purchase) }}"
-                                    style="color: var(--accent); text-decoration: none; margin-right: 12px;">View</a>
-                                <a href="{{ route('purchases.edit', $purchase) }}"
-                                    style="color: var(--accent); text-decoration: none; margin-right: 12px;">Edit</a>
-                                <form action="{{ route('purchases.destroy', $purchase) }}" method="POST" style="display: inline;"
-                                    onsubmit="return confirm('Delete this purchase?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-danger" style="padding: 4px 8px;">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <form method="GET" action="{{ route('purchases.index') }}" class="expense-card expense-filter" autocomplete="off">
+            <input type="search" name="search" class="form-control" value="{{ request('search') }}"
+                placeholder="ស្វែងរកចំណាយ ឬកំណត់ចំណាំ..." autocomplete="off">
+            <select name="status" class="form-select">
+                <option value="all">គ្រប់ស្ថានភាព</option>
+                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>
+                <option value="received" {{ request('status') === 'received' ? 'selected' : '' }}>បានទូទាត់</option>
+                <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>បានលុប</option>
+            </select>
+            <input type="date" name="date" class="form-control" value="{{ request('date') }}" autocomplete="off">
+            <button class="expense-btn expense-btn-primary" type="submit">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
 
-            <!-- Pagination -->
-            <div style="margin-top: 32px;">
-                {{ $purchases->links() }}
-            </div>
-        @else
-            <div class="empty-state">
-                <div class="empty-state-icon">📦</div>
-                <div class="empty-state-text">No purchases recorded yet</div>
-                <a href="{{ route('purchases.create') }}" class="btn-primary">Record First Purchase</a>
-            </div>
-        @endif
+        <div class="expense-card">
+            @if($purchases->count() > 0)
+                <div class="table-responsive">
+                    <table class="expense-table">
+                        <thead>
+                            <tr>
+                                <th>លេខយោង</th>
+                                <th>ប្រភេទ / អ្នកទទួល</th>
+                                <th>កាលបរិច្ឆេទ</th>
+                                <th>ចំនួនទឹកប្រាក់</th>
+                                <th>ស្ថានភាព</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($purchases as $purchase)
+                                <tr>
+                                    <td>
+                                        <strong>{{ $purchase->reference_number ?: 'EXP-' . str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</strong>
+                                        @if($purchase->notes)
+                                            <span class="d-block text-muted small">{{ \Illuminate\Support\Str::limit($purchase->notes, 46) }}</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $purchase->supplier_name }}</td>
+                                    <td>{{ $purchase->purchase_date->translatedFormat('d M Y') }}</td>
+                                    <td>
+                                        <span class="expense-money">${{ number_format($purchase->total_amount, 2) }}</span>
+                                        <span class="expense-khr">៛{{ number_format($purchase->total_amount * $exchangeRate) }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="expense-status {{ $purchase->status }}">
+                                            {{ $statusLabels[$purchase->status] ?? ucfirst($purchase->status) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="expense-actions">
+                                            <a href="{{ route('purchases.show', $purchase) }}" class="expense-action" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('purchases.edit', $purchase) }}" class="expense-action" title="Edit">
+                                                <i class="fas fa-pen"></i>
+                                            </a>
+                                            <form action="{{ route('purchases.destroy', $purchase) }}" method="POST"
+                                                onsubmit="return confirm('Delete this daily expense?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="expense-action expense-action-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3">
+                    {{ $purchases->links() }}
+                </div>
+            @else
+                <div class="expense-empty">
+                    <h5 class="mb-2">មិនទាន់មានការចំណាយទេ</h5>
+                    <p class="text-muted mb-3">ចាប់ផ្តើមកត់ត្រាចំណាយប្រចាំថ្ងៃរបស់ហាង។</p>
+                    <a href="{{ route('purchases.create') }}" class="expense-btn expense-btn-primary">
+                        <i class="fas fa-plus"></i> បញ្ចូលចំណាយដំបូង
+                    </a>
+                </div>
+            @endif
+        </div>
     </div>
-
 @endsection

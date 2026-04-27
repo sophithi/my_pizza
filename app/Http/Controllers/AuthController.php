@@ -117,4 +117,5 @@ class AuthController extends Controller
             'current_user_agent' => request()->userAgent(),
         ]);
     }
+
 }

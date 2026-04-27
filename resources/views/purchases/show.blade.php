@@ -1,271 +1,173 @@
 @extends('layouts.app')
 
-@section('title', 'Purchase #' . str_pad($purchase->id, 5, '0', STR_PAD_LEFT))
+@section('title', 'ព័ត៌មានចំណាយ')
 
 @push('styles')
-<style>
-    :root {
-        --accent: #e85d24;
-        --bg: #f4f5f7;
-        --surface: #ffffff;
-        --border: #e9ecef;
-        --text: #1a1d29;
-        --text-muted: #6c757d;
-        --success: #28a745;
-        --warning: #ffc107;
-        --danger: #dc3545;
-    }
+    <style>
+        .expense-show {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 28px 20px;
+        }
 
-    body { background: var(--bg); }
+        .expense-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+            padding: 24px;
+        }
 
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 40px;
-        gap: 24px;
-    }
+        .expense-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
 
-    .header-info {
-        flex: 1;
-    }
+        .expense-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+        }
 
-    .purchase-title {
-        font-size: 32px;
-        font-weight: 800;
-        color: var(--text);
-        margin: 0 0 8px 0;
-    }
+        .expense-value {
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
 
-    .purchase-meta {
-        display: flex;
-        gap: 24px;
-        color: var(--text-muted);
-        font-size: 14px;
-    }
+        .expense-money {
+            color: #e85d24;
+            font-size: 28px;
+            font-weight: 800;
+        }
 
-    .header-actions {
-        display: flex;
-        gap: 12px;
-    }
+        .expense-status {
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 6px 11px;
+        }
 
-    .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
+        .expense-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
 
-    .btn-primary {
-        background: var(--accent);
-        color: white;
-    }
+        .expense-status.received {
+            background: #d1fae5;
+            color: #065f46;
+        }
 
-    .btn-primary:hover {
-        background: #d64a1a;
-    }
+        .expense-status.cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
 
-    .btn-secondary {
-        background: transparent;
-        color: var(--text-muted);
-        border: 1px solid var(--border);
-    }
+        .expense-primary {
+            background: #e85d24;
+            border-color: #e85d24;
+            color: #fff;
+            font-weight: 700;
+        }
 
-    .btn-secondary:hover {
-        background: var(--bg);
-        color: var(--text);
-    }
+        .expense-primary:hover {
+            background: #d94a10;
+            border-color: #d94a10;
+            color: #fff;
+        }
 
-    .btn-danger {
-        background: var(--danger);
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background: #c82333;
-    }
-
-    .info-card {
-        background: var(--surface);
-        padding: 24px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 24px;
-    }
-
-    .info-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 24px;
-        margin-bottom: 20px;
-    }
-
-    .info-group {
-        flex: 1;
-    }
-
-    .info-label {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-    }
-
-    .info-value {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--text);
-    }
-
-    .status-pending {
-        background: #fff3cd;
-        color: #856404;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
-    }
-
-    .status-received {
-        background: #d4edda;
-        color: #155724;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
-    }
-
-    .status-cancelled {
-        background: #f8d7da;
-        color: #721c24;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
-    }
-
-    .amount-large {
-        font-size: 28px;
-        color: var(--accent);
-    }
-
-    .notes-section {
-        background: #fafafa;
-        padding: 16px;
-        border-radius: 8px;
-        border-left: 4px solid var(--accent);
-    }
-
-    .action-section {
-        background: var(--surface);
-        padding: 24px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        display: flex;
-        gap: 12px;
-    }
-</style>
+        @media (max-width: 800px) {
+            .expense-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
+    @php
+        $exchangeRate = 4000;
+        $statusLabels = [
+            'pending' => 'មិនទាន់ទូទាត់',
+            'received' => 'បានទូទាត់',
+            'cancelled' => 'បានលុប',
+        ];
+        $reference = $purchase->reference_number ?: 'EXP-' . str_pad($purchase->id, 5, '0', STR_PAD_LEFT);
+    @endphp
 
-<div style="max-width: 900px; margin: 0 auto; padding: 24px;">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="header-info">
-            <h1 class="purchase-title">📦 Purchase #{{ str_pad($purchase->id, 5, '0', STR_PAD_LEFT) }}</h1>
-            <div class="purchase-meta">
-                <span>📅 {{ $purchase->purchase_date->translatedFormat('M d, Y') }}</span>
-                <span>🏢 {{ $purchase->supplier_name }}</span>
+    <div class="expense-show">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+            <div>
+                <h1 class="mb-1" style="font-size: 30px; font-weight: 800; color: #0f172a;">ព័ត៌មានចំណាយ</h1>
+                <p class="text-muted mb-0">{{ $reference }}</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('purchases.edit', $purchase) }}" class="btn expense-primary">
+                    <i class="fas fa-pen me-1"></i> Edit
+                </a>
+                <a href="{{ route('purchases.index') }}" class="btn btn-outline-secondary">
+                    Back
+                </a>
             </div>
         </div>
-        <div class="header-actions">
-            <a href="{{ route('purchases.edit', $purchase) }}" class="btn btn-primary">✏️ Edit</a>
-            <form action="{{ route('purchases.destroy', $purchase) }}" method="POST" style="display: inline;" onsubmit="return confirm('Delete this purchase?');">
+
+        <div class="expense-card mb-3">
+            <div class="expense-grid">
+                <div>
+                    <div class="expense-label">លេខយោង</div>
+                    <div class="expense-value">{{ $reference }}</div>
+                </div>
+                <div>
+                    <div class="expense-label">ប្រភេទ / អ្នកទទួល</div>
+                    <div class="expense-value">{{ $purchase->supplier_name }}</div>
+                </div>
+                <div>
+                    <div class="expense-label">ស្ថានភាព</div>
+                    <div class="expense-value">
+                        <span class="expense-status {{ $purchase->status }}">
+                            {{ $statusLabels[$purchase->status] ?? ucfirst($purchase->status) }}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <div class="expense-label">កាលបរិច្ឆេទ</div>
+                    <div class="expense-value">{{ $purchase->purchase_date->translatedFormat('d M Y') }}</div>
+                </div>
+                <div>
+                    <div class="expense-label">ចំនួនទឹកប្រាក់</div>
+                    <div class="expense-money">${{ number_format($purchase->total_amount, 2) }}</div>
+                    <div class="text-muted">៛{{ number_format($purchase->total_amount * $exchangeRate) }}</div>
+                </div>
+                <div>
+                    <div class="expense-label">Created</div>
+                    <div class="expense-value">
+                        {{ $purchase->created_at ? $purchase->created_at->setTimezone('Asia/Phnom_Penh')->translatedFormat('d M Y h:i A') : '' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if($purchase->notes)
+            <div class="expense-card mb-3">
+                <div class="expense-label mb-2">កំណត់ចំណាំ</div>
+                <div style="white-space: pre-line;">{{ $purchase->notes }}</div>
+            </div>
+        @endif
+
+        <div class="expense-card d-flex flex-wrap gap-2">
+            <a href="{{ route('purchases.edit', $purchase) }}" class="btn expense-primary">Edit Expense</a>
+            <form action="{{ route('purchases.destroy', $purchase) }}" method="POST"
+                onsubmit="return confirm('Delete this daily expense?');">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-danger">🗑️ Delete</button>
+                <button type="submit" class="btn btn-danger">Delete Expense</button>
             </form>
-            <a href="{{ route('purchases.index') }}" class="btn btn-secondary">← Back</a>
+            <a href="{{ route('purchases.index') }}" class="btn btn-outline-secondary">Back</a>
         </div>
     </div>
-
-    <!-- Purchase Details -->
-    <div class="info-card">
-        <div class="info-row">
-            <div class="info-group">
-                <div class="info-label">Reference Number</div>
-                <div class="info-value">
-                    {{ $purchase->reference_number ?? 'N/A' }}
-                </div>
-            </div>
-            <div class="info-group">
-                <div class="info-label">Status</div>
-                <div>
-                    @if($purchase->status === 'pending')
-                        <span class="status-pending">⏱ Pending</span>
-                    @elseif($purchase->status === 'received')
-                        <span class="status-received">✓ Received</span>
-                    @else
-                        <span class="status-cancelled">✕ Cancelled</span>
-                    @endif
-                </div>
-            </div>
-            <div class="info-group">
-                <div class="info-label">Total Amount</div>
-                <div class="info-value amount-large">${{ number_format($purchase->total_amount, 2) }}</div>
-            </div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-group">
-                <div class="info-label">Supplier Name</div>
-                <div class="info-value">{{ $purchase->supplier_name }}</div>
-            </div>
-            <div class="info-group">
-                <div class="info-label">Purchase Date</div>
-                <div class="info-value">{{ $purchase->purchase_date->translatedFormat('M d, Y') }}</div>
-            </div>
-            <div class="info-group">
-                <div class="info-label">Created</div>
-                <div class="info-value">{{ $purchase->created_at ? $purchase->created_at->setTimezone('Asia/Phnom_Penh')->translatedFormat('M d, Y h:i A') : '' }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notes -->
-    @if($purchase->notes)
-    <div class="info-card">
-        <div style="font-size: 12px; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">📝 Notes</div>
-        <div class="notes-section">
-            {{ $purchase->notes }}
-        </div>
-    </div>
-    @endif
-
-    <!-- Actions -->
-    <div class="action-section">
-        <a href="{{ route('purchases.edit', $purchase) }}" class="btn btn-primary">Edit Purchase</a>
-        <form action="{{ route('purchases.destroy', $purchase) }}" method="POST" style="display: inline;" onsubmit="return confirm('Delete this purchase?');">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger">Delete Purchase</button>
-        </form>
-        <a href="{{ route('purchases.index') }}" class="btn btn-secondary">Back to Purchases</a>
-    </div>
-</div>
-
 @endsection

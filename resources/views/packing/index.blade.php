@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'រៀបចំទំនិញ')
+
 @section('content')
     <div class="container-fluid py-4">
         <div class="row mb-4">
@@ -12,24 +14,24 @@
         <!-- Date Filter -->
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
             <div class="card-body" style="padding: 16px 24px;">
-                <form method="GET" action="{{ route('print.index') }}" id="printFilter"
+                <form method="GET" action="{{ route('packing.index') }}" id="packingFilter"
                     style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
 
                     <input type="hidden" name="period" id="periodInput" value="{{ request('period') }}">
 
-                    <a href="{{ route('print.index', ['period' => 'today']) }}"
+                    <a href="{{ route('packing.index', ['period' => 'today']) }}"
                         style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'today' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'today' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'today' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
                         <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
                     </a>
-                    <a href="{{ route('print.index', ['period' => 'yesterday']) }}"
+                    <a href="{{ route('packing.index', ['period' => 'yesterday']) }}"
                         style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'yesterday' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'yesterday' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'yesterday' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
                         <i class="fas fa-calendar-minus"></i> ម្សិលមិញ
                     </a>
-                    <a href="{{ route('print.index', ['period' => 'month']) }}"
+                    <a href="{{ route('packing.index', ['period' => 'month']) }}"
                         style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'month' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'month' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'month' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
                         <i class="fas fa-calendar-alt"></i> ខែនេះ
                     </a>
-                    <a href="{{ route('print.index', ['period' => 'year']) }}"
+                    <a href="{{ route('packing.index', ['period' => 'year']) }}"
                         style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'year' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'year' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'year' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
                         <i class="fas fa-calendar"></i> ឆ្នាំនេះ
                     </a>
@@ -69,11 +71,11 @@
                                                 <td>{{ $invoice->order?->customer?->name ?? 'N/A' }}</td>
                                                 <td>{{ $invoice->invoice_date->translatedFormat('M d, Y') }}</td>
                                                 <td style="text-align:right">
-                                                    <a href="{{ route('print.prep', $invoice) }}" target="_blank" class="btn"
+                                                    <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="btn"
                                                         style="background:#1a1d29;color:white;border:none;padding:6px 10px;border-radius:6px;font-weight:600;margin-right:6px;">
                                                         <i class="fas fa-print"></i> រៀបចំទំនិញ
                                                     </a>
-                                                    <a href="{{ route('print.customer', $invoice) }}" target="_blank" class="btn"
+                                                    <a href="{{ route('packing.customer', $invoice) }}" target="_blank" class="btn"
                                                         style="background:#e85d24;color:white;border:none;padding:6px 10px;border-radius:6px;font-weight:600;">
                                                         <i class="fas fa-print"></i> វិក្ក័យបត្រភ្ញៀវ
                                                     </a>

@@ -512,8 +512,9 @@
                             </td>
                             <td class="amt">${{ number_format($order->total_amount, 2) }}</td>
                             <td>
-                                <span
-                                    class="s-badge {{ strtolower($order->payment_status) }}">{{ ucfirst($order->payment_status) }}</span>
+                                <span class="s-badge {{ strtolower($order->payment_status) }}">
+                                    {{ $order->payment_status === 'paid' ? 'បានបង់' : ($order->payment_status === 'unpaid' ? 'មិនទាន់បង់' : 'បង់ខ្លះ') }}
+                                </span>
                             </td>
                             <td>
                                 <div class="actions">

@@ -223,7 +223,7 @@
                 @endif
 
                 <!-- Login Form -->
-                <form action="{{ route('login.post') }}" method="POST">
+                <form action="{{ route('login.post') }}" method="POST" autocomplete="off">
                     @csrf
 
                     <!-- Email -->
@@ -231,7 +231,8 @@
                         <label class="form-label" for="email">Email</label>
                         <input type="email" id="email" name="email"
                             class="form-control @error('email') is-invalid @enderror"
-                            placeholder="user1@pizzahappyfamily.com" value="{{ old('email') }}" required autofocus>
+                            placeholder="user1@pizzahappyfamily.com" value="{{ old('email') }}" required autofocus
+                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                         @error('email')
                             <span class="error-text">{{ $message }}</span>
                         @enderror
@@ -242,7 +243,7 @@
                         <label class="form-label" for="password">Password</label>
                         <input type="password" id="password" name="password"
                             class="form-control @error('password') is-invalid @enderror" placeholder="••••••••"
-                            required>
+                            required autocomplete="new-password">
                         @error('password')
                             <span class="error-text">{{ $message }}</span>
                         @enderror

@@ -33,11 +33,11 @@
                                                 <td style="padding:12px;color:#666;">
                                                     {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</td>
                                                 <td style="padding:12px;text-align:right;">
-                                                    <a href="{{ route('print.prep', $invoice) }}" target="_blank" class="btn"
+                                                    <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="btn"
                                                         style="background:#1a1d29;color:white;border:none;padding:6px 12px;border-radius:6px;font-weight:600;font-size:12px;margin-right:6px;">
                                                         <i class="fas fa-print"></i> រៀបចំទំនិញ
                                                     </a>
-                                                    <a href="{{ route('print.customer', $invoice) }}" target="_blank" class="btn"
+                                                    <a href="{{ route('packing.customer', $invoice) }}" target="_blank" class="btn"
                                                         style="background:#e85d24;color:white;border:none;padding:6px 12px;border-radius:6px;font-weight:600;font-size:12px;">
                                                         <i class="fas fa-print"></i> វិក្ក័យបត្រ
                                                     </a>
@@ -52,7 +52,7 @@
                                 {{ $invoices->links() }}
                             </div>
                         @else
-                            <p style="color:#999;text-align:center;padding:40px;">No invoices available for printing.</p>
+                            <p style="color:#999;text-align:center;padding:40px;">No invoices available for packing.</p>
                         @endif
                     </div>
                 </div>

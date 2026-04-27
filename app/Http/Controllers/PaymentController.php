@@ -10,13 +10,15 @@ use App\Exports\PaymentsExport;
 
 class PaymentController extends Controller
 {
+    private const EXCHANGE_RATE = 4000;
+
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private function applyFilters(Request $request)
     {
         $query = Order::with([
             'customer',
-            'payments' => fn($q) => $q->latest('id'),
+            'payments' => fn($q) => $q->with('lines')->latest('id'),
         ]);
 
         // Date / period filter
@@ -92,6 +94,12 @@ class PaymentController extends Controller
             'paid_amount' => min((float) $order->total_amount, (float) $paidAmount),
             'balance' => max(0, (float) $order->total_amount - (float) $paidAmount),
             'method' => $payment?->method ?? '—',
+            'lines' => $payment?->lines?->map(fn($line) => [
+                'method' => $line->method,
+                'currency' => $line->currency,
+                'amount_original' => (float) $line->amount_original,
+                'amount_usd' => (float) $line->amount_usd,
+            ])->values() ?? [],
             'status' => $status,
             'notes' => $payment?->notes ?? $order->notes,
         ];
@@ -148,12 +156,14 @@ class PaymentController extends Controller
             'order_date'    => 'nullable|date',
             'total_amount'  => 'nullable|numeric|min:0',
             'paid_amount'   => 'nullable|numeric|min:0',
+            'payment_lines' => 'nullable|string',
             'method'        => 'nullable|string|max:50',
             'notes'         => 'nullable|string|max:500',
             'source_order_id' => 'nullable|integer',
         ]);
 
-        $data['paid_amount'] = $data['paid_amount'] ?? 0;
+        $lines = $this->parsePaymentLines($request);
+        $data['paid_amount'] = collect($lines)->sum('amount_usd');
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
         $data['order_date'] = $order->order_date;
@@ -162,11 +172,14 @@ class PaymentController extends Controller
 
         // Auto-set status
         $data['status'] = $this->resolveStatus($data['total_amount'], $data['paid_amount']);
+        $data['method'] = $this->summarizeMethods($lines);
+        unset($data['payment_lines']);
 
-        Payment::updateOrCreate(
+        $payment = Payment::updateOrCreate(
             ['order_id' => $order->id],
             $data
         );
+        $this->syncPaymentLines($payment, $lines);
 
         $order->update([
             'payment_status' => match ($data['status']) {
@@ -190,20 +203,25 @@ class PaymentController extends Controller
             'order_date'    => 'nullable|date',
             'total_amount'  => 'nullable|numeric|min:0',
             'paid_amount'   => 'nullable|numeric|min:0',
+            'payment_lines' => 'nullable|string',
             'method'        => 'nullable|string|max:50',
             'notes'         => 'nullable|string|max:500',
             'source_order_id' => 'nullable|integer',
         ]);
 
-        $data['paid_amount'] = $data['paid_amount'] ?? 0;
+        $lines = $this->parsePaymentLines($request);
+        $data['paid_amount'] = collect($lines)->sum('amount_usd');
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
         $data['order_date'] = $order->order_date;
         $data['total_amount'] = $order->total_amount;
         abort_if((float) $data['paid_amount'] > (float) $data['total_amount'], 422, 'Paid amount cannot be greater than the order total.');
         $data['status']      = $this->resolveStatus($data['total_amount'], $data['paid_amount']);
+        $data['method'] = $this->summarizeMethods($lines);
+        unset($data['payment_lines']);
 
         $payment->update($data);
+        $this->syncPaymentLines($payment, $lines);
 
         $order->update([
             'payment_status' => match ($data['status']) {
@@ -265,5 +283,60 @@ class PaymentController extends Controller
         abort_unless($sourceOrderId, 422, 'Please select a valid order.');
 
         return Order::with('customer')->findOrFail($sourceOrderId);
+    }
+
+    private function parsePaymentLines(Request $request): array
+    {
+        $rawLines = json_decode($request->input('payment_lines', '[]'), true);
+
+        if (!is_array($rawLines) || empty($rawLines)) {
+            $amount = (float) $request->input('paid_amount', 0);
+
+            return $amount > 0 ? [[
+                'method' => $request->input('method', 'Cash'),
+                'currency' => 'USD',
+                'amount_original' => $amount,
+                'amount_usd' => $amount,
+                'exchange_rate' => self::EXCHANGE_RATE,
+            ]] : [];
+        }
+
+        return collect($rawLines)
+            ->map(function ($line) {
+                $currency = strtoupper($line['currency'] ?? 'USD') === 'KHR' ? 'KHR' : 'USD';
+                $amountOriginal = max(0, (float) ($line['amount'] ?? 0));
+                $amountUsd = $currency === 'KHR'
+                    ? round($amountOriginal / self::EXCHANGE_RATE, 2)
+                    : round($amountOriginal, 2);
+
+                return [
+                    'method' => $line['method'] ?? 'Cash',
+                    'currency' => $currency,
+                    'amount_original' => $amountOriginal,
+                    'amount_usd' => $amountUsd,
+                    'exchange_rate' => self::EXCHANGE_RATE,
+                ];
+            })
+            ->filter(fn($line) => $line['amount_original'] > 0)
+            ->values()
+            ->all();
+    }
+
+    private function summarizeMethods(array $lines): string
+    {
+        if (empty($lines)) {
+            return '—';
+        }
+
+        return collect($lines)->pluck('method')->unique()->join(' + ');
+    }
+
+    private function syncPaymentLines(Payment $payment, array $lines): void
+    {
+        $payment->lines()->delete();
+
+        foreach ($lines as $line) {
+            $payment->lines()->create($line);
+        }
     }
 }

@@ -13,6 +13,7 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Khmer&family=Hanuman&family=Battambang&display=swap"
         rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 
     <style>
         * {
@@ -699,9 +700,9 @@
 
       
 
-            {{-- Print (admin + staff inventory + staff office + manager) --}}
+            {{-- Packing labels (admin + staff inventory + staff office + manager) --}}
             @if($isAdmin || $isManager || $isStaff || $isInventory)
-                <a href="{{ route('print.index') }}" class="nav-link {{ request()->is('print/index') ? 'active' : '' }}">
+                <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') || request()->is('print*') ? 'active' : '' }}">
                     <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
                 </a>
             @endif
@@ -717,13 +718,6 @@
             @if($isAdminOrManager)
                 <a href="/users" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
                     <i class="fas fa-users-cog"></i><span>បុគ្គលិក</span>
-                </a>
-            @endif
-
-            {{-- Settings (admin & manager only) --}}
-            @if($isAdminOrManager)
-                <a href="/settings" class="nav-link {{ request()->is('settings*') ? 'active' : '' }}">
-                    <i class="fas fa-cog"></i><span>Settings</span>
                 </a>
             @endif
 
@@ -796,6 +790,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/km.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -928,6 +924,22 @@
             notifOverlay?.addEventListener('click', closeNotif);
             renderNotifications();
             updateCount();
+            // Initialize Flatpickr for all date inputs with Khmer locale
+            try {
+                if (typeof flatpickr !== 'undefined') {
+                    document.querySelectorAll('input[type="date"]').forEach(inp => {
+                        const current = inp.value || null;
+                        inp.type = 'text';
+                        flatpickr(inp, {
+                            dateFormat: 'Y-m-d',
+                            defaultDate: current,
+                            locale: flatpickr.l10ns && flatpickr.l10ns.km ? flatpickr.l10ns.km : 'default'
+                        });
+                    });
+                }
+            } catch (e) {
+                console.warn('Flatpickr init failed', e);
+            }
             // ===== USER DROPDOWN =====
             const userDropdownToggle = document.getElementById('userDropdownToggle');
             const userDropdownMenu = document.getElementById('userDropdownMenu');
@@ -963,6 +975,7 @@
                     if (result.isConfirmed) form.submit();
                 });
             });
+
         });
     </script>
     @stack('scripts')

@@ -3,252 +3,277 @@
 @section('title', 'Deliveries')
 
 @push('styles')
-    <style>
-        :root {
-            --accent: #e85d24;
-            --accent-light: #fff5f0;
-            --bg: #f4f5f7;
-            --surface: #ffffff;
-            --border: #e9ecef;
-            --text: #1a1d29;
-            --text-muted: #6c757d;
+<style>
+    .delivery-page {
+        --accent: #e85d24;
+        --accent-dark: #d94a10;
+        --surface: #ffffff;
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+    }
+
+    .delivery-header {
+        align-items: center;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .delivery-title {
+        color: var(--text);
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .delivery-subtitle {
+        color: var(--muted);
+        margin: 6px 0 0;
+    }
+
+    .delivery-btn {
+        align-items: center;
+        border: 0;
+        border-radius: 8px;
+        display: inline-flex;
+        font-weight: 700;
+        gap: 8px;
+        justify-content: center;
+        min-height: 40px;
+        padding: 9px 14px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .delivery-btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+        color: #fff;
+    }
+
+    .delivery-btn-primary:hover {
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(232, 93, 36, 0.22);
+        transform: translateY(-1px);
+    }
+
+    .delivery-toolbar {
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-start;
+        margin-bottom: 16px;
+        padding: 14px;
+    }
+
+    .search-wrap {
+        align-items: center;
+        display: flex;
+        flex: 1;
+        max-width: 420px;
+        position: relative;
+    }
+
+    .search-wrap i {
+        color: var(--muted);
+        left: 13px;
+        position: absolute;
+    }
+
+    .delivery-search {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        min-height: 42px;
+        padding: 10px 12px 10px 38px;
+        width: 100%;
+    }
+
+    .delivery-search:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(232, 93, 36, 0.12);
+        outline: none;
+    }
+
+    .delivery-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+    }
+
+    .delivery-table {
+        margin: 0;
+        width: 100%;
+    }
+
+    .delivery-table th {
+        background: #f9fafb;
+        border-bottom: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        padding: 14px 16px;
+        text-transform: uppercase;
+    }
+
+    .delivery-table td {
+        border-bottom: 1px solid #f1f3f5;
+        color: var(--text);
+        padding: 15px 16px;
+        vertical-align: middle;
+    }
+
+    .delivery-name {
+        font-weight: 800;
+    }
+
+    .delivery-desc {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+        max-width: 420px;
+    }
+
+    .price-badge {
+        background: #fff5f0;
+        border: 1px solid rgba(232, 93, 36, 0.2);
+        border-radius: 999px;
+        color: var(--accent);
+        display: inline-flex;
+        font-weight: 800;
+        padding: 7px 11px;
+    }
+
+    .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        justify-content: flex-end;
+    }
+
+    .action-btn {
+        align-items: center;
+        border: 0;
+        border-radius: 8px;
+        color: #fff;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 800;
+        gap: 6px;
+        min-height: 34px;
+        padding: 7px 10px;
+        text-decoration: none;
+    }
+
+    .action-view { background: #16a34a; }
+    .action-edit { background: #2563eb; }
+    .action-delete { background: #dc2626; }
+
+    .empty-state {
+        padding: 56px 20px;
+        text-align: center;
+    }
+
+    .empty-state i {
+        color: #d1d5db;
+        font-size: 46px;
+        margin-bottom: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .delivery-header,
+        .delivery-toolbar {
+            align-items: stretch;
+            flex-direction: column;
         }
 
-        body {
-            background: var(--bg);
+        .search-wrap {
+            max-width: none;
         }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .page-title {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--text);
-            margin: 0;
-        }
-
-        .page-subtitle {
-            color: var(--text-muted);
-            font-size: 13px;
-            margin-top: 4px;
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, var(--accent) 0%, #d94a10 100%);
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-            border: none;
-        }
-
-        .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(232, 93, 36, 0.3);
-            color: #fff;
-        }
-
-        .search-bar {
-            margin-bottom: 24px;
-        }
-
-        .search-bar input {
-            padding: 10px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            font-size: 14px;
-            width: 300px;
-            background: var(--surface);
-            color: var(--text);
-        }
-
-        .search-bar input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .table-card {
-            background: var(--surface);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-
-        .table-card table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table-card th {
-            padding: 14px 16px;
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            background: #fafbfc;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .table-card td {
-            padding: 14px 16px;
-            font-size: 14px;
-            color: var(--text);
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        .table-card tr:hover {
-            background: #fafbfc;
-        }
-
-        .price-tag {
-            font-weight: 700;
-            color: var(--accent);
-            font-size: 15px;
-        }
-
-        .action-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 7px 14px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.2s;
-            gap: 4px;
-        }
-
-        .btn-view {
-            background: #28a745;
-            color: #fff;
-        }
-
-        .btn-view:hover {
-            background: #218838;
-            color: #fff;
-        }
-
-        .btn-edit {
-            background: #0d6efd;
-            color: #fff;
-        }
-
-        .btn-edit:hover {
-            background: #0a58ca;
-            color: #fff;
-        }
-
-        .btn-delete {
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-delete:hover {
-            background: #b02a37;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-        }
-
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            color: #dee2e6;
-        }
-    </style>
+    }
+</style>
 @endpush
 
 @section('content')
-    <div style="max-width: 1000px; margin: 0 auto; padding: 24px;">
-
-        @if(session('success'))
-            <div
-                style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
-                <i class="fas fa-check-circle"></i> {{ session('success') }}
-            </div>
-        @endif
-
-        <div class="page-header">
-            <div>
-                <p class="page-subtitle">ការដឹកជញ្ជូន</p>
-
-            </div>
-            <a href="{{ route('deliveries.create') }}" class="btn-add">
-                <i class="fas fa-plus"></i> បង្កើតថ្មី
-            </a>
+<div class="container-fluid py-4 delivery-page">
+    @if(session('success'))
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
         </div>
+    @endif
 
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder=" ស្វែងរកការដឹកជញ្ជូន..." onkeyup="filterTable()">
+    <div class="delivery-header">
+        <div>
+            <h1 class="delivery-title">ការដឹកជញ្ជូន</h1>
+            <p class="delivery-subtitle">Manage delivery options that staff can choose when creating an order.</p>
         </div>
+        <a href="{{ route('deliveries.create') }}" class="delivery-btn delivery-btn-primary">
+            <i class="fas fa-plus"></i> បង្កើតថ្មី
+        </a>
+    </div>
 
-        <div class="table-card">
-            <table>
+    <div class="delivery-toolbar">
+        <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" class="delivery-search" placeholder="Search delivery name or note..." oninput="filterTable()">
+        </div>
+    </div>
+
+    <div class="delivery-card">
+        <div class="table-responsive">
+            <table class="delivery-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>ឈ្មោះដឹកជញ្ជូន</th>
-                        <th>តម្លៃ</th>
-                        <th>ផ្សេងៗ</th>
-                        <th>សកម្មភាព</th>
+                        <th style="width: 70px;">#</th>
+                        <th>Delivery Option</th>
+                        <th style="width: 180px;">Fee</th>
+                        <th class="text-end" style="width: 280px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     @forelse($deliveries as $delivery)
                         <tr data-search="{{ strtolower($delivery->delivery_name . ' ' . $delivery->delivery_desc) }}">
-                            <td style="font-weight: 700; color: var(--accent);">{{ $delivery->id }}</td>
-                            <td style="font-weight: 700;">{{ $delivery->delivery_name }}</td>
+                            <td style="font-weight: 800; color: var(--accent);">{{ $delivery->id }}</td>
                             <td>
-                                <span class="price-tag">៛{{ number_format($delivery->delivery_price_khr, 0) }}</span>
+                                <div class="delivery-name">{{ $delivery->delivery_name }}</div>
+                                <div class="delivery-desc">{{ $delivery->delivery_desc ?: 'No note added' }}</div>
                             </td>
-                            <td style="color: var(--text-muted); max-width: 300px;">
-                                {{ Str::limit($delivery->delivery_desc, 60) ?? '—' }}</td>
                             <td>
-                                <div style="display: flex; gap: 6px;">
-                                    <a href="{{ route('deliveries.show', $delivery) }}" class="action-btn btn-view"><i
-                                            class="fas fa-eye"></i> View</a>
-                                    <a href="{{ route('deliveries.edit', $delivery) }}" class="action-btn btn-edit"><i
-                                            class="fas fa-edit"></i> Edit</a>
-                                    <form action="{{ route('deliveries.destroy', $delivery) }}" method="POST"
-                                        style="display:inline;" data-delete="Delivery"
-                                        data-item-name="{{ $delivery->delivery_name }}">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="action-btn btn-delete"><i class="fas fa-trash"></i>
-                                            Delete</button>
+                                <span class="price-badge">៛{{ number_format($delivery->delivery_price_khr, 0) }}</span>
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <a href="{{ route('deliveries.show', $delivery) }}" class="action-btn action-view">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="{{ route('deliveries.edit', $delivery) }}" class="action-btn action-edit">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <form action="{{ route('deliveries.destroy', $delivery) }}" method="POST" data-delete="Delivery" data-item-name="{{ $delivery->delivery_name }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="action-btn action-delete">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="4">
                                 <div class="empty-state">
                                     <i class="fas fa-truck"></i>
-                                    <p style="font-size: 16px; font-weight: 600;">មិនមានការដឹកជញ្ជូន</p>
-                                    <p>ចុច "បង្កើតថ្មី" ដើម្បីចាប់ផ្តើម</p>
+                                    <h5>No delivery options yet</h5>
+                                    <p class="text-muted mb-3">Create one so staff can choose delivery during order creation.</p>
+                                    <a href="{{ route('deliveries.create') }}" class="delivery-btn delivery-btn-primary">
+                                        <i class="fas fa-plus"></i> បង្កើតថ្មី
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -256,20 +281,21 @@
                 </tbody>
             </table>
         </div>
-
-        <div style="margin-top: 20px;">
-            {{ $deliveries->links() }}
-        </div>
     </div>
+
+    <div class="mt-3">
+        {{ $deliveries->links() }}
+    </div>
+</div>
 @endsection
 
 @push('scripts')
-    <script>
-        function filterTable() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('#tableBody tr[data-search]').forEach(row => {
-                row.style.display = row.getAttribute('data-search').includes(search) ? '' : 'none';
-            });
-        }
-    </script>
+<script>
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#tableBody tr[data-search]').forEach(row => {
+            row.style.display = row.getAttribute('data-search').includes(search) ? '' : 'none';
+        });
+    }
+</script>
 @endpush

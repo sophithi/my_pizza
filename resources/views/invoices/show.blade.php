@@ -110,6 +110,16 @@
                         <strong>${{ number_format($invoice->discount_amount, 2) }}</strong>
                     </div>
 
+                    @if((float) $invoice->delivery_fee_khr > 0)
+                    <div class="d-flex justify-content-between border-bottom py-2">
+                        <span>Delivery {{ $invoice->order?->delivery ? '(' . $invoice->order->delivery->delivery_name . ')' : '' }}</span>
+                        <strong>
+                            ${{ number_format($invoice->delivery_fee_usd, 2) }}
+                            <small class="text-muted d-block text-end">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</small>
+                        </strong>
+                    </div>
+                    @endif
+
                     <div class="d-flex justify-content-between bg-light p-3 rounded mt-2">
                         <span class="fw-bold">Total</span>
                         <span class="fw-bold text-danger fs-5">
