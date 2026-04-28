@@ -41,7 +41,6 @@ class CustomerController extends Controller
             'total' => Customer::count(),
             'active' => Customer::where('status', 'active')->count(),
             'with_orders' => Customer::has('orders')->count(),
-            'total_revenue' => \App\Models\Order::sum('total_amount'),
         ];
 
         $customers = $query->latest()->paginate(15)->withQueryString();
@@ -70,7 +69,7 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        $customer->load(['orders' => fn($q) => $q->with('items')->latest('order_date')]);
+        $customer->load(['orders' => fn($q) => $q->with(['items', 'invoice'])->latest('order_date')]);
         $summary = [
             'orders' => $customer->orders->count(),
             'spent' => $customer->orders->sum('total_amount'),

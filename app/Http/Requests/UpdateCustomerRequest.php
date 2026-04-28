@@ -25,14 +25,9 @@ class UpdateCustomerRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:facebook,telegram',
-            'email' => 'nullable|email|unique:customers,email,' . $this->customer->id . '|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'company_name' => 'nullable|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'credit_limit' => 'nullable|numeric|min:0',
             'status' => 'required|string|in:active,inactive',
             'notes' => 'nullable|string|max:1000',
         ];

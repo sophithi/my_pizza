@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'exchange_rate' => [
+        'url' => env('EXCHANGE_RATE_API_URL', 'https://open.er-api.com/v6/latest/USD'),
+    ],
+
 ];

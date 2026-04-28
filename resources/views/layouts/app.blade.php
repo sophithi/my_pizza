@@ -57,6 +57,22 @@
             min-height: 72px;
         }
 
+        .sidebar-brand .brand-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .sidebar-logo {
+            height: 40px;
+            width: auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+
         .sidebar-brand-text {
             color: #fff;
             font-size: 16px;
@@ -260,6 +276,36 @@
             gap: 12px;
         }
 
+        .exchange-chip {
+            align-items: center;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 999px;
+            color: #9a3412;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 800;
+            gap: 7px;
+            min-height: 34px;
+            padding: 7px 12px;
+            white-space: nowrap;
+        }
+
+        .exchange-chip i {
+            color: #e85d24;
+        }
+
+        .exchange-chip small {
+            background: #dcfce7;
+            border-radius: 999px;
+            color: #047857;
+            font-size: 10px;
+            font-weight: 900;
+            line-height: 1;
+            padding: 4px 6px;
+            text-transform: uppercase;
+        }
+
         .user-avatar {
             width: 38px;
             height: 38px;
@@ -277,6 +323,14 @@
 
         .user-avatar:hover {
             transform: scale(1.05);
+        }
+
+        .user-avatar-img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
         }
 
         .user-name {
@@ -596,8 +650,12 @@
                 padding: 12px 16px;
             }
 
-            .topbar .page-title {
-                font-size: 17px;
+        .topbar .page-title {
+            font-size: 17px;
+        }
+
+            .exchange-chip {
+                display: none;
             }
         }
 
@@ -627,7 +685,9 @@
     <div class="sidebar" id="sidebar">
         <button class="sidebar-close-btn" id="sidebarCloseBtn"><i class="fas fa-times"></i></button>
         <div class="sidebar-brand">
-            <a href="/" class="sidebar-brand-text">Pizza Happy Family</a>
+            <a href="/" class="brand-inner">
+                <span class="sidebar-brand-text">Pizza Happy Family</span>
+            </a>
             <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar">
                 <i class="fas fa-chevron-left" id="collapseIcon"></i>
             </button>
@@ -740,14 +800,26 @@
             <h1 class="page-title">@yield('title', 'Dashboard')</h1>
         </div>
         <div class="user-info">
+            <div class="exchange-chip" title="អត្រាប្តូរប្រាក់">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>1 USD = ៛{{ number_format($globalExchangeRate['rate'] ?? 4000, 0) }}</span>
+                @if(($globalExchangeRate['source'] ?? 'local') === 'live')
+                    <small>Live</small>
+                @endif
+            </div>
             <button class="notification-toggle" id="notificationToggle" title="ការជូនដំណឹង">
                 <i class="fas fa-bell"></i>
                 <span class="notification-count" id="notificationCount">3</span>
             </button>
             <div style="position: relative;">
                 <button class="user-avatar" id="userDropdownToggle" title="User menu"
-                    style="border: none; cursor: pointer;">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                    style="border: none; cursor: pointer; padding:0; overflow: hidden;">
+                    @php $u = auth()->user(); @endphp
+                    @if(!empty($u->profile_image) && file_exists(public_path($u->profile_image)))
+                        <img src="{{ asset($u->profile_image) }}" alt="{{ $u->name }}" class="user-avatar-img">
+                    @else
+                        {{ strtoupper(substr($u->name ?? 'A', 0, 1)) }}
+                    @endif
                 </button>
                 <div class="user-dropdown-menu" id="userDropdownMenu"
                     style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #e9ecef; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 220px; z-index: 1000;">

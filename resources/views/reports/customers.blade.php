@@ -69,17 +69,6 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #17a2b8;">
-                    <div class="card-body" style="padding: 24px;">
-                        <p
-                            style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">
-                            Total Credit Limit</p>
-                        <h3 style="color: #17a2b8; font-size: 32px; font-weight: 700; margin: 0;">
-                            ${{ number_format($totalCreditLimit, 2) }}</h3>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Customer Activity -->
@@ -104,7 +93,7 @@
                             @foreach ($customerActivity as $customer)
                                 <tr style="border-bottom: 1px solid #e9ecef;">
                                     <td style="padding: 12px; color: #333; font-weight: 500;">{{ $customer->name }}</td>
-                                    <td style="padding: 12px; color: #666;">{{ $customer->email }}<br>{{ $customer->phone }}
+                                    <td style="padding: 12px; color: #666;">{{ $customer->phone ?? 'N/A' }}
                                     </td>
                                     <td style="padding: 12px; color: #666; text-align: right;">
                                         <span

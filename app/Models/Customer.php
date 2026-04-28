@@ -9,14 +9,9 @@ class Customer extends Model
     protected $fillable = [
         'name',
         'type',
-        'email',
         'phone',
         'address',
         'city',
-        'postal_code',
-        'company_name',
-        'contact_person',
-        'credit_limit',
         'status',
         'notes',
     ];
@@ -36,8 +31,8 @@ class Customer extends Model
     /**
      * Get the total amount spent by this customer.
      */
-    public function getTotalSpentAttribute()
+    public function getTotalSpentAttribute($value)
     {
-        return $this->orders()->where('status', 'completed')->sum('total_amount');
+        return $value ?? $this->orders()->sum('total_amount');
     }
 }

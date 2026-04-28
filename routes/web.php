@@ -119,6 +119,7 @@ Route::middleware('auth')->group(function () {
     // INVOICES - Admin, Manager, Staff Inventory can create; all can view
     // ============================================
     Route::middleware('role:admin,manager,staff_inventory')->group(function () {
+        Route::get('invoices/export/report', [InvoiceController::class, 'exportReport'])->name('invoices.export');
         Route::resource('invoices', InvoiceController::class);
         Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     });

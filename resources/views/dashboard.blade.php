@@ -45,6 +45,19 @@
             margin: 0;
         }
 
+        .dash-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .dash-brand img {
+            height: 56px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(15,23,42,.12);
+        }
+
         .dash-subtitle {
             color: #d1d5db;
             margin: 8px 0 0;
@@ -450,9 +463,12 @@
 
     <div class="dashboard-page">
         <section class="dash-hero">
-            <div>
-                <h1 class="dash-title">Pizza Happy Family</h1>
-                <p class="dash-subtitle">Welcome back, {{ auth()->user()->name ?? 'Admin' }}.</p>
+            <div class="dash-brand">
+                <img src="{{ asset('assets/logos/logo_pizza.png') }}" alt="Pizza Happy Family Logo">
+                <div>
+                    <h1 class="dash-title">Pizza Happy Family</h1>
+                    <p class="dash-subtitle">Welcome back, {{ auth()->user()->name ?? 'Admin' }}.</p>
+                </div>
             </div>
             <div class="dash-today">
                 <strong>{{ now('Asia/Phnom_Penh')->format('h:i A') }}</strong>

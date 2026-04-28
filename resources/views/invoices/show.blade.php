@@ -1,145 +1,435 @@
 @extends('layouts.app')
 
+@section('title', $invoice->invoice_number)
+
+@push('styles')
+    <style>
+        .invoice-show {
+            --accent: #e85d24;
+            --accent-dark: #d94a10;
+            --border: #e5e7eb;
+            --muted: #6b7280;
+            --surface: #fff;
+            --text: #111827;
+        }
+
+        .invoice-header {
+            align-items: flex-start;
+            display: flex;
+            gap: 16px;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .invoice-title {
+            color: var(--text);
+            font-size: 28px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .invoice-subtitle {
+            color: var(--muted);
+            margin: 6px 0 0;
+        }
+
+        .invoice-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .invoice-btn {
+            align-items: center;
+            border: 0;
+            border-radius: 8px;
+            display: inline-flex;
+            font-weight: 800;
+            gap: 8px;
+            justify-content: center;
+            min-height: 40px;
+            padding: 9px 14px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .invoice-btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: #fff;
+        }
+
+        .invoice-btn-primary:hover {
+            color: #fff;
+        }
+
+        .invoice-btn-soft {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .invoice-btn-soft:hover {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .summary-grid {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: 1fr 1fr;
+            margin-bottom: 14px;
+        }
+
+        .invoice-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+            padding: 14px 16px;
+        }
+
+        .card-title {
+            align-items: center;
+            color: var(--text);
+            display: flex;
+            font-size: 16px;
+            font-weight: 900;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .card-title i {
+            color: var(--accent);
+        }
+
+        .info-row {
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            padding: 7px 0;
+        }
+
+        .info-row + .info-row {
+            border-top: 1px solid #f1f3f5;
+        }
+
+        .info-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .info-value {
+            color: var(--text);
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .status-pill {
+            align-items: center;
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 800;
+            gap: 6px;
+            padding: 6px 10px;
+        }
+
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-sent {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-other {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .items-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+            overflow: hidden;
+        }
+
+        .items-header {
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            padding: 13px 16px;
+        }
+
+        .items-title {
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .items-body {
+            align-items: start;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 330px;
+        }
+
+        .items-body .table-responsive {
+            min-width: 0;
+        }
+
+        .invoice-table th {
+            background: #f9fafb;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 900;
+            padding: 12px 16px;
+            text-transform: uppercase;
+        }
+
+        .invoice-table td {
+            border-bottom: 1px solid #f1f3f5;
+            color: var(--text);
+            padding: 12px 16px;
+            vertical-align: middle;
+        }
+
+        .totals-panel {
+            border-left: 1px solid var(--border);
+            padding: 14px 16px;
+            width: 100%;
+        }
+
+        .total-row {
+            align-items: center;
+            border-bottom: 1px solid #eef2f7;
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .grand-total {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            margin-top: 8px;
+            padding: 12px;
+        }
+
+        .grand-total .amount {
+            color: var(--accent-dark);
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .note-card {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            color: #78350f;
+            font-weight: 700;
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .invoice-header,
+            .invoice-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .items-body {
+                grid-template-columns: 1fr;
+            }
+
+            .totals-panel {
+                border-left: 0;
+                border-top: 1px solid var(--border);
+            }
+
+            .invoice-btn {
+                width: 100%;
+            }
+        }
+    </style>
+@endpush
+
 @section('content')
-<div class="container-fluid py-4">
+    @php
+        $customer = $invoice->order?->customer;
+        $items = $invoice->order?->items ?? collect();
+    @endphp
 
-    {{-- HEADER --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">{{ $invoice->invoice_number }}</h2>
-            <small class="text-muted">Invoice Detail</small>
-        </div>
+    <div class="container-fluid py-4 invoice-show">
+        <div class="invoice-header">
+            <div>
+                <h2 class="invoice-title">{{ $invoice->invoice_number }}</h2>
+                <p class="invoice-subtitle">ព័ត៌មានលម្អិតវិក្ក័យប័ត្រ និងទំនិញដែលបានបញ្ជាទិញ</p>
+            </div>
 
-        <div class="d-flex gap-2">
-            <a href="{{ route('invoices.index') }}" class="btn btn-light">
-                ← Back
-            </a>
-
-            <a href="{{ route('invoices.print', $invoice) }}" class="btn btn-dark">
-                🖨 Print
-            </a>
-        </div>
-    </div>
-
-    {{-- INFO --}}
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <h6 class="text-muted">Customer</h6>
-
-                @if($invoice->order && $invoice->order->customer)
-                    <h5>{{ $invoice->order->customer->name }}</h5>
-                    <p class="mb-1">{{ $invoice->order->customer->email }}</p>
-                    <p class="mb-0">{{ $invoice->order->customer->phone }}</p>
-                @else
-                    <p class="text-muted">No customer</p>
+            <div class="invoice-actions">
+                <a href="{{ route('invoices.index') }}" class="invoice-btn invoice-btn-soft">
+                    <i class="fas fa-arrow-left"></i> ត្រឡប់ក្រោយ
+                </a>
+                <a href="{{ route('invoices.print', $invoice) }}" class="invoice-btn invoice-btn-primary">
+                    <i class="fas fa-print"></i> Print
+                </a>
+                @if($invoice->status !== 'paid')
+                    <a href="{{ route('invoices.edit', $invoice) }}" class="invoice-btn invoice-btn-soft">
+                        <i class="fas fa-edit"></i> កែប្រែ
+                    </a>
                 @endif
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <h6 class="text-muted">Invoice Details</h6>
+        <div class="summary-grid">
+            <div class="invoice-card">
+                <div class="card-title">
+                    <i class="fas fa-user"></i> ព័ត៌មានអតិថិជន
+                </div>
 
-                <p><strong>Date:</strong> {{ $invoice->invoice_date->format('d M Y') }}</p>
-                <p><strong>Due:</strong> {{ $invoice->due_date?->format('d M Y') ?? 'N/A' }}</p>
-
-                <span class="badge bg-success">
-                    {{ $invoice->status }}
-                </span>
-            </div>
-        </div>
-    </div>
-
-    {{-- ITEMS --}}
-    <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-body">
-
-            <h5 class="mb-3">Order Items</h5>
-
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Product</th>
-                            <th class="text-center">Qty</th>
-                            <th class="text-end">Price</th>
-                            <th class="text-end">Total</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach(($invoice->order->items ?? []) as $item)
-                        <tr>
-                            <td>{{ $item->product->name }}</td>
-
-                            <td class="text-center">{{ $item->quantity }}</td>
-
-                            <td class="text-end">
-                                ${{ number_format($item->unit_price, 2) }}
-                                <br>
-                                <small class="text-muted">
-                                    ៛{{ number_format($item->unit_price * 4000) }}
-                                </small>
-                            </td>
-
-                            <td class="text-end fw-bold">
-                                ${{ number_format($item->total_price, 2) }}
-                                <br>
-                                <small class="text-muted">
-                                    ៛{{ number_format($item->total_price * 4000) }}
-                                </small>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                @if($customer)
+                    <div class="info-row">
+                        <span class="info-label">ឈ្មោះ</span>
+                        <span class="info-value">{{ $customer->name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">លេខទូរស័ព្ទ</span>
+                        <span class="info-value">{{ $customer->phone ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">ទីតាំង</span>
+                        <span class="info-value">{{ $customer->city ?? $customer->address ?? 'N/A' }}</span>
+                    </div>
+                @else
+                    <div class="text-muted">មិនមានព័ត៌មានអតិថិជន</div>
+                @endif
             </div>
 
-            {{-- TOTAL --}}
-            <div class="d-flex justify-content-end mt-4">
-                <div style="width: 300px">
+            <div class="invoice-card">
+                <div class="card-title">
+                    <i class="fas fa-file-invoice-dollar"></i> ព័ត៌មានវិក្ក័យប័ត្រ
+                </div>
 
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Subtotal</span>
-                        <strong>${{ number_format($invoice->subtotal, 2) }}</strong>
-                    </div>
-
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Discount</span>
-                        <strong>${{ number_format($invoice->discount_amount, 2) }}</strong>
-                    </div>
-
-                    @if((float) $invoice->delivery_fee_khr > 0)
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Delivery {{ $invoice->order?->delivery ? '(' . $invoice->order->delivery->delivery_name . ')' : '' }}</span>
-                        <strong>
-                            ${{ number_format($invoice->delivery_fee_usd, 2) }}
-                            <small class="text-muted d-block text-end">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</small>
-                        </strong>
-                    </div>
-                    @endif
-
-                    <div class="d-flex justify-content-between bg-light p-3 rounded mt-2">
-                        <span class="fw-bold">Total</span>
-                        <span class="fw-bold text-danger fs-5">
-                            ${{ number_format($invoice->total_amount, 2) }}
-                        </span>
-                    </div>
-
+                <div class="info-row">
+                    <span class="info-label">កាលបរិច្ឆេទ</span>
+                    <span class="info-value">{{ $invoice->invoice_date?->format('d/m/Y') ?? 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">បញ្ជាទិញ</span>
+                    <span class="info-value">#{{ $invoice->order?->id ?? 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ស្ថានភាព</span>
+                    <span class="info-value">
+                        @if($invoice->status === 'paid')
+                            <span class="status-pill status-paid"><i class="fas fa-check-circle"></i> បានទូទាត់</span>
+                        @elseif($invoice->status === 'sent')
+                            <span class="status-pill status-sent"><i class="fas fa-clock"></i> មិនទាន់ទូទាត់</span>
+                        @elseif($invoice->status === 'cancelled')
+                            <span class="status-pill status-cancelled"><i class="fas fa-times-circle"></i> មិនទូទាត់</span>
+                        @elseif($invoice->status === 'draft')
+                            <span class="status-pill status-draft"><i class="fas fa-clock"></i> មិនទាន់ទូទាត់</span>
+                        @else
+                            <span class="status-pill status-other">{{ ucfirst($invoice->status) }}</span>
+                        @endif
+                    </span>
                 </div>
             </div>
-
         </div>
-    </div>
 
-    {{-- NOTES --}}
-    @if($invoice->notes)
-    <div class="card shadow-sm border-0 rounded-3 mt-3 p-3">
-        <h6 class="text-muted">Notes</h6>
-        <p class="mb-0">{{ $invoice->notes }}</p>
-    </div>
-    @endif
+        <div class="items-card">
+            <div class="items-header">
+                <h3 class="items-title">ទំនិញក្នុងវិក្ក័យប័ត្រ</h3>
+                <span class="text-muted fw-bold">{{ number_format($items->count()) }} មុខទំនិញ</span>
+            </div>
 
-</div>
+            <div class="items-body">
+                <div class="table-responsive">
+                    <table class="table invoice-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>ទំនិញ</th>
+                                <th class="text-center">ចំនួន</th>
+                                <th class="text-end">តម្លៃ</th>
+                                <th class="text-end">សរុប</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($items as $item)
+                                <tr>
+                                    <td class="fw-bold">{{ $item->product?->name ?? 'N/A' }}</td>
+                                    <td class="text-center">{{ number_format($item->quantity) }}</td>
+                                    <td class="text-end">
+                                        <strong>${{ number_format($item->unit_price, 2) }}</strong>
+                                        <div class="text-muted small">៛{{ number_format($item->unit_price * 4000) }}</div>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong>${{ number_format($item->total_price, 2) }}</strong>
+                                        <div class="text-muted small">៛{{ number_format($item->total_price * 4000) }}</div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-5">មិនមានទំនិញក្នុងវិក្ក័យប័ត្រនេះទេ។</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="totals-panel">
+                    <div class="total-row">
+                        <span class="text-muted fw-bold">Subtotal</span>
+                        <strong>${{ number_format($invoice->subtotal, 2) }}</strong>
+                    </div>
+                    <div class="total-row">
+                        <span class="text-muted fw-bold">Discount</span>
+                        <strong>${{ number_format($invoice->discount_amount, 2) }}</strong>
+                    </div>
+                    @if((float) $invoice->delivery_fee_khr > 0)
+                        <div class="total-row">
+                            <span class="text-muted fw-bold">Delivery {{ $invoice->order?->delivery ? '(' . $invoice->order->delivery->delivery_name . ')' : '' }}</span>
+                            <strong>
+                                ${{ number_format($invoice->delivery_fee_usd, 2) }}
+                                <span class="text-muted small d-block text-end">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</span>
+                            </strong>
+                        </div>
+                    @endif
+                    <div class="grand-total d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">សរុបទឹកប្រាក់</span>
+                        <span class="amount">${{ number_format($invoice->total_amount, 2) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if($invoice->notes)
+            <div class="note-card">
+                <div class="fw-bold mb-1"><i class="fas fa-sticky-note me-1"></i> កំណត់ចំណាំ</div>
+                <div>{{ $invoice->notes }}</div>
+            </div>
+        @endif
+    </div>
 @endsection

@@ -23,11 +23,11 @@
                                 <select name="status" id="status" class="form-control"
                                     style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
                                     <option value="draft" {{ $invoice->status === 'draft' ? 'selected' : '' }}>
-                                        មិនទាន់បង់ប្រាក់</option>
+                                        មិនទាន់ទូទាត់</option>
 
-                                    <option value="paid" {{ $invoice->status === 'paid' ? 'selected' : '' }}>បានបង់ប្រាក់
+                                    <option value="paid" {{ $invoice->status === 'paid' ? 'selected' : '' }}>បានទូទាត់
                                     </option>
-                                    <option value="cancelled" {{ $invoice->status === 'cancelled' ? 'selected' : '' }}>Cancel
+                                    <option value="cancelled" {{ $invoice->status === 'cancelled' ? 'selected' : '' }}>មិនទូទាត់
                                     </option>
                                 </select>
                             </div>

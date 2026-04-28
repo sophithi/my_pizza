@@ -93,6 +93,24 @@
             font-size: 14px;
         }
 
+        .customer-line {
+            display: flex;
+            gap: 6px;
+            line-height: 1.45;
+            margin: 2px 0;
+        }
+
+        .customer-line .label {
+            color: #555;
+            flex: 0 0 58px;
+            font-weight: 700;
+        }
+
+        .customer-line .value {
+            color: #333;
+            font-weight: 500;
+        }
+
         .customer-name {
             font-weight: 600;
             font-size: 16px;
@@ -236,14 +254,24 @@
             <div class="customer-info">
                 <div class="section-title">ព័ត៌មានអតិថិជន</div>
                 @if($invoice->order && $invoice->order->customer)
-                    <p class="customer-name">{{ $invoice->order->customer->name }}</p>
-                    <p>{{ $invoice->order->customer->address ?? '-' }}</p>
-                    <p>{{ ($invoice->order->customer->city ?? '') . ' ' . ($invoice->order->customer->postal_code ?? '') }}
-                    </p>
-                    <p>{{ $invoice->order->customer->phone ?? '-' }}</p>
-                    @if($invoice->order->customer->email)
-                        <p>{{ $invoice->order->customer->email }}</p>
-                    @endif
+                    @php
+                        $customer = $invoice->order->customer;
+                        $source = $customer->type === 'facebook'
+                            ? 'Facebook'
+                            : ($customer->type === 'telegram' ? 'Telegram' : null);
+                    @endphp
+                    <div class="customer-line">
+                        <span class="label">ឈ្មោះ:</span>
+                        <span class="value">{{ $customer->name }}{{ $source ? ' (' . $source . ')' : '' }}</span>
+                    </div>
+                    <div class="customer-line">
+                        <span class="label">ទីតាំង:</span>
+                        <span class="value">{{ $customer->address ?? $customer->city ?? '-' }}</span>
+                    </div>
+                    <div class="customer-line">
+                        <span class="label">លេខ:</span>
+                        <span class="value">{{ $customer->phone ?? '-' }}</span>
+                    </div>
                     @php
                         $deliveryItems = $invoice->order->items->filter(fn($item) => $item->delivery_id);
                         $deliveryGroups = $deliveryItems->groupBy('delivery_id');
@@ -277,9 +305,29 @@
             <div class="invoice-info">
                 <div class="section-title">Invoice Info</div>
                 <p><strong>Order:</strong> ORD-{{ str_pad($invoice->order->id ?? 0, 4, '0', STR_PAD_LEFT) }}</p>
-                <p><strong>Status:</strong> {{ ucfirst($invoice->status) }}</p>
+                <p>
+                    <strong>ស្ថានភាព:</strong>
+                    @if($invoice->status === 'paid')
+                        បានទូទាត់
+                    @elseif($invoice->status === 'sent' || $invoice->status === 'draft' || $invoice->status === 'pending')
+                        មិនទាន់ទូទាត់
+                    @elseif($invoice->status === 'cancelled')
+                        មិនទូទាត់
+                    @else
+                        {{ $invoice->status }}
+                    @endif
+                </p>
             </div>
         </div>
+
+        @php
+            $orderItems = $invoice->order?->items ?? collect();
+            $subtotalKhr = $orderItems->sum(function ($item) {
+                return (float) ($item->product?->price_khr ?? 0) * (float) $item->quantity;
+            });
+            $discountKhr = (float) $invoice->discount_amount * 4000;
+            $grandTotalKhr = $subtotalKhr - $discountKhr + (float) $invoice->delivery_fee_khr;
+        @endphp
 
         <table>
             <thead>
@@ -292,14 +340,18 @@
                 </tr>
             </thead>
             <tbody>
-                @if($invoice->order && $invoice->order->items && count($invoice->order->items) > 0)
-                    @foreach ($invoice->order->items as $item)
+                @if($orderItems->count() > 0)
+                    @foreach ($orderItems as $item)
+                        @php
+                            $unitPriceKhr = (float) ($item->product?->price_khr ?? 0);
+                            $totalPriceKhr = $unitPriceKhr * (float) $item->quantity;
+                        @endphp
                         <tr>
                             <td>{{ $item->product->name ?? 'N/A' }}</td>
-                            <td class="text-right">{{ $item->quantity }}</td>
-                            <td class="text-right">${{ number_format($item->unit_price, 2) }}</td>
+                            <td class="text-right">{{ $item->quantity }} x</td>
+                            <td class="text-right">៛{{ number_format($unitPriceKhr, 0) }}/${{ number_format($item->unit_price, 2) }}</td>
                             <td class="text-right">${{ number_format($item->total_price, 2) }}</td>
-                            <td class="text-right" style="color: #888;">៛{{ number_format($item->total_price * 4000, 0) }}</td>
+                            <td class="text-right">៛{{ number_format($totalPriceKhr, 0) }}</td>
                         </tr>
                     @endforeach
                 @else
@@ -319,7 +371,7 @@
                 <div class="total-row" style="border-bottom: none; padding-bottom: 0;">
                     <span></span>
                     <span
-                        style="color: #888; font-size: 13px;">៛{{ number_format($invoice->subtotal * 4000, 0) }}</span>
+                        style="color: #888; font-size: 13px;">៛{{ number_format($subtotalKhr, 0) }}</span>
                 </div>
                 <div class="total-row">
                     <span>បញ្ចុះតម្លៃ:</span>
@@ -339,7 +391,7 @@
                     <span class="amount">
                         ${{ number_format($invoice->total_amount, 2) }}
                         <span
-                            style="display: block; font-size: 14px; color: #888; font-weight: 400;">៛{{ number_format($invoice->total_amount * 4000, 0) }}</span>
+                            style="display: block; font-size: 14px; color: #888; font-weight: 400;">៛{{ number_format($grandTotalKhr, 0) }}</span>
                     </span>
                 </div>
             </div>

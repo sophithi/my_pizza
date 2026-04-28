@@ -137,7 +137,6 @@ class ReportController extends Controller
 
         $totalCustomers = Customer::count();
         $activeCustomers = Customer::where('status', 'active')->count();
-        $totalCreditLimit = Customer::sum('credit_limit');
 
         // Customer activity (orders placed) with date filtering
         $customerActivity = Customer::withCount(['orders' => function ($q) use ($dateRange) {
@@ -154,7 +153,6 @@ class ReportController extends Controller
         return view('reports.customers', compact(
             'totalCustomers',
             'activeCustomers',
-            'totalCreditLimit',
             'customerActivity',
             'period',
             'startDate',

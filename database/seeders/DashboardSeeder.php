@@ -38,14 +38,14 @@ class DashboardSeeder extends Seeder
 
         // Create customers
         $customers = [
-            ['name' => 'John Restaurant', 'email' => 'john@restaurant.com', 'phone' => '555-0101'],
-            ['name' => 'Pizza Italia', 'email' => 'contact@pizzaitalia.com', 'phone' => '555-0102'],
-            ['name' => 'Quick Bite Cafe', 'email' => 'quick@bite.com', 'phone' => '555-0103'],
-            ['name' => 'Family Bistro', 'email' => 'family@bistro.com', 'phone' => '555-0104'],
-            ['name' => 'Gourmet Hub', 'email' => 'gourmet@hub.com', 'phone' => '555-0105'],
-            ['name' => 'Modern Eatery', 'email' => 'modern@eatery.com', 'phone' => '555-0106'],
-            ['name' => 'Taste of Italy', 'email' => 'taste@italy.com', 'phone' => '555-0107'],
-            ['name' => 'Premium Pizzeria', 'email' => 'premium@pizzeria.com', 'phone' => '555-0108'],
+            ['name' => 'John Restaurant', 'type' => 'facebook', 'phone' => '555-0101'],
+            ['name' => 'Pizza Italia', 'type' => 'telegram', 'phone' => '555-0102'],
+            ['name' => 'Quick Bite Cafe', 'type' => 'facebook', 'phone' => '555-0103'],
+            ['name' => 'Family Bistro', 'type' => 'telegram', 'phone' => '555-0104'],
+            ['name' => 'Gourmet Hub', 'type' => 'facebook', 'phone' => '555-0105'],
+            ['name' => 'Modern Eatery', 'type' => 'telegram', 'phone' => '555-0106'],
+            ['name' => 'Taste of Italy', 'type' => 'facebook', 'phone' => '555-0107'],
+            ['name' => 'Premium Pizzeria', 'type' => 'telegram', 'phone' => '555-0108'],
         ];
 
         foreach ($customers as $customer) {

@@ -55,7 +55,7 @@
     <div class="customer-form-card p-4 p-lg-5">
         <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
             <div>
-                <h2 class="mb-1" style="font-size: 28px; font-weight: 800; color: #0f172a;">កែប្រែអតិថិជន</h2>
+                <h2 class="mb-1" style="font-size: 28px; font-weight: 800; color: #0f172a;">កែប្រែព័ត៌មានអតិថិជន</h2>
                 <p class="text-muted mb-0">Update customer information for {{ $customer->name }}.</p>
             </div>
          
@@ -79,7 +79,7 @@
 
             <div class="customer-section">
                 <div class="customer-section-title">
-                    <i class="fas fa-user me-2" style="color: #e85d24;"></i>Basic Information
+                    <i class="fas fa-user me-2" style="color: #e85d24;"></i>ព័ត៌មានទូទៅ
                 </div>
 
                 <div class="row g-3">
@@ -112,10 +112,10 @@
                         <label class="form-label fw-semibold">Status</label>
                         <select name="status" class="form-select" autocomplete="off">
                             <option value="active" {{ old('status', $customer->status) === 'active' ? 'selected' : '' }}>
-                                Active
+                                សកម្ម
                             </option>
                             <option value="inactive" {{ old('status', $customer->status) === 'inactive' ? 'selected' : '' }}>
-                                Inactive
+                                អសកម្ម
                             </option>
                         </select>
                     </div>
@@ -124,12 +124,12 @@
 
             <div class="customer-section">
                 <div class="customer-section-title">
-                    <i class="fas fa-map-marker-alt me-2" style="color: #e85d24;"></i>Location Details
+                    <i class="fas fa-map-marker-alt me-2" style="color: #e85d24;"></i>ទីតាំងអតិថិជន
                 </div>
 
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label fw-semibold">ទីតាំងអតិថិជន</label>
+                        <label class="form-label fw-semibold">ទីតាំងទទួលទំនិញ</label>
                         <textarea name="address" class="form-control" rows="3" placeholder="បំពេញទីតាំង" autocomplete="off"
                             spellcheck="false">{{ old('address', $customer->address) }}</textarea>
                     </div>
