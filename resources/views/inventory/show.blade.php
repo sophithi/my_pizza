@@ -261,15 +261,15 @@
 
             <!-- Stock Info -->
             <div class="stat-row">
-                <span class="stat-label">Current Stock</span>
+                <span class="stat-label">ចំនួនក្នុងស្តុក</span>
                 <span class="stat-value" style="color: #e85d24;">{{ $inventory->quantity }} {{ $inventory->product->unit }}</span>
             </div>
             <div class="stat-row">
-                <span class="stat-label">Minimum Level</span>
+                <span class="stat-label">កម្រិតចំនួន</span>
                 <span class="stat-value">{{ $inventory->reorder_level }} {{ $inventory->product->unit }}</span>
             </div>
             <div class="stat-row">
-                <span class="stat-label">Location</span>
+                <span class="stat-label">ទីតាំងស្តុក</span>
                 <span class="stat-value">📍 {{ $inventory->warehouse_location ?? '—' }}</span>
             </div>
 

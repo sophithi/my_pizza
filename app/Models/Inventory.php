@@ -31,6 +31,11 @@ class Inventory extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function movements()
+    {
+        return $this->hasMany(InventoryMovement::class);
+    }
+
     /**
      * Check if the inventory needs restocking.
      */

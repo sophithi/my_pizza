@@ -7,17 +7,19 @@
         .inventory-page {
             --accent: #e85d24;
             --accent-dark: #d94a10;
-            --surface: #fff;
+            --accent-soft: #fff7ed;
             --border: #e5e7eb;
-            --text: #0f172a;
+            --danger: #dc2626;
             --muted: #64748b;
             --success: #059669;
+            --surface: #fff;
+            --text: #0f172a;
             --warning: #d97706;
-            --danger: #dc2626;
+            --shadow: 0 12px 32px rgba(15, 23, 42, .07);
         }
 
         .inventory-header {
-            align-items: center;
+            align-items: flex-start;
             display: flex;
             gap: 16px;
             justify-content: space-between;
@@ -27,7 +29,7 @@
         .inventory-title {
             color: var(--text);
             font-size: 30px;
-            font-weight: 800;
+            font-weight: 900;
             margin: 0;
         }
 
@@ -41,24 +43,38 @@
             border: 0;
             border-radius: 8px;
             display: inline-flex;
-            font-weight: 800;
+            font-weight: 900;
             gap: 8px;
             justify-content: center;
-            min-height: 42px;
-            padding: 10px 15px;
+            min-height: 40px;
+            padding: 9px 14px;
             text-decoration: none;
+            transition: background .15s ease, color .15s ease, transform .15s ease;
             white-space: nowrap;
+        }
+
+        .inventory-btn:hover {
+            transform: translateY(-1px);
         }
 
         .inventory-btn-primary {
             background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            color: #fff;
             box-shadow: 0 10px 22px rgba(232, 93, 36, .18);
+            color: #fff;
         }
 
         .inventory-btn-primary:hover {
             color: #fff;
-            background: linear-gradient(135deg, var(--accent-dark), #b83a0a);
+        }
+
+        .inventory-btn-soft {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .inventory-btn-soft:hover {
+            background: #e5e7eb;
+            color: #111827;
         }
 
         .inventory-stats {
@@ -72,7 +88,24 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
             padding: 16px;
+            position: relative;
+        }
+
+        .stat-card::before {
+            background: var(--accent);
+            content: "";
+            inset: 0 auto 0 0;
+            position: absolute;
+            width: 4px;
+        }
+
+        .stat-top {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
         }
 
         .stat-label {
@@ -82,11 +115,65 @@
             text-transform: uppercase;
         }
 
+        .stat-icon {
+            align-items: center;
+            background: var(--accent-soft);
+            border-radius: 8px;
+            color: var(--accent);
+            display: inline-flex;
+            height: 34px;
+            justify-content: center;
+            width: 34px;
+        }
+
         .stat-value {
             color: var(--text);
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 900;
-            margin-top: 6px;
+            margin-top: 8px;
+        }
+
+        .movement-summary {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-bottom: 16px;
+        }
+
+        .movement-card {
+            align-items: center;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            display: flex;
+            gap: 12px;
+            padding: 14px;
+        }
+
+        .movement-card i {
+            align-items: center;
+            background: var(--accent-soft);
+            border-radius: 8px;
+            color: var(--accent);
+            display: inline-flex;
+            height: 36px;
+            justify-content: center;
+            width: 36px;
+        }
+
+        .movement-label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .movement-value {
+            color: var(--text);
+            font-size: 22px;
+            font-weight: 900;
+            line-height: 1.1;
         }
 
         .filter-card,
@@ -95,22 +182,66 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+            box-shadow: var(--shadow);
         }
 
         .filter-card {
-            display: grid;
-            gap: 10px;
-            grid-template-columns: minmax(260px, 1fr) 180px 180px auto;
             margin-bottom: 16px;
             padding: 14px;
         }
 
-        .filter-card .form-control,
-        .filter-card .form-select {
+        .filter-form {
+            align-items: center;
+            display: grid;
+            gap: 10px;
+            grid-template-columns: minmax(280px, 1fr) 170px 170px auto;
+        }
+
+        .filter-form .form-control,
+        .filter-form .form-select {
             border-color: #d9dee7;
-            border-radius: 6px;
+            border-radius: 8px;
             min-height: 42px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quick-filter {
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #475569;
+            display: inline-flex;
+            font-size: 13px;
+            font-weight: 800;
+            gap: 7px;
+            min-height: 36px;
+            padding: 7px 11px;
+            text-decoration: none;
+        }
+
+        .quick-filter.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .date-filter {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
         }
 
         .inventory-table-card {
@@ -118,7 +249,7 @@
         }
 
         .inventory-table th {
-            background: #f9fafb;
+            background: #f8fafc;
             border-bottom: 1px solid var(--border);
             color: var(--muted);
             font-size: 12px;
@@ -135,8 +266,12 @@
             vertical-align: middle;
         }
 
+        .inventory-table tr:hover td {
+            background: #fbfdff;
+        }
+
         .product-name {
-            font-weight: 800;
+            font-weight: 900;
         }
 
         .product-meta {
@@ -145,13 +280,43 @@
             margin-top: 3px;
         }
 
+        .stock-cell {
+            min-width: 160px;
+        }
+
         .stock-number {
+            color: var(--text);
             cursor: pointer;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 900;
             text-decoration: underline;
-            text-decoration-color: rgba(232, 93, 36, .3);
+            text-decoration-color: rgba(232, 93, 36, .35);
             text-underline-offset: 4px;
+        }
+
+        .stock-progress {
+            background: #edf2f7;
+            border-radius: 999px;
+            height: 7px;
+            margin: 7px auto 0;
+            max-width: 120px;
+            overflow: hidden;
+        }
+
+        .stock-progress span {
+            background: var(--success);
+            border-radius: inherit;
+            display: block;
+            height: 100%;
+            min-width: 4px;
+        }
+
+        .stock-progress.low span {
+            background: var(--warning);
+        }
+
+        .stock-progress.out span {
+            background: var(--danger);
         }
 
         .status-pill {
@@ -180,6 +345,33 @@
             color: #991b1b;
         }
 
+        .movement-pill {
+            align-items: center;
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 900;
+            gap: 6px;
+            padding: 6px 10px;
+        }
+
+        .movement-out {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .movement-in {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .movement-time {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
         .action-row {
             display: flex;
             gap: 8px;
@@ -188,18 +380,31 @@
 
         .icon-action {
             align-items: center;
-            background: transparent;
-            border: 0;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
             color: #2563eb;
             display: inline-flex;
-            height: 32px;
+            height: 34px;
             justify-content: center;
             text-decoration: none;
-            width: 32px;
+            width: 34px;
+        }
+
+        .icon-action:hover {
+            background: #dbeafe;
+            color: #1d4ed8;
         }
 
         .icon-danger {
+            background: #fef2f2;
+            border-color: #fecaca;
             color: var(--danger);
+        }
+
+        .icon-danger:hover {
+            background: #fee2e2;
+            color: #b91c1c;
         }
 
         .empty-state {
@@ -216,7 +421,7 @@
         .empty-state h3 {
             color: var(--text);
             font-size: 22px;
-            font-weight: 800;
+            font-weight: 900;
             margin-bottom: 8px;
         }
 
@@ -225,22 +430,45 @@
             margin-bottom: 18px;
         }
 
-        @media (max-width: 1000px) {
-            .inventory-stats,
-            .filter-card {
+        @media (max-width: 1100px) {
+            .inventory-stats {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .movement-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-form {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filter-actions {
+                justify-content: flex-start;
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 700px) {
             .inventory-header {
                 align-items: stretch;
                 flex-direction: column;
             }
 
             .inventory-stats,
-            .filter-card {
+            .filter-form {
                 grid-template-columns: 1fr;
+            }
+
+            .quick-filters,
+            .date-filter,
+            .filter-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .quick-filter,
+            .inventory-btn {
+                width: 100%;
             }
         }
     </style>
@@ -249,6 +477,7 @@
 @section('content')
     @php
         $items = $inventories->getCollection();
+        $movementActive = $movementDate || in_array(request('period'), ['month', 'year'], true);
     @endphp
 
     <div class="container-fluid py-4 inventory-page">
@@ -263,7 +492,7 @@
         </div>
 
         @if($message = Session::get('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius: 10px;">
                 {{ $message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -271,43 +500,114 @@
 
         <div class="inventory-stats">
             <div class="stat-card">
-                <div class="stat-label">មុខទំនិញសរុប</div>
+                <div class="stat-top">
+                    <div class="stat-label">មុខទំនិញសរុប</div>
+                    <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+                </div>
                 <div class="stat-value">{{ number_format($stats['total']) }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">មានក្នុងស្តុក</div>
+                <div class="stat-top">
+                    <div class="stat-label">មានក្នុងស្តុក</div>
+                    <div class="stat-icon" style="background:#ecfdf5;color:#059669;"><i class="fas fa-check"></i></div>
+                </div>
                 <div class="stat-value text-success">{{ number_format($stats['in_stock']) }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">ជិតអស់</div>
+                <div class="stat-top">
+                    <div class="stat-label">ជិតអស់</div>
+                    <div class="stat-icon" style="background:#fffbeb;color:#d97706;"><i class="fas fa-triangle-exclamation"></i></div>
+                </div>
                 <div class="stat-value" style="color:#d97706;">{{ number_format($stats['low_stock']) }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">អស់ស្តុក</div>
+                <div class="stat-top">
+                    <div class="stat-label">អស់ស្តុក</div>
+                    <div class="stat-icon" style="background:#fef2f2;color:#dc2626;"><i class="fas fa-circle-xmark"></i></div>
+                </div>
                 <div class="stat-value text-danger">{{ number_format($stats['out_stock']) }}</div>
             </div>
         </div>
 
-        @if($inventories->count())
-            <div class="filter-card">
-                <input type="search" id="inventorySearch" class="form-control" placeholder="ស្វែងរកទំនិញ ឬប្រភេទ..." autocomplete="off">
-                <select id="statusFilter" class="form-select">
-                    <option value="">គ្រប់ស្ថានភាព</option>
-                    <option value="in">មានក្នុងស្តុក</option>
-                    <option value="low">ជិតអស់</option>
-                    <option value="out">អស់ស្តុក</option>
-                </select>
-                <select id="warehouseFilter" class="form-select">
-                    <option value="">គ្រប់ទីតាំង</option>
-                    @foreach($items->pluck('warehouse_location')->unique()->reject(fn($x) => !$x) as $warehouse)
-                        <option value="{{ strtolower($warehouse) }}">{{ $warehouse }}</option>
-                    @endforeach
-                </select>
-                <button type="button" class="inventory-btn inventory-btn-primary" onclick="exportInventoryCsv()">
-                    <i class="fas fa-download"></i> ទាញយក
-                </button>
+        @if($movementActive)
+            <div class="movement-summary">
+                <div class="movement-card">
+                    <i class="fas fa-arrow-down"></i>
+                    <div>
+                        <div class="movement-label">កាត់ចេញតាមការបញ្ជាទិញ</div>
+                        <div class="movement-value">{{ number_format($movementSummary['cut_out'] ?? 0) }}</div>
+                    </div>
+                </div>
+                <div class="movement-card">
+                    <i class="fas fa-arrow-up"></i>
+                    <div>
+                        <div class="movement-label">បានបន្ថែម/ត្រឡប់ចូល</div>
+                        <div class="movement-value">{{ number_format($movementSummary['added_back'] ?? 0) }}</div>
+                    </div>
+                </div>
+                <div class="movement-card">
+                    <i class="fas fa-layer-group"></i>
+                    <div>
+                        <div class="movement-label">មុខទំនិញមានចលនា</div>
+                        <div class="movement-value">{{ number_format($movementSummary['products'] ?? 0) }}</div>
+                    </div>
+                </div>
             </div>
+        @endif
 
+        <div class="filter-card">
+            <form id="inventoryFilters" method="GET" action="{{ route('inventory.index') }}">
+                <div class="filter-form">
+                    <input type="search" name="search" id="inventorySearch" value="{{ request('search') }}" class="form-control" placeholder="ស្វែងរកទំនិញ ឬប្រភេទ..." autocomplete="off">
+
+                    <select id="statusFilter" name="status" class="form-select">
+                        <option value="">គ្រប់ស្ថានភាព</option>
+                        <option value="in" {{ request('status') === 'in' ? 'selected' : '' }}>មានក្នុងស្តុក</option>
+                        <option value="low" {{ request('status') === 'low' ? 'selected' : '' }}>ជិតអស់</option>
+                        <option value="out" {{ request('status') === 'out' ? 'selected' : '' }}>អស់ស្តុក</option>
+                    </select>
+
+                    <select id="warehouseFilter" name="warehouse" class="form-select">
+                        <option value="">គ្រប់ទីតាំង</option>
+                        @foreach($items->pluck('warehouse_location')->unique()->reject(fn($x) => !$x) as $warehouse)
+                            <option value="{{ strtolower($warehouse) }}" {{ request('warehouse') === strtolower($warehouse) ? 'selected' : '' }}>{{ $warehouse }}</option>
+                        @endforeach
+                    </select>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="inventory-btn inventory-btn-primary">
+                            <i class="fas fa-filter"></i> Apply
+                        </button>
+                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="exportInventoryCsv()">
+                            <i class="fas fa-download"></i> ទាញយក
+                        </button>
+                    </div>
+                </div>
+
+                <div class="quick-filters">
+                    <a href="{{ route('inventory.index', array_merge(request()->except('page'), ['period' => 'today'])) }}"
+                        class="quick-filter {{ request('period') === 'today' ? 'active' : '' }}">
+                        <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
+                    </a>
+                    <a href="{{ route('inventory.index', array_merge(request()->except('page'), ['period' => 'yesterday'])) }}"
+                        class="quick-filter {{ request('period') === 'yesterday' ? 'active' : '' }}">
+                        <i class="fas fa-calendar-minus"></i> ម្សិលមិញ
+                    </a>
+                    <a href="{{ route('inventory.index') }}" class="quick-filter">
+                        <i class="fas fa-rotate-left"></i> សម្អាត
+                    </a>
+
+                    <div class="date-filter">
+                        <input type="date" name="date" value="{{ request('date') }}" class="form-control">
+                        <button type="submit" class="inventory-btn inventory-btn-soft">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        @if($inventories->count())
             <div class="inventory-table-card">
                 <div class="table-responsive">
                     <table class="table inventory-table mb-0">
@@ -317,6 +617,9 @@
                                 <th>ប្រភេទ</th>
                                 <th>ទីតាំងស្តុក</th>
                                 <th class="text-center">ចំនួន</th>
+                                @if($movementActive)
+                                    <th class="text-center">ចលនាស្តុក</th>
+                                @endif
                                 <th class="text-center">កម្រិតត្រូវបំពេញ</th>
                                 <th class="text-center">ស្ថានភាព</th>
                                 <th class="text-end">សកម្មភាព</th>
@@ -330,6 +633,11 @@
                                     $status = $isOut ? 'out' : ($isLow ? 'low' : 'in');
                                     $statusClass = $isOut ? 'status-out' : ($isLow ? 'status-low' : 'status-good');
                                     $statusLabel = $isOut ? 'អស់ស្តុក' : ($isLow ? 'ជិតអស់' : 'មានក្នុងស្តុក');
+                                    $progressClass = $isOut ? 'out' : ($isLow ? 'low' : '');
+                                    $progress = $inv->reorder_level > 0
+                                        ? min(100, max(0, ($inv->quantity / max($inv->reorder_level * 2, 1)) * 100))
+                                        : 100;
+                                    $movement = $movementsByInventory->get($inv->id);
                                 @endphp
                                 <tr data-name="{{ strtolower($inv->product?->name ?? '') }}"
                                     data-category="{{ strtolower($inv->product?->category ?? '') }}"
@@ -341,11 +649,33 @@
                                     </td>
                                     <td>{{ $inv->product?->category ?? 'មិនមាន' }}</td>
                                     <td>{{ $inv->warehouse_location ?? 'មិនមាន' }}</td>
-                                    <td class="text-center">
+                                    <td class="text-center stock-cell">
                                         <span class="stock-number" onclick="openQuickUpdate({{ $inv->id }}, {{ $inv->quantity }})">
                                             {{ number_format($inv->quantity) }}
                                         </span>
+                                        <div class="stock-progress {{ $progressClass }}">
+                                            <span style="width: {{ $progress }}%;"></span>
+                                        </div>
                                     </td>
+                                    @if($movementActive)
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                                @if(($movement?->cut_out ?? 0) > 0)
+                                                    <span class="movement-pill movement-out">
+                                                        <i class="fas fa-minus"></i> {{ number_format($movement->cut_out) }}
+                                                    </span>
+                                                @endif
+                                                @if(($movement?->added_back ?? 0) > 0)
+                                                    <span class="movement-pill movement-in">
+                                                        <i class="fas fa-plus"></i> {{ number_format($movement->added_back) }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            @if($movement?->last_movement_at)
+                                                <div class="movement-time">{{ \Carbon\Carbon::parse($movement->last_movement_at)->format('h:i A') }}</div>
+                                            @endif
+                                        </td>
+                                    @endif
                                     <td class="text-center">{{ number_format($inv->reorder_level) }}</td>
                                     <td class="text-center">
                                         <span class="status-pill {{ $statusClass }}">
@@ -380,8 +710,8 @@
         @else
             <div class="empty-state">
                 <i class="fas fa-box-open"></i>
-                <h3>មិនទាន់មានស្តុកទំនិញ</h3>
-                <p>ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញក្នុងហាង។</p>
+                <h3>{{ $movementActive ? 'មិនមានចលនាស្តុកសម្រាប់ថ្ងៃនេះ' : 'មិនទាន់មានស្តុកទំនិញ' }}</h3>
+                <p>{{ $movementActive ? 'ពេលបង្កើត ឬកែការបញ្ជាទិញ ប្រព័ន្ធនឹងបង្ហាញទំនិញដែលត្រូវបានកាត់ចេញនៅទីនេះ។' : 'ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញក្នុងហាង។' }}</p>
                 <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
                     <i class="fas fa-plus"></i> បន្ថែមស្តុកដំបូង
                 </a>
@@ -421,6 +751,7 @@
             searchInput.addEventListener('input', filterTable);
             statusFilter.addEventListener('change', filterTable);
             warehouseFilter.addEventListener('change', filterTable);
+            filterTable();
         });
 
         function exportInventoryCsv() {

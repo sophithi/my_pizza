@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\User;
+use App\Notifications\NewOrderNotification;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -22,13 +24,14 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $query = $this->filteredInvoiceQuery($request)->withCount('items');
+        $statsQuery = $this->filteredInvoiceQuery($request);
 
         $stats = [
-            'total' => Invoice::count(),
-            'paid' => Invoice::where('status', 'paid')->count(),
-            'unpaid' => Invoice::where('status', '!=', 'paid')->count(),
-            'amount_usd' => Invoice::sum('total_amount'),
-            'amount_khr' => Invoice::with('order.items.product')->get()->sum(fn($invoice) => $this->invoiceTotalKhr($invoice)),
+            'total' => (clone $statsQuery)->count(),
+            'paid' => (clone $statsQuery)->where('status', 'paid')->count(),
+            'unpaid' => (clone $statsQuery)->where('status', '!=', 'paid')->count(),
+            'amount_usd' => (clone $statsQuery)->sum('total_amount'),
+            'amount_khr' => (clone $statsQuery)->get()->sum(fn($invoice) => $this->invoiceTotalKhr($invoice)),
         ];
 
         $invoices = $this->orderInvoices($query)->paginate(15)->withQueryString();
@@ -306,6 +309,7 @@ class InvoiceController extends Controller
     public function printIndex(Request $request)
     {
         $query = Invoice::with(['order', 'order.customer']);
+        $query->whereNotNull('packing_sent_at');
         $period = $request->get('period');
 
         if ($period === 'today') {
@@ -325,20 +329,44 @@ class InvoiceController extends Controller
             $query->whereDate('invoice_date', today());
         }
 
-        $invoices = $query->latest('invoice_date')->paginate(15)->withQueryString();
+        $invoices = $query->orderByDesc('packing_sent_at')
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
         return view('packing.index', compact('invoices'));
     }
 
-    /**
-     * Store a newly created invoice.
-     */
-    /**
-     * Store a newly created invoice (kept for API/flexibility but redirects).
-     * Invoices are now auto-created when orders are marked ready.
-     */
+    public function sendToPacking(Invoice $invoice)
+    {
+        if (!$invoice->packing_sent_at) {
+            $invoice->update(['packing_sent_at' => now()]);
+            $invoice->loadMissing('order.customer', 'order.invoice');
+
+            if ($invoice->order) {
+                User::where('role', 'staff_inventory')->get()->each(function ($user) use ($invoice) {
+                    $user->notify(new NewOrderNotification($invoice->order));
+                });
+            }
+        }
+
+        return redirect()
+            ->route('invoices.show', $invoice)
+            ->with('success', 'វិក្ក័យប័ត្របានបញ្ជូនដាក់រៀបចំ');
+    }
+
+    public function markPackingCompleted(Invoice $invoice)
+    {
+        if (!$invoice->packing_completed_at) {
+            $invoice->update(['packing_completed_at' => now()]);
+        }
+
+        return back()->with('success', 'បានរៀបចំរួចរាល់');
+    }
+
+  
     public function store(Request $request)
     {
-        return redirect()->route('orders.index')->with('info', 'វិក្ក័យប័ត្របានបង្កើតដោយស្វយប្រវត្តិរួចហើយ។');
+        return redirect()->route('orders.index')->with('info', 'វិក្ក័យប័ត្របានបង្កើតដោយស្វ័យប្រវត្តិ');
     }
 
     /**
@@ -391,7 +419,9 @@ class InvoiceController extends Controller
     public function print(Invoice $invoice)
     {
         $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
-        return view('packing.sticker-customer', compact('invoice'));
+        // When printing from the invoices area, return back to the invoice view
+        $backUrl = route('invoices.show', $invoice);
+        return view('packing.sticker-customer', compact('invoice', 'backUrl'));
     }
 
     /**
@@ -400,7 +430,9 @@ class InvoiceController extends Controller
     public function stickerPrep(Invoice $invoice)
     {
         $invoice->load('order.customer', 'order.items.product');
-        return view('packing.sticker-prep', compact('invoice'));
+        // For prep view, return to packing index by default
+        $backUrl = route('packing.index');
+        return view('packing.sticker-prep', compact('invoice', 'backUrl'));
     }
 
     /**
@@ -409,6 +441,10 @@ class InvoiceController extends Controller
     public function stickerCustomer(Invoice $invoice)
     {
         $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
-        return view('packing.sticker-customer', compact('invoice'));
+        $backUrl = auth()->user()?->isStaffInventory()
+            ? route('packing.index')
+            : route('invoices.show', $invoice);
+
+        return view('packing.sticker-customer', compact('invoice', 'backUrl'));
     }
 }

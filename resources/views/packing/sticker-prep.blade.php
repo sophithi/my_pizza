@@ -262,7 +262,7 @@
             style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
             Print Packing Label
         </button>
-        <a href="{{ route('packing.index') }}"
+        <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}"
             style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
             ← Back
         </a>

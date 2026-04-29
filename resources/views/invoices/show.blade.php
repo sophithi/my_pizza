@@ -7,30 +7,68 @@
         .invoice-show {
             --accent: #e85d24;
             --accent-dark: #d94a10;
+            --accent-soft: #fff7ed;
             --border: #e5e7eb;
             --muted: #6b7280;
             --surface: #fff;
             --text: #111827;
+            --shadow: 0 12px 32px rgba(15, 23, 42, .07);
         }
 
         .invoice-header {
             align-items: flex-start;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
             display: flex;
             gap: 16px;
             justify-content: space-between;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
+            padding: 18px;
+        }
+
+        .invoice-heading {
+            min-width: 0;
         }
 
         .invoice-title {
             color: var(--text);
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 900;
             margin: 0;
         }
 
         .invoice-subtitle {
             color: var(--muted);
-            margin: 6px 0 0;
+            font-size: 14px;
+            margin: 5px 0 0;
+        }
+
+        .invoice-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .meta-chip {
+            align-items: center;
+            background: #f9fafb;
+            border: 1px solid #eef2f7;
+            border-radius: 999px;
+            color: #374151;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 800;
+            gap: 7px;
+            min-height: 30px;
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
+
+        .meta-chip i {
+            color: var(--accent);
         }
 
         .invoice-actions {
@@ -51,11 +89,17 @@
             min-height: 40px;
             padding: 9px 14px;
             text-decoration: none;
+            transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
             white-space: nowrap;
+        }
+
+        .invoice-btn:hover {
+            transform: translateY(-1px);
         }
 
         .invoice-btn-primary {
             background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            box-shadow: 0 8px 18px rgba(232, 93, 36, .22);
             color: #fff;
         }
 
@@ -73,6 +117,18 @@
             color: #111827;
         }
 
+        .invoice-btn-success {
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            color: #047857;
+            cursor: default;
+        }
+
+        .invoice-btn-success:hover {
+            color: #047857;
+            transform: none;
+        }
+
         .summary-grid {
             display: grid;
             gap: 14px;
@@ -84,8 +140,8 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
-            padding: 14px 16px;
+            box-shadow: var(--shadow);
+            padding: 16px;
         }
 
         .card-title {
@@ -99,7 +155,14 @@
         }
 
         .card-title i {
+            align-items: center;
+            background: var(--accent-soft);
+            border-radius: 8px;
             color: var(--accent);
+            display: inline-flex;
+            height: 30px;
+            justify-content: center;
+            width: 30px;
         }
 
         .info-row {
@@ -160,11 +223,21 @@
             color: #374151;
         }
 
+        .packing-status {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .packing-pending {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
         .items-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+            box-shadow: var(--shadow);
             overflow: hidden;
         }
 
@@ -211,8 +284,9 @@
         }
 
         .totals-panel {
+            background: #fbfdff;
             border-left: 1px solid var(--border);
-            padding: 14px 16px;
+            padding: 16px;
             width: 100%;
         }
 
@@ -225,16 +299,16 @@
         }
 
         .grand-total {
-            background: #fff7ed;
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
             border: 1px solid #fed7aa;
             border-radius: 8px;
             margin-top: 8px;
-            padding: 12px;
+            padding: 14px;
         }
 
         .grand-total .amount {
             color: var(--accent-dark);
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 900;
         }
 
@@ -282,10 +356,17 @@
     @endphp
 
     <div class="container-fluid py-4 invoice-show">
+        @if(session('success'))
+            <div class="alert alert-success border-0 shadow-sm" style="border-radius: 10px;">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <div class="invoice-header">
-            <div>
+            <div class="invoice-heading">
                 <h2 class="invoice-title">{{ $invoice->invoice_number }}</h2>
                 <p class="invoice-subtitle">ព័ត៌មានលម្អិតវិក្ក័យប័ត្រ និងទំនិញដែលបានបញ្ជាទិញ</p>
+              
             </div>
 
             <div class="invoice-actions">
@@ -295,9 +376,28 @@
                 <a href="{{ route('invoices.print', $invoice) }}" class="invoice-btn invoice-btn-primary">
                     <i class="fas fa-print"></i> Print
                 </a>
+                @if(!auth()->user()->isStaffInventory())
+                    @if($invoice->packing_sent_at)
+                        <span class="invoice-btn invoice-btn-success">
+                            <i class="fas fa-check"></i> បានដាក់រៀបចំ
+                        </span>
+                    @else
+                        <form method="POST" action="{{ route('invoices.send-to-packing', $invoice) }}" class="m-0">
+                            @csrf
+                            <button type="submit" class="invoice-btn invoice-btn-primary">
+                                <i class="fas fa-box-open"></i> ដាក់រៀបចំ
+                            </button>
+                        </form>
+                    @endif
+                @endif
+                @if($invoice->order)
+                    <a href="{{ route('orders.edit', $invoice->order) }}" class="invoice-btn invoice-btn-soft">
+                        <i class="fas fa-shopping-cart"></i> កែបញ្ជាទិញ
+                    </a>
+                @endif
                 @if($invoice->status !== 'paid')
                     <a href="{{ route('invoices.edit', $invoice) }}" class="invoice-btn invoice-btn-soft">
-                        <i class="fas fa-edit"></i> កែប្រែ
+                        <i class="fas fa-file-invoice"></i> កែវិក្ក័យប័ត្រ
                     </a>
                 @endif
             </div>
@@ -339,6 +439,16 @@
                 <div class="info-row">
                     <span class="info-label">បញ្ជាទិញ</span>
                     <span class="info-value">#{{ $invoice->order?->id ?? 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ដាក់រៀបចំ</span>
+                    <span class="info-value">
+                        @if($invoice->packing_sent_at)
+                            {{ $invoice->packing_sent_at->setTimezone('Asia/Phnom_Penh')->format('d/m/Y h:i A') }}
+                        @else
+                            មិនទាន់ផ្ញើ
+                        @endif
+                    </span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">ស្ថានភាព</span>

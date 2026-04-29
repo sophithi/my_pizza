@@ -20,6 +20,7 @@ class Order extends Model
         'delivery_fee_usd',
         'total_amount',
         'status',
+        'stock_deducted',
         'payment_status',
         'notes',
         'delivery_date',
@@ -34,6 +35,7 @@ class Order extends Model
         'delivery_fee_khr' => 'decimal:2',
         'delivery_fee_usd' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'stock_deducted' => 'boolean',
     ];
 
     /**

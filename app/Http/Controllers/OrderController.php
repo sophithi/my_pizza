@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventory;
+use App\Models\InventoryMovement;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Notifications\NewOrderNotification;
 use App\Models\User;
 use App\Models\Delivery;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -50,61 +53,75 @@ class OrderController extends Controller
         $subtotal = (float) $validated['subtotal'];
         $discountAmount = (float) ($validated['discount_amount'] ?? 0);
         $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
-        
-        // Create the order
-        $order = Order::create([
-            'customer_id' => $validated['customer_id'],
-            'delivery_id' => $delivery?->id,
-            'user_id' => auth()->id(),
-            'order_date' => $validated['order_date'],
-            'code' => 'ORD-' . rand(1000, 9999),
-            'subtotal' => $subtotal,
-            'discount_amount' => $discountAmount,
-            'delivery_fee_khr' => $deliveryFeeKhr,
-            'delivery_fee_usd' => $deliveryFeeUsd,
-            'total_amount' => $totalAmount,
-            'status' => $validated['status'] ?? 'pending',
-            'payment_status' => $validated['payment_status'] ?? 'unpaid',
-            'notes' => $validated['notes'] ?? null,
-        ]);
 
-        // Parse and create order items
-        $orderItems = json_decode($validated['order_items'], true);
-        foreach ($orderItems as $item) {
-            \App\Models\OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item['product_id'],
+        [$order, $invoiceNumber, $warnings] = DB::transaction(function () use ($validated, $delivery, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
+            // Create the order
+            $order = Order::create([
+                'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'total_price' => $item['total_price'],
+                'user_id' => auth()->id(),
+                'order_date' => $validated['order_date'],
+                'code' => 'ORD-' . rand(1000, 9999),
+                'subtotal' => $subtotal,
+                'discount_amount' => $discountAmount,
+                'delivery_fee_khr' => $deliveryFeeKhr,
+                'delivery_fee_usd' => $deliveryFeeUsd,
+                'total_amount' => $totalAmount,
+                'status' => $validated['status'] ?? 'pending',
+                'payment_status' => $validated['payment_status'] ?? 'unpaid',
+                'notes' => $validated['notes'] ?? null,
             ]);
-        }
 
-        // Auto-create invoice
-        $lastInvoice = \App\Models\Invoice::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
-        $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
-        $invoiceNumber = 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            // Parse and create order items
+            $orderItems = json_decode($validated['order_items'], true);
+            foreach ($orderItems as $item) {
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'delivery_id' => $delivery?->id,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_price' => $item['total_price'],
+                ]);
+            }
 
-        \App\Models\Invoice::create([
-            'order_id' => $order->id,
-            'invoice_number' => $invoiceNumber,
-            'invoice_date' => now()->toDateString(),
-            'subtotal' => $order->subtotal,
-            'discount_amount' => $order->discount_amount,
-            'delivery_fee_khr' => $order->delivery_fee_khr,
-            'delivery_fee_usd' => $order->delivery_fee_usd,
-            'total_amount' => $order->total_amount,
-            'notes' => $order->notes ?? null,
-        ]);
+            $warnings = $this->deductInventoryForOrder($order);
 
-        // Send notification to inventory staff + admin
-        $users = User::whereIn('role', ['inventory', 'admin'])->get();
+            // Auto-create invoice
+            $lastInvoice = \App\Models\Invoice::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
+            $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
+            $invoiceNumber = 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+
+            \App\Models\Invoice::create([
+                'order_id' => $order->id,
+                'invoice_number' => $invoiceNumber,
+                'invoice_date' => now()->toDateString(),
+                'subtotal' => $order->subtotal,
+                'discount_amount' => $order->discount_amount,
+                'delivery_fee_khr' => $order->delivery_fee_khr,
+                'delivery_fee_usd' => $order->delivery_fee_usd,
+                'total_amount' => $order->total_amount,
+                'notes' => $order->notes ?? null,
+            ]);
+
+            return [$order, $invoiceNumber, $warnings];
+        });
+
+        // Notify admins immediately; inventory staff are notified when the invoice is sent to packing.
+        $users = User::where('role', 'admin')->get();
         foreach ($users as $user) {
             $user->notify(new NewOrderNotification($order));
         }
 
-        return redirect()->route('orders.show', $order)->with('success', 'Order created successfully with invoice ' . $invoiceNumber . '.');
+        $redirect = redirect()
+            ->route('orders.show', $order)
+            ->with('success', 'Order created successfully with invoice ' . $invoiceNumber . '. Stock has been deducted.');
+
+        if (!empty($warnings)) {
+            $redirect->with('stockWarnings', $warnings);
+        }
+
+        return $redirect;
     }
 
     /**
@@ -121,8 +138,12 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
+        $order->load('items.product', 'customer', 'delivery', 'invoice');
         $customers = \App\Models\Customer::all();
-        return view('orders.edit', compact('order', 'customers'));
+        $products = \App\Models\Product::all();
+        $deliveries = \App\Models\Delivery::all();
+
+        return view('orders.edit', compact('order', 'customers', 'products', 'deliveries'));
     }
 
     /**
@@ -130,8 +151,69 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, Order $order)
     {
-        $order->update($request->validated());
-        return redirect()->route('orders.show', $order)->with('success', 'Order updated successfully.');
+        $validated = $request->validated();
+        $delivery = !empty($validated['delivery_id']) ? Delivery::find($validated['delivery_id']) : null;
+        $deliveryFeeKhr = $delivery ? (float) $delivery->delivery_price_khr : 0;
+        $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
+        $subtotal = (float) $validated['subtotal'];
+        $discountAmount = (float) ($validated['discount_amount'] ?? 0);
+        $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
+
+        DB::transaction(function () use ($order, $validated, $delivery, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
+            $wasStockDeducted = (bool) $order->stock_deducted;
+
+            if ($wasStockDeducted) {
+                $this->restoreInventoryForOrder($order);
+            }
+
+            $order->update([
+                'customer_id' => $validated['customer_id'],
+                'delivery_id' => $delivery?->id,
+                'order_date' => $validated['order_date'],
+                'subtotal' => $subtotal,
+                'discount_amount' => $discountAmount,
+                'delivery_fee_khr' => $deliveryFeeKhr,
+                'delivery_fee_usd' => $deliveryFeeUsd,
+                'total_amount' => $totalAmount,
+                'payment_status' => $validated['payment_status'] ?? $order->payment_status,
+                'notes' => $validated['notes'] ?? null,
+                'stock_deducted' => false,
+            ]);
+
+            $order->items()->delete();
+
+            foreach (json_decode($validated['order_items'], true) as $item) {
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'delivery_id' => $delivery?->id,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_price' => $item['total_price'],
+                ]);
+            }
+
+            if ($wasStockDeducted) {
+                $this->deductInventoryForOrder($order->fresh('items.product'));
+            }
+
+            if ($order->invoice) {
+                $order->invoice->update([
+                    'subtotal' => $order->subtotal,
+                    'discount_amount' => $order->discount_amount,
+                    'delivery_fee_khr' => $order->delivery_fee_khr,
+                    'delivery_fee_usd' => $order->delivery_fee_usd,
+                    'total_amount' => $order->total_amount,
+                    'packing_sent_at' => null,
+                    'packing_completed_at' => null,
+                    'notes' => $order->notes ?? null,
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('orders.show', $order)
+            ->with('success', 'Order updated successfully. Please send it to packing again.');
     }
 
     /**
@@ -139,17 +221,11 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        // Only restore inventory if order was already prepared (stock was deducted)
-        if (in_array($order->status, ['processing', 'completed'])) {
-            foreach ($order->items as $item) {
-                $inventory = \App\Models\Inventory::where('product_id', $item->product_id)->first();
-                if ($inventory) {
-                    $inventory->increment('quantity', $item->quantity);
-                }
-            }
-        }
-        
-        $order->delete();
+        DB::transaction(function () use ($order) {
+            $this->restoreInventoryForOrder($order);
+            $order->delete();
+        });
+
         return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
     }
 
@@ -162,27 +238,17 @@ class OrderController extends Controller
             return back()->with('error', 'មានតែការបញ្ជាទិញដែលកំពុងរង់ចាំប៉ុណ្ណោះដែលអាចរៀបចំបាន។');
         }
 
-        $order->load('items.product');
-        $warnings = [];
+        $warnings = DB::transaction(function () use ($order) {
+            $warnings = $this->deductInventoryForOrder($order);
 
-        // Deduct inventory for each order item
-        foreach ($order->items as $item) {
-            $inventory = \App\Models\Inventory::where('product_id', $item->product_id)->first();
-            if ($inventory) {
-                $inventory->decrement('quantity', $item->quantity);
-                if ($inventory->fresh()->quantity < 0) {
-                    $warnings[] = $item->product->name . ' ស្តុកអស់ (នៅសល់: ' . $inventory->fresh()->quantity . ')';
-                } elseif ($inventory->fresh()->quantity <= 5) {
-                    $warnings[] = $item->product->name . ' ស្តុកជិតអស់ (នៅសល់: ' . $inventory->fresh()->quantity . ')';
-                }
-            }
-        }
+            $order->update([
+                'status' => 'processing',
+                'prepared_by' => auth()->id(),
+                'prepared_at' => now(),
+            ]);
 
-        $order->update([
-            'status' => 'processing',
-            'prepared_by' => auth()->id(),
-            'prepared_at' => now(),
-        ]);
+            return $warnings;
+        });
 
         $message = 'ការបញ្ជាទិញកំពុងរៀបចំ។ ស្តុកត្រូវបានកាត់រួចហើយ។';
         if (!empty($warnings)) {
@@ -227,5 +293,88 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'ការបញ្ជាទិញបានបញ្ចប់។');
+    }
+
+    private function deductInventoryForOrder(Order $order): array
+    {
+        if ($order->stock_deducted) {
+            return [];
+        }
+
+        $order->loadMissing('items.product');
+        $warnings = [];
+        $quantitiesByProduct = $order->items
+            ->groupBy('product_id')
+            ->map(fn($items) => (int) $items->sum('quantity'));
+
+        foreach ($quantitiesByProduct as $productId => $quantity) {
+            $inventory = Inventory::where('product_id', $productId)->lockForUpdate()->first();
+            if (!$inventory) {
+                continue;
+            }
+
+            $before = (int) $inventory->quantity;
+            $inventory->decrement('quantity', $quantity);
+            $remaining = (int) $inventory->fresh()->quantity;
+            $this->recordInventoryMovement($inventory, $order, 'order_deduct', -$quantity, $before, $remaining);
+            $productName = $order->items->firstWhere('product_id', $productId)?->product?->name ?? 'Product';
+
+            if ($remaining < 0) {
+                $warnings[] = $productName . ' ស្តុកអស់ (នៅសល់: ' . $remaining . ')';
+            } elseif ($remaining <= (int) $inventory->reorder_level) {
+                $warnings[] = $productName . ' ស្តុកជិតអស់ (នៅសល់: ' . $remaining . ')';
+            }
+        }
+
+        $order->update(['stock_deducted' => true]);
+
+        return $warnings;
+    }
+
+    private function restoreInventoryForOrder(Order $order): void
+    {
+        if (!$order->stock_deducted) {
+            return;
+        }
+
+        $order->loadMissing('items');
+        $quantitiesByProduct = $order->items
+            ->groupBy('product_id')
+            ->map(fn($items) => (int) $items->sum('quantity'));
+
+        foreach ($quantitiesByProduct as $productId => $quantity) {
+            $inventory = Inventory::where('product_id', $productId)->lockForUpdate()->first();
+            if ($inventory) {
+                $before = (int) $inventory->quantity;
+                $inventory->increment('quantity', $quantity);
+                $after = (int) $inventory->fresh()->quantity;
+                $this->recordInventoryMovement($inventory, $order, 'order_restore', $quantity, $before, $after);
+            }
+        }
+
+        $order->update(['stock_deducted' => false]);
+    }
+
+    private function recordInventoryMovement(
+        Inventory $inventory,
+        Order $order,
+        string $type,
+        int $quantityChange,
+        int $quantityBefore,
+        int $quantityAfter
+    ): void {
+        InventoryMovement::create([
+            'inventory_id' => $inventory->id,
+            'product_id' => $inventory->product_id,
+            'order_id' => $order->id,
+            'user_id' => auth()->id(),
+            'type' => $type,
+            'quantity_change' => $quantityChange,
+            'quantity_before' => $quantityBefore,
+            'quantity_after' => $quantityAfter,
+            'note' => $type === 'order_deduct'
+                ? 'Stock deducted by order #' . $order->id
+                : 'Stock restored by order edit/delete #' . $order->id,
+        ]);
     }
 }

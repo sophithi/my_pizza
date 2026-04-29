@@ -438,6 +438,11 @@
             top: 0;
         }
 
+        .notification-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
         .notification-title {
             font-size: 17px;
             font-weight: 700;
@@ -465,6 +470,37 @@
 
         .notification-content {
             padding: 16px;
+        }
+
+        .notification-empty {
+            color: #6c757d;
+            padding: 40px 16px;
+            text-align: center;
+        }
+
+        .notification-empty i {
+            align-items: center;
+            background: #fff7ed;
+            border-radius: 999px;
+            color: #e85d24;
+            display: inline-flex;
+            font-size: 22px;
+            height: 52px;
+            justify-content: center;
+            margin-bottom: 12px;
+            width: 52px;
+        }
+
+        .notification-empty-title {
+            color: #1a1d29;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .notification-empty-text {
+            font-size: 12px;
+            margin: 0;
         }
 
         .notification-item {
@@ -549,6 +585,14 @@
             background: #e85d24;
             color: #fff;
             border-color: #e85d24;
+        }
+
+        .notification-link-hint {
+            color: #e85d24;
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 6px;
         }
 
         /* ===== OVERLAYS ===== */
@@ -702,6 +746,36 @@
 
             $isAdminOrManager = $isAdmin || $isManager;
             $isOfficeStaff = $isStaff && !$isInventory;
+            $notificationRows = collect();
+            $unreadNotificationCount = 0;
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                $notificationRows = $user->notifications()
+                    ->latest()
+                    ->take(10)
+                    ->get()
+                    ->map(function ($notification) use ($isInventory) {
+                        $data = $notification->data;
+                        $url = $data['url'] ?? null;
+
+                        if ($isInventory && ($data['type'] ?? null) === 'order' && !empty($data['order_id'])) {
+                            $url = route('packing.index');
+                        }
+
+                        return [
+                            'id' => $notification->id,
+                            'type' => $data['type'] ?? 'message',
+                            'title' => $data['title'] ?? 'ការជូនដំណឹងថ្មី',
+                            'message' => $data['message'] ?? '',
+                            'url' => $url,
+                            'time' => $notification->created_at?->diffForHumans() ?? '',
+                            'unread' => is_null($notification->read_at),
+                        ];
+                    })
+                    ->values();
+
+                $unreadNotificationCount = $user->unreadNotifications()->count();
+            }
         @endphp
 
         <nav>
@@ -788,7 +862,9 @@
     <div class="notification-panel" id="notificationPanel">
         <div class="notification-header">
             <h3 class="notification-title">ការជូនដំណឹង</h3>
-            <button class="notification-close-btn" id="notificationCloseBtn"><i class="fas fa-times"></i></button>
+            <div class="notification-header-actions">
+                <button class="notification-close-btn" id="notificationCloseBtn"><i class="fas fa-times"></i></button>
+            </div>
         </div>
         <div class="notification-content" id="notificationContent"></div>
     </div>
@@ -809,7 +885,7 @@
             </div>
             <button class="notification-toggle" id="notificationToggle" title="ការជូនដំណឹង">
                 <i class="fas fa-bell"></i>
-                <span class="notification-count" id="notificationCount">3</span>
+                <span class="notification-count" id="notificationCount" style="{{ $unreadNotificationCount > 0 ? '' : 'display: none;' }}">{{ $unreadNotificationCount }}</span>
             </button>
             <div style="position: relative;">
                 <button class="user-avatar" id="userDropdownToggle" title="User menu"
@@ -948,40 +1024,96 @@
                 }
             });
             // ===== NOTIFICATIONS =====
-            const notifications = [
-                { type: 'order', title: 'New Order #ORD-0512', message: 'Order for $45.50 by John Doe', time: '5 min ago', unread: true },
-                { type: 'inventory', title: 'Low Stock Alert', message: 'Mozzarella cheese is below reorder level', time: '12 min ago', unread: true },
-                { type: 'alert', title: 'Invoice Due Soon', message: 'Invoice INV-0089 is due in 2 days', time: '1 hour ago', unread: true },
-                { type: 'message', title: 'System Alert', message: 'Database backup completed successfully', time: '3 hours ago', unread: false },
-                { type: 'order', title: 'Order Delivered', message: 'Order #ORD-0511 successfully delivered', time: '5 hours ago', unread: false },
-            ];
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            let notifications = @json($notificationRows);
+            let unreadNotificationCount = {{ $unreadNotificationCount }};
+
+            function textNode(tag, className, text) {
+                const node = document.createElement(tag);
+                if (className) node.className = className;
+                node.textContent = text || '';
+                return node;
+            }
+
             function renderNotifications() {
                 notifContent.innerHTML = '';
+                if (notifications.length === 0) {
+                    notifContent.innerHTML = `
+                        <div class="notification-empty">
+                            <i class="fas fa-bell-slash"></i>
+                            <div class="notification-empty-title">មិនមានការជូនដំណឹង</div>
+                            <p class="notification-empty-text">ការជូនដំណឹងថ្មីនឹងបង្ហាញនៅទីនេះ។</p>
+                        </div>
+                    `;
+                    return;
+                }
                 notifications.forEach((n, i) => {
                     const el = document.createElement('div');
                     el.className = 'notification-item' + (n.unread ? ' unread' : '');
-                    el.innerHTML = `
-                <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                    <span class="notification-type ${n.type}">${n.type}</span>
-                    <span class="notification-time">${n.time}</span>
-                </div>
-                <div class="notification-title-text">${n.title}</div>
-                <div class="notification-message">${n.message}</div>
-                ${n.unread ? `<button class="notification-read-btn" onclick="markRead(${i})">Mark as read</button>` : ''}
-            `;
+                    const type = ['order', 'inventory', 'alert', 'message'].includes(n.type) ? n.type : 'message';
+                    const meta = document.createElement('div');
+                    meta.style.display = 'flex';
+                    meta.style.justifyContent = 'space-between';
+                    meta.style.marginBottom = '6px';
+                    meta.appendChild(textNode('span', `notification-type ${type}`, type));
+                    meta.appendChild(textNode('span', 'notification-time', n.time));
+                    el.appendChild(meta);
+                    el.appendChild(textNode('div', 'notification-title-text', n.title));
+                    el.appendChild(textNode('div', 'notification-message', n.message));
+
+                    if (n.url) {
+                        el.appendChild(textNode('span', 'notification-link-hint', 'View details'));
+                        el.addEventListener('click', () => window.location.href = n.url);
+                    }
+
+                    if (n.unread) {
+                        const readButton = textNode('button', 'notification-read-btn', 'Mark as read');
+                        readButton.type = 'button';
+                        readButton.addEventListener('click', (event) => {
+                            event.stopPropagation();
+                            markRead(i);
+                        });
+                        el.appendChild(readButton);
+                    }
+
                     notifContent.appendChild(el);
                 });
             }
-            window.markRead = function (i) {
-                notifications[i].unread = false;
+            async function markRead(i) {
+                const notification = notifications[i];
+                if (!notification?.id || !notification.unread) return;
+
+                notification.unread = false;
+                unreadNotificationCount = Math.max(0, unreadNotificationCount - 1);
                 updateCount();
                 renderNotifications();
-            };
+
+                try {
+                    const response = await fetch(`/notifications/${notification.id}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                    });
+
+                    if (!response.ok) throw new Error('Unable to mark notification as read');
+
+                    const data = await response.json();
+                    unreadNotificationCount = data.unread_count ?? unreadNotificationCount;
+                    updateCount();
+                } catch (error) {
+                    notification.unread = true;
+                    unreadNotificationCount += 1;
+                    updateCount();
+                    renderNotifications();
+                }
+            }
             function updateCount() {
-                const count = notifications.filter(n => n.unread).length;
                 const badge = document.getElementById('notificationCount');
-                badge.textContent = count;
-                badge.style.display = count > 0 ? 'flex' : 'none';
+                badge.textContent = unreadNotificationCount;
+                badge.style.display = unreadNotificationCount > 0 ? 'flex' : 'none';
             }
             function openNotif() {
                 notifPanel.classList.add('show');

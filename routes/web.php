@@ -14,6 +14,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\NotificationController;
 
 // Health check route
 Route::get('/health', function () {
@@ -47,6 +48,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/activity-log', [AuthController::class, 'activityLog'])->name('activity-log');
     Route::get('/session-info', [AuthController::class, 'sessionInfo'])->name('session-info');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     // Profile management (all users)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -60,6 +63,12 @@ Route::middleware('auth')->group(function () {
     // ============================================
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', UserController::class)->except(['index', 'show']);
+    });
+
+    // Allow admin, manager and inventory staff to fully manage inventory
+    Route::middleware('role:admin,manager,staff_inventory')->group(function () {
+        Route::resource('inventory', InventoryController::class);
+        Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
     });
 
     // ============================================
@@ -78,8 +87,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('products', ProductController::class);
 
         // Inventory management (full CRUD)
-        Route::resource('inventory', InventoryController::class);
-        Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
+        // NOTE: inventory resource moved to a dedicated group below so staff_inventory
+        // role can also be granted full access without exposing other admin routes.
 
 
         // Payment management
@@ -118,6 +127,10 @@ Route::middleware('auth')->group(function () {
     // ============================================
     // INVOICES - Admin, Manager, Staff Inventory can create; all can view
     // ============================================
+    Route::middleware('role:admin,manager,staff')->group(function () {
+        Route::post('invoices/{invoice}/send-to-packing', [InvoiceController::class, 'sendToPacking'])->name('invoices.send-to-packing');
+    });
+
     Route::middleware('role:admin,manager,staff_inventory')->group(function () {
         Route::get('invoices/export/report', [InvoiceController::class, 'exportReport'])->name('invoices.export');
         Route::resource('invoices', InvoiceController::class);
@@ -127,6 +140,7 @@ Route::middleware('auth')->group(function () {
     // Packing labels
     Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
         Route::get('packing/index', [InvoiceController::class, 'printIndex'])->name('packing.index');
+        Route::post('packing/{invoice}/complete', [InvoiceController::class, 'markPackingCompleted'])->name('packing.complete');
         Route::get('packing/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('packing.prep');
         Route::get('packing/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('packing.customer');
 

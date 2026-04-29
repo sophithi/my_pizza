@@ -19,6 +19,8 @@ class Invoice extends Model
         'delivery_fee_usd',
         'total_amount',
         'status',
+        'packing_sent_at',
+        'packing_completed_at',
         'notes',
     ];
 
@@ -30,6 +32,8 @@ class Invoice extends Model
         'delivery_fee_khr' => 'decimal:2',
         'delivery_fee_usd' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'packing_sent_at' => 'datetime',
+        'packing_completed_at' => 'datetime',
     ];
 
     /**

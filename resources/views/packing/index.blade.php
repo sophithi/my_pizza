@@ -2,8 +2,78 @@
 
 @section('title', 'រៀបចំទំនិញ')
 
+@push('styles')
+    <style>
+        .packing-new-badge {
+            align-items: center;
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            border-radius: 999px;
+            color: #047857;
+            display: inline-flex;
+            font-size: 11px;
+            font-weight: 800;
+            gap: 5px;
+            margin-left: 8px;
+            padding: 3px 8px;
+            vertical-align: middle;
+        }
+
+        .packing-sent-time {
+            color: #6b7280;
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+        .packing-complete-btn,
+        .packing-complete-done {
+            align-items: center;
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 800;
+            gap: 7px;
+            min-height: 32px;
+            padding: 6px 12px;
+            white-space: nowrap;
+        }
+
+        .packing-complete-btn {
+            background: #fff;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .packing-complete-btn:hover {
+            background: #ecfdf5;
+            border-color: #86efac;
+            color: #047857;
+        }
+
+        .packing-complete-done {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #047857;
+        }
+
+        .packing-row-completed {
+            background: #f9fafb;
+            opacity: .78;
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="container-fluid py-4">
+        @if(session('success'))
+            <div class="alert alert-success border-0 shadow-sm" style="border-radius: 10px;">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <div class="row mb-4">
             <div class="col-12">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -61,15 +131,45 @@
                                             <th>វិក័្កយប័ត្រ</th>
                                             <th>ឈ្មោះអតិថិជន</th>
                                             <th>កាលបរិច្ឆេទ</th>
+                                            <th>ផ្ញើមក</th>
+                                            <th>រៀបចំរួច</th>
                                             <th class="text-end">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($invoices as $invoice)
-                                            <tr>
-                                                <td>{{ $invoice->invoice_number }}</td>
+                                            <tr class="{{ $invoice->packing_completed_at ? 'packing-row-completed' : '' }}">
+                                                <td>
+                                                    {{ $invoice->invoice_number }}
+                                                    @if(!$invoice->packing_completed_at && $invoice->packing_sent_at && $invoice->packing_sent_at->gt(now()->subMinutes(30)))
+                                                        <span class="packing-new-badge">
+                                                            <i class="fas fa-circle"></i> ថ្មី
+                                                        </span>
+                                                    @endif
+                                                </td>
                                                 <td>{{ $invoice->order?->customer?->name ?? 'N/A' }}</td>
                                                 <td>{{ $invoice->invoice_date->translatedFormat('M d, Y') }}</td>
+                                                <td>
+                                                    {{ $invoice->packing_sent_at?->setTimezone('Asia/Phnom_Penh')->format('h:i A') ?? 'N/A' }}
+                                                    <span class="packing-sent-time">{{ $invoice->packing_sent_at?->diffForHumans() }}</span>
+                                                </td>
+                                                <td>
+                                                    @if($invoice->packing_completed_at)
+                                                        <span class="packing-complete-done">
+                                                            <i class="fas fa-check-circle"></i> រួចរាល់
+                                                        </span>
+                                                        <span class="packing-sent-time">
+                                                            {{ $invoice->packing_completed_at->setTimezone('Asia/Phnom_Penh')->format('h:i A') }}
+                                                        </span>
+                                                    @else
+                                                        <form method="POST" action="{{ route('packing.complete', $invoice) }}" class="m-0">
+                                                            @csrf
+                                                            <button type="submit" class="packing-complete-btn">
+                                                                <i class="far fa-square"></i> បញ្ជាក់
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </td>
                                                 <td style="text-align:right">
                                                     <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="btn"
                                                         style="background:#1a1d29;color:white;border:none;padding:6px 10px;border-radius:6px;font-weight:600;margin-right:6px;">

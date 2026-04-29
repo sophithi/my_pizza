@@ -538,19 +538,14 @@
             </button>
         @endif
 
-        {{-- 2) "ដាក់រៀបចំ" — show notification only (no navigation) --}}
-        <button id="prepareBtn" class="btn btn-warning" style="background: #e85d24; border:none;">
-            <i class="fas fa-box"></i> ដាក់រៀបចំ
-        </button>
-
-        {{-- 3) Edit button --}}
+        {{-- 2) Edit button --}}
         @if($order->status === 'pending')
             <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary" style="background: #2563eb;">
                 <i class="fas fa-edit"></i> កែប្រែ
             </a>
         @endif
 
-        {{-- 4) Back button --}}
+        {{-- 3) Back button --}}
         <a href="{{ route('orders.index') }}" class="btn btn-outline">
             ← ត្រឡប់ក្រោយ
         </a>
@@ -559,28 +554,9 @@
 </div>
 @endsection
 
-    {{-- Removed client-only toast; preparation print opens prep sticker in a new tab --}}
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const prepareBtn = document.getElementById('prepareBtn');
-                if (!prepareBtn) return;
-                prepareBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    try {
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'success',
-                            title: 'ការការបញ្ជាទិញត្រូវបានបញ្ជូលសម្រាប់រៀបចំ',
-                            showConfirmButton: false,
-                            timer: 2200,
-                            timerProgressBar: true
-                        });
-                    } catch (err) {
-                        alert('ការការបញ្ជាទិញត្រូវបានបញ្ជូលសម្រាប់រៀបចំ');
-                    }
-                });
                 // Print customer invoice: open print in a new tab then redirect current page to create order
                 const printCustomerBtn = document.getElementById('printCustomerBtn');
                 if (printCustomerBtn) {

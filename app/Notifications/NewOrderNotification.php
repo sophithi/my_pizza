@@ -2,9 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewOrderNotification extends Notification
@@ -14,9 +13,8 @@ class NewOrderNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(private Order $order)
     {
-        //
     }
 
     /**
@@ -26,18 +24,7 @@ class NewOrderNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     /**
@@ -47,8 +34,23 @@ class NewOrderNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $this->order->loadMissing('customer', 'invoice');
+        $url = route('orders.show', $this->order);
+
+        if (($notifiable->role ?? null) === 'staff_inventory') {
+            $url = route('packing.index');
+        }
+
         return [
-            //
+            'type' => 'order',
+            'title' => 'New Order #' . $this->order->id,
+            'message' => 'Order for $' . number_format((float) $this->order->total_amount, 2)
+                . ' by ' . ($this->order->customer?->name ?? 'Unknown customer'),
+            'url' => $url,
+            'order_id' => $this->order->id,
+            'invoice_id' => $this->order->invoice?->id,
+            'customer_id' => $this->order->customer_id,
+            'amount' => (float) $this->order->total_amount,
         ];
     }
 }

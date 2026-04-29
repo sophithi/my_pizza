@@ -188,6 +188,22 @@ class PaymentController extends Controller
             },
         ]);
 
+        // Also update linked invoice status (if an invoice exists for this order)
+        try {
+            $invoice = \App\Models\Invoice::where('order_id', $order->id)->first();
+            if ($invoice) {
+                $invoiceStatus = match ($data['status']) {
+                    'paid' => 'paid',
+                    'partial' => 'pending',
+                    default => 'pending',
+                };
+                $invoice->update(['status' => $invoiceStatus]);
+            }
+        } catch (\Throwable $e) {
+            // don't break on invoice update failure; log if necessary
+            logger()->warning('Failed to update invoice status after payment store: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Payment recorded successfully.');
     }
 
@@ -229,6 +245,21 @@ class PaymentController extends Controller
                 default => $data['status'],
             },
         ]);
+
+            // Also update linked invoice status (if an invoice exists for this order)
+            try {
+                $invoice = \App\Models\Invoice::where('order_id', $order->id)->first();
+                if ($invoice) {
+                    $invoiceStatus = match ($data['status']) {
+                        'paid' => 'paid',
+                        'partial' => 'pending',
+                        default => 'pending',
+                    };
+                    $invoice->update(['status' => $invoiceStatus]);
+                }
+            } catch (\Throwable $e) {
+                logger()->warning('Failed to update invoice status after payment update: ' . $e->getMessage());
+            }
 
         return back()->with('success', 'Payment updated successfully.');
     }
