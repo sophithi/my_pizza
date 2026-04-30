@@ -16,6 +16,10 @@ class InventoryController extends Controller
      */
     public function index(Request $request)
     {
+        if (!$request->has('period') && !$request->filled('date')) {
+            $request->merge(['period' => 'today']);
+        }
+
         $stats = [
             'total' => Inventory::count(),
             'in_stock' => Inventory::whereColumn('quantity', '>', 'reorder_level')->count(),
@@ -149,6 +153,27 @@ class InventoryController extends Controller
         return redirect()->route('inventory.index')->with('success', 'បានកែប្រែចំនួនស្តុកដោយជោគជ័យ។');
     }
 
+    public function restock(Inventory $inventory)
+    {
+        $validated = request()->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $addedQuantity = (int) $validated['quantity'];
+
+        DB::transaction(function () use ($inventory, $addedQuantity) {
+            $before = (int) $inventory->quantity;
+            $inventory->increment('quantity', $addedQuantity);
+            $after = (int) $inventory->fresh()->quantity;
+
+            $this->recordManualMovement($inventory, 'stock_restock', $addedQuantity, $before, $after, 'Stock added to inventory');
+        });
+
+        return redirect()
+            ->route('inventory.index', ['period' => 'today'])
+            ->with('success', 'បានបន្ថែមចំនួនទំនិញចូលស្តុកដោយជោគជ័យ។');
+    }
+
     private function movementDateFromRequest(Request $request): ?string
     {
         if ($request->get('period') === 'today') {
@@ -168,27 +193,41 @@ class InventoryController extends Controller
 
     private function movementSummary(Request $request): array
     {
-        $query = InventoryMovement::query();
-        $this->applyMovementDateFilter($query, $request);
+        $query = $this->visibleMovementGroups($request);
 
         return [
-            'cut_out' => (int) (clone $query)->where('quantity_change', '<', 0)->sum(DB::raw('ABS(quantity_change)')),
-            'added_back' => (int) (clone $query)->where('quantity_change', '>', 0)->sum('quantity_change'),
+            'cut_out' => (int) (clone $query)->sum(DB::raw('CASE WHEN net_change < 0 THEN ABS(net_change) ELSE 0 END')),
+            'added_back' => (int) (clone $query)->sum(DB::raw('CASE WHEN net_change > 0 THEN net_change ELSE 0 END')),
             'products' => (clone $query)->distinct('inventory_id')->count('inventory_id'),
         ];
     }
 
     private function movementsByInventory(Request $request)
     {
-        $query = InventoryMovement::query()
-            ->selectRaw('inventory_id, SUM(CASE WHEN quantity_change < 0 THEN ABS(quantity_change) ELSE 0 END) as cut_out')
-            ->selectRaw('SUM(CASE WHEN quantity_change > 0 THEN quantity_change ELSE 0 END) as added_back')
-            ->selectRaw('MAX(created_at) as last_movement_at')
+        $query = $this->visibleMovementGroups($request)
+            ->selectRaw('inventory_id, SUM(CASE WHEN net_change < 0 THEN ABS(net_change) ELSE 0 END) as cut_out')
+            ->selectRaw('SUM(CASE WHEN net_change > 0 THEN net_change ELSE 0 END) as added_back')
+            ->selectRaw('MAX(last_movement_at) as last_movement_at')
             ->groupBy('inventory_id');
 
-        $this->applyMovementDateFilter($query, $request);
-
         return $query->get()->keyBy('inventory_id');
+    }
+
+    private function visibleMovementGroups(Request $request)
+    {
+        $groups = InventoryMovement::query()
+            ->selectRaw('inventory_id')
+            ->selectRaw('SUM(quantity_change) as net_change')
+            ->selectRaw('MAX(created_at) as last_movement_at')
+            ->groupBy('inventory_id')
+            ->groupBy(DB::raw('COALESCE(order_id, id)'))
+            ->groupBy('created_at');
+
+        $this->applyMovementDateFilter($groups, $request);
+
+        return DB::query()
+            ->fromSub($groups, 'movement_groups')
+            ->where('net_change', '<>', 0);
     }
 
     private function applyMovementDateFilter($query, Request $request): void

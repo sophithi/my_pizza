@@ -20,12 +20,18 @@ class CustomerController extends Controller
             ->withMax('orders as last_order_at', 'order_date');
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $search = trim($request->search);
+            $phoneSearch = preg_replace('/\D+/', '', $search);
+
+            $query->where(function ($q) use ($search, $phoneSearch) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhere('city', 'like', "%{$search}%")
                     ->orWhere('address', 'like', "%{$search}%");
+
+                if ($phoneSearch !== '') {
+                    $q->orWhereRaw("REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', '') LIKE ?", ["%{$phoneSearch}%"]);
+                }
             });
         }
 

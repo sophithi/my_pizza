@@ -14,7 +14,6 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\NotificationController;
 
 // Health check route
 Route::get('/health', function () {
@@ -48,8 +47,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/activity-log', [AuthController::class, 'activityLog'])->name('activity-log');
     Route::get('/session-info', [AuthController::class, 'sessionInfo'])->name('session-info');
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     // Profile management (all users)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -69,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,manager,staff_inventory')->group(function () {
         Route::resource('inventory', InventoryController::class);
         Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
+        Route::post('inventory/{inventory}/restock', [InventoryController::class, 'restock'])->name('inventory.restock');
     });
 
     // ============================================

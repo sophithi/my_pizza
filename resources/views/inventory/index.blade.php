@@ -407,6 +407,189 @@
             color: #b91c1c;
         }
 
+        .icon-restock {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+            color: #047857;
+        }
+
+        .icon-restock:hover {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .restock-overlay {
+            --accent: #e85d24;
+            --accent-dark: #d94a10;
+            --accent-soft: #fff7ed;
+            --border: #e5e7eb;
+            --danger: #dc2626;
+            --muted: #64748b;
+            --text: #0f172a;
+            align-items: center;
+            background: rgba(15, 23, 42, .42);
+            display: none;
+            inset: 0;
+            justify-content: center;
+            padding: 20px;
+            position: fixed;
+            z-index: 1100;
+        }
+
+        .restock-overlay.show {
+            display: flex;
+        }
+
+        .restock-modal {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+            max-width: 440px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .restock-header {
+            align-items: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 18px;
+        }
+
+        .restock-title {
+            font-size: 17px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .restock-close {
+            align-items: center;
+            background: rgba(255, 255, 255, .18);
+            border: 0;
+            border-radius: 8px;
+            color: #fff;
+            display: inline-flex;
+            height: 34px;
+            justify-content: center;
+            width: 34px;
+        }
+
+        .restock-body {
+            padding: 18px;
+        }
+
+        .restock-product {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 14px;
+            padding: 12px;
+        }
+
+        .restock-product-name {
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .restock-product-meta {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .restock-field label {
+            color: var(--muted);
+            display: block;
+            font-size: 12px;
+            font-weight: 900;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+        }
+
+        .restock-input {
+            border: 1.5px solid #d9dee7;
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 22px;
+            font-weight: 900;
+            min-height: 52px;
+            outline: none;
+            padding: 10px 12px;
+            width: 100%;
+        }
+
+        .restock-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(232, 93, 36, .13);
+        }
+
+        .restock-preview {
+            align-items: center;
+            display: grid;
+            gap: 8px;
+            grid-template-columns: 1fr auto 1fr;
+            margin-top: 14px;
+        }
+
+        .restock-preview-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .restock-preview-label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .restock-preview-value {
+            color: var(--text);
+            font-size: 20px;
+            font-weight: 900;
+            margin-top: 2px;
+        }
+
+        .restock-preview-plus {
+            color: var(--accent);
+            font-weight: 900;
+        }
+
+        .restock-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 18px;
+        }
+
+        .restock-actions .inventory-btn-primary {
+            color: #fff;
+            min-width: 118px;
+        }
+
+        .restock-actions .inventory-btn-primary:hover {
+            color: #fff;
+        }
+
+        .restock-error {
+            color: var(--danger);
+            display: none;
+            font-size: 12px;
+            font-weight: 800;
+            margin-top: 8px;
+        }
+
+        .restock-error.show {
+            display: block;
+        }
+
         .empty-state {
             padding: 64px 20px;
             text-align: center;
@@ -484,7 +667,7 @@
         <div class="inventory-header">
             <div>
                 <h2 class="inventory-title">ស្តុកទំនិញ</h2>
-                <p class="inventory-subtitle">តាមដានចំនួនទំនិញ កម្រិតស្តុក និងទីតាំងស្តុកសម្រាប់ការរៀបចំទំនិញ។</p>
+                <p class="inventory-subtitle">តាមដានចំនួនទំនិញ កម្រិតស្តុក និងទីតាំងស្តុកសម្រាប់ការរៀបចំទំនិញ</p>
             </div>
             <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
                 <i class="fas fa-plus"></i> បន្ថែមស្តុក
@@ -575,9 +758,7 @@
                     </select>
 
                     <div class="filter-actions">
-                        <button type="submit" class="inventory-btn inventory-btn-primary">
-                            <i class="fas fa-filter"></i> Apply
-                        </button>
+                       
                         <button type="button" class="inventory-btn inventory-btn-soft" onclick="exportInventoryCsv()">
                             <i class="fas fa-download"></i> ទាញយក
                         </button>
@@ -593,7 +774,7 @@
                         class="quick-filter {{ request('period') === 'yesterday' ? 'active' : '' }}">
                         <i class="fas fa-calendar-minus"></i> ម្សិលមិញ
                     </a>
-                    <a href="{{ route('inventory.index') }}" class="quick-filter">
+                    <a href="{{ route('inventory.index', ['period' => 'all']) }}" class="quick-filter">
                         <i class="fas fa-rotate-left"></i> សម្អាត
                     </a>
 
@@ -684,6 +865,11 @@
                                     </td>
                                     <td>
                                         <div class="action-row">
+                                            <button type="button" class="icon-action icon-restock"
+                                                onclick="openRestock({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'), {{ $inv->quantity }})"
+                                                title="បន្ថែមចំនួនចូលស្តុក">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
                                             <a href="{{ route('inventory.show', $inv) }}" class="icon-action" title="មើល">
                                                 <i class="fas fa-eye"></i>
                                             </a>
@@ -711,12 +897,57 @@
             <div class="empty-state">
                 <i class="fas fa-box-open"></i>
                 <h3>{{ $movementActive ? 'មិនមានចលនាស្តុកសម្រាប់ថ្ងៃនេះ' : 'មិនទាន់មានស្តុកទំនិញ' }}</h3>
-                <p>{{ $movementActive ? 'ពេលបង្កើត ឬកែការបញ្ជាទិញ ប្រព័ន្ធនឹងបង្ហាញទំនិញដែលត្រូវបានកាត់ចេញនៅទីនេះ។' : 'ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញក្នុងហាង។' }}</p>
+                <p>{{ $movementActive ? 'ពេលបង្កើត ឬកែការបញ្ជាទិញ ប្រព័ន្ធនឹងបង្ហាញទំនិញដែលត្រូវបានកាត់ចេញនៅទីនេះ។' : 'ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញ' }}</p>
                 <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
                     <i class="fas fa-plus"></i> បន្ថែមស្តុកដំបូង
                 </a>
             </div>
         @endif
+    </div>
+
+    <div class="restock-overlay" id="restockOverlay" aria-hidden="true">
+        <div class="restock-modal" role="dialog" aria-modal="true" aria-labelledby="restockTitle">
+            <div class="restock-header">
+                <h3 class="restock-title" id="restockTitle">បន្ថែមចំនួនចូលស្តុក</h3>
+              
+            </div>
+            <form method="POST" id="restockForm">
+                @csrf
+                <div class="restock-body">
+                    <div class="restock-product">
+                        <div class="restock-product-name" id="restockProductName">ទំនិញ</div>
+                        <div class="restock-product-meta">ចំនួនបច្ចុប្បន្ន: <span id="restockCurrentText">0</span></div>
+                    </div>
+
+                    <div class="restock-field">
+                        <label for="restockQuantity">ចំនួនដែលត្រូវបន្ថែម</label>
+                        <input type="number" min="1" step="1" name="quantity" id="restockQuantity" class="restock-input" autocomplete="off" required>
+                        <div class="restock-error" id="restockError">សូមបញ្ចូលចំនួនធំជាង 0</div>
+                    </div>
+
+                    <div class="restock-preview">
+                        <div class="restock-preview-card">
+                            <div class="restock-preview-label">បច្ចុប្បន្ន</div>
+                            <div class="restock-preview-value" id="restockCurrentValue">0</div>
+                        </div>
+                        <div class="restock-preview-plus">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="restock-preview-card">
+                            <div class="restock-preview-label">បន្ទាប់ពីបន្ថែម</div>
+                            <div class="restock-preview-value" id="restockNewValue">0</div>
+                        </div>
+                    </div>
+
+                    <div class="restock-actions">
+                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeRestockModal()">Cancel</button>
+                        <button type="submit" class="inventory-btn inventory-btn-primary">
+                            <i class="fas fa-check"></i> Confirm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 @endsection
 
@@ -807,5 +1038,72 @@
             document.body.appendChild(form);
             form.submit();
         }
+
+        function openRestock(id, name, currentQty) {
+            const overlay = document.getElementById('restockOverlay');
+            const form = document.getElementById('restockForm');
+            const productName = document.getElementById('restockProductName');
+            const currentText = document.getElementById('restockCurrentText');
+            const currentValue = document.getElementById('restockCurrentValue');
+            const newValue = document.getElementById('restockNewValue');
+            const quantityInput = document.getElementById('restockQuantity');
+            const error = document.getElementById('restockError');
+
+            form.action = '/inventory/' + id + '/restock';
+            form.dataset.currentQty = currentQty;
+            productName.textContent = name;
+            currentText.textContent = currentQty.toLocaleString();
+            currentValue.textContent = currentQty.toLocaleString();
+            newValue.textContent = currentQty.toLocaleString();
+            quantityInput.value = '';
+            error.classList.remove('show');
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => quantityInput.focus(), 50);
+        }
+
+        function closeRestockModal() {
+            const overlay = document.getElementById('restockOverlay');
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const overlay = document.getElementById('restockOverlay');
+            const form = document.getElementById('restockForm');
+            const quantityInput = document.getElementById('restockQuantity');
+            const newValue = document.getElementById('restockNewValue');
+            const error = document.getElementById('restockError');
+
+            function updateRestockPreview() {
+                const currentQty = parseInt(form.dataset.currentQty || '0', 10);
+                const addQty = parseInt(quantityInput.value || '0', 10);
+                newValue.textContent = (currentQty + Math.max(addQty || 0, 0)).toLocaleString();
+                error.classList.remove('show');
+            }
+
+            quantityInput?.addEventListener('input', updateRestockPreview);
+
+            form?.addEventListener('submit', function (event) {
+                const addQty = parseInt(quantityInput.value || '0', 10);
+                if (!Number.isInteger(addQty) || addQty <= 0) {
+                    event.preventDefault();
+                    error.classList.add('show');
+                    quantityInput.focus();
+                }
+            });
+
+            overlay?.addEventListener('click', function (event) {
+                if (event.target === overlay) closeRestockModal();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && overlay?.classList.contains('show')) {
+                    closeRestockModal();
+                }
+            });
+        });
     </script>
 @endpush

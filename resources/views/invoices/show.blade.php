@@ -543,3 +543,14 @@
         @endif
     </div>
 @endsection
+
+@if(session('packing_refresh_url'))
+    @push('scripts')
+        <script>
+            localStorage.setItem('packingRefresh', JSON.stringify({
+                url: @json(session('packing_refresh_url')),
+                time: Date.now()
+            }));
+        </script>
+    @endpush
+@endif

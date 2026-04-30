@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Order;
-use App\Models\User;
-use App\Notifications\NewOrderNotification;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -313,20 +311,20 @@ class InvoiceController extends Controller
         $period = $request->get('period');
 
         if ($period === 'today') {
-            $query->whereDate('invoice_date', today());
+            $query->whereDate('packing_sent_at', today());
         } elseif ($period === 'yesterday') {
-            $query->whereDate('invoice_date', today()->subDay());
+            $query->whereDate('packing_sent_at', today()->subDay());
         } elseif ($period === 'month') {
-            $query->whereMonth('invoice_date', now()->month)->whereYear('invoice_date', now()->year);
+            $query->whereMonth('packing_sent_at', now()->month)->whereYear('packing_sent_at', now()->year);
         } elseif ($period === 'year') {
-            $query->whereYear('invoice_date', now()->year);
+            $query->whereYear('packing_sent_at', now()->year);
         } elseif ($request->filled('date')) {
-            $query->whereDate('invoice_date', $request->date);
+            $query->whereDate('packing_sent_at', $request->date);
         }
         // If no period or date filter provided, default to today's invoices.
         if (!$period && !$request->filled('date')) {
             $period = 'today';
-            $query->whereDate('invoice_date', today());
+            $query->whereDate('packing_sent_at', today());
         }
 
         $invoices = $query->orderByDesc('packing_sent_at')
@@ -341,17 +339,12 @@ class InvoiceController extends Controller
         if (!$invoice->packing_sent_at) {
             $invoice->update(['packing_sent_at' => now()]);
             $invoice->loadMissing('order.customer', 'order.invoice');
-
-            if ($invoice->order) {
-                User::where('role', 'staff_inventory')->get()->each(function ($user) use ($invoice) {
-                    $user->notify(new NewOrderNotification($invoice->order));
-                });
-            }
         }
 
         return redirect()
             ->route('invoices.show', $invoice)
-            ->with('success', 'វិក្ក័យប័ត្របានបញ្ជូនដាក់រៀបចំ');
+            ->with('success', 'វិក្ក័យប័ត្របានបញ្ជូនដាក់រៀបចំ')
+            ->with('packing_refresh_url', route('packing.index', ['period' => 'today']));
     }
 
     public function markPackingCompleted(Invoice $invoice)

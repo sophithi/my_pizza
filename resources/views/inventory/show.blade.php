@@ -254,6 +254,19 @@
             @php
                 $isOut = $inventory->quantity == 0;
                 $isLow = !$isOut && $inventory->quantity <= $inventory->reorder_level;
+                $unitLabels = [
+                    'kg' => 'គីឡូក្រាម',
+                    'g' => 'ក្រាម',
+                    'L' => 'លីត្រ',
+                    'ml' => 'មីលីលីត្រ',
+                    'pcs' => 'បន្ទះ',
+                    'box' => 'ប្រអប់',
+                    'box1' => 'ប្រអប់ 1',
+                    'box2' => 'ប្រអប់ 2',
+                    'pack' => 'កញ្ចប់',
+                    'bag' => 'បាវ',
+                ];
+                $unit = $unitLabels[$inventory->product->unit] ?? $inventory->product->unit;
             @endphp
             <span class="badge {{ $isOut ? 'badge-bad' : ($isLow ? 'badge-warn' : 'badge-good') }}">
                 {{ $isOut ? '✕ Out of Stock' : ($isLow ? '⚠ Low Stock' : '✓ In Stock') }}
@@ -262,11 +275,11 @@
             <!-- Stock Info -->
             <div class="stat-row">
                 <span class="stat-label">ចំនួនក្នុងស្តុក</span>
-                <span class="stat-value" style="color: #e85d24;">{{ $inventory->quantity }} {{ $inventory->product->unit }}</span>
+                <span class="stat-value" style="color: #e85d24;">{{ $inventory->quantity }} {{ $unit }}</span>
             </div>
             <div class="stat-row">
                 <span class="stat-label">កម្រិតចំនួន</span>
-                <span class="stat-value">{{ $inventory->reorder_level }} {{ $inventory->product->unit }}</span>
+                <span class="stat-value">{{ $inventory->reorder_level }} {{ $unit }}</span>
             </div>
             <div class="stat-row">
                 <span class="stat-label">ទីតាំងស្តុក</span>

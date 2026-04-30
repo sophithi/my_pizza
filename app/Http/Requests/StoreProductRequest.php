@@ -8,7 +8,7 @@ class StoreProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->isAdmin();
+        return auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isManager());
     }
 
     public function rules(): array

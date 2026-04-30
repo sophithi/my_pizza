@@ -336,7 +336,7 @@
         <div class="invoice-header">
             <div>
                 <h2 class="invoice-title">វិក្ក័យប័ត្រ</h2>
-                <p class="invoice-subtitle">គ្រប់គ្រងវិក្ក័យប័ត្រ ស្វែងរកតាមអតិថិជន និងបោះពុម្ពបានរហ័ស។</p>
+                <p class="invoice-subtitle">គ្រប់គ្រងវិក្ក័យប័ត្រ</p>
             </div>
             <a href="{{ route('orders.create') }}" class="invoice-btn invoice-btn-primary">
                 <i class="fas fa-plus"></i> បង្កើតបញ្ជាទិញ
@@ -366,7 +366,7 @@
         <form method="GET" action="{{ route('invoices.index') }}" class="filter-card" id="invoiceFilter">
             <div class="quick-filters">
                 <a href="{{ route('invoices.index', ['period' => 'today']) }}"
-                    class="quick-filter {{ request('period') === 'today' ? 'active' : '' }}">
+                    class="quick-filter {{ request('period') === 'today' ? 'active' : '' }}">  
                     <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
                 </a>
                 <a href="{{ route('invoices.index', ['period' => 'yesterday']) }}"
@@ -389,8 +389,7 @@
 
                 <select name="status" class="form-select">
                     <option value="all">គ្រប់ស្ថានភាព</option>
-                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>
-                    <option value="sent" {{ request('status') === 'sent' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>
+                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>  
                     <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>បានទូទាត់</option>
                     <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>មិនទូទាត់</option>
                 </select>

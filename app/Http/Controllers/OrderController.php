@@ -7,8 +7,6 @@ use App\Models\InventoryMovement;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
-use App\Notifications\NewOrderNotification;
-use App\Models\User;
 use App\Models\Delivery;
 use Illuminate\Support\Facades\DB;
 
@@ -106,12 +104,6 @@ class OrderController extends Controller
 
             return [$order, $invoiceNumber, $warnings];
         });
-
-        // Notify admins immediately; inventory staff are notified when the invoice is sent to packing.
-        $users = User::where('role', 'admin')->get();
-        foreach ($users as $user) {
-            $user->notify(new NewOrderNotification($order));
-        }
 
         $redirect = redirect()
             ->route('orders.show', $order)

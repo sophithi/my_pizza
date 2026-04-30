@@ -109,12 +109,27 @@
             align-items: center;
             display: grid;
             gap: 10px;
-            grid-template-columns: minmax(260px, 1fr) 170px 170px auto;
+            grid-template-columns: minmax(320px, 1fr) 170px 170px auto auto;
         }
 
         .filter-card .form-control,
         .filter-card .form-select {
             min-height: 42px;
+        }
+
+        .customer-search {
+            display: flex;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .customer-search .form-control {
+            min-width: 0;
+        }
+
+        .customer-search-btn {
+            min-width: 46px;
+            padding-inline: 12px;
         }
 
         .customer-table-card {
@@ -245,6 +260,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .customer-search {
+                flex-direction: column;
+            }
+
             .customer-btn {
                 width: 100%;
             }
@@ -298,8 +317,13 @@
 
         <form method="GET" action="{{ route('customers.index') }}" class="filter-card">
             <div class="filter-row">
-                <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                    placeholder="ស្វែងរកឈ្មោះ លេខទូរស័ព្ទ ឬទីតាំង...">
+                <div class="customer-search">
+                    <input type="search" name="search" value="{{ request('search') }}" class="form-control"
+                        placeholder="ស្វែងរកឈ្មោះ លេខទូរស័ព្ទ ទីក្រុង ឬទីតាំង..." autocomplete="off">
+                    <button type="submit" class="customer-btn customer-btn-primary customer-search-btn" title="ស្វែងរក">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
                 <select name="type" class="form-select">
                     <option value="all">គ្រប់ប្រភព</option>
                     <option value="facebook" {{ request('type') === 'facebook' ? 'selected' : '' }}>Facebook</option>
@@ -310,8 +334,9 @@
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>សកម្ម</option>
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>អសកម្ម</option>
                 </select>
+          
                 <a href="{{ route('customers.index') }}" class="customer-btn customer-btn-soft">
-                    <i class="fas fa-rotate-left"></i> សម្អាត
+                    <i class="fas fa-rotate-left"></i>
                 </a>
             </div>
         </form>
@@ -437,17 +462,9 @@
 
                 const input = form.querySelector('input[name="search"]');
                 const selects = form.querySelectorAll('select[name="type"], select[name="status"]');
-                let timer = null;
-
                 const submit = () => form.submit();
 
                 if (input) {
-                    input.addEventListener('input', function () {
-                        clearTimeout(timer);
-                        timer = setTimeout(submit, 400);
-                    });
-
-                    // optionally submit immediately on Enter
                     input.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();

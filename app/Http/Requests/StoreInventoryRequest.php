@@ -12,8 +12,8 @@ class StoreInventoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Only admins can create inventory
-        return auth()->check() && auth()->user()->isAdmin();
+        return auth()->check()
+            && (auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isStaffInventory());
     }
 
     /**

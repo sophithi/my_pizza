@@ -199,3 +199,61 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const refreshKey = 'packingRefresh';
+            const seenKey = 'packingRefreshSeenAt';
+
+            function refreshPackingPage(payload) {
+                if (!payload?.time || sessionStorage.getItem(seenKey) === String(payload.time)) {
+                    return;
+                }
+
+                if (Date.now() - payload.time > 120000) {
+                    return;
+                }
+
+                sessionStorage.setItem(seenKey, String(payload.time));
+                const targetUrl = payload.url || @json(route('packing.index', ['period' => 'today']));
+
+                if (window.location.href === targetUrl) {
+                    window.location.reload();
+                    return;
+                }
+
+                window.location.href = targetUrl;
+            }
+
+            function readRefreshSignal() {
+                try {
+                    return JSON.parse(localStorage.getItem(refreshKey) || 'null');
+                } catch (error) {
+                    return null;
+                }
+            }
+
+            window.addEventListener('storage', (event) => {
+                if (event.key === refreshKey) {
+                    refreshPackingPage(readRefreshSignal());
+                }
+            });
+
+            refreshPackingPage(readRefreshSignal());
+
+            setInterval(() => {
+                if (document.hidden) {
+                    return;
+                }
+
+                const activeTag = document.activeElement?.tagName;
+                if (activeTag === 'INPUT' || activeTag === 'SELECT' || activeTag === 'TEXTAREA') {
+                    return;
+                }
+
+                window.location.reload();
+            }, 60000);
+        })();
+    </script>
+@endpush

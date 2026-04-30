@@ -357,43 +357,6 @@
             color: #e85d24;
         }
 
-        /* Notification button */
-        .notification-toggle {
-            background: linear-gradient(135deg, #e85d24, #d94a10);
-            border: none;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .notification-toggle:hover {
-            transform: scale(1.05);
-        }
-
-        .notification-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #fff;
-            color: #e85d24;
-            border: 2px solid #e85d24;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-        }
-
         /* ===== MAIN CONTENT ===== */
         .main-content {
             margin-left: 260px;
@@ -409,195 +372,8 @@
             margin-left: 80px;
         }
 
-        /* ===== NOTIFICATION PANEL ===== */
-        .notification-panel {
-            position: fixed;
-            top: 0;
-            right: -380px;
-            width: 380px;
-            height: 100vh;
-            background: #fff;
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
-            z-index: 1002;
-            transition: right 0.2s ease;
-            overflow-y: auto;
-        }
-
-        .notification-panel.show {
-            right: 0;
-        }
-
-        .notification-header {
-            background: linear-gradient(135deg, #e85d24, #d94a10);
-            padding: 20px;
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-        }
-
-        .notification-header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .notification-title {
-            font-size: 17px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .notification-close-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #fff;
-            width: 34px;
-            height: 34px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .notification-close-btn:hover {
-            background: rgba(255, 255, 255, 0.35);
-        }
-
-        .notification-content {
-            padding: 16px;
-        }
-
-        .notification-empty {
-            color: #6c757d;
-            padding: 40px 16px;
-            text-align: center;
-        }
-
-        .notification-empty i {
-            align-items: center;
-            background: #fff7ed;
-            border-radius: 999px;
-            color: #e85d24;
-            display: inline-flex;
-            font-size: 22px;
-            height: 52px;
-            justify-content: center;
-            margin-bottom: 12px;
-            width: 52px;
-        }
-
-        .notification-empty-title {
-            color: #1a1d29;
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .notification-empty-text {
-            font-size: 12px;
-            margin: 0;
-        }
-
-        .notification-item {
-            background: #fff;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .notification-item:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transform: translateX(-3px);
-        }
-
-        .notification-item.unread {
-            border-left: 4px solid #e85d24;
-            background: #fdf9f7;
-        }
-
-        .notification-type {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .notification-type.order {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .notification-type.inventory {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .notification-type.alert {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .notification-type.message {
-            background: #e2e3e5;
-            color: #383d41;
-        }
-
-        .notification-time {
-            font-size: 11px;
-            color: #999;
-        }
-
-        .notification-title-text {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a1d29;
-            margin: 6px 0 4px;
-        }
-
-        .notification-message {
-            font-size: 12px;
-            color: #6c757d;
-        }
-
-        .notification-read-btn {
-            font-size: 11px;
-            padding: 3px 8px;
-            background: transparent;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            color: #6c757d;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-top: 6px;
-        }
-
-        .notification-read-btn:hover {
-            background: #e85d24;
-            color: #fff;
-            border-color: #e85d24;
-        }
-
-        .notification-link-hint {
-            color: #e85d24;
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            margin-top: 6px;
-        }
-
         /* ===== OVERLAYS ===== */
-        .sidebar-overlay,
-        .notification-overlay {
+        .sidebar-overlay {
             display: none;
             position: fixed;
             inset: 0;
@@ -606,8 +382,7 @@
             backdrop-filter: blur(2px);
         }
 
-        .sidebar-overlay.active,
-        .notification-overlay.active {
+        .sidebar-overlay.active {
             display: block;
         }
 
@@ -723,7 +498,6 @@
 <body class="no-transition">
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <div class="notification-overlay" id="notificationOverlay"></div>
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
@@ -746,36 +520,6 @@
 
             $isAdminOrManager = $isAdmin || $isManager;
             $isOfficeStaff = $isStaff && !$isInventory;
-            $notificationRows = collect();
-            $unreadNotificationCount = 0;
-
-            if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
-                $notificationRows = $user->notifications()
-                    ->latest()
-                    ->take(10)
-                    ->get()
-                    ->map(function ($notification) use ($isInventory) {
-                        $data = $notification->data;
-                        $url = $data['url'] ?? null;
-
-                        if ($isInventory && ($data['type'] ?? null) === 'order' && !empty($data['order_id'])) {
-                            $url = route('packing.index');
-                        }
-
-                        return [
-                            'id' => $notification->id,
-                            'type' => $data['type'] ?? 'message',
-                            'title' => $data['title'] ?? 'ការជូនដំណឹងថ្មី',
-                            'message' => $data['message'] ?? '',
-                            'url' => $url,
-                            'time' => $notification->created_at?->diffForHumans() ?? '',
-                            'unread' => is_null($notification->read_at),
-                        ];
-                    })
-                    ->values();
-
-                $unreadNotificationCount = $user->unreadNotifications()->count();
-            }
         @endphp
 
         <nav>
@@ -825,7 +569,7 @@
 
             {{-- Inventory (everyone except none) --}}
             @if($isAdmin || $isManager || $isStaff || $isInventory)
-                <a href="/inventory" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
+                <a href="{{ route('inventory.index', ['period' => 'today']) }}" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
                     <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
                 </a>
             @endif
@@ -858,17 +602,6 @@
         </nav>
     </div>
 
-    <!-- Notification Panel -->
-    <div class="notification-panel" id="notificationPanel">
-        <div class="notification-header">
-            <h3 class="notification-title">ការជូនដំណឹង</h3>
-            <div class="notification-header-actions">
-                <button class="notification-close-btn" id="notificationCloseBtn"><i class="fas fa-times"></i></button>
-            </div>
-        </div>
-        <div class="notification-content" id="notificationContent"></div>
-    </div>
-
     <!-- Topbar -->
     <div class="topbar" id="topbar">
         <div style="display:flex;align-items:center;gap:12px;flex:1">
@@ -883,10 +616,6 @@
                     <small>Live</small>
                 @endif
             </div>
-            <button class="notification-toggle" id="notificationToggle" title="ការជូនដំណឹង">
-                <i class="fas fa-bell"></i>
-                <span class="notification-count" id="notificationCount" style="{{ $unreadNotificationCount > 0 ? '' : 'display: none;' }}">{{ $unreadNotificationCount }}</span>
-            </button>
             <div style="position: relative;">
                 <button class="user-avatar" id="userDropdownToggle" title="User menu"
                     style="border: none; cursor: pointer; padding:0; overflow: hidden;">
@@ -953,11 +682,6 @@
             const navbarToggle = document.getElementById('navbarToggle');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
             const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
-            const notifToggle = document.getElementById('notificationToggle');
-            const notifPanel = document.getElementById('notificationPanel');
-            const notifClose = document.getElementById('notificationCloseBtn');
-            const notifOverlay = document.getElementById('notificationOverlay');
-            const notifContent = document.getElementById('notificationContent');
 
             // ===== SIDEBAR COLLAPSE (desktop) =====
             function applyCollapsed(collapsed) {
@@ -1010,7 +734,7 @@
 
             // ESC key closes sidebar
             document.addEventListener('keydown', e => {
-                if (e.key === 'Escape') { closeSidebar(); closeNotif(); }
+                if (e.key === 'Escape') closeSidebar();
             });
 
             // Handle resize
@@ -1023,111 +747,6 @@
                     mainContent.classList.remove('sidebar-collapsed');
                 }
             });
-            // ===== NOTIFICATIONS =====
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            let notifications = @json($notificationRows);
-            let unreadNotificationCount = {{ $unreadNotificationCount }};
-
-            function textNode(tag, className, text) {
-                const node = document.createElement(tag);
-                if (className) node.className = className;
-                node.textContent = text || '';
-                return node;
-            }
-
-            function renderNotifications() {
-                notifContent.innerHTML = '';
-                if (notifications.length === 0) {
-                    notifContent.innerHTML = `
-                        <div class="notification-empty">
-                            <i class="fas fa-bell-slash"></i>
-                            <div class="notification-empty-title">មិនមានការជូនដំណឹង</div>
-                            <p class="notification-empty-text">ការជូនដំណឹងថ្មីនឹងបង្ហាញនៅទីនេះ។</p>
-                        </div>
-                    `;
-                    return;
-                }
-                notifications.forEach((n, i) => {
-                    const el = document.createElement('div');
-                    el.className = 'notification-item' + (n.unread ? ' unread' : '');
-                    const type = ['order', 'inventory', 'alert', 'message'].includes(n.type) ? n.type : 'message';
-                    const meta = document.createElement('div');
-                    meta.style.display = 'flex';
-                    meta.style.justifyContent = 'space-between';
-                    meta.style.marginBottom = '6px';
-                    meta.appendChild(textNode('span', `notification-type ${type}`, type));
-                    meta.appendChild(textNode('span', 'notification-time', n.time));
-                    el.appendChild(meta);
-                    el.appendChild(textNode('div', 'notification-title-text', n.title));
-                    el.appendChild(textNode('div', 'notification-message', n.message));
-
-                    if (n.url) {
-                        el.appendChild(textNode('span', 'notification-link-hint', 'View details'));
-                        el.addEventListener('click', () => window.location.href = n.url);
-                    }
-
-                    if (n.unread) {
-                        const readButton = textNode('button', 'notification-read-btn', 'Mark as read');
-                        readButton.type = 'button';
-                        readButton.addEventListener('click', (event) => {
-                            event.stopPropagation();
-                            markRead(i);
-                        });
-                        el.appendChild(readButton);
-                    }
-
-                    notifContent.appendChild(el);
-                });
-            }
-            async function markRead(i) {
-                const notification = notifications[i];
-                if (!notification?.id || !notification.unread) return;
-
-                notification.unread = false;
-                unreadNotificationCount = Math.max(0, unreadNotificationCount - 1);
-                updateCount();
-                renderNotifications();
-
-                try {
-                    const response = await fetch(`/notifications/${notification.id}/read`, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                        },
-                    });
-
-                    if (!response.ok) throw new Error('Unable to mark notification as read');
-
-                    const data = await response.json();
-                    unreadNotificationCount = data.unread_count ?? unreadNotificationCount;
-                    updateCount();
-                } catch (error) {
-                    notification.unread = true;
-                    unreadNotificationCount += 1;
-                    updateCount();
-                    renderNotifications();
-                }
-            }
-            function updateCount() {
-                const badge = document.getElementById('notificationCount');
-                badge.textContent = unreadNotificationCount;
-                badge.style.display = unreadNotificationCount > 0 ? 'flex' : 'none';
-            }
-            function openNotif() {
-                notifPanel.classList.add('show');
-                notifOverlay.classList.add('active');
-            }
-            function closeNotif() {
-                notifPanel.classList.remove('show');
-                notifOverlay.classList.remove('active');
-            }
-            notifToggle?.addEventListener('click', e => { e.stopPropagation(); notifPanel.classList.contains('show') ? closeNotif() : openNotif(); });
-            notifClose?.addEventListener('click', closeNotif);
-            notifOverlay?.addEventListener('click', closeNotif);
-            renderNotifications();
-            updateCount();
             // Initialize Flatpickr for all date inputs with Khmer locale
             try {
                 if (typeof flatpickr !== 'undefined') {
