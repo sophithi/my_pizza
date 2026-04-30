@@ -484,43 +484,7 @@
             <a href="{{ route('inventory.index') }}" class="quick-action"><i class="fas fa-boxes-stacked"></i> Stock</a>
         </nav>
 
-        <section class="metric-grid">
-            <article class="metric-card">
-                <div class="metric-top">
-                    <div class="metric-label">Today Sales</div>
-                    <div class="metric-icon" style="background:#fff4ef;color:#e85d24;"><i class="fas fa-dollar-sign"></i></div>
-                </div>
-                <div class="metric-value">${{ $fmt($stats['today_sales']) }}</div>
-                <div class="metric-sub">៛{{ $fmtKhr($stats['today_sales_khr']) }}</div>
-            </article>
-
-            <article class="metric-card">
-                <div class="metric-top">
-                    <div class="metric-label">Today Orders</div>
-                    <div class="metric-icon" style="background:#eff6ff;color:#2563eb;"><i class="fas fa-cart-shopping"></i></div>
-                </div>
-                <div class="metric-value">{{ $stats['orders_today'] }}</div>
-                <div class="metric-sub">{{ $stats['pending_orders'] }} pending, {{ $stats['processing_orders'] }} preparing</div>
-            </article>
-
-            <article class="metric-card">
-                <div class="metric-top">
-                    <div class="metric-label">Paid Today</div>
-                    <div class="metric-icon" style="background:#ecfdf5;color:#059669;"><i class="fas fa-money-bill-wave"></i></div>
-                </div>
-                <div class="metric-value">${{ $fmt($stats['today_payments']) }}</div>
-                <div class="metric-sub">{{ $stats['unpaid_orders'] }} orders still unpaid</div>
-            </article>
-
-            <article class="metric-card">
-                <div class="metric-top">
-                    <div class="metric-label">Today Net</div>
-                    <div class="metric-icon" style="background:#f8fafc;color:#0f172a;"><i class="fas fa-chart-line"></i></div>
-                </div>
-                <div class="metric-value">${{ $fmt($stats['today_net']) }}</div>
-                <div class="metric-sub">Expenses: ${{ $fmt($stats['today_expenses']) }}</div>
-            </article>
-        </section>
+       
 
         <section class="content-grid">
             <div class="dash-panel sales-panel">

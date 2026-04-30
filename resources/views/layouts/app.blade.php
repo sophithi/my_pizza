@@ -541,12 +541,15 @@
                     <i class="fas fa-users"></i><span>អតិថិជន</span>
                 </a>
             @endif
-                  {{-- Invoices & Payments (admin, manager, staff office) --}}
+                  {{-- Invoices (admin, manager, staff office) --}}
             @if($isAdminOrManager || $isOfficeStaff)
                 <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
                     <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
                 </a>
+            @endif
 
+            {{-- Payments (admin & manager only) --}}
+            @if($isAdminOrManager)
                 <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}">
                     <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
                 </a>

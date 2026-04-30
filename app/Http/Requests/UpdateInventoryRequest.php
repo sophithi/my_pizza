@@ -13,7 +13,12 @@ class UpdateInventoryRequest extends FormRequest
     public function authorize(): bool
     {
         return auth()->check()
-            && (auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isStaffInventory());
+            && (
+                auth()->user()->isAdmin()
+                || auth()->user()->isManager()
+                || auth()->user()->isStaff()
+                || auth()->user()->isStaffInventory()
+            );
     }
 
     /**
