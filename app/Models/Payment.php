@@ -31,6 +31,11 @@ class Payment extends Model
         return $this->hasMany(PaymentLine::class);
     }
 
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────────────
 
     public function scopePaid($query)

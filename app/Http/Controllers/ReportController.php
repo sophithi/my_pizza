@@ -3,15 +3,92 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
 use App\Models\Product;
+use App\Models\Purchase;
 use App\Models\Customer;
 use App\Models\Inventory;
+use App\Models\InventoryMovement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class ReportController extends Controller
 {
+    public function daily(Request $request)
+    {
+        $date = $request->input('date', today()->toDateString());
+        $reportDate = Carbon::createFromFormat('Y-m-d', $date);
+
+        $orders = Order::query()
+            ->with('customer')
+            ->whereDate('order_date', $reportDate)
+            ->latest('order_date');
+
+        $totalOrders = (clone $orders)->count();
+        $grossSales = (clone $orders)->where('status', '!=', 'cancelled')->sum('total_amount');
+        $income = Payment::whereDate('created_at', $reportDate)->sum('paid_amount');
+        $expenses = Purchase::whereDate('purchase_date', $reportDate)
+            ->where('status', '!=', 'cancelled')
+            ->sum('total_amount');
+        $netIncome = $income - $expenses;
+
+        $soldItems = OrderItem::query()
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->whereDate('orders.order_date', $reportDate)
+            ->where('orders.status', '!=', 'cancelled')
+            ->groupBy('order_items.product_id', 'products.name', 'products.unit')
+            ->selectRaw('products.name, products.unit, SUM(order_items.quantity) as quantity, SUM(order_items.total_price) as total')
+            ->orderByDesc('quantity')
+            ->get();
+
+        $payments = Payment::with('order.customer')
+            ->whereDate('created_at', $reportDate)
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        $purchases = Purchase::whereDate('purchase_date', $reportDate)
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        $stockMovement = InventoryMovement::query()
+            ->join('inventories', 'inventory_movements.inventory_id', '=', 'inventories.id')
+            ->leftJoin('products', 'inventory_movements.product_id', '=', 'products.id')
+            ->whereDate('inventory_movements.created_at', $reportDate)
+            ->groupBy('inventory_movements.inventory_id', 'products.name', 'products.unit', 'inventories.quantity')
+            ->selectRaw('products.name, products.unit, inventories.quantity as current_quantity')
+            ->selectRaw('SUM(CASE WHEN inventory_movements.quantity_change < 0 THEN ABS(inventory_movements.quantity_change) ELSE 0 END) as stock_out')
+            ->selectRaw('SUM(CASE WHEN inventory_movements.quantity_change > 0 THEN inventory_movements.quantity_change ELSE 0 END) as stock_in')
+            ->selectRaw('MAX(inventory_movements.created_at) as last_movement_at')
+            ->orderByDesc('last_movement_at')
+            ->get();
+
+        $lowStock = Inventory::with('product')
+            ->whereColumn('quantity', '<=', 'reorder_level')
+            ->orderBy('quantity')
+            ->limit(10)
+            ->get();
+
+        return view('reports.daily', compact(
+            'date',
+            'reportDate',
+            'totalOrders',
+            'grossSales',
+            'income',
+            'expenses',
+            'netIncome',
+            'soldItems',
+            'payments',
+            'purchases',
+            'stockMovement',
+            'lowStock'
+        ));
+    }
+
     /**
      * Display sales report.
      */

@@ -102,6 +102,17 @@
     <div class="row mb-4">
         <div class="col-12">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+                <a href="{{ route('reports.daily') }}" class="card border-0 shadow-sm" style="border-radius: 12px; text-decoration: none; transition: all 0.3s ease;">
+                    <div class="card-body" style="padding: 24px; text-align: center;">
+                        <h5 style="color: #333; font-weight: 600; margin-bottom: 8px;">
+                            <i class="fas fa-calendar-day" style="color: #e85d24; margin-right: 8px;"></i>Daily Report
+                        </h5>
+                        <p style="color: #666; font-size: 12px; margin: 0;">Sales, income, expenses and stock</p>
+                    </div>
+                </a>
+                @endif
+
                 <a href="{{ route('reports.sales') }}" class="card border-0 shadow-sm" style="border-radius: 12px; text-decoration: none; transition: all 0.3s ease;">
                     <div class="card-body" style="padding: 24px; text-align: center;">
                         <h5 style="color: #333; font-weight: 600; margin-bottom: 8px;">
@@ -111,6 +122,7 @@
                     </div>
                 </a>
 
+                @if(auth()->user()->isAdmin() || auth()->user()->isManager())
                 <a href="{{ route('reports.inventory') }}" class="card border-0 shadow-sm" style="border-radius: 12px; text-decoration: none; transition: all 0.3s ease;">
                     <div class="card-body" style="padding: 24px; text-align: center;">
                         <h5 style="color: #333; font-weight: 600; margin-bottom: 8px;">
@@ -128,6 +140,7 @@
                         <p style="color: #666; font-size: 12px; margin: 0;">Analyze customer activity</p>
                     </div>
                 </a>
+                @endif
             </div>
         </div>
     </div>

@@ -182,6 +182,7 @@ Route::middleware('auth')->group(function () {
     // Admin & Manager - Extra reports
     Route::middleware('role:admin,manager')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/daily', [ReportController::class, 'daily'])->name('daily');
             Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');
             Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
         });
