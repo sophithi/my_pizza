@@ -172,7 +172,7 @@
             padding: 7px 0;
         }
 
-        .info-row + .info-row {
+        .info-row+.info-row {
             border-top: 1px solid #f1f3f5;
         }
 
@@ -323,6 +323,7 @@
         }
 
         @media (max-width: 900px) {
+
             .invoice-header,
             .invoice-actions {
                 align-items: stretch;
@@ -365,8 +366,8 @@
         <div class="invoice-header">
             <div class="invoice-heading">
                 <h2 class="invoice-title">{{ $invoice->invoice_number }}</h2>
-                <p class="invoice-subtitle">ព័ត៌មានលម្អិតវិក្ក័យប័ត្រ និងទំនិញដែលបានបញ្ជាទិញ</p>
-              
+                <p class="invoice-subtitle">ព័ត៌មានលម្អិតវិក្ក័យបត្រ និងទំនិញដែលបានបញ្ជាទិញ</p>
+
             </div>
 
             <div class="invoice-actions">
@@ -397,7 +398,7 @@
                 @endif
                 @if($invoice->status !== 'paid')
                     <a href="{{ route('invoices.edit', $invoice) }}" class="invoice-btn invoice-btn-soft">
-                        <i class="fas fa-file-invoice"></i> កែវិក្ក័យប័ត្រ
+                        <i class="fas fa-file-invoice"></i> កែវិក្ក័យបត្រ
                     </a>
                 @endif
             </div>
@@ -429,7 +430,7 @@
 
             <div class="invoice-card">
                 <div class="card-title">
-                    <i class="fas fa-file-invoice-dollar"></i> ព័ត៌មានវិក្ក័យប័ត្រ
+                    <i class="fas fa-file-invoice-dollar"></i> ព័ត៌មានវិក្ក័យបត្រ
                 </div>
 
                 <div class="info-row">
@@ -451,12 +452,10 @@
                     </span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">ស្ថានភាព</span>
+                    <span class="info-label">ការបង់ប្រាក់</span>
                     <span class="info-value">
                         @if($invoice->status === 'paid')
                             <span class="status-pill status-paid"><i class="fas fa-check-circle"></i> បានទូទាត់</span>
-                        @elseif($invoice->status === 'sent')
-                            <span class="status-pill status-sent"><i class="fas fa-clock"></i> មិនទាន់ទូទាត់</span>
                         @elseif($invoice->status === 'cancelled')
                             <span class="status-pill status-cancelled"><i class="fas fa-times-circle"></i> មិនទូទាត់</span>
                         @elseif($invoice->status === 'draft')
@@ -471,7 +470,7 @@
 
         <div class="items-card">
             <div class="items-header">
-                <h3 class="items-title">ទំនិញក្នុងវិក្ក័យប័ត្រ</h3>
+                <h3 class="items-title">ទំនិញក្នុងវិក្ក័យបត្រ</h3>
                 <span class="text-muted fw-bold">{{ number_format($items->count()) }} មុខទំនិញ</span>
             </div>
 
@@ -502,7 +501,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-5">មិនមានទំនិញក្នុងវិក្ក័យប័ត្រនេះទេ។</td>
+                                    <td colspan="4" class="text-center text-muted py-5">មិនមានទំនិញក្នុងវិក្ក័យបត្រនេះទេ</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -513,17 +512,21 @@
                     <div class="total-row">
                         <span class="text-muted fw-bold">Subtotal</span>
                         <strong>${{ number_format($invoice->subtotal, 2) }}</strong>
+
                     </div>
                     <div class="total-row">
                         <span class="text-muted fw-bold">Discount</span>
                         <strong>${{ number_format($invoice->discount_amount, 2) }}</strong>
+
                     </div>
                     @if((float) $invoice->delivery_fee_khr > 0)
                         <div class="total-row">
-                            <span class="text-muted fw-bold">Delivery {{ $invoice->order?->delivery ? '(' . $invoice->order->delivery->delivery_name . ')' : '' }}</span>
+                            <span class="text-muted fw-bold">Delivery
+                                {{ $invoice->order?->delivery ? '(' . $invoice->order->delivery->delivery_name . ')' : '' }}</span>
                             <strong>
                                 ${{ number_format($invoice->delivery_fee_usd, 2) }}
-                                <span class="text-muted small d-block text-end">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</span>
+                                <span
+                                    class="text-muted small d-block text-end">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</span>
                             </strong>
                         </div>
                     @endif

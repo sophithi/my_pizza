@@ -101,10 +101,7 @@
                         style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'month' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'month' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'month' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
                         <i class="fas fa-calendar-alt"></i> ខែនេះ
                     </a>
-                    <a href="{{ route('packing.index', ['period' => 'year']) }}"
-                        style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'year' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'year' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'year' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
-                        <i class="fas fa-calendar"></i> ឆ្នាំនេះ
-                    </a>
+
 
                     <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
                         <input type="date" name="date" value="{{ request('date') }}"
@@ -128,7 +125,7 @@
                                 <table class="table">
                                     <thead style="background:#f8f9fa;">
                                         <tr>
-                                            <th>វិក័្កយប័ត្រ</th>
+                                            <th>វិក័្កយបត្រ</th>
                                             <th>ឈ្មោះអតិថិជន</th>
                                             <th>កាលបរិច្ឆេទ</th>
                                             <th>ផ្ញើមក</th>
@@ -151,7 +148,8 @@
                                                 <td>{{ $invoice->invoice_date->translatedFormat('M d, Y') }}</td>
                                                 <td>
                                                     {{ $invoice->packing_sent_at?->setTimezone('Asia/Phnom_Penh')->format('h:i A') ?? 'N/A' }}
-                                                    <span class="packing-sent-time">{{ $invoice->packing_sent_at?->diffForHumans() }}</span>
+                                                    <span
+                                                        class="packing-sent-time">{{ $invoice->packing_sent_at?->diffForHumans() }}</span>
                                                 </td>
                                                 <td>
                                                     @if($invoice->packing_completed_at)
@@ -162,7 +160,8 @@
                                                             {{ $invoice->packing_completed_at->setTimezone('Asia/Phnom_Penh')->format('h:i A') }}
                                                         </span>
                                                     @else
-                                                        <form method="POST" action="{{ route('packing.complete', $invoice) }}" class="m-0">
+                                                        <form method="POST" action="{{ route('packing.complete', $invoice) }}"
+                                                            class="m-0">
                                                             @csrf
                                                             <button type="submit" class="packing-complete-btn">
                                                                 <i class="far fa-square"></i> បញ្ជាក់
@@ -191,7 +190,7 @@
                                 {{ $invoices->links() }}
                             </div>
                         @else
-                            <p style="color:#666;">No invoices available for preparation.</p>
+                            <p style="color:#666;">មិនទាន់មានវិក្ក័យបត្រ.</p>
                         @endif
                     </div>
                 </div>

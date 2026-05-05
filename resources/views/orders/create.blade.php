@@ -37,10 +37,15 @@
         font-size: 18px;
         font-weight: 700;
         color: var(--text);
-        margin-bottom: 14px;
+        margin-bottom: 18px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+    }
+
+    .product-section-title i {
+        color: var(--accent);
+        font-size: 20px;
     }
 
     .products-grid {
@@ -125,12 +130,12 @@
         border: 1px solid var(--border);
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 16px;
+        margin-bottom: 20px;
         transition: all 0.3s ease;
     }
 
     .card-body {
-        padding: 16px;
+        padding: 20px;
     }
 
     .form-label {
@@ -145,17 +150,24 @@
     .form-control, .form-select {
         border: 1px solid var(--border);
         border-radius: 8px;
-        padding: 12px 14px;
+        padding: 10px 14px;
         font-size: 14px;
         transition: all 0.3s ease;
         background: var(--surface);
         color: var(--text);
+        width: 100%;
+        font-family: inherit;
     }
 
     .form-control:focus, .form-select:focus {
         outline: none;
         border-color: var(--accent);
         box-shadow: 0 0 0 3px rgba(232, 93, 36, 0.1);
+    }
+
+    textarea.form-control {
+        resize: none;
+        min-height: 100px;
     }
 
     .customer-info-card {
@@ -355,7 +367,14 @@
     .button-group {
         display: flex;
         gap: 12px;
-        margin-top: 16px;
+        margin-top: 24px;
+    }
+
+    .button-group .btn-primary,
+    .button-group .btn-secondary {
+        font-size: 14px;
+        padding: 12px 24px;
+        border-radius: 8px;
     }
 
     .alert-danger {
@@ -403,7 +422,7 @@
 
     /* Order Details Fields */
     .od-field {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
         position: relative;
     }
 
@@ -411,10 +430,12 @@
         font-weight: 600;
         color: var(--text);
         margin-bottom: 8px;
-        font-size: 13px;
+        font-size: 12px;
         display: flex;
         align-items: center;
         gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
     }
 
     .od-label i {
@@ -437,6 +458,17 @@
         .products-grid {
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         }
+    }
+
+    .row {
+        margin-left: -8px;
+        margin-right: -8px;
+    }
+
+    [class*='col-'] {
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-bottom: 8px;
     }
 
     /* Toast Notification */
@@ -511,6 +543,70 @@
         transition: all 0.2s;
     }
     .toast-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(232,93,36,0.3); }
+
+    /* Free Products Section */
+    .free-product-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding: 12px;
+        background: rgba(232, 93, 36, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .free-product-row select,
+    .free-product-row input {
+        flex: 1;
+    }
+
+    .free-product-row input[type="number"] {
+        flex: 0 0 80px;
+    }
+
+    .btn-remove-free {
+        background: var(--danger);
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        flex: 0 0 auto;
+    }
+
+    .btn-remove-free:hover {
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-sm {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    .mt-2 {
+        margin-top: 12px;
+    }
 </style>
 @endpush
 
@@ -527,62 +623,63 @@
 @endif
 
 <div class="row">
-    
+
     <!-- Left Section: Products -->
     <div class="col-lg-7">
 
+        <!-- Customer Selection -->
         <div class="card">
-            
-            <!-- Customer Selection (Inside Form!) -->
-            <div class="card">
-                <div class="card-body">
-                   <h4 class="product-section-title">
-                        សូមជ្រើសរើសអតិថិជន
-                    </h4>
-
-                    <div class="mb-3">
-                        <select name="customer_id" id="customer_id" class="form-control select2-customer" required>
-                            <option value="">សូមស្វែងរកអតិថិជន</option>
-                            @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}"
-                                    data-name="{{ $customer->name }}"
-                                    data-phone="{{ $customer->phone }}"
-                                    data-location="{{ $customer->location }}"
-                                    {{ (string) old('customer_id', $selectedCustomerId ?? '') === (string) $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div id="customer_info_card" class="customer-info-card" style="display: none;">
-                        <div class="customer-info-item">
-                            <strong>ឈ្មោះ:</strong> <span id="customer_name">-</span>
-                        </div>
-                        <div class="customer-info-item">
-                            <strong>លេខទំនាក់ទំនង:</strong> <span id="customer_phone">-</span>
-                        </div>
-                        <div class="customer-info-item">
-                            <strong>ទីតាំង:</strong> <span id="customer_location">-</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            
             <div class="card-body">
-                 <!-- Products Section -->
                 <h4 class="product-section-title">
-                    <div class="mb-6">សូមជ្រើសរើសទំនិញ</div>
+                    <i class="fas fa-user-circle"></i> សូមជ្រើសរើសអតិថិជន
                 </h4>
 
-        <div class="products-grid" id="productsGrid">
+                <div class="od-field">
+                    <select name="customer_id" id="customer_id" class="form-control select2-customer" required>
+                        <option value="">សូមស្វែងរកអតិថិជន</option>
+                        @foreach($customers as $customer)
+                            <option value="{{ $customer->id }}"
+                                data-name="{{ $customer->name }}"
+                                data-phone="{{ $customer->phone }}"
+                                data-location="{{ $customer->location }}"
+                                {{ (string) old('customer_id', $selectedCustomerId ?? '') === (string) $customer->id ? 'selected' : '' }}>
+                                {{ $customer->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div id="customer_info_card" class="customer-info-card" style="display: none;">
+                    <div class="customer-info-item">
+                        <strong>ឈ្មោះ:</strong> <span id="customer_name">-</span>
+                    </div>
+                    <!-- <div class="customer-info-item">
+                        <strong>លេខទំនាក់ទំនង:</strong> <span id="customer_phone">-</span>
+                    </div>
+                    <div class="customer-info-item">
+                        <strong>ទីតាំង:</strong> <span id="customer_location">-</span>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+        <!-- Products Section -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="product-section-title">
+                     សូមជ្រើសរើសទំនិញ
+                </h4>
+
+                <div class="products-grid" id="productsGrid">
                     @forelse($products as $product)
-                    <div class="product-card" onclick="addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price_usd }}, {{ $product->price_khr }}, '{{ asset('storage/' . $product->image) }}')">
+                    <div class="product-card" onclick="addToCart({{ $product->id }}, '{{ $product->name }}',
+                    {{ $product->price_usd }},
+                     {{ $product->price_khr }},
+                     '{{ asset('storage/' . $product->image) }}')">
                         @if($product->image)
                             <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="product-image">
                         @else
-                            <div style="width: 100%; height: 100px; background: var(--bg); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                            <div style="width: 100%; height: 100px; background: var(--bg); border-radius: 6px;
+                            display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
                                 <i class="fas fa-image" style="font-size: 24px; color: var(--text-muted);"></i>
                             </div>
                         @endif
@@ -591,12 +688,12 @@
                             <div style="color: var(--accent); font-weight: 700;">${{ number_format($product->price_usd, 2) }}</div>
                             <div style="color: var(--text-muted); font-weight: 600;">៛{{ number_format($product->price_khr, 0) }}</div>
                         </div>
-                    </div>  
+                    </div>
                     @empty
                     <div class="empty-state" style="grid-column: 1 / -1;">
                         <div class="empty-state-icon"></div>
-                        <div class="empty-state-text">មិនមានផលិតផលទេ</div>
-                        <a href="{{ route('products.index') }}" style="color: var(--accent); text-decoration: none; font-weight: 600;">បន្ថែមផលិតផល →</a>
+                        <div class="empty-state-text">មិនមានទំនិញទេ</div>
+                        <a href="{{ route('products.index') }}" style="color: var(--accent); text-decoration: none; font-weight: 600;">បន្ថែមទំនិញ→</a>
                     </div>
                     @endforelse
                 </div>
@@ -614,13 +711,13 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="product-section-title">
-                        វិក្ក័យបត្រ
+                        <i class="fas fa-receipt"></i> វិក្ក័យបត្រ
                     </h4>
 
                     <div class="invoice-items" id="invoiceItems">
                         <div class="empty-state">
                             <div class="empty-state-icon">🛒</div>
-                            <div class="empty-state-text">មិនទាន់បន្ថែមមុខទំនិញនៅឡើយទេ</div>
+                            <div class="empty-state-text">សូមជ្រើសរើសមុខទំនិញ</div>
                         </div>
                     </div>
 
@@ -649,7 +746,7 @@
                             </div>
                         </div>
 
-                    
+
                         <div class="summary-row total">
                             <span>តម្លៃសរុប:</span>
                             <div style="text-align: right;">
@@ -665,7 +762,7 @@
             <input type="hidden" id="hidden_customer_id" name="customer_id">
             <input type="hidden" id="order_items" name="order_items" value="[]">
             <input type="hidden" id="subtotal_amount" name="subtotal">
-            
+
             <input type="hidden" id="discount_amount" name="discount_amount">
             <input type="hidden" id="delivery_fee_khr" name="delivery_fee_khr" value="0">
             <input type="hidden" id="total_amount_input" name="total_amount">
@@ -674,23 +771,21 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="product-section-title">
-                        <i class="fas fa-cog" style="color: var(--accent);"></i> ព័ត៌មានការបញ្ជាទិញ
+                        ព័ត៌មានការបញ្ជាទិញ
                     </h4>
 
+                    <!-- Row 1: Date & Delivery -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="od-field">
-                                <label class="od-label"><i class="fas fa-calendar-alt"></i> កាលបរិច្ឆេទ និងពេល *</label>
+                                <label class="od-label"><i class="fas fa-calendar-alt"></i> កាលបរិច្ឆេទ*</label>
                                 <input type="datetime-local" name="order_date" class="form-control" required
                                     value="{{ old('order_date', now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
+                         <div class="col-md-6">
                             <div class="od-field">
-                                <label class="od-label"><i class="fas fa-money-bill-wave"></i> ស្ថានភាពបង់ប្រាក់</label>
+                                <label class="od-label"><i class="fas fa-money-bill-wave"></i> ការបង់ប្រាក់</label>
                                 <select name="payment_status" class="form-control od-select">
                                     <option value="unpaid" {{ old('payment_status') == 'unpaid' ? 'selected' : '' }}>🔴 មិនទាន់បង់</option>
                                     <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>🟡 បង់មួយផ្នែក</option>
@@ -698,25 +793,57 @@
                                 </select>
                             </div>
                         </div>
+
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="od-field">
                                 <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន</label>
                                 <select id="delivery_select" name="delivery_id" class="form-control od-select">
-                                    <option value="">គ្មាន</option>
+                                    <option value="">សូមជ្រើសរើស</option>
                                     @foreach($deliveries as $delivery)
-                                        <option value="{{ $delivery->id }}" data-name="{{ $delivery->delivery_name }}" data-price="{{ $delivery->delivery_price_khr }}">
-                                             {{ $delivery->delivery_name }} — ៛{{ number_format($delivery->delivery_price_khr, 0) }}
+                                        <option value="{{ $delivery->id }}" data-name="{{ $delivery->delivery_name }}
+                                        " data-price="{{ $delivery->delivery_price_khr }}">
+                                            {{ $delivery->delivery_name  }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="od-field">
+                                <label class="od-label"><i class="fas fa-box"></i> ចំនួនកេស</label>
+                                <input type="number" name="box_qty" class="form-control" min="0" value="{{ old('box_qty', 0) }}">
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="od-field">
-                        <label class="od-label"><i class="fas fa-sticky-note"></i> កំណត់ចំណាំ</label>
-                        <textarea name="notes" class="form-control" rows="2" placeholder="បញ្ចូលកំណត់ចំណាំ..." style="resize: none;">{{ old('notes') }}</textarea>
+
+                    <!-- Row 3: Free Products (Multiple) -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="od-field">
+                                <label class="od-label"><i class="fas fa-gift"></i> Free ជូនអតិថិជន</label>
+                                <div id="freeProductsContainer">
+
+                                </div>
+                                <button type="button" id="addFreeProductBtn" class="btn btn-sm btn-outline-primary mt-2">
+                                     +Add Free
+                                </button>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Row 4: Notes -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="od-field">
+                                <label class="od-label"><i class="fas fa-sticky-note"></i> ផ្សេងៗ</label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="..." style="resize: none;">{{ old('notes') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <div class="button-group">
                         <button type="submit" class="btn-primary">
@@ -737,9 +864,11 @@
 <script>
     let cart = {};
     const exchangeRate = 4000;
+    let freeProductCount = 0;
 
     // Delivery options from server
     const deliveryOptions = @json($deliveries->map(fn($d) => ['id' => $d->id, 'name' => $d->delivery_name, 'price_khr' => $d->delivery_price_khr]));
+    const productOptions = @json($products->map(fn($p) => ['id' => $p->id, 'name' => $p->name]));
 
     $(document).ready(function() {
         // Initialize Select2
@@ -770,6 +899,15 @@
                 $('#customer_info_card').slideUp(300);
             }
         });
+
+        // Handle adding free products
+        $('#addFreeProductBtn').on('click', function(e) {
+            e.preventDefault();
+            addFreeProductRow();
+        });
+
+        // Add initial free product row
+        addFreeProductRow();
 
         if ($('#customer_id').val()) {
             $('#customer_id').trigger('change');
@@ -808,7 +946,7 @@
 
     function removeFromCart(productId) {
         const itemName = cart[productId].name;
-        
+
         if (confirm(`Remove "${itemName}" from order?`)) {
             delete cart[productId];
             renderInvoice();
@@ -832,7 +970,7 @@
         if (Object.keys(cart).length === 0) {
             invoiceItems.html(`
                 <div class="empty-state">
-                    <div class="empty-state-icon">🛒</div>  
+                    <div class="empty-state-icon">🛒</div>
                     <div class="empty-state-text">No items added yet</div>
                 </div>
             `);
@@ -842,10 +980,10 @@
                 const discountPercent = parseFloat(item.discount || 0);
                 const discountedPrice = item.price * (1 - discountPercent / 100);
                 const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
-                
+
                 const itemTotal = discountedPrice * item.qty;
                 const itemTotalKhr = discountedPriceKhr * item.qty;
-                
+
                 html += `
                     <div class="invoice-item">
                         <div class="invoice-item-info">
@@ -856,7 +994,7 @@
                                     ${discountPercent > 0 ? `<span style="color: var(--danger); margin-left: 8px;">-${discountPercent}%</span>` : ''}
                                 </div>
                                 <div>
-                                    $${discountedPrice.toFixed(2)} / ៛${discountedPriceKhr.toLocaleString()} × ${item.qty} = 
+                                    $${discountedPrice.toFixed(2)} / ៛${discountedPriceKhr.toLocaleString()} × ${item.qty} =
                                     <strong>$${itemTotal.toFixed(2)}</strong> / <strong>${itemTotalKhr.toLocaleString()}</strong>
                                 </div>
                             </div>
@@ -908,16 +1046,16 @@
         let subtotalKhr = 0;
         let totalDiscount = 0;
         let totalDiscountKhr = 0;
-        
+
         Object.values(cart).forEach(item => {
             const discountPercent = parseFloat(item.discount || 0);
             const discountedPrice = item.price * (1 - discountPercent / 100);
             const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
-            
+
             // Calculate discount amount for this item
             const itemDiscount = item.price * item.qty - discountedPrice * item.qty;
             const itemDiscountKhr = item.price_khr * item.qty - discountedPriceKhr * item.qty;
-            
+
             subtotal += discountedPrice * item.qty;
             subtotalKhr += discountedPriceKhr * item.qty;
             totalDiscount += itemDiscount;
@@ -1017,6 +1155,41 @@
         $('.toast-overlay').removeClass('show');
         $('.toast-box').removeClass('show');
         setTimeout(() => { $('.toast-overlay, .toast-box').remove(); }, 300);
+    }
+
+    // Free Product Functions
+    function addFreeProductRow() {
+        const rowId = freeProductCount++;
+        const productOptions = @json($products);
+
+        let selectHTML = '<option value="">សូមជ្រើសរើស</option>';
+        productOptions.forEach(product => {
+            selectHTML += `<option value="${product.id}">${product.name}</option>`;
+        });
+
+        const rowHTML = `
+            <div class="free-product-row" id="freeRow${rowId}">
+                <select name="free_products[${rowId}][product_id]" class="form-control od-select">
+                    ${selectHTML}
+                </select>
+                <input type="number" name="free_products[${rowId}][qty]" class="form-control" min="0" placeholder="ចំនួន" value="1">
+                <button type="button" class="btn-remove-free" onclick="removeFreeProductRow(${rowId})">
+                    <i class="fas fa-trash"></i> លុប
+                </button>
+            </div>
+        `;
+
+        $('#freeProductsContainer').append(rowHTML);
+    }
+
+    function removeFreeProductRow(rowId) {
+        $(`#freeRow${rowId}`).slideUp(300, function() {
+            $(this).remove();
+            // If all rows are removed, add one empty row back
+            if ($('.free-product-row').length === 0) {
+                addFreeProductRow();
+            }
+        });
     }
 </script>
 @endpush

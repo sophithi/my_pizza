@@ -109,15 +109,15 @@
         }
     </style>
 @endpush
-
 @section('content')
     <div class="form-container">
-        <h1 class="form-title"> បង្កើតការដឹកជញ្ជូន</h1>
+        <h1 class="form-title"> ការដឹកជញ្ជូន</h1>
         <p class="form-subtitle">បន្ថែមសេវាដឹកជញ្ជូនថ្មី</p>
-
         @if($errors->any())
             <div
-                style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;">
+                style="background: #f8d7da; border: 1px solid #f5c6cb;
+                color: #721c24; padding: 12px 20px; border-radius: 8px;
+                margin-bottom: 20px; font-size: 13px;">
                 <ul style="margin: 0; padding-left: 20px;">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -128,20 +128,19 @@
 
         <form action="{{ route('deliveries.store') }}" method="POST">
             @csrf
-
             <div class="form-card">
                 <div class="form-group">
-                    <label>ឈ្មោះដឹកជញ្ជូន <span class="req">*</span></label>
+                    <label>ឈ្មោះប្រភេទដឹកជញ្ជូន <span class="req">*</span></label>
                     <input type="text" name="delivery_name" class="form-control" value="{{ old('delivery_name') }}"
                         placeholder="..." required>
                     @error('delivery_name') <div class="error-msg">{{ $message }}</div> @enderror
                 </div>
-
-
                 <div class="form-group">
                     <label>តម្លៃដឹកជញ្ជូន (៛) <span class="req">*</span></label>
                     <input type="number" name="delivery_price_khr" class="form-control" step="1" min="0"
                         value="{{ old('delivery_price_khr', '0') }}" placeholder="0" required>
+                   
+
                     @error('delivery_price_khr') <div class="error-msg">{{ $message }}</div> @enderror
                 </div>
 
@@ -154,7 +153,7 @@
             </div>
 
             <div style="margin-top: 24px; display: flex; align-items: center; gap: 12px;">
-                <button type="submit" class="btn-submit">បង្កើតការដឹកជញ្ជូន</button>
+                <button type="submit" class="btn-submit">បញ្ជាក់</button>
                 <a href="{{ route('deliveries.index') }}" class="btn-cancel">បោះបង់</a>
             </div>
         </form>

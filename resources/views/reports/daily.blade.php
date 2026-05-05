@@ -82,7 +82,7 @@
 
         .metric-label {
             color: var(--muted);
-            font-size: 12px;
+            font-size: 18px;
             font-weight: 900;
             text-transform: uppercase;
         }
@@ -96,7 +96,7 @@
 
         .report-grid {
             display: grid;
-            gap: 16px;
+            gap: 24px;
             grid-template-columns: 1.1fr .9fr;
         }
 
@@ -115,7 +115,7 @@
 
         .report-card-title {
             color: var(--text);
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 900;
             margin: 0;
         }
@@ -127,7 +127,7 @@
         .daily-table th {
             background: #f8fafc;
             color: var(--muted);
-            font-size: 12px;
+            font-size: 16px;
             font-weight: 900;
             padding: 12px 16px;
             text-transform: uppercase;
@@ -145,6 +145,7 @@
         }
 
         @media (max-width: 1100px) {
+
             .metric-grid,
             .report-grid {
                 grid-template-columns: 1fr 1fr;
@@ -152,6 +153,7 @@
         }
 
         @media (max-width: 720px) {
+
             .report-head,
             .filter-inline {
                 align-items: stretch;
@@ -172,13 +174,12 @@
             'kg' => 'គីឡូក្រាម',
             'g' => 'ក្រាម',
             'L' => 'លីត្រ',
-            'ml' => 'មីលីលីត្រ',
+            'ml' => 'កំប៉ុង',
             'pcs' => 'បន្ទះ',
-            'box' => 'ប្រអប់',
-            'box1' => 'ប្រអប់ 1',
-            'box2' => 'ប្រអប់ 2',
-            'pack' => 'កញ្ចប់',
             'bag' => 'ដើម',
+            'box1' => 'កេស',
+            'box2' => 'ប្រអប់',
+            'pack' => 'កញ្ចប់',
         ];
 
         $unitLabel = fn($unit) => $unitLabels[$unit] ?? $unit;
@@ -188,11 +189,11 @@
         <div class="report-head">
             <div>
                 <h2 class="report-title">របាយការណ៍ប្រចាំថ្ងៃ</h2>
-                <p class="report-subtitle">សរុបលក់ ចំណូល ចំណាយ និងចលនាស្តុក សម្រាប់ {{ $reportDate->format('d/m/Y') }}</p>
+                <p class="report-subtitle">សរុបចំនួនលក់ ចំណូល ចំណាយ និងស្តុក {{ $reportDate->format('d/m/Y') }}</p>
             </div>
         </div>
 
-        <form method="GET" action="{{ route('reports.daily') }}" class="report-filter">
+       <form method="GET" action="/reports/daily" class="report-filter">
             <div class="filter-inline">
                 <input type="date" name="date" value="{{ $date }}" class="form-control" style="max-width: 220px;">
                 <button type="submit" class="report-btn">
@@ -200,7 +201,6 @@
                 </button>
             </div>
         </form>
-
         <div class="metric-grid">
             <div class="metric">
                 <div class="metric-label">ចំនួនវិក្ក័យបត្រ</div>
@@ -215,8 +215,9 @@
                 <div class="metric-value text-success">${{ number_format($income, 2) }}</div>
             </div>
             <div class="metric">
-                <div class="metric-label">ចំណេញសុទ្ធ</div>
-                <div class="metric-value {{ $netIncome < 0 ? 'text-danger' : 'text-primary' }}">${{ number_format($netIncome, 2) }}</div>
+                <div class="metric-label">ចំណេញ</div>
+                <div class="metric-value {{ $netIncome < 0 ? 'text-danger' : 'text-primary' }}">
+                    ${{ number_format($netIncome, 2) }}</div>
             </div>
         </div>
 
@@ -241,7 +242,9 @@
                                     @foreach($soldItems as $item)
                                         <tr>
                                             <td>{{ $item->name }}</td>
-                                            <td class="text-center">{{ number_format($item->quantity) }} {{ $unitLabel($item->unit) }}</td>
+                                            <td class="text-center">{{ number_format($item->quantity) }}
+                                                {{ $unitLabel($item->unit) }}
+                                            </td>
                                             <td class="text-end">${{ number_format($item->total, 2) }}</td>
                                         </tr>
                                     @endforeach
@@ -263,9 +266,9 @@
                                 <thead>
                                     <tr>
                                         <th>ទំនិញ</th>
-                                        <th class="text-center">ចូល</th>
-                                        <th class="text-center">ចេញ</th>
-                                        <th class="text-center">នៅសល់</th>
+                                        <th class="text-center">ចូលក្នុងស្តុក</th>
+                                        <th class="text-center">កាត់ចេញពីស្តុក</th>
+                                        <th class="text-center">នៅសល់ក្នុងស្តុក</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -274,7 +277,9 @@
                                             <td>{{ $stock->name ?? 'មិនមានឈ្មោះ' }}</td>
                                             <td class="text-center text-success">+{{ number_format($stock->stock_in) }}</td>
                                             <td class="text-center text-danger">-{{ number_format($stock->stock_out) }}</td>
-                                            <td class="text-center">{{ number_format($stock->current_quantity) }} {{ $unitLabel($stock->unit) }}</td>
+                                            <td class="text-center">{{ number_format($stock->current_quantity) }}
+                                                {{ $unitLabel($stock->unit) }}
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -342,7 +347,9 @@
                                 @foreach($lowStock as $stock)
                                     <tr>
                                         <td>{{ $stock->product?->name ?? 'មិនមានឈ្មោះ' }}</td>
-                                        <td class="text-end">{{ number_format($stock->quantity) }} / {{ number_format($stock->reorder_level) }}</td>
+                                        <td class="text-end">{{ number_format($stock->quantity) }} /
+                                            {{ number_format($stock->reorder_level) }}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

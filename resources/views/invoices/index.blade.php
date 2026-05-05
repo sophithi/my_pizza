@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'វិក្ក័យប័ត្រ')
+@section('title', 'វិក្ក័យបត្រ')
 
 @push('styles')
     <style>
@@ -335,8 +335,8 @@
     <div class="container-fluid py-4 invoice-page">
         <div class="invoice-header">
             <div>
-                <h2 class="invoice-title">វិក្ក័យប័ត្រ</h2>
-                <p class="invoice-subtitle">គ្រប់គ្រងវិក្ក័យប័ត្រ</p>
+                <h2 class="invoice-title">វិក្ក័យបត្រ</h2>
+                <p class="invoice-subtitle">គ្រប់គ្រងវិក្ក័យបត្រ</p>
             </div>
             <a href="{{ route('orders.create') }}" class="invoice-btn invoice-btn-primary">
                 <i class="fas fa-plus"></i> បង្កើតបញ្ជាទិញ
@@ -345,7 +345,7 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">វិក្ក័យប័ត្រសរុប</div>
+                <div class="stat-label">វិក្ក័យបត្រសរុប</div>
                 <div class="stat-value">{{ number_format($stats['total']) }}</div>
             </div>
             <div class="stat-card">
@@ -366,7 +366,7 @@
         <form method="GET" action="{{ route('invoices.index') }}" class="filter-card" id="invoiceFilter">
             <div class="quick-filters">
                 <a href="{{ route('invoices.index', ['period' => 'today']) }}"
-                    class="quick-filter {{ request('period') === 'today' ? 'active' : '' }}">  
+                    class="quick-filter {{ request('period') === 'today' ? 'active' : '' }}">
                     <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
                 </a>
                 <a href="{{ route('invoices.index', ['period' => 'yesterday']) }}"
@@ -377,19 +377,16 @@
                     class="quick-filter {{ request('period') === 'month' ? 'active' : '' }}">
                     <i class="fas fa-calendar-alt"></i> ខែនេះ
                 </a>
-                <a href="{{ route('invoices.index', ['period' => 'year']) }}"
-                    class="quick-filter {{ request('period') === 'year' ? 'active' : '' }}">
-                    <i class="fas fa-calendar"></i> ឆ្នាំនេះ
-                </a>
+
             </div>
 
             <div class="filter-row">
                 <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                    placeholder="ស្វែងរកលេខវិក្ក័យប័ត្រ ឈ្មោះអតិថិជន លេខទូរស័ព្ទ ឬលេខបញ្ជាទិញ...">
+                    placeholder="ស្វែងរកលេខវិក្ក័យបត្រ ឈ្មោះអតិថិជន លេខទូរស័ព្ទ ឬលេខបញ្ជាទិញ...">
 
                 <select name="status" class="form-select">
                     <option value="all">គ្រប់ស្ថានភាព</option>
-                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>  
+                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>
                     <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>បានទូទាត់</option>
                     <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>មិនទូទាត់</option>
                 </select>
@@ -405,7 +402,7 @@
                 </a>
 
                 <a href="{{ route('invoices.export', request()->query()) }}" class="invoice-btn invoice-btn-export">
-                    <i class="fas fa-file-excel"></i> Export Excel
+                    <i class="fas fa-file-excel"></i> ទាញយក
                 </a>
             </div>
         </form>
@@ -415,13 +412,13 @@
                 <table class="table invoice-table mb-0">
                     <thead>
                         <tr>
-                            <th>លេខវិក្ក័យប័ត្រ</th>
+                            <th>លេខវិក្ក័យបត្រ</th>
                             <th>អតិថិជន</th>
                             <th>បញ្ជាទិញ</th>
                             <th>ចំនួនទំនិញ</th>
                             <th>ទឹកប្រាក់</th>
                             <th>កាលបរិច្ឆេទ</th>
-                            <th>ស្ថានភាព</th>
+                            <th>ការបង់ប្រាក់</th>
                             <th class="text-center">សកម្មភាព</th>
                         </tr>
                     </thead>
@@ -452,10 +449,15 @@
                                         <span class="status-pill status-paid">
                                             <i class="fas fa-check-circle"></i> បានទូទាត់
                                         </span>
-                                    @elseif($invoice->status === 'sent')
-                                        <span class="status-pill status-sent">
-                                            <i class="fas fa-clock"></i> មិនទាន់ទូទាត់
+                                    @if ($invoice->status === 'send'
+
+                                    )
+                                        <span class="status-pill status-send">
+                                            <i class="fas fa-check-circle"></i>ទូទាត់ខ្លះ
                                         </span>
+
+                                    @endif
+
                                     @elseif($invoice->status === 'cancelled')
                                         <span class="status-pill status-cancelled">
                                             <i class="fas fa-times-circle"></i> មិនទូទាត់
@@ -495,8 +497,8 @@
                                         <div class="empty-state-icon">
                                             <i class="fas fa-file-invoice"></i>
                                         </div>
-                                        <div class="empty-state-title">មិនមានវិក្ក័យប័ត្រ</div>
-                                        <p class="empty-state-text">សាកល្បងសម្អាតតម្រង ឬបង្កើតបញ្ជាទិញថ្មី។</p>
+                                        <div class="empty-state-title">មិនមានវិក្ក័យបត្រ</div>
+
                                         <a href="{{ route('orders.create') }}" class="invoice-btn invoice-btn-primary">
                                             <i class="fas fa-plus"></i> បង្កើតបញ្ជាទិញ
                                         </a>

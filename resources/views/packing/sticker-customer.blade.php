@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Sticker - {{ $invoice->invoice_number }}</title>
+    <title>Customer INV - {{ $invoice->invoice_number }}</title>
     <style>
         @page {
             size: A5 portrait;
@@ -242,81 +242,85 @@
         <div class="header">
             <div>
                 <div class="logo">PizzaHappyFamily</div>
-                <span class="sticker-label">វិក្ក័យបត្រអតិថិជន</span>
+
+
             </div>
             <div class="invoice-details">
                 <div class="invoice-number">{{ $invoice->invoice_number }}</div>
                 <p>កាលបរិច្ឆេទ: {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</p>
             </div>
         </div>
-
         <div class="section">
             <div class="customer-info">
                 <div class="section-title">ព័ត៌មានអតិថិជន</div>
                 @if($invoice->order && $invoice->order->customer)
-                    @php
-                        $customer = $invoice->order->customer;
-                        $source = $customer->type === 'facebook'
-                            ? 'Facebook'
-                            : ($customer->type === 'telegram' ? 'Telegram' : null);
-                    @endphp
-                    <div class="customer-line">
-                        <span class="label">ឈ្មោះ:</span>
-                        <span class="value">{{ $customer->name }}{{ $source ? ' (' . $source . ')' : '' }}</span>
-                    </div>
-                    <div class="customer-line">
-                        <span class="label">ទីតាំង:</span>
-                        <span class="value">{{ $customer->address ?? $customer->city ?? '-' }}</span>
-                    </div>
-                    <div class="customer-line">
-                        <span class="label">លេខ:</span>
-                        <span class="value">{{ $customer->phone ?? '-' }}</span>
-                    </div>
-                    @php
-                        $deliveryItems = $invoice->order->items->filter(fn($item) => $item->delivery_id);
-                        $deliveryGroups = $deliveryItems->groupBy('delivery_id');
-                    @endphp
-                    @if($deliveryItems->count())
-                        <div style="margin-top: 6px;">
-                            <strong>ការដឹកជញ្ជូន:</strong>
-                            @if($deliveryGroups->count() === 1)
-                                @php
-                                    $firstDeliveryItem = $deliveryItems->first();
-                                @endphp
-                                <p style="margin: 2px 0;">{{ $firstDeliveryItem->delivery->delivery_name ?? 'មិនមាន' }}</p>
-                            @else
-                                @foreach($deliveryGroups as $group)
-                                    @php
-                                        $firstDeliveryItem = $group->first();
-                                        $productNames = $group->map(fn($item) => $item->product->name ?? 'ទំនិញ')->join(', ');
-                                    @endphp
-                                    <p style="margin: 2px 0;">
-                                        {{ $firstDeliveryItem->delivery->delivery_name ?? 'មិនមាន' }}:
-                                        {{ $productNames }}
-                                    </p>
-                                @endforeach
-                            @endif
+                        @php
+                            $customer = $invoice->order->customer;
+                            $source = $customer->type === 'facebook'
+                                ? 'Facebook'
+                                : ($customer->type === 'telegram' ? 'Telegram' : null);
+                        @endphp
+                        <div class="customer-line">
+                            <span class="label">ឈ្មោះ:</span>
+                            <span class="value">{{ $customer->name }}{{ $source ? ' (' . $source . ')' : '' }}</span>
                         </div>
-                    @endif
+                        <div class="customer-line">
+                            <span class="label">ទីតាំង:</span>
+                            <span class="value">{{ $customer->address ?? $customer->city ?? '-' }}</span>
+                        </div>
+                        <div class="customer-line">
+                            <span class="label">លេខ:</span>
+                            <span class="value">{{ $customer->phone ?? '-' }}</span>
+                        </div>
+
+                    </div>
+                    <div class="invoice-info">
+                        <div class="section-title">Invoice Info</div>
+                        @php
+                            $deliveryItems = $invoice->order->items->filter(fn($item) => $item->delivery_id);
+                            $deliveryGroups = $deliveryItems->groupBy('delivery_id');
+                        @endphp
+                        @if($deliveryItems->count())
+                            <div style="margin-top: 6px;">
+                                <strong>ការដឹកជញ្ជូន:</strong>
+                                @if($deliveryGroups->count() === 1)
+                                    @php
+                                        $firstDeliveryItem = $deliveryItems->first();
+                                    @endphp
+                                    <p style="margin: 2px 0;">{{ $firstDeliveryItem->delivery->delivery_name ?? 'មិនមាន' }}</p>
+                                @else
+                                    @foreach($deliveryGroups as $group)
+                                        @php
+                                            $firstDeliveryItem = $group->first();
+                                            $productNames = $group->map(fn($item) => $item->product->name ?? 'ទំនិញ')->join(', ');
+                                        @endphp
+                                        <p style="margin: 2px 0;">
+                                            {{ $firstDeliveryItem->delivery->delivery_name ?? 'មិនមាន' }}:
+                                            {{ $productNames }}
+                                        </p>
+                                    @endforeach
+                                @endif
+                            </div>
+                        @endif
                 @else
                     <p class="customer-name">N/A</p>
                 @endif
-            </div>
-            <div class="invoice-info">
-                <div class="section-title">Invoice Info</div>
-                <p><strong>Order:</strong> ORD-{{ str_pad($invoice->order->id ?? 0, 4, '0', STR_PAD_LEFT) }}</p>
                 <p>
-                    <strong>ស្ថានភាព:</strong>
+                    <strong>ការបង់ប្រាក់:</strong>
                     @if($invoice->status === 'paid')
                         បានទូទាត់
-                    @elseif($invoice->status === 'sent' || $invoice->status === 'draft' || $invoice->status === 'pending')
+                    @elseif($invoice->status === 'draft' || $invoice->status === 'draft')
                         មិនទាន់ទូទាត់
+                    @elseif($invoice->status === 'pending' || $invoice->status === 'pending')
+                        បង់មួយផ្នែក
                     @elseif($invoice->status === 'cancelled')
                         មិនទូទាត់
                     @else
                         {{ $invoice->status }}
                     @endif
+
                 </p>
+
             </div>
         </div>
 
@@ -349,7 +353,8 @@
                         <tr>
                             <td>{{ $item->product->name ?? 'N/A' }}</td>
                             <td class="text-right">{{ $item->quantity }} x</td>
-                            <td class="text-right">៛{{ number_format($unitPriceKhr, 0) }}/${{ number_format($item->unit_price, 2) }}</td>
+                            <td class="text-right">
+                                ៛{{ number_format($unitPriceKhr, 0) }}/${{ number_format($item->unit_price, 2) }}</td>
                             <td class="text-right">${{ number_format($item->total_price, 2) }}</td>
                             <td class="text-right">៛{{ number_format($totalPriceKhr, 0) }}</td>
                         </tr>
@@ -370,19 +375,20 @@
                 </div>
                 <div class="total-row" style="border-bottom: none; padding-bottom: 0;">
                     <span></span>
-                    <span
-                        style="color: #888; font-size: 13px;">៛{{ number_format($subtotalKhr, 0) }}</span>
+                    <span style="color: #888; font-size: 13px;">៛{{ number_format($subtotalKhr, 0) }}</span>
                 </div>
                 <div class="total-row">
                     <span>បញ្ចុះតម្លៃ:</span>
                     <span>-${{ number_format($invoice->discount_amount, 2) }}</span>
+
                 </div>
                 @if((float) $invoice->delivery_fee_khr > 0)
                     <div class="total-row">
                         <span>ការដឹកជញ្ជូន:</span>
                         <span>
                             ${{ number_format($invoice->delivery_fee_usd, 2) }}
-                            <span style="display: block; color: #888; font-size: 13px;">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</span>
+                            <span
+                                style="display: block; color: #888; font-size: 13px;">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</span>
                         </span>
                     </div>
                 @endif
@@ -397,14 +403,30 @@
             </div>
         </div>
 
+
+
+        <div class="free-products">
+          @if($invoice->order && count($invoice->order->freeitems ?? []) > 0)
+                <div style="margin-top: 10px;">
+                    <strong>Free Items:</strong>
+                    @foreach($invoice->order->freeItems as $freeItem)
+                        <p style="margin: 2px 0; color: #059669;">
+                            {{ $freeItem->product->name ?? 'N/A' }} (x{{ $freeItem->quantity ?? 1 }})
+                        </p>
+                    @endforeach
+                </div>
+            @endif
+        </div>
         @if($invoice->notes)
             <div class="notes">
-                <div class="notes-title">Notes</div>
+                <div class="notes-title">ផ្សេងៗ</div>
                 {{ $invoice->notes }}
             </div>
         @endif
 
         <div class="footer">
+            <p>ទំនាក់ទំនងក្រុមហ៊ុន៖</p>
+            <p>ទូរស័ព្ទ: 012 345 678 | 010 987 654</p>
             <p>@PizzaHappyFamily សូមអគុណអតិថិជនសម្រាប់ការកម្មង់</p>
         </div>
     </div>
@@ -413,7 +435,7 @@
         style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 12px;">
         <button onclick="window.print()"
             style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-            Print Sticker 
+            Print Sticker
         </button>
         <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}"
             style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">

@@ -157,15 +157,15 @@
         {{-- Page Header --}}
         <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
             <h4 class="mb-0 fw-semibold">
-                <i class="bi bi-credit-card me-2"></i> ប្រតិបត្តិការទូទាត់ពីអតិថិជន
+                <i class="bi bi-credit-card me-2"></i> ការទូទាត់ពីអតិថិជន
             </h4>
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ route('payments.export.excel', request()->query()) }}" class="btn btn-outline-success btn-sm">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> នាំចេញ CSV
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>  CSV
                 </a>
                 <a href="{{ route('payments.export.pdf', request()->query()) }}" class="btn btn-outline-danger btn-sm"
                     target="_blank">
-                    <i class="bi bi-file-earmark-pdf me-1"></i> នាំចេញ PDF
+                    <i class="bi bi-file-earmark-pdf me-1"></i>  PDF
                 </a>
                 <button type="button" class="btn btn-sm text-white" style="background:#D85A30" data-bs-toggle="modal"
                     data-bs-target="#paymentModal">
@@ -333,7 +333,7 @@
                                     <button class="btn btn-sm btn-outline-secondary"
                                         onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
                                         data-bs-target="#paymentModal">
-                                        {{ $payment->payment_id ? 'កែប្រែ' : 'កត់ត្រា' }}
+                                        {{ $payment->payment_id ? 'check' : 'កត់ត្រា' }}
                                     </button>
                                 </td>
                             </tr>
@@ -341,7 +341,7 @@
                             <tr>
                                 <td colspan="8" class="text-center text-muted py-5">
                                     <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                                    មិនមានទិន្នន័យការទូទាត់សម្រាប់រយៈពេលនេះទេ។
+                                    មិនមានទិន្នន័យការទូទាត់
                                 </td>
                             </tr>
                         @endforelse
@@ -386,7 +386,7 @@
                             <input type="date" name="order_date" id="f_order_date" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small text-muted">សរុបការបញ្ជាទិញ</label>
+                            <label class="form-label small text-muted">សរុប</label>
                             <div class="currency-input-group">
                                 <div class="row g-2">
                                     <div class="col">
@@ -429,7 +429,7 @@
                                 placeholder="ឧ. ចំនួននៅសល់នឹងបង់ថ្ងៃស្អែក"></textarea>
                         </div>
                         <div class="d-flex align-items-center justify-content-between bg-light rounded px-3 py-2">
-                            <span class="text-muted small">ស្ថានភាពការទូទាត់</span>
+                            <span class="text-muted small">ការបង់ប្រាក់</span>
                             <span id="statusBadge" class="badge rounded-pill px-3 badge-paid">បានបង់</span>
                         </div>
                     </div>
@@ -522,7 +522,7 @@
                                 <option value="USD" ${line.currency === 'USD' ? 'selected' : ''}>USD</option>
                                 <option value="KHR" ${line.currency === 'KHR' ? 'selected' : ''}>KHR</option>
                             </select>
-                            <input type="number" class="form-control form-control-sm" min="0" step="${line.currency === 'KHR' ? '1' : '0.01'}" value="${line.amount || ''}" placeholder="Amount" oninput="updatePaymentLine(${index}, 'amount', this.value)">
+                            <input type="number" class="form-control form-control-sm" min="0" step="${line.currency === 'KHR' ? '1' : '0.01'}" value="${line.amount || ''}" placeholder="ទឹកប្រាក់" oninput="updatePaymentLine(${index}, 'amount', this.value)">
                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePaymentLine(${index})"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
@@ -564,7 +564,7 @@
         function openPaymentForm(payment) {
             const isEdit = !!payment.payment_id;
 
-            document.getElementById('paymentModalLabel').textContent = (isEdit ? 'កែប្រែការទូទាត់ - ' : 'កត់ត្រាការទូទាត់ - ') + payment.order_id;
+            document.getElementById('paymentModalLabel').textContent = (isEdit ? 'កែការទូទាត់ - ' : 'កត់ត្រាការទូទាត់ - ') + payment.order_id;
             document.getElementById('paymentForm').action = isEdit
                 ? '{{ url('/payments') }}/' + payment.payment_id
                 : '{{ route("payments.store") }}';

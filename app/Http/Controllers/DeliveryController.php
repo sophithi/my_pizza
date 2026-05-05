@@ -4,13 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Models\Delivery;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class DeliveryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $deliveries = Delivery::latest()->paginate(15);
-        return view('deliveries.index', compact('deliveries'));
+        $filter = $request->query('filter');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        if ($filter === 'today') {
+            $startDate = Carbon::today()->toDateString();
+            $endDate = Carbon::today()->toDateString();
+        } elseif ($filter === 'yesterday') {
+            $startDate = Carbon::yesterday()->toDateString();
+            $endDate = Carbon::yesterday()->toDateString();
+        }
+
+        $deliveries = Delivery::withCount([
+            'orders as orders_count' => function ($query) use ($startDate, $endDate) {
+                if ($startDate && $endDate) {
+                    $query->whereBetween('created_at', [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()]);
+                }
+            }
+        ])->latest()->paginate(15)->appends($request->query());
+
+        return view('deliveries.index', compact('deliveries', 'startDate', 'endDate', 'filter'));
     }
 
     public function create()
@@ -34,6 +54,8 @@ class DeliveryController extends Controller
 
     public function show(Delivery $delivery)
     {
+        $delivery->load(['orders.invoice', 'orders.customer']);
+
         return view('deliveries.show', compact('delivery'));
     }
 

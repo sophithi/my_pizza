@@ -758,7 +758,7 @@
                     </select>
 
                     <div class="filter-actions">
-                       
+
                         <button type="button" class="inventory-btn inventory-btn-soft" onclick="exportInventoryCsv()">
                             <i class="fas fa-download"></i> ទាញយក
                         </button>
@@ -897,9 +897,9 @@
             <div class="empty-state">
                 <i class="fas fa-box-open"></i>
                 <h3>{{ $movementActive ? 'មិនមានចលនាស្តុកសម្រាប់ថ្ងៃនេះ' : 'មិនទាន់មានស្តុកទំនិញ' }}</h3>
-                <p>{{ $movementActive ? 'ពេលបង្កើត ឬកែការបញ្ជាទិញ ប្រព័ន្ធនឹងបង្ហាញទំនិញដែលត្រូវបានកាត់ចេញនៅទីនេះ។' : 'ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញ' }}</p>
+                <p>{{ $movementActive ? 'ពេលបង្កើត ឬកែការបញ្ជាទិញ ប្រព័ន្ធនឹងបង្ហាញទំនិញដែលត្រូវបានកាត់ចេញនៅទីនេះ' : 'ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញ' }}</p>
                 <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
-                    <i class="fas fa-plus"></i> បន្ថែមស្តុកដំបូង
+                    បន្ថែមស្តុកដំបូង
                 </a>
             </div>
         @endif
@@ -909,7 +909,7 @@
         <div class="restock-modal" role="dialog" aria-modal="true" aria-labelledby="restockTitle">
             <div class="restock-header">
                 <h3 class="restock-title" id="restockTitle">បន្ថែមចំនួនចូលស្តុក</h3>
-              
+
             </div>
             <form method="POST" id="restockForm">
                 @csrf

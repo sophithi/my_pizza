@@ -4,7 +4,7 @@
     <div class="container-fluid py-4">
         <div class="row mb-4">
             <div class="col-12">
-                <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">Edit Invoice -
+                <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">កែវិក័្កយបត្រ -
                     {{ $invoice->invoice_number }}</h2>
             </div>
         </div>
@@ -19,12 +19,12 @@
 
                             <div class="form-group" style="margin-bottom: 20px;">
                                 <label for="status"
-                                    style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">Status</label>
+                                    style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">ការបង់ប្រាក់</label>
                                 <select name="status" id="status" class="form-control"
                                     style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
                                     <option value="draft" {{ $invoice->status === 'draft' ? 'selected' : '' }}>
-                                        មិនទាន់ទូទាត់</option>
-
+                                        មិនទាន់ទូទាត់
+                                    </option>
                                     <option value="paid" {{ $invoice->status === 'paid' ? 'selected' : '' }}>បានទូទាត់
                                     </option>
                                     <option value="cancelled" {{ $invoice->status === 'cancelled' ? 'selected' : '' }}>មិនទូទាត់
@@ -35,7 +35,7 @@
 
                             <div class="form-group" style="margin-bottom: 20px;">
                                 <label for="notes"
-                                    style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">Notes</label>
+                                    style="display: block; color: #333; font-weight: 600; margin-bottom: 8px;">ផ្សេងៗ</label>
                                 <textarea name="notes" id="notes" class="form-control" rows="4"
                                     style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">{{ $invoice->notes }}</textarea>
                             </div>
@@ -43,7 +43,7 @@
                             <div style="display: flex; gap: 8px;">
                                 <button type="submit" class="btn"
                                     style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                                    <i class="fas fa-save"></i> Update
+                                    <i class="fas fa-save"></i> save
                                 </button>
                                 <a href="{{ route('invoices.show', $invoice) }}" class="btn"
                                     style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">

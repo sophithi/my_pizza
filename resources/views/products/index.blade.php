@@ -89,10 +89,10 @@
                         <td style="padding: 12px; color: #1a1d29; font-weight: 600;">
                             ${{ rtrim(rtrim(number_format($usd, 3, '.', ''), '0'), '.') }}/<span style="color:#6c757d;font-weight:600;">៛{{ number_format((int)round($khr)) }}</span>
                         </td>
-                      
+
                         <td style="padding: 12px;">
                             @if($product->inventory)
-                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; 
+                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
                                     background: {{ $product->inventory->status === 'out_of_stock' ? '#f8d7da' : ($product->inventory->status === 'low_stock' ? '#fff3cd' : '#d4edda') }};
                                     color: {{ $product->inventory->status === 'out_of_stock' ? '#721c24' : ($product->inventory->status === 'low_stock' ? '#856404' : '#155724') }};">
                                     {{ $product->inventory->quantity }} units

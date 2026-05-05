@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Packing Label - {{ $invoice->invoice_number }}</title>
+    <title>Packing INV - {{ $invoice->invoice_number }}</title>
     <style>
         @page {
             size: A5 portrait;
@@ -200,8 +200,7 @@
 <body>
     <div class="sticker">
         <div class="sticker-header">
-            <span class="sticker-title">Packing</span>
-            <span class="order-id">ORD-{{ str_pad($invoice->order->id, 4, '0', STR_PAD_LEFT) }}</span>
+            <span class="sticker-title">ទំនិញដែលត្រូវរៀបចំ</span>
         </div>
 
         <div class="meta-row">
@@ -210,15 +209,16 @@
         </div>
         <div class="meta-row">
             <span><strong>Customer:</strong> {{ $invoice->order->customer->name ?? 'N/A' }}</span>
-            <span><strong>Items:</strong> {{ $invoice->order->items->count() }} products</span>
+
         </div>
 
         <table class="items-table">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Product</th>
-                    <th>Qty</th>
+                    <th>មុខទំនិញ</th>
+                    <th>ចំនួន</th>
+                    <th>ពិនិត្យ</th>
                 </tr>
             </thead>
             <tbody>
@@ -232,35 +232,45 @@
                             @endif
                         </td>
                         <td>{{ $item->quantity }}</td>
+                        <td>
+                            <div class="checkbox-row">
+
+                                <span class="box"></span>
+                            </div>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-
+        <div class="free-products">
+            @forelse(($invoice->order->freeItems ?? []) as $freeItem)
+                <div style="margin-bottom: 6px;">
+                    <span style="font-size: 13px; color: #059669; font-weight: 600;">Free:</span>
+                    <span style="font-size: 13px; color: #1a1d29;">
+                        {{ $freeItem->product->name ?? 'N/A' }} (x{{ $freeItem->quantity ?? 1 }})
+                    </span>
+                </div>
+            @empty
+                {{-- No free product --}}
+            @endforelse
+        </div>
         @if($invoice->order->notes || $invoice->notes)
             <div class="notes-box">
                 <div class="notes-label">Special Notes</div>
                 <div class="notes-text">{{ $invoice->order->notes ?? $invoice->notes }}</div>
             </div>
         @endif
-
-        <div class="footer-row">
-            <span class="total-items">Total: {{ $invoice->order->items->sum('quantity') }} items</span>
-            <span>Packed label: {{ now()->setTimezone('Asia/Phnom_Penh')->format('M d, Y h:i A') }}</span>
-        </div>
-
         <div class="checkbox-area">
-            <div class="checkbox-row"><span class="box"></span> Items packed</div>
-            <div class="checkbox-row"><span class="box"></span> Quality checked</div>
-            <div class="checkbox-row"><span class="box"></span> Ready for delivery</div>
+            <div class="checkbox-row"><span class="box"></span> បានរៀបចំ</div>
+            <div class="checkbox-row"><span class="box"></span> បានពិនិត្យគុណភាព</div>
+            <div class="checkbox-row"><span class="box"></span> រួចរាល់សម្រាប់ការដឹកជញ្ជូន</div>
         </div>
     </div>
-
     <div class="no-print"
         style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 12px;">
         <button onclick="window.print()"
             style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-            Print Packing Label
+            Print
         </button>
         <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}"
             style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">

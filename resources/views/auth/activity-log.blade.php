@@ -239,17 +239,17 @@
         <!-- Statistics -->
         <div class="stat-grid">
             <div class="stat-card">
-                <div class="stat-label">📊 Total Logins</div>
+                <div class="stat-label">Total Logins</div>
                 <div class="stat-value" style="color: #10b981;">
                     {{ $activities->where('activity_type', 'login')->count() ?? 0 }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">⏱️ Total Logouts</div>
+                <div class="stat-label">Total Logouts</div>
                 <div class="stat-value" style="color: #ef4444;">
                     {{ $activities->where('activity_type', 'logout')->count() ?? 0 }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">🕐 Active Sessions</div>
+                <div class="stat-label">Active Sessions</div>
                 <div class="stat-value" style="color: #0d6efd;">
                     @php
                         $logins = $activities->where('activity_type', 'login')->count();
@@ -308,7 +308,7 @@
             </div>
         @else
             <div class="empty-state">
-                <div class="empty-icon">📭</div>
+                <div class="empty-icon"></div>
                 <div class="empty-text">No activity yet</div>
                 <p style="color: var(--text-muted); margin-top: 8px;">Your login/logout history will appear here</p>
             </div>

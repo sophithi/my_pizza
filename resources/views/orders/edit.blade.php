@@ -471,18 +471,26 @@
                         </div>
                     </div>
 
-                    <div class="mt-3">
+                    <div class="col-md-6">
                         <label class="form-label">ការដឹកជញ្ជូន</label>
                         <select name="delivery_id" id="delivery_id" class="form-select">
                             <option value="" data-price="0">គ្មាន</option>
                             @foreach($deliveries as $delivery)
                                 <option value="{{ $delivery->id }}" data-price="{{ $delivery->delivery_price_khr }}"
                                     {{ (string) old('delivery_id', $order->delivery_id) === (string) $delivery->id ? 'selected' : '' }}>
-                                    {{ $delivery->delivery_name }} - ៛{{ number_format($delivery->delivery_price_khr, 0) }}
+                                    {{ $delivery->delivery_name }}
                                 </option>
                             @endforeach
+
                         </select>
+
                     </div>
+                      <div class="col-md-6">
+                            <div class="od-field">
+                                <label class="od-label">ចំនួនកេស</label>
+                                <input type="number" name="box_qty" class="form-control" min="0" value="{{ old('box_qty', 0) }}">
+                            </div>
+                        </div>
 
                     <div class="mt-3">
                         <label class="form-label">កំណត់ចំណាំ</label>

@@ -142,6 +142,7 @@
                     <label>តម្លៃដឹកជញ្ជូន (៛) <span class="req">*</span></label>
                     <input type="number" name="delivery_price_khr" class="form-control" step="1" min="0"
                         value="{{ old('delivery_price_khr', $delivery->delivery_price_khr) }}" required>
+                    <small style="display:block; margin-top: 6px; color: #6c757d;">1 កេស = 5000៛ · 2 កេស = 10000៛</small>
                     @error('delivery_price_khr') <div class="error-msg">{{ $message }}</div> @enderror
                 </div>
 

@@ -170,9 +170,6 @@
                 <label class="form-label">ទីតាំងស្តុក</label>
                 <input type="text" name="warehouse_location" class="form-input" value="{{ old('warehouse_location', $inventory->warehouse_location) }}" placeholder="......">
             </div>
-
-        
-
             <div class="form-actions">
                 <button type="submit" class="btn-primary">
                     <i class="fas fa-save"></i> Update

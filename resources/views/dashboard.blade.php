@@ -478,13 +478,13 @@
 
         <nav class="quick-actions" aria-label="Dashboard quick actions">
             <a href="{{ route('orders.create') }}" class="quick-action primary"><i class="fas fa-plus"></i> New Order</a>
-            <a href="{{ route('payments.index') }}" class="quick-action"><i class="fas fa-credit-card"></i> Payments</a>
-            <a href="{{ route('packing.index') }}" class="quick-action"><i class="fas fa-box-open"></i> Packing</a>
-            <a href="{{ route('purchases.index') }}" class="quick-action"><i class="fas fa-file-invoice"></i> Expenses</a>
-            <a href="{{ route('inventory.index') }}" class="quick-action"><i class="fas fa-boxes-stacked"></i> Stock</a>
+            <a href="{{ route('payments.index') }}" class="quick-action"><i class="fas fa-credit-card"></i> ការទូទាត់</a>
+            <a href="{{ route('packing.index') }}" class="quick-action"><i class="fas fa-box-open"></i> ការរៀបចំទំនិញ</a>
+            <a href="{{ route('purchases.index') }}" class="quick-action"><i class="fas fa-file-invoice"></i> ការចំណាយប្រចាំថ្ងៃ</a>
+            <a href="{{ route('inventory.index') }}" class="quick-action"><i class="fas fa-boxes-stacked"></i> ស្តុកទំនិញ</a>
         </nav>
 
-       
+
 
         <section class="content-grid">
             <div class="dash-panel sales-panel">
@@ -531,7 +531,7 @@
                 </div>
             </div>
 
-            
+
         </section>
 
     </div>
