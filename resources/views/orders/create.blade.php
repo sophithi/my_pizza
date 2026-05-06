@@ -711,7 +711,7 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="product-section-title">
-                        <i class="fas fa-receipt"></i> វិក្ក័យបត្រ
+                        ទំនិញដែលបានជ្រើសរើស
                     </h4>
 
                     <div class="invoice-items" id="invoiceItems">

@@ -382,7 +382,7 @@
 
             <div class="filter-row">
                 <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                    placeholder="ស្វែងរកលេខវិក្ក័យបត្រ ឈ្មោះអតិថិជន លេខទូរស័ព្ទ ឬលេខបញ្ជាទិញ...">
+                    placeholder="...">
 
                 <select name="status" class="form-select">
                     <option value="all">គ្រប់ស្ថានភាព</option>
