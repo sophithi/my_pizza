@@ -1,297 +1,190 @@
 @extends('layouts.app')
 
+@section('title', 'របាយការណ៍ការលក់')
+
+@push('styles')
+    <style>
+        .report-page { --accent:#e85d24; --accent-dark:#cf4b15; --border:#e5e7eb; --muted:#64748b; --soft:#f8fafc; --surface:#fff; --text:#0f172a; }
+        .report-head { align-items:flex-end; display:flex; gap:16px; justify-content:space-between; margin-bottom:16px; }
+        .report-title { color:var(--text); font-size:30px; font-weight:900; margin:0; }
+        .report-subtitle { color:var(--muted); margin:6px 0 0; }
+        .report-filter,.metric,.panel { background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:0 12px 32px rgba(15,23,42,.06); }
+        .report-filter { margin-bottom:16px; padding:14px; }
+        .filter-row { align-items:center; display:grid; gap:10px; grid-template-columns:minmax(180px,240px) auto; justify-content:end; }
+        .filter-row.has-dates { grid-template-columns:minmax(180px,240px) minmax(170px,220px) minmax(170px,220px) auto; }
+        .date-field { position:relative; }
+        .date-field-label { color:var(--muted); font-size:11px; font-weight:900; left:12px; position:absolute; top:3px; text-transform:uppercase; }
+        .date-field input { padding-top:18px; }
+        .report-btn { align-items:center; background:linear-gradient(135deg,var(--accent),var(--accent-dark)); border:0; border-radius:8px; color:#fff; display:inline-flex; font-weight:900; justify-content:center; min-height:40px; padding:9px 16px; text-decoration:none; white-space:nowrap; }
+        .report-btn:hover { color:#fff; transform:translateY(-1px); }
+        .metric-grid { display:grid; gap:14px; grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:16px; }
+        .metric { border-left:4px solid var(--accent); padding:16px; }
+        .metric-label { color:var(--muted); font-size:15px; font-weight:900; margin:0; }
+        .metric-value { color:var(--text); font-size:28px; font-weight:900; margin-top:6px; }
+        .content-grid { display:grid; gap:16px; grid-template-columns:1fr 1fr; }
+        .panel { margin-bottom:16px; overflow:hidden; }
+        .panel-head { border-bottom:1px solid var(--border); padding:14px 16px; }
+        .panel-title { color:var(--text); font-size:18px; font-weight:900; margin:0; }
+        .panel-body { padding:16px; }
+        .chart-wrap { height:300px; position:relative; }
+        .report-table { margin:0; }
+        .report-table th { background:var(--soft); color:var(--muted); font-size:13px; font-weight:900; padding:11px 12px; text-transform:uppercase; }
+        .report-table td { padding:11px 12px; vertical-align:middle; }
+        .status-pill { border-radius:999px; display:inline-flex; font-size:12px; font-weight:900; padding:4px 10px; }
+        .status-completed { background:#dcfce7; color:#166534; }
+        .status-pending { background:#fef3c7; color:#92400e; }
+        .status-cancelled { background:#fee2e2; color:#991b1b; }
+        .empty-note { color:var(--muted); padding:22px 16px; text-align:center; }
+        @media (max-width:1100px){ .metric-grid,.content-grid{grid-template-columns:1fr 1fr;} }
+        @media (max-width:760px){ .report-head{align-items:stretch; flex-direction:column;} .filter-row,.metric-grid,.content-grid{grid-template-columns:1fr;} }
+    </style>
+@endpush
+
 @section('content')
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">Sales Report</h2>
-            <p style="color: #666; margin-top: 8px;">Track sales performance and revenue metrics</p>
+    @php
+        $selectedPeriod = $period ?? 'all';
+        $rangeText = [
+            'all' => 'ទាំងអស់',
+            'today' => 'ថ្ងៃនេះ',
+            'yesterday' => 'ម្សិលមិញ',
+            'week' => 'សប្ដាហ៍នេះ',
+            'month' => 'ខែនេះ',
+            'year' => 'ឆ្នាំនេះ',
+            'custom' => trim(($startDate ?? '') . ' - ' . ($endDate ?? '')),
+        ][$selectedPeriod] ?? 'ទាំងអស់';
+    @endphp
+
+    <div class="container-fluid py-4 report-page">
+        <div class="report-head">
+            <div>
+                <h2 class="report-title">របាយការណ៍ការលក់</h2>
+                <p class="report-subtitle">ចំណូល ចំនួនវិក្ក័យបត្រ និងទំនិញលក់បាន។ កំពុងមើល: {{ $rangeText }}</p>
+            </div>
+            <a href="{{ route('reports.dashboard') }}" class="report-btn">Back</a>
         </div>
-    </div>
 
-    <!-- Filter Section -->
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
-        <div class="card-body" style="padding: 24px;">
-            <form method="GET" action="{{ route('reports.sales') }}" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label" style="font-weight: 600; color: #333;">Period</label>
-                    <select name="period" class="form-select" onchange="this.form.submit()">
-                        <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Time</option>
-                        <option value="today" {{ $period === 'today' ? 'selected' : '' }}>Today</option>
-                        <option value="yesterday" {{ $period === 'yesterday' ? 'selected' : '' }}>Yesterday</option>
-                        <option value="week" {{ $period === 'week' ? 'selected' : '' }}>This Week</option>
-                        <option value="month" {{ $period === 'month' ? 'selected' : '' }}>This Month</option>
-                        <option value="year" {{ $period === 'year' ? 'selected' : '' }}>This Year</option>
-                        <option value="custom" {{ $period === 'custom' ? 'selected' : '' }}>Custom Range</option>
-                    </select>
-                </div>
-
-                @if($period === 'custom')
-                <div class="col-md-3">
-                    <label class="form-label" style="font-weight: 600; color: #333;">Start Date</label>
-                    <input type="date" name="start_date" class="form-control" value="{{ $startDate ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label" style="font-weight: 600; color: #333;">End Date</label>
-                    <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label" style="font-weight: 600; color: #333;">&nbsp;</label>
-                    <button type="submit" class="btn w-100" style="background: #e85d24; color: white; border: none; font-weight: 600;">Filter</button>
-                </div>
+        <form method="GET" action="{{ route('reports.sales') }}" class="report-filter">
+            <div class="filter-row {{ $selectedPeriod === 'custom' ? 'has-dates' : '' }}">
+                <select name="period" class="form-select" onchange="this.form.submit()">
+                    <option value="all" {{ $selectedPeriod === 'all' ? 'selected' : '' }}>ទាំងអស់</option>
+                    <option value="today" {{ $selectedPeriod === 'today' ? 'selected' : '' }}>ថ្ងៃនេះ</option>
+                    <option value="yesterday" {{ $selectedPeriod === 'yesterday' ? 'selected' : '' }}>ម្សិលមិញ</option>
+                    <option value="week" {{ $selectedPeriod === 'week' ? 'selected' : '' }}>សប្ដាហ៍នេះ</option>
+                    <option value="month" {{ $selectedPeriod === 'month' ? 'selected' : '' }}>ខែនេះ</option>
+                    <option value="year" {{ $selectedPeriod === 'year' ? 'selected' : '' }}>ឆ្នាំនេះ</option>
+                    <option value="custom" {{ $selectedPeriod === 'custom' ? 'selected' : '' }}>ជ្រើសថ្ងៃ</option>
+                </select>
+                @if($selectedPeriod === 'custom')
+                    <label class="date-field">
+                        <span class="date-field-label">From</span>
+                        <input type="date" name="start_date" class="form-control" value="{{ $startDate ?? '' }}">
+                    </label>
+                    <label class="date-field">
+                        <span class="date-field-label">To</span>
+                        <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
+                    </label>
                 @endif
-            </form>
+                <button type="submit" class="report-btn">Apply</button>
+            </div>
+        </form>
+
+        <div class="metric-grid">
+            <div class="metric"><p class="metric-label">លក់សរុប</p><div class="metric-value">${{ number_format($totalRevenue, 2) }}</div></div>
+            <div class="metric"><p class="metric-label">ចំនួនវិក្ក័យបត្រ</p><div class="metric-value">{{ number_format($totalOrders) }}</div></div>
+            <div class="metric"><p class="metric-label">បានបញ្ចប់</p><div class="metric-value text-success">{{ number_format($completedOrders) }}</div></div>
+            <div class="metric"><p class="metric-label">មធ្យម/វិក្ក័យបត្រ</p><div class="metric-value">${{ number_format($averageOrderValue, 2) }}</div></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head"><h3 class="panel-title">ចំណូលប្រចាំថ្ងៃ</h3></div>
+            <div class="panel-body">
+                @if($dailyRevenue && count($dailyRevenue) > 0)
+                    <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+                @else
+                    <div class="empty-note">មិនទាន់មានទិន្នន័យ។</div>
+                @endif
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="panel">
+                <div class="panel-head"><h3 class="panel-title">ស្ថានភាពវិក្ក័យបត្រ</h3></div>
+                <div class="table-responsive">
+                    <table class="table report-table">
+                        <thead><tr><th>ស្ថានភាព</th><th class="text-end">ចំនួន</th><th class="text-end">តម្លៃ</th></tr></thead>
+                        <tbody>
+                            @forelse ($ordersByStatus as $stat)
+                                @php $statusClass = 'status-' . $stat->status; @endphp
+                                <tr>
+                                    <td><span class="status-pill {{ $statusClass }}">{{ ucfirst($stat->status) }}</span></td>
+                                    <td class="text-end">{{ number_format($stat->count) }}</td>
+                                    <td class="text-end fw-bold">${{ number_format($stat->total ?? 0, 2) }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="3" class="empty-note">មិនទាន់មានទិន្នន័យ។</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head"><h3 class="panel-title">ទំនិញលក់បានច្រើន</h3></div>
+                <div class="table-responsive">
+                    <table class="table report-table">
+                        <thead><tr><th>ទំនិញ</th><th class="text-end">ចំនួនកម្មង់</th></tr></thead>
+                        <tbody>
+                            @forelse ($productRevenue as $product)
+                                <tr>
+                                    <td>{{ $product->name }}</td>
+                                    <td class="text-end fw-bold">{{ number_format($product->order_items_count) }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="2" class="empty-note">មិនទាន់មានទិន្នន័យ។</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head"><h3 class="panel-title">អតិថិជនចំណាយច្រើន</h3></div>
+            <div class="table-responsive">
+                <table class="table report-table">
+                    <thead><tr><th>អតិថិជន</th><th class="text-end">ចំណាយសរុប</th></tr></thead>
+                    <tbody>
+                        @forelse ($customerRevenue as $customer)
+                            <tr>
+                                <td>{{ $customer->name }}</td>
+                                <td class="text-end fw-bold">${{ number_format($customer->orders_sum_total_amount ?? 0, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="empty-note">មិនទាន់មានទិន្នន័យ។</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- Key Metrics -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #e85d24;">
-                <div class="card-body" style="padding: 24px;">
-                    <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Total Revenue</p>
-                    <h3 style="color: #e85d24; font-size: 32px; font-weight: 700; margin: 0;">${{ number_format($totalRevenue, 2) }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #17a2b8;">
-                <div class="card-body" style="padding: 24px;">
-                    <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Total Orders</p>
-                    <h3 style="color: #17a2b8; font-size: 32px; font-weight: 700; margin: 0;">{{ $totalOrders }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #28a745;">
-                <div class="card-body" style="padding: 24px;">
-                    <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Completed</p>
-                    <h3 style="color: #28a745; font-size: 32px; font-weight: 700; margin: 0;">{{ $completedOrders }}</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #ffc107;">
-                <div class="card-body" style="padding: 24px;">
-                    <p style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">Avg Order Value</p>
-                    <h3 style="color: #ffc107; font-size: 32px; font-weight: 700; margin: 0;">${{ number_format($averageOrderValue, 2) }}</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Daily Revenue Chart -->
     @if($dailyRevenue && count($dailyRevenue) > 0)
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-                <div class="card-header" style="background: none; border-bottom: 2px solid #e9ecef; padding: 20px;">
-                    <h5 style="color: #333; font-weight: 600; margin: 0;">Daily Revenue Trend</h5>
-                </div>
-                <div class="card-body" style="padding: 24px;">
-                    <div style="position: relative; height: 300px;">
-                        <canvas id="dailyChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-                <div class="card-header" style="background: none; border-bottom: 2px solid #e9ecef; padding: 20px;">
-                    <h5 style="color: #333; font-weight: 600; margin: 0;">Orders by Status</h5>
-                </div>
-                <div class="card-body" style="padding: 24px;">
-                    <div class="table-responsive">
-                        <table class="table" style="margin-bottom: 0;">
-                            <thead style="background: #f8f9fa;">
-                                <tr>
-                                    <th style="padding: 8px; color: #666; font-weight: 600;">Status</th>
-                                    <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">Orders</th>
-                                    <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">Total Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($ordersByStatus as $stat)
-                                <tr style="border-bottom: 1px solid #e9ecef;">
-                                    <td style="padding: 8px; color: #333;">
-                                        <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
-                                            background: {{ $stat->status === 'completed' ? '#d4edda' : ($stat->status === 'pending' ? '#fff3cd' : '#f8d7da') }};
-                                            color: {{ $stat->status === 'completed' ? '#155724' : ($stat->status === 'pending' ? '#856404' : '#721c24') }};">
-                                            {{ ucfirst($stat->status) }}
-                                        </span>
-                                    </td>
-                                    <td style="padding: 8px; color: #666; text-align: right;">{{ $stat->count }}</td>
-                                    <td style="padding: 8px; color: #333; font-weight: 500; text-align: right;">${{ number_format($stat->total ?? 0, 2) }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-                <div class="card-header" style="background: none; border-bottom: 2px solid #e9ecef; padding: 20px;">
-                    <h5 style="color: #333; font-weight: 600; margin: 0;">Top 10 Products by Orders</h5>
-                </div>
-                <div class="card-body" style="padding: 24px;">
-                    <div class="table-responsive">
-                        <table class="table table-sm" style="margin-bottom: 0;">
-                            <thead style="background: #f8f9fa;">
-                                <tr>
-                                    <th style="padding: 8px; color: #666; font-weight: 600;">Product</th>
-                                    <th style="padding: 8px; color: #666; font-weight: 600; text-align: right;">Orders</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($productRevenue as $product)
-                                <tr style="border-bottom: 1px solid #e9ecef;">
-                                    <td style="padding: 8px; color: #333;">{{ $product->name }}</td>
-                                    <td style="padding: 8px; color: #333; font-weight: 500; text-align: right;">{{ $product->order_items_count }} orders</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-                <div class="card-header" style="background: none; border-bottom: 2px solid #e9ecef; padding: 20px;">
-                    <h5 style="color: #333; font-weight: 600; margin: 0;">Top 10 Customers by Revenue</h5>
-                </div>
-                <div class="card-body" style="padding: 24px;">
-                    <div class="table-responsive">
-                        <table class="table table-hover" style="margin-bottom: 0;">
-                            <thead style="background: #f8f9fa;">
-                                <tr>
-                                    <th style="padding: 12px; color: #666; font-weight: 600;">Customer</th>
-                                    <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">Total Spent</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($customerRevenue as $customer)
-                                <tr style="border-bottom: 1px solid #e9ecef;">
-                                    <td style="padding: 12px; color: #333;">{{ $customer->name }}</td>
-                                    <td style="padding: 12px; color: #333; font-weight: 500; text-align: right;">${{ number_format($customer->orders_sum_total_amount ?? 0, 2) }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div style="margin-top: 20px;">
-        <a href="{{ route('reports.dashboard') }}" class="btn" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-            Back to Dashboard
-        </a>
-    </div>
-</div>
-
-<!-- Chart.js for daily revenue visualization -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-<script>
-    @if($dailyRevenue && count($dailyRevenue) > 0)
-    const ctx = document.getElementById('dailyChart');
-    if (ctx) {
-        const dates = [
-            @foreach($dailyRevenue as $daily)
-                '{{ \Carbon\Carbon::parse($daily->date)->translatedFormat('M d') }}',
-            @endforeach
-        ];
-        
-        const revenues = [
-            @foreach($dailyRevenue as $daily)
-                {{ $daily->total }},
-            @endforeach
-        ];
-
-        const counts = [
-            @foreach($dailyRevenue as $daily)
-                {{ $daily->count }},
-            @endforeach
-        ];
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: dates,
-                datasets: [
-                    {
-                        label: 'Revenue ($)',
-                        data: revenues,
-                        backgroundColor: 'rgba(232, 93, 36, 0.7)',
-                        borderColor: '#e85d24',
-                        borderWidth: 2,
-                        yAxisID: 'y',
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+        <script>
+            const salesCanvas = document.getElementById('dailyChart');
+            if (salesCanvas) {
+                new Chart(salesCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: @json($dailyRevenue->map(fn($daily) => \Carbon\Carbon::parse($daily->date)->format('d/m'))->values()),
+                        datasets: [
+                            { label: 'លក់សរុប ($)', data: @json($dailyRevenue->pluck('total')->map(fn($value) => (float) $value)->values()), backgroundColor: 'rgba(232, 93, 36, 0.72)', borderColor: '#e85d24', borderWidth: 2, yAxisID: 'sales' },
+                            { label: 'វិក្ក័យបត្រ', data: @json($dailyRevenue->pluck('count')->map(fn($value) => (int) $value)->values()), backgroundColor: 'rgba(37, 99, 235, 0.46)', borderColor: '#2563eb', borderWidth: 2, yAxisID: 'orders' }
+                        ]
                     },
-                    {
-                        label: 'Orders',
-                        data: counts,
-                        backgroundColor: 'rgba(23, 162, 184, 0.5)',
-                        borderColor: '#17a2b8',
-                        borderWidth: 2,
-                        yAxisID: 'y1',
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            font: {
-                                size: 12,
-                                weight: '600'
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Revenue ($)'
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Order Count'
-                        },
-                        grid: {
-                            drawOnChartArea: false,
-                        },
-                    },
-                }
+                    options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index', intersect:false}, scales:{ sales:{type:'linear', position:'left', ticks:{callback:value=>'$'+value}}, orders:{type:'linear', position:'right', grid:{drawOnChartArea:false}, ticks:{precision:0}} } }
+                });
             }
-        });
-    }
+        </script>
     @endif
-</script>
 @endsection

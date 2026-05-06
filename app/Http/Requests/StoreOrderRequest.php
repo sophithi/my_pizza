@@ -27,6 +27,7 @@ class StoreOrderRequest extends FormRequest
         return [
             'customer_id' => 'required|exists:customers,id',
             'delivery_id' => 'nullable|exists:deliveries,id',
+            'box_qty' => 'nullable|integer|min:1',
             'order_date' => 'required|date',
             'subtotal' => 'required|numeric|min:0',
             'tax_amount' => 'nullable|numeric|min:0',
@@ -37,6 +38,9 @@ class StoreOrderRequest extends FormRequest
             'payment_status' => 'in:unpaid,partial,paid',
             'notes' => 'nullable|string',
             'order_items' => 'required|json',
+            'free_products' => 'nullable|array',
+            'free_products.*.product_id' => 'nullable|exists:products,id',
+            'free_products.*.qty' => 'nullable|integer|min:1',
         ];
     }
 }

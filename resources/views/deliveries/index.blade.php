@@ -355,6 +355,7 @@
                         <tr>
                             <th style="width: 70px;">#</th>
                             <th>ប្រភេទដឹកជញ្ជូន</th>
+                            <th style="width: 150px;">តម្លៃ/កេស</th>
                             <th style="width: 140px;">ចំនួនវិក្ក័យបត្រ</th>
                             <th class="text-end" style="width: 280px;">ផ្សេងៗ</th>
                         </tr>
@@ -366,6 +367,9 @@
                                 <td>
                                     <div class="delivery-name">{{ $delivery->delivery_name }}</div>
                                     <div class="delivery-desc">{{ $delivery->delivery_desc ?: 'No note added' }}</div>
+                                </td>
+                                <td style="font-weight: 800; color: var(--accent);">
+                                    ៛{{ number_format($delivery->delivery_price_khr, 0) }}
                                 </td>
                                 <td style="text-align: center; font-weight: 700; color: var(--accent);">
                                     {{ $delivery->orders_count ?? 0 }}
@@ -393,11 +397,16 @@
 
                             {{-- Inline detail row --}}
                             <tr class="detail-row" id="detail-{{ $delivery->id }}">
-                                <td colspan="4" style="padding: 0;">
+                                <td colspan="5" style="padding: 0;">
                                     <div class="detail-panel">
                                         <div class="detail-item">
                                             <label>ប្រភេទដឹកជញ្ជូន</label>
                                             <span>{{ $delivery->delivery_name }}</span>
+                                        </div>
+
+                                        <div class="detail-item">
+                                            <label>តម្លៃក្នុង ១ កេស</label>
+                                            <span class="accent">៛{{ number_format($delivery->delivery_price_khr, 0) }}</span>
                                         </div>
 
                                         <div class="detail-item">
@@ -413,7 +422,7 @@
                                                     <span>{{ $delivery->updated_at->format('d M Y') }}</span>
                                                 </div> -->
                                         <div class="detail-item" style="align-self: center;">
-                                            <a href="{{ route('deliveries.show', $delivery) }}"
+                                            <a href="{{ route('deliveries.show', array_merge([$delivery], request()->only('filter', 'start_date', 'end_date'))) }}"
                                                 class="delivery-btn delivery-btn-primary"
                                                 style="font-size: 12px; min-height: 32px; padding: 6px 12px;">
                                                 <i class="fas fa-external-link-alt"></i> ពិនិត្យ
@@ -424,7 +433,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4">
+                                <td colspan="5">
                                     <div class="empty-state">
                                         <i class="fas fa-truck"></i>
                                         <h5>No delivery options yet</h5>
@@ -492,7 +501,7 @@
             const endDate = document.getElementById('endDate');
 
             todayButton?.addEventListener('click', function () {
-                filterInput.value = 'today';ន
+                filterInput.value = 'today';
                 startDate.value = '';
                 endDate.value = '';
                 this.closest('form').submit();

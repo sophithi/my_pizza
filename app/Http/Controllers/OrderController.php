@@ -46,17 +46,19 @@ class OrderController extends Controller
     {
         $validated = $request->validated();
         $delivery = !empty($validated['delivery_id']) ? Delivery::find($validated['delivery_id']) : null;
-        $deliveryFeeKhr = $delivery ? (float) $delivery->delivery_price_khr : 0;
+        $boxQty = max((int) ($validated['box_qty'] ?? 1), 1);
+        $deliveryFeeKhr = $delivery ? (float) $delivery->delivery_price_khr * $boxQty : 0;
         $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
         $subtotal = (float) $validated['subtotal'];
         $discountAmount = (float) ($validated['discount_amount'] ?? 0);
         $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
 
-        [$order, $invoiceNumber, $warnings] = DB::transaction(function () use ($validated, $delivery, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
+        [$order, $invoiceNumber, $warnings] = DB::transaction(function () use ($validated, $delivery, $boxQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
             // Create the order
             $order = Order::create([
                 'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
+                'box_qty' => $boxQty,
                 'user_id' => auth()->id(),
                 'order_date' => $validated['order_date'],
                 'code' => 'ORD-' . rand(1000, 9999),
@@ -80,6 +82,21 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'total_price' => $item['total_price'],
+                ]);
+            }
+
+            foreach (($validated['free_products'] ?? []) as $freeProduct) {
+                if (empty($freeProduct['product_id']) || empty($freeProduct['qty'])) {
+                    continue;
+                }
+
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $freeProduct['product_id'],
+                    'delivery_id' => $delivery?->id,
+                    'quantity' => (int) $freeProduct['qty'],
+                    'unit_price' => 0,
+                    'total_price' => 0,
                 ]);
             }
 
@@ -145,13 +162,14 @@ class OrderController extends Controller
     {
         $validated = $request->validated();
         $delivery = !empty($validated['delivery_id']) ? Delivery::find($validated['delivery_id']) : null;
-        $deliveryFeeKhr = $delivery ? (float) $delivery->delivery_price_khr : 0;
+        $boxQty = max((int) ($validated['box_qty'] ?? 1), 1);
+        $deliveryFeeKhr = $delivery ? (float) ($validated['delivery_fee_khr'] ?? 0) : 0;
         $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
         $subtotal = (float) $validated['subtotal'];
         $discountAmount = (float) ($validated['discount_amount'] ?? 0);
         $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
 
-        DB::transaction(function () use ($order, $validated, $delivery, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
+        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
             $wasStockDeducted = (bool) $order->stock_deducted;
 
             if ($wasStockDeducted) {
@@ -161,6 +179,7 @@ class OrderController extends Controller
             $order->update([
                 'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
+                'box_qty' => $boxQty,
                 'order_date' => $validated['order_date'],
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,

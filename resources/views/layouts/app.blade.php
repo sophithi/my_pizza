@@ -559,7 +559,7 @@
                 <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}">
                     <i class="fas fa-file-invoice"></i><span>ការចំណាយ</span>
                 </a>
-                <a href="{{ route('reports.daily') }}" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}">
+                <a href="{{ route('reports.dashboard') }}" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}">
                     <i class="fas fa-chart-line"></i><span>របាយការណ៍</span>
                 </a>
             @endif

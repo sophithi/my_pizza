@@ -27,6 +27,7 @@ class UpdateOrderRequest extends FormRequest
         return [
             'customer_id' => 'required|exists:customers,id',
             'delivery_id' => 'nullable|exists:deliveries,id',
+            'box_qty' => 'nullable|integer|min:1',
             'order_date' => 'required|date',
             'subtotal' => 'required|numeric|min:0',
             'discount_amount' => 'nullable|numeric|min:0',

@@ -191,37 +191,68 @@
     }
 
     .invoice-items {
-        max-height: 280px;
+        max-height: 260px;
         overflow-y: auto;
         margin-bottom: 12px;
     }
 
     .invoice-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 14px;
-        border-bottom: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: 54px 1fr;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
         background: var(--surface);
         border-radius: 8px;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         transition: all 0.2s ease;
         animation: slideDown 0.3s ease-out;
+    }
+
+    .invoice-item-thumb {
+        width: 54px;
+        height: 54px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: var(--text-muted);
+        font-size: 18px;
+    }
+
+    .invoice-item-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .invoice-item-content {
+        min-width: 0;
     }
 
     .invoice-item:hover {
         background: rgba(232, 93, 36, 0.02);
     }
 
-    .invoice-item-info {
-        flex: 1;
+    .invoice-item-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
     }
 
     .invoice-item-name {
         font-size: 14px;
         font-weight: 600;
         color: var(--text);
-        margin-bottom: 4px;
+        margin-bottom: 3px;
+        line-height: 1.45;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .invoice-item-qty {
@@ -229,24 +260,102 @@
         color: var(--text-muted);
     }
 
+    .invoice-item-total {
+        text-align: right;
+        color: var(--accent);
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .invoice-item-total span {
+        display: block;
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
     .invoice-item-actions {
-        display: flex;
+        display: grid;
+        grid-template-columns: 112px minmax(76px, 92px) 36px;
         gap: 8px;
         align-items: center;
     }
 
-    .qty-input {
-        width: 55px;
+    .control-label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    .qty-stepper {
+        display: grid;
+        grid-template-columns: 32px 48px 32px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+    }
+
+    .qty-stepper button {
+        border: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-weight: 800;
+        cursor: pointer;
+        min-height: 34px;
+    }
+
+    .qty-stepper button:hover {
+        color: var(--accent);
+        background: rgba(232, 93, 36, 0.08);
+    }
+
+    .qty-input,
+    .discount-input {
+        width: 100%;
         padding: 6px 8px;
         border: 1px solid var(--border);
-        border-radius: 6px;
+        border-radius: 8px;
         text-align: center;
         font-size: 13px;
         font-weight: 600;
         transition: all 0.2s ease;
     }
 
-    .qty-input:focus {
+    .qty-stepper .qty-input {
+        border: 0;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        border-radius: 0;
+        min-height: 34px;
+    }
+
+    .discount-inline {
+        position: relative;
+    }
+
+    .discount-inline .discount-input {
+        height: 36px;
+        padding-right: 20px;
+    }
+
+    .discount-inline span {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 800;
+        pointer-events: none;
+    }
+
+    .qty-input:focus,
+    .discount-input:focus {
         outline: none;
         border-color: var(--accent);
         box-shadow: 0 0 0 2px rgba(232, 93, 36, 0.1);
@@ -256,8 +365,10 @@
         background: linear-gradient(135deg, var(--danger) 0%, #bb2d3b 100%);
         color: white;
         border: none;
-        padding: 6px 12px;
-        border-radius: 6px;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 8px;
         cursor: pointer;
         transition: all 0.3s ease;
         font-size: 12px;
@@ -270,8 +381,8 @@
     }
 
     .invoice-summary {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 12px 16px;
+        background: #f7f8fa;
+        padding: 14px 16px;
         border-radius: 10px;
         border: 1px solid var(--border);
     }
@@ -305,13 +416,13 @@
 
     .empty-state {
         text-align: center;
-        padding: 20px 12px;
+        padding: 24px 12px;
         color: var(--text-muted);
     }
 
     .empty-state-icon {
-        font-size: 48px;
-        margin-bottom: 16px;
+        font-size: 42px;
+        margin-bottom: 12px;
         opacity: 0.6;
     }
 
@@ -367,7 +478,7 @@
     .button-group {
         display: flex;
         gap: 12px;
-        margin-top: 24px;
+        margin-top: 0;
     }
 
     .button-group .btn-primary,
@@ -416,9 +527,105 @@
 
     .col-lg-7 { animation: slideUp 0.6s ease-out; }
     .col-lg-5 { animation: slideUp 0.6s ease-out 0.1s both; }
-    /* Keep action buttons visible on long forms */
-    .col-lg-5 { position: relative; }
-    form#orderForm .button-group { position: sticky; bottom: 18px; background: transparent; padding-top: 8px; z-index: 40; }
+
+    .order-side {
+        position: sticky;
+        top: 92px;
+        align-self: flex-start;
+    }
+
+    .checkout-card {
+        max-height: calc(100vh - 112px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .checkout-card .card-body {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .checkout-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .checkout-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: var(--text);
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .checkout-title i {
+        color: var(--accent);
+    }
+
+    .cart-count-pill {
+        background: rgba(232, 93, 36, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(232, 93, 36, 0.24);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .checkout-scroll {
+        overflow-y: auto;
+        padding: 18px 20px;
+        min-height: 0;
+    }
+
+    .checkout-section {
+        margin-bottom: 18px;
+    }
+
+    .checkout-section-title {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--text);
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .checkout-section-title i {
+        color: var(--accent);
+    }
+
+    .order-details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .order-details-grid .od-field {
+        margin-bottom: 0;
+    }
+
+    .order-details-grid .full-span {
+        grid-column: 1 / -1;
+    }
+
+    .checkout-actions {
+        padding: 12px 20px 16px;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        box-shadow: 0 -8px 18px rgba(26, 29, 41, 0.06);
+    }
 
     /* Order Details Fields */
     .od-field {
@@ -454,9 +661,64 @@
         padding-right: 36px;
     }
 
+    .delivery-combo {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 92px;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .box-inline {
+        position: relative;
+    }
+
+    .box-inline input {
+        height: 100%;
+        padding-top: 18px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .box-inline span {
+        position: absolute;
+        top: 5px;
+        left: 0;
+        right: 0;
+        color: var(--text-muted);
+        font-size: 10px;
+        font-weight: 800;
+        text-align: center;
+        pointer-events: none;
+    }
+
     @media (max-width: 992px) {
         .products-grid {
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+
+        .order-side {
+            position: static;
+        }
+
+        .checkout-card {
+            max-height: none;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .invoice-item-actions,
+        .order-details-grid,
+        .button-group {
+            grid-template-columns: 1fr;
+            display: grid;
+        }
+
+        .btn-remove {
+            width: 100%;
+        }
+
+        .delivery-combo {
+            grid-template-columns: 1fr 86px;
         }
     }
 
@@ -703,149 +965,128 @@
     </div>
 
     <!-- Right Section: Order Form -->
-    <div class="col-lg-5">
+    <div class="col-lg-5 order-side">
         <form action="{{ route('orders.store') }}" method="POST" id="orderForm">
             @csrf
 
-            <!-- Invoice Section -->
-            <div class="card">
+            <div class="card checkout-card">
                 <div class="card-body">
-                    <h4 class="product-section-title">
-                        ទំនិញដែលបានជ្រើសរើស
-                    </h4>
-
-                    <div class="invoice-items" id="invoiceItems">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🛒</div>
-                            <div class="empty-state-text">សូមជ្រើសរើសមុខទំនិញ</div>
-                        </div>
+                    <div class="checkout-header">
+                        <h4 class="checkout-title">
+                           បញ្ជាទិញ
+                        </h4>
                     </div>
 
-                    <div class="invoice-summary">
-                        <div class="summary-row">
-                            <span>សរុប (USD / KHR):</span>
-                            <div style="text-align: right;">
-                                <div style="font-weight: 600;">$<span id="subtotal">0.00</span></div>
-                                <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="subtotal_khr">0</span></div>
-                            </div>
-                        </div>
-
-                        <div class="summary-row" id="discountAmountRow">
-                            <span style="font-weight: 600;">បញ្ចុះតម្លៃសរុប:</span>
-                            <div style="text-align: right;">
-                                <div style="font-weight: 600; color: var(--danger);">-$<span id="discountAmount">0.00</span></div>
-                                <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">-៛<span id="discountAmount_khr">0</span></div>
-                            </div>
-                        </div>
-
-                        <div class="summary-row" id="deliveryFeeRow">
-                            <span style="font-weight: 600;">ការដឹកជញ្ជូន:</span>
-                            <div style="text-align: right;">
-                                <div style="font-weight: 600;">$<span id="deliveryFeeUsd">0.00</span></div>
-                                <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="deliveryFeeKhr">0</span></div>
-                            </div>
-                        </div>
-
-
-                        <div class="summary-row total">
-                            <span>តម្លៃសរុប:</span>
-                            <div style="text-align: right;">
-                                <div>$<span id="totalAmount">0.00</span></div>
-                                <div style="color: var(--accent); font-size: 13px;">៛<span id="totalAmount_khr">0</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hidden inputs for form submission -->
-            <input type="hidden" id="hidden_customer_id" name="customer_id">
-            <input type="hidden" id="order_items" name="order_items" value="[]">
-            <input type="hidden" id="subtotal_amount" name="subtotal">
-
-            <input type="hidden" id="discount_amount" name="discount_amount">
-            <input type="hidden" id="delivery_fee_khr" name="delivery_fee_khr" value="0">
-            <input type="hidden" id="total_amount_input" name="total_amount">
-
-            <!-- Order Details Section -->
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="product-section-title">
-                        ព័ត៌មានការបញ្ជាទិញ
-                    </h4>
-
-                    <!-- Row 1: Date & Delivery -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="od-field">
-                                <label class="od-label"><i class="fas fa-calendar-alt"></i> កាលបរិច្ឆេទ*</label>
-                                <input type="datetime-local" name="order_date" class="form-control" required
-                                    value="{{ old('order_date', now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}">
-                            </div>
-                        </div>
-                         <div class="col-md-6">
-                            <div class="od-field">
-                                <label class="od-label"><i class="fas fa-money-bill-wave"></i> ការបង់ប្រាក់</label>
-                                <select name="payment_status" class="form-control od-select">
-                                    <option value="unpaid" {{ old('payment_status') == 'unpaid' ? 'selected' : '' }}>🔴 មិនទាន់បង់</option>
-                                    <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>🟡 បង់មួយផ្នែក</option>
-                                    <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>🟢 បានបង់</option>
-                                </select>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="od-field">
-                                <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន</label>
-                                <select id="delivery_select" name="delivery_id" class="form-control od-select">
-                                    <option value="">សូមជ្រើសរើស</option>
-                                    @foreach($deliveries as $delivery)
-                                        <option value="{{ $delivery->id }}" data-name="{{ $delivery->delivery_name }}
-                                        " data-price="{{ $delivery->delivery_price_khr }}">
-                                            {{ $delivery->delivery_name  }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="od-field">
-                                <label class="od-label"><i class="fas fa-box"></i> ចំនួនកេស</label>
-                                <input type="number" name="box_qty" class="form-control" min="0" value="{{ old('box_qty', 0) }}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Row 3: Free Products (Multiple) -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="od-field">
-                                <label class="od-label"><i class="fas fa-gift"></i> Free ជូនអតិថិជន</label>
-                                <div id="freeProductsContainer">
-
+                    <div class="checkout-scroll">
+                        <div class="checkout-section">
+                          
+                            <div class="invoice-items" id="invoiceItems">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div>
+                                    <div class="empty-state-text">សូមជ្រើសរើសមុខទំនិញ</div>
                                 </div>
-                                <button type="button" id="addFreeProductBtn" class="btn btn-sm btn-outline-primary mt-2">
-                                     +Add Free
-                                </button>
+                            </div>
+                        </div>
+
+
+                        <!-- Hidden inputs for form submission -->
+                        <input type="hidden" id="hidden_customer_id" name="customer_id">
+                        <input type="hidden" id="order_items" name="order_items" value="[]">
+                        <input type="hidden" id="subtotal_amount" name="subtotal">
+
+                        <input type="hidden" id="discount_amount" name="discount_amount">
+                        <input type="hidden" id="delivery_fee_khr" name="delivery_fee_khr" value="0">
+                        <input type="hidden" id="total_amount_input" name="total_amount">
+                        <input type="hidden" name="order_date" value="{{ old('order_date', now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}">
+
+                        <div class="checkout-section">
+                            
+
+                            <div class="order-details-grid">
+                              
+
+                                <div class="od-field">
+                                    <label class="od-label"><i class="fas fa-money-bill-wave"></i> ការបង់ប្រាក់</label>
+                                    <select name="payment_status" class="form-control od-select">
+                                        <option value="unpaid" {{ old('payment_status') == 'unpaid' ? 'selected' : '' }}>មិនទាន់បង់</option>
+                                        <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
+                                        <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>បានបង់</option>
+                                    </select>
+                                </div>
+
+                                <div class="od-field">
+                                    <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន</label>
+                                    <div class="delivery-combo">
+                                        <select id="delivery_select" name="delivery_id" class="form-control od-select">
+                                            <option value="">សូមជ្រើសរើស</option>
+                                            @foreach($deliveries as $delivery)
+                                                <option value="{{ $delivery->id }}" data-name="{{ $delivery->delivery_name }}" data-price="{{ $delivery->delivery_price_khr }}">
+                                                    {{ $delivery->delivery_name  }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="box-inline">
+                                            <span>កេស</span>
+                                        <input type="number" id="box_qty" name="box_qty" class="form-control" min="1" value="{{ old('box_qty', 1) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="od-field full-span">
+                                    <label class="od-label"><i class="fas fa-gift"></i> Free ជូនអតិថិជន</label>
+                                    <div id="freeProductsContainer"></div>
+                                    <button type="button" id="addFreeProductBtn" class="btn btn-sm btn-outline-primary mt-2">
+                                         +Add Free
+                                    </button>
+                                </div>
+
+                                <div class="od-field full-span">
+                                    <label class="od-label"><i class="fas fa-sticky-note"></i> ផ្សេងៗ</label>
+                                    <textarea name="notes" class="form-control" rows="2" placeholder="..." style="resize: none;">{{ old('notes') }}</textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    
+                        <div class="checkout-section">
+                            <div class="invoice-summary">
+                                <div class="summary-row">
+                                    <span>សរុប (USD / KHR):</span>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 600;">$<span id="subtotal">0.00</span></div>
+                                        <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="subtotal_khr">0</span></div>
+                                    </div>
+                                </div>
 
-                    <!-- Row 4: Notes -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="od-field">
-                                <label class="od-label"><i class="fas fa-sticky-note"></i> ផ្សេងៗ</label>
-                                <textarea name="notes" class="form-control" rows="3" placeholder="..." style="resize: none;">{{ old('notes') }}</textarea>
+                                <div class="summary-row" id="discountAmountRow">
+                                    <span style="font-weight: 600;">បញ្ចុះតម្លៃសរុប:</span>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 600; color: var(--danger);">-$<span id="discountAmount">0.00</span></div>
+                                        <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">-៛<span id="discountAmount_khr">0</span></div>
+                                    </div>
+                                </div>
+
+                                <div class="summary-row" id="deliveryFeeRow">
+                                    <span style="font-weight: 600;">ការដឹកជញ្ជូន:</span>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 600;">$<span id="deliveryFeeUsd">0.00</span></div>
+                                        <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="deliveryFeeKhr">0</span></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="summary-row total">
+                                    <span>តម្លៃសរុប:</span>
+                                    <div style="text-align: right;">
+                                        <div>$<span id="totalAmount">0.00</span></div>
+                                        <div style="color: var(--accent); font-size: 13px;">៛<span id="totalAmount_khr">0</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    
 
-
-                    <div class="button-group">
+                    <div class="checkout-actions button-group">
                         <button type="submit" class="btn-primary">
                             <i class="fas fa-check-circle"></i> បញ្ជាក់
                         </button>
@@ -854,6 +1095,7 @@
                         </a>
                     </div>
                 </div>
+
             </div>
         </form>
     </div>
@@ -945,12 +1187,8 @@
     }
 
     function removeFromCart(productId) {
-        const itemName = cart[productId].name;
-
-        if (confirm(`Remove "${itemName}" from order?`)) {
-            delete cart[productId];
-            renderInvoice();
-        }
+        delete cart[productId];
+        renderInvoice();
     }
 
     function updateQuantity(productId, newQty) {
@@ -966,12 +1204,14 @@
     function renderInvoice() {
         const invoiceItems = $('#invoiceItems');
         let html = '';
+        const cartCount = Object.values(cart).reduce((total, item) => total + (parseInt(item.qty) || 0), 0);
+        $('#cartCount').text(cartCount);
 
         if (Object.keys(cart).length === 0) {
             invoiceItems.html(`
                 <div class="empty-state">
-                    <div class="empty-state-icon">🛒</div>
-                    <div class="empty-state-text">No items added yet</div>
+                    <div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="empty-state-text">សូមជ្រើសរើសមុខទំនិញ</div>
                 </div>
             `);
         } else {
@@ -986,29 +1226,37 @@
 
                 html += `
                     <div class="invoice-item">
-                        <div class="invoice-item-info">
-                            <div class="invoice-item-name">${item.name}</div>
-                            <div class="invoice-item-qty">
-                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">
-                                    Original: $${item.price.toFixed(2)} / ៛${item.price_khr.toLocaleString()}
-                                    ${discountPercent > 0 ? `<span style="color: var(--danger); margin-left: 8px;">-${discountPercent}%</span>` : ''}
-                                </div>
-                                <div>
-                                    $${discountedPrice.toFixed(2)} / ៛${discountedPriceKhr.toLocaleString()} × ${item.qty} =
-                                    <strong>$${itemTotal.toFixed(2)}</strong> / <strong>${itemTotalKhr.toLocaleString()}</strong>
-                                </div>
-                            </div>
+                        <div class="invoice-item-thumb">
+                            ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : '<i class="fas fa-image"></i>'}
                         </div>
-                        <div class="invoice-item-actions">
-                            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-                                <label style="font-size: 11px; white-space: nowrap;">Qty:</label>
-                                <input type="number" class="qty-input" value="${item.qty}" onchange="updateQuantity(${productId}, this.value)" min="1" style="width: 50px;">
-                                <label style="font-size: 11px; white-space: nowrap; margin-left: 8px;">Discount %:</label>
-                                <input type="number" value="${discountPercent}" onchange="updateItemDiscount(${productId}, this.value)" min="0" max="100" step="0.1" style="width: 60px; padding: 4px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px;">
+                        <div class="invoice-item-content">
+                            <div class="invoice-item-header">
+                                <div>
+                                    <div class="invoice-item-name">${escapeHtml(item.name)}</div>
+                                    <div class="invoice-item-qty">
+                                        $${discountedPrice.toFixed(2)} / ៛${Math.round(discountedPriceKhr).toLocaleString()} × ${item.qty}
+                                        ${discountPercent > 0 ? `<span style="color: var(--danger); margin-left: 8px;">-${discountPercent}%</span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="invoice-item-total">
+                                    $${itemTotal.toFixed(2)}
+                                    <span>៛${Math.round(itemTotalKhr).toLocaleString()}</span>
+                                </div>
                             </div>
-                            <button type="button" class="btn-remove" onclick="removeFromCart(${productId})">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <div class="invoice-item-actions">
+                                <div class="qty-stepper">
+                                    <button type="button" onclick="updateQuantity(${productId}, ${item.qty - 1})">−</button>
+                                    <input type="number" class="qty-input" value="${item.qty}" onchange="updateQuantity(${productId}, this.value)" min="1">
+                                    <button type="button" onclick="updateQuantity(${productId}, ${item.qty + 1})">+</button>
+                                </div>
+                                <div class="discount-inline">
+                                    <input type="number" class="discount-input" value="${discountPercent}" onchange="updateItemDiscount(${productId}, this.value)" min="0" max="100" step="0.1">
+                                    <span>%</span>
+                                </div>
+                                <button type="button" class="btn-remove" onclick="removeFromCart(${productId})" title="Remove item">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1018,6 +1266,15 @@
 
         calculateTotal();
         updateCartData();
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
     function updateItemDiscount(productId, discountPercent) {
         const percent = parseFloat(discountPercent) || 0;
@@ -1029,15 +1286,20 @@
 
     // Update cart data when delivery selection changes
     $(document).ready(function() {
-        $('#delivery_select').on('change', function() {
+        $('#delivery_select, #box_qty').on('change input', function() {
             calculateTotal();
             updateCartData();
         });
     });
 
+    function getBoxQty() {
+        return Math.max(parseInt($('#box_qty').val() || 1, 10) || 1, 1);
+    }
+
     function getSelectedDeliveryFeeKhr() {
         const selected = $('#delivery_select option:selected');
-        return parseFloat(selected.data('price') || 0) || 0;
+        const deliveryPriceKhr = parseFloat(selected.data('price') || 0) || 0;
+        return deliveryPriceKhr * getBoxQty();
     }
 
     function calculateTotal() {

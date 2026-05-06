@@ -174,7 +174,9 @@ class ReportController extends Controller
             ->with('product')
             ->get();
         $outOfStockCount = Inventory::where('quantity', 0)->count();
-        $totalInventoryValue = Inventory::selectRaw('SUM(quantity * COALESCE(cost_per_unit, 0)) as total')
+        $totalInventoryValue = Inventory::query()
+            ->join('products', 'products.id', '=', 'inventories.product_id')
+            ->selectRaw('SUM(inventories.quantity * COALESCE(NULLIF(inventories.cost_per_unit, 0), products.price_usd, 0)) as total')
             ->value('total') ?? 0;
 
         // All inventory with stock status

@@ -10,17 +10,7 @@ class DeliveryController extends Controller
 {
     public function index(Request $request)
     {
-        $filter = $request->query('filter');
-        $startDate = $request->query('start_date');
-        $endDate = $request->query('end_date');
-
-        if ($filter === 'today') {
-            $startDate = Carbon::today()->toDateString();
-            $endDate = Carbon::today()->toDateString();
-        } elseif ($filter === 'yesterday') {
-            $startDate = Carbon::yesterday()->toDateString();
-            $endDate = Carbon::yesterday()->toDateString();
-        }
+        [$filter, $startDate, $endDate] = $this->resolveDateFilter($request);
 
         $deliveries = Delivery::withCount([
             'orders as orders_count' => function ($query) use ($startDate, $endDate) {
@@ -52,11 +42,24 @@ class DeliveryController extends Controller
             ->with('success', 'Created successfully!');
     }
 
-    public function show(Delivery $delivery)
+    public function show(Request $request, Delivery $delivery)
     {
-        $delivery->load(['orders.invoice', 'orders.customer']);
+        [$filter, $startDate, $endDate] = $this->resolveDateFilter($request);
 
-        return view('deliveries.show', compact('delivery'));
+        $delivery->load([
+            'orders' => function ($query) use ($startDate, $endDate) {
+                $query->with(['invoice', 'customer'])->latest();
+
+                if ($startDate && $endDate) {
+                    $query->whereBetween('created_at', [
+                        Carbon::parse($startDate)->startOfDay(),
+                        Carbon::parse($endDate)->endOfDay(),
+                    ]);
+                }
+            },
+        ]);
+
+        return view('deliveries.show', compact('delivery', 'startDate', 'endDate', 'filter'));
     }
 
     public function edit(Delivery $delivery)
@@ -84,5 +87,22 @@ class DeliveryController extends Controller
 
         return redirect()->route('deliveries.index')
             ->with('success', 'Deleted successfully!');
+    }
+
+    private function resolveDateFilter(Request $request): array
+    {
+        $filter = $request->query('filter');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        if ($filter === 'today') {
+            $startDate = Carbon::today()->toDateString();
+            $endDate = Carbon::today()->toDateString();
+        } elseif ($filter === 'yesterday') {
+            $startDate = Carbon::yesterday()->toDateString();
+            $endDate = Carbon::yesterday()->toDateString();
+        }
+
+        return [$filter, $startDate, $endDate];
     }
 }

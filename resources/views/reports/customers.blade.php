@@ -1,126 +1,123 @@
 @extends('layouts.app')
 
+@section('title', 'របាយការណ៍អតិថិជន')
+
+@push('styles')
+    <style>
+        .report-page { --accent:#e85d24; --accent-dark:#cf4b15; --border:#e5e7eb; --muted:#64748b; --soft:#f8fafc; --surface:#fff; --text:#0f172a; }
+        .report-head { align-items:flex-end; display:flex; gap:16px; justify-content:space-between; margin-bottom:16px; }
+        .report-title { color:var(--text); font-size:30px; font-weight:900; margin:0; }
+        .report-subtitle { color:var(--muted); margin:6px 0 0; }
+        .report-filter,.metric,.panel { background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:0 12px 32px rgba(15,23,42,.06); }
+        .report-filter { margin-bottom:16px; padding:14px; }
+        .filter-row { align-items:center; display:grid; gap:10px; grid-template-columns:minmax(180px,240px) auto; justify-content:end; }
+        .filter-row.has-dates { grid-template-columns:minmax(180px,240px) minmax(170px,220px) minmax(170px,220px) auto; }
+        .date-field { position:relative; }
+        .date-field-label { color:var(--muted); font-size:11px; font-weight:900; left:12px; position:absolute; top:3px; text-transform:uppercase; }
+        .date-field input { padding-top:18px; }
+        .report-btn { align-items:center; background:linear-gradient(135deg,var(--accent),var(--accent-dark)); border:0; border-radius:8px; color:#fff; display:inline-flex; font-weight:900; justify-content:center; min-height:40px; padding:9px 16px; text-decoration:none; white-space:nowrap; }
+        .report-btn:hover { color:#fff; transform:translateY(-1px); }
+        .metric-grid { display:grid; gap:14px; grid-template-columns:repeat(3,minmax(0,1fr)); margin-bottom:16px; }
+        .metric { border-left:4px solid var(--accent); padding:16px; }
+        .metric-label { color:var(--muted); font-size:15px; font-weight:900; margin:0; }
+        .metric-value { color:var(--text); font-size:28px; font-weight:900; margin-top:6px; }
+        .panel { margin-bottom:16px; overflow:hidden; }
+        .panel-head { border-bottom:1px solid var(--border); padding:14px 16px; }
+        .panel-title { color:var(--text); font-size:18px; font-weight:900; margin:0; }
+        .report-table { margin:0; }
+        .report-table th { background:var(--soft); color:var(--muted); font-size:13px; font-weight:900; padding:11px 12px; text-transform:uppercase; }
+        .report-table td { padding:11px 12px; vertical-align:middle; }
+        .badge-count { background:#eef2ff; border-radius:999px; color:#3730a3; display:inline-flex; font-weight:900; min-width:34px; justify-content:center; padding:4px 10px; }
+        .pager-wrap { margin-top:16px; }
+        .empty-note { color:var(--muted); padding:22px 16px; text-align:center; }
+        @media (max-width:1100px){ .metric-grid{grid-template-columns:1fr 1fr;} }
+        @media (max-width:760px){ .report-head{align-items:stretch; flex-direction:column;} .filter-row,.metric-grid{grid-template-columns:1fr;} }
+    </style>
+@endpush
+
 @section('content')
-    <div class="container-fluid py-4">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2 style="font-size: 28px; font-weight: 600; color: #333; margin: 0;">Customer Report</h2>
-                <p style="color: #666; margin-top: 8px;">Analyze customer activity and revenue distribution</p>
+    @php
+        $selectedPeriod = $period ?? 'all';
+        $rangeText = [
+            'all' => 'ទាំងអស់',
+            'today' => 'ថ្ងៃនេះ',
+            'yesterday' => 'ម្សិលមិញ',
+            'week' => 'សប្ដាហ៍នេះ',
+            'month' => 'ខែនេះ',
+            'year' => 'ឆ្នាំនេះ',
+            'custom' => trim(($startDate ?? '') . ' - ' . ($endDate ?? '')),
+        ][$selectedPeriod] ?? 'ទាំងអស់';
+
+        $totalPeriodOrders = $customerActivity->sum('orders_count');
+        $totalPeriodSpent = $customerActivity->sum('orders_sum_total_amount');
+    @endphp
+
+    <div class="container-fluid py-4 report-page">
+        <div class="report-head">
+            <div>
+                <h2 class="report-title">របាយការណ៍អតិថិជន</h2>
+                <p class="report-subtitle">មើលអតិថិជនសកម្ម ចំនួនកម្មង់ និងចំណាយ។ កំពុងមើល: {{ $rangeText }}</p>
             </div>
+            <a href="{{ route('reports.dashboard') }}" class="report-btn">Back</a>
         </div>
 
-        <!-- Filter Section -->
-        <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
-            <div class="card-body" style="padding: 24px;">
-                <form method="GET" action="{{ route('reports.customers') }}" class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label" style="font-weight: 600; color: #333;">Period</label>
-                        <select name="period" class="form-select" onchange="this.form.submit()">
-                            <option value="all" {{ ($period ?? 'all') === 'all' ? 'selected' : '' }}>All Time</option>
-                            <option value="today" {{ ($period ?? '') === 'today' ? 'selected' : '' }}>Today</option>
-                            <option value="yesterday" {{ ($period ?? '') === 'yesterday' ? 'selected' : '' }}>Yesterday
-                            </option>
-                            <option value="week" {{ ($period ?? '') === 'week' ? 'selected' : '' }}>This Week</option>
-                            <option value="month" {{ ($period ?? '') === 'month' ? 'selected' : '' }}>This Month</option>
-                            <option value="year" {{ ($period ?? '') === 'year' ? 'selected' : '' }}>This Year</option>
-                            <option value="custom" {{ ($period ?? '') === 'custom' ? 'selected' : '' }}>Custom Range</option>
-                        </select>
-                    </div>
-
-                    @if(($period ?? '') === 'custom')
-                        <div class="col-md-3">
-                            <label class="form-label" style="font-weight: 600; color: #333;">Start Date</label>
-                            <input type="date" name="start_date" class="form-control" value="{{ $startDate ?? '' }}">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" style="font-weight: 600; color: #333;">End Date</label>
-                            <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" style="font-weight: 600; color: #333;">&nbsp;</label>
-                            <button type="submit" class="btn w-100"
-                                style="background: #e85d24; color: white; border: none; font-weight: 600;">Filter</button>
-                        </div>
-                    @endif
-                </form>
+        <form method="GET" action="{{ route('reports.customers') }}" class="report-filter">
+            <div class="filter-row {{ $selectedPeriod === 'custom' ? 'has-dates' : '' }}">
+                <select name="period" class="form-select" onchange="this.form.submit()">
+                    <option value="all" {{ $selectedPeriod === 'all' ? 'selected' : '' }}>ទាំងអស់</option>
+                    <option value="today" {{ $selectedPeriod === 'today' ? 'selected' : '' }}>ថ្ងៃនេះ</option>
+                    <option value="yesterday" {{ $selectedPeriod === 'yesterday' ? 'selected' : '' }}>ម្សិលមិញ</option>
+                    <option value="week" {{ $selectedPeriod === 'week' ? 'selected' : '' }}>សប្ដាហ៍នេះ</option>
+                    <option value="month" {{ $selectedPeriod === 'month' ? 'selected' : '' }}>ខែនេះ</option>
+                    <option value="year" {{ $selectedPeriod === 'year' ? 'selected' : '' }}>ឆ្នាំនេះ</option>
+                    <option value="custom" {{ $selectedPeriod === 'custom' ? 'selected' : '' }}>ជ្រើសថ្ងៃ</option>
+                </select>
+                @if($selectedPeriod === 'custom')
+                    <label class="date-field">
+                        <span class="date-field-label">From</span>
+                        <input type="date" name="start_date" class="form-control" value="{{ $startDate ?? '' }}">
+                    </label>
+                    <label class="date-field">
+                        <span class="date-field-label">To</span>
+                        <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
+                    </label>
+                @endif
+                <button type="submit" class="report-btn">Apply</button>
             </div>
+        </form>
+
+        <div class="metric-grid">
+            <div class="metric"><p class="metric-label">អតិថិជនសរុប</p><div class="metric-value">{{ number_format($totalCustomers) }}</div></div>
+            <div class="metric"><p class="metric-label">អតិថិជនសកម្ម</p><div class="metric-value text-success">{{ number_format($activeCustomers) }}</div></div>
+            <div class="metric"><p class="metric-label">ចំណាយក្នុងទំព័រនេះ</p><div class="metric-value">${{ number_format($totalPeriodSpent, 2) }}</div></div>
         </div>
 
-        <!-- Key Metrics -->
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-                <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #e85d24;">
-                    <div class="card-body" style="padding: 24px;">
-                        <p
-                            style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">
-                            Total Customers</p>
-                        <h3 style="color: #e85d24; font-size: 32px; font-weight: 700; margin: 0;">{{ $totalCustomers }}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card border-0 shadow-sm" style="border-radius: 12px; border-left: 4px solid #28a745;">
-                    <div class="card-body" style="padding: 24px;">
-                        <p
-                            style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0;">
-                            Active Customers</p>
-                        <h3 style="color: #28a745; font-size: 32px; font-weight: 700; margin: 0;">{{ $activeCustomers }}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Customer Activity -->
-        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
-            <div class="card-header" style="background: none; border-bottom: 2px solid #e9ecef; padding: 20px;">
-                <h5 style="color: #333; font-weight: 600; margin: 0;">Customer Activity (Ordered by Order Count)</h5>
-            </div>
-            <div class="card-body" style="padding: 24px;">
-                <div class="table-responsive">
-                    <table class="table table-hover" style="margin-bottom: 0;">
-                        <thead style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+        <div class="panel">
+            <div class="panel-head"><h3 class="panel-title">សកម្មភាពអតិថិជន</h3></div>
+            <div class="table-responsive">
+                <table class="table report-table">
+                    <thead><tr><th>ឈ្មោះអតិថិជន</th><th>ទំនាក់ទំនង</th><th class="text-end">កម្មង់</th><th class="text-end">ចំណាយសរុប</th><th class="text-end">មធ្យម/កម្មង់</th></tr></thead>
+                    <tbody>
+                        @forelse ($customerActivity as $customer)
+                            @php
+                                $ordersCount = $customer->orders_count ?? 0;
+                                $spent = $customer->orders_sum_total_amount ?? 0;
+                            @endphp
                             <tr>
-                                <th style="padding: 12px; color: #666; font-weight: 600;">ឈ្មោះអតិថិជន</th>
-                                <th style="padding: 12px; color: #666; font-weight: 600;">ទំនាក់ទំនង</th>
-                                <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">ការកម្មង់</th>
-                                <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">ការចំណាយ</th>
-                                <th style="padding: 12px; color: #666; font-weight: 600; text-align: right;">ការចំណាយទូទៅ
-                                </th>
+                                <td class="fw-bold">{{ $customer->name }}</td>
+                                <td>{{ $customer->phone ?? 'N/A' }}</td>
+                                <td class="text-end"><span class="badge-count">{{ number_format($ordersCount) }}</span></td>
+                                <td class="text-end fw-bold">${{ number_format($spent, 2) }}</td>
+                                <td class="text-end">${{ number_format($ordersCount > 0 ? $spent / $ordersCount : 0, 2) }}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($customerActivity as $customer)
-                                <tr style="border-bottom: 1px solid #e9ecef;">
-                                    <td style="padding: 12px; color: #333; font-weight: 500;">{{ $customer->name }}</td>
-                                    <td style="padding: 12px; color: #666;">{{ $customer->phone ?? 'N/A' }}
-                                    </td>
-                                    <td style="padding: 12px; color: #666; text-align: right;">
-                                        <span
-                                            style="padding: 4px 8px; background: #e9ecef; border-radius: 4px; font-weight: 600;">
-                                            {{ $customer->orders_count ?? 0 }}
-                                        </span>
-                                    </td>
-                                    <td style="padding: 12px; color: #333; font-weight: 500; text-align: right;">
-                                        ₱{{ number_format($customer->orders_sum_total_amount ?? 0, 2) }}</td>
-                                    <td style="padding: 12px; color: #666; text-align: right;">
-                                        ${{ number_format(($customer->orders_count && $customer->orders_sum_total_amount) ? $customer->orders_sum_total_amount / $customer->orders_count : 0, 2) }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                        @empty
+                            <tr><td colspan="5" class="empty-note">មិនទាន់មានទិន្នន័យ។</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div style="margin-top: 20px;">
-            {{ $customerActivity->links() }}
-        </div>
-        <div style="margin-top: 20px;">
-            <a href="{{ route('reports.dashboard') }}" class="btn"
-                style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
-                Back to Dashboard
-            </a>
-        </div>
+
+        <div class="pager-wrap">{{ $customerActivity->links() }}</div>
     </div>
 @endsection

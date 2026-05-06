@@ -488,7 +488,7 @@
                       <div class="col-md-6">
                             <div class="od-field">
                                 <label class="od-label">ចំនួនកេស</label>
-                                <input type="number" name="box_qty" class="form-control" min="0" value="{{ old('box_qty', 0) }}">
+                                <input type="number" name="box_qty" id="box_qty" class="form-control" min="1" value="{{ old('box_qty', $order->box_qty ?? 1) }}">
                             </div>
                         </div>
 
@@ -523,6 +523,11 @@
 <script>
     const exchangeRate = 4000;
     let cart = @json($initialCart);
+    const originalDeliveryId = @json((string) $order->delivery_id);
+    const originalBoxQty = Math.max(parseInt(@json($order->box_qty ?? 1), 10) || 1, 1);
+    const originalDeliveryFeeKhr = parseFloat(@json((float) $order->delivery_fee_khr)) || 0;
+    const originalDeliveryUnitKhr = originalBoxQty > 0 ? originalDeliveryFeeKhr / originalBoxQty : 0;
+    let deliverySelectionChanged = false;
 
     $(document).ready(function () {
         $('.select2-customer').select2({
@@ -532,7 +537,11 @@
         });
 
         $('#customer_id').on('change', updateCustomerInfo).trigger('change');
-        $('#delivery_id').on('change', renderCart);
+        $('#delivery_id').on('change', function () {
+            deliverySelectionChanged = true;
+            renderCart();
+        });
+        $('#box_qty').on('change input', renderCart);
         renderCart();
     });
 
@@ -579,7 +588,13 @@
     }
 
     function getDeliveryFeeKhr() {
-        return parseFloat($('#delivery_id option:selected').data('price') || 0) || 0;
+        const selectedDeliveryId = String($('#delivery_id').val() || '');
+        const isOriginalDelivery = selectedDeliveryId === originalDeliveryId;
+        const deliveryPriceKhr = isOriginalDelivery && !deliverySelectionChanged
+            ? originalDeliveryUnitKhr
+            : (parseFloat($('#delivery_id option:selected').data('price') || 0) || 0);
+        const boxQty = Math.max(parseInt($('#box_qty').val() || 1, 10) || 1, 1);
+        return deliveryPriceKhr * boxQty;
     }
 
     function renderCart() {

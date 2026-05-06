@@ -9,6 +9,7 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'delivery_id',
+        'box_qty',
         'user_id',
         'prepared_by',
         'prepared_at',
@@ -35,6 +36,7 @@ class Order extends Model
         'delivery_fee_khr' => 'decimal:2',
         'delivery_fee_usd' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'box_qty' => 'integer',
         'stock_deducted' => 'boolean',
     ];
 

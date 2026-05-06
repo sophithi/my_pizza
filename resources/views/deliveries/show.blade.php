@@ -14,7 +14,7 @@
         }
 
         .show-container {
-            max-width: 1080px;
+            max-width: 1180px;
             margin: 24px auto;
             padding: 0 24px 48px;
         }
@@ -194,7 +194,7 @@
         /* ── Stats ── */
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
 
@@ -354,6 +354,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .stats-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
             .show-header {
                 flex-direction: column;
                 align-items: flex-start;
@@ -372,13 +376,21 @@
                 </div>
             @endif
 
-            <a href="{{ route('deliveries.index') }}" class="show-back">
+            <a href="{{ route('deliveries.index', request()->only('filter', 'start_date', 'end_date')) }}" class="show-back">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
 
             <div class="show-header">
                 <div>
                     <h1 class="show-title">{{ $delivery->delivery_name }}</h1>
+                    @if($startDate && $endDate)
+                        <p class="show-subtitle">
+                            {{ \Illuminate\Support\Carbon::parse($startDate)->format('Y-m-d') }}
+                            @if($startDate !== $endDate)
+                                - {{ \Illuminate\Support\Carbon::parse($endDate)->format('Y-m-d') }}
+                            @endif
+                        </p>
+                    @endif
                 </div>
                 <div class="header-actions">
                     <a href="{{ route('deliveries.edit', $delivery) }}" class="btn btn-primary">
@@ -395,12 +407,11 @@
             </div>
 
             @php
-                $caseUnit = 5000;
-                $oneCasePrice = $caseUnit;
-                $twoCasePrice = $caseUnit * 2;
                 $totalFee = $delivery->orders->sum('delivery_fee_khr');
                 $totalAmount = $delivery->orders->sum(fn($o) => $o->invoice?->total_amount ?? $o->total_amount ?? 0);
                 $orderCount = $delivery->orders_count ?? $delivery->orders->count();
+                $totalBoxes = $delivery->orders->sum(fn($o) => max((int) ($o->box_qty ?? 1), 1));
+                $currentUnitPrice = (float) $delivery->delivery_price_khr;
             @endphp
 
             <div class="show-grid">
@@ -457,6 +468,7 @@
                                         <th>ឈ្មោះអតិថិជន</th>
                                         <th>ទំនាក់ទំនង</th>
                                         <th style="text-align:center;">ចំនួនកេស</th>
+                                        <th style="text-align:right;">តម្លៃ/កេស</th>
                                         <th style="text-align:right;">ថ្លៃដឹក</th>
                                         <th style="text-align:right;">តម្លៃសរុប</th>
                                     </tr>
@@ -467,19 +479,20 @@
                                             $invoice = $order->invoice;
                                             $customer = $order->customer;
                                             $deliveryFee = (float) $order->delivery_fee_khr;
-                                            $caseCount = $deliveryFee > 0 ? $deliveryFee / $caseUnit : 0;
-                                            $caseLabel = $caseCount > 0
-                                                ? ($caseCount == floor($caseCount) ? number_format($caseCount, 0) : number_format($caseCount, 2))
-                                                : '0';
-                                            $customerName = $customer?->customer_name ?? 'N/A';
-                                            $customerPhone = $customer?->customer_phone ?? '—';
+                                            $caseCount = max((int) ($order->box_qty ?? 1), 1);
+                                            $unitFee = $caseCount > 0 ? $deliveryFee / $caseCount : 0;
+                                            $customerName = $customer?->name ?? 'N/A';
+                                            $customerPhone = $customer?->phone ?? '—';
                                             $totalPrice = $invoice?->total_amount ?? $order->total_amount ?? 0;
                                         @endphp
                                         <tr>
                                             <td><span class="badge-inv">{{ $invoice?->invoice_number ?? 'N/A' }}</span></td>
                                             <td>{{ $customerName }}</td>
                                             <td>{{ $customerPhone }}</td>
-                                            <td style="text-align:center; font-weight:700;">{{ $caseLabel }}</td>
+                                            <td style="text-align:center; font-weight:700;">{{ number_format($caseCount, 0) }}</td>
+                                            <td style="text-align:right; font-weight:700;">
+                                                ៛{{ number_format($unitFee, 0) }}
+                                            </td>
                                             <td style="text-align:right; font-weight:700; color:var(--accent);">
                                                 ៛{{ number_format($deliveryFee, 0) }}
                                             </td>
@@ -489,7 +502,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6">
+                                            <td colspan="7">
                                                 <div class="empty-orders">
                                                     <i class="fas fa-file-invoice"></i>
                                                     មិនមានវិក្ក័យបត្រ.
@@ -520,64 +533,28 @@
                                     <div class="stat-lbl">ចំនួនវិក្ក័យបត្រ</div>
                                 </div>
                                 <div class="stat-card">
+                                    <div class="stat-val">{{ number_format($totalBoxes, 0) }}</div>
+                                    <div class="stat-lbl">សរុបកេស</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-val" style="font-size: 15px;">៛{{ number_format($currentUnitPrice, 0) }}</div>
+                                    <div class="stat-lbl">តម្លៃបច្ចុប្បន្ន/កេស</div>
+                                </div>
+                                <div class="stat-card">
                                     <div class="stat-val" style="font-size: 15px;">៛{{ number_format($totalFee, 0) }}</div>
-                                    <div class="stat-lbl">សរុបចំនួនថ្លៃដឹក</div>
+                                    <div class="stat-lbl">សរុបថ្លៃដឹក</div>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-val" style="font-size: 15px;">${{ number_format($totalAmount, 0) }}
                                     </div>
-                                    <div class="stat-lbl">សរុប</div>
+                                    <div class="stat-lbl">សរុបវិក្ក័យបត្រ</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    {{-- Case / Price selector --}}
-                    <!-- <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-icon"><i class="fas fa-money-bill-wave"></i></div>
-                            <p class="card-header-title">តម្លៃ</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="case-selector">
-                                <label class="case-option-card selected" id="card-case1">
-                                    <input type="radio" name="case" value="1" checked onchange="selectCase(1)">
-                                    <div>
-                                        <div class="case-label">1 កេស</div>
-                                        <div class="case-price">៛{{ number_format($oneCasePrice, 0) }}</div>
-                                    </div>
-                                </label>
-                                <label class="case-option-card" id="card-case2">
-                                    <input type="radio" name="case" value="2" onchange="selectCase(2)">
-                                    <div>
-                                        <div class="case-label">2 កេស</div>
-                                        <div class="case-price">៛{{ number_format($twoCasePrice, 0) }}</div>
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="selected-price-display">
-                                <span class="price-label" id="selectedCaseText">Selected: 1 កេស</span>
-                                <span class="price-value" id="deliveryPrice">៛{{ number_format($oneCasePrice, 0) }}</span>
-                            </div>
-                        </div>
-                    </div> -->
-
                 </div>
             </div>
 
         </div>
     </div>
 @endsection
-
-@push('scripts')
-    <script>
-        const prices = { 1: {{ $oneCasePrice }}, 2: {{ $twoCasePrice }} };
-
-        function selectCase(num) {
-            document.getElementById('card-case1').classList.toggle('selected', num === 1);
-            document.getElementById('card-case2').classList.toggle('selected', num === 2);
-            document.getElementById('deliveryPrice').textContent = '៛' + prices[num].toLocaleString();
-            document.getElementById('selectedCaseText').textContent = 'Selected: ' + num + ' កេស';
-        }
-    </script>
-@endpush
