@@ -999,12 +999,13 @@
 
                 <div class="products-grid" id="productsGrid">
                     @forelse($products as $product)
+                    @php($productImageUrl = $product->imageUrl())
                     <div class="product-card" data-product-name="{{ Str::lower($product->name) }}" onclick="addToCart({{ $product->id }}, @js($product->name),
                     {{ $product->price_usd }},
                      {{ $product->price_khr }},
-                     @js(asset('storage/' . $product->image)))">
-                        @if($product->image)
-                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="product-image">
+                     @js($productImageUrl))">
+                        @if($productImageUrl)
+                            <img src="{{ $productImageUrl }}" alt="{{ $product->name }}" class="product-image">
                         @else
                             <div style="width: 100%; height: 88px; background: var(--bg); border-radius: 6px;
                             display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">

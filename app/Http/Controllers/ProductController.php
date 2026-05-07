@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProductController extends Controller
 {
@@ -25,6 +26,32 @@ class ProductController extends Controller
     {
         $exchangeRate = 4000;
         return view('products.create', compact('exchangeRate'));
+    }
+
+    public function image(string $filename): BinaryFileResponse
+    {
+        $relativePath = str_replace('\\', '/', ltrim($filename, '/'));
+
+        abort_if(str_contains($relativePath, '..'), 404);
+
+        if (!str_starts_with($relativePath, 'products/')) {
+            $relativePath = 'products/' . $relativePath;
+        }
+
+        $candidates = [
+            storage_path('app/public/' . $relativePath),
+            public_path('storage/' . $relativePath),
+            base_path('storage/' . $relativePath),
+            base_path('public/storage/' . $relativePath),
+        ];
+
+        foreach ($candidates as $path) {
+            if (is_file($path)) {
+                return response()->file($path);
+            }
+        }
+
+        abort(404);
     }
 
     /**

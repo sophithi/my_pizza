@@ -102,6 +102,9 @@ Route::middleware('auth')->group(function () {
 
     // Product management
     Route::middleware('role:admin,manager,staff')->group(function () {
+        Route::get('products/images/{filename}', [ProductController::class, 'image'])
+            ->where('filename', '.*')
+            ->name('products.image');
         Route::resource('products', ProductController::class);
     });
 

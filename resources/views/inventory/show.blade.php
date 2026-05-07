@@ -237,8 +237,8 @@
         <!-- LEFT: Product Image -->
         <div class="prod-img-box">
             <div class="prod-img {{ !$inventory->product->image ? 'no-img' : '' }}">
-                @if($inventory->product->image)
-                    <img src="{{ asset('storage/' . $inventory->product->image) }}" alt="{{ $inventory->product->name }}">
+                @if($inventory->product->imageUrl())
+                    <img src="{{ $inventory->product->imageUrl() }}" alt="{{ $inventory->product->name }}">
                 @else
                     <i class="fas fa-image"></i>
                 @endif

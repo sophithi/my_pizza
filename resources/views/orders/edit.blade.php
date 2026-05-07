@@ -342,7 +342,7 @@
                 'price_khr' => (float) ($product?->price_khr ?? $unitPrice * 4000),
                 'qty' => $qty,
                 'discount' => $unitPrice > 0 ? round((1 - ($effectiveUnit / $unitPrice)) * 100, 2) : 0,
-                'image' => $product?->image ? asset('storage/' . $product->image) : null,
+                'image' => $product?->imageUrl(),
             ],
         ];
     });
@@ -410,9 +410,10 @@
                     <h3 class="section-title"><i class="fas fa-pizza-slice"></i> ទំនិញ</h3>
                     <div class="products-grid">
                         @foreach($products as $product)
-                            <div class="product-card" onclick="addToCart({{ $product->id }}, @js($product->name), {{ (float) $product->price_usd }}, {{ (float) $product->price_khr }}, @js($product->image ? asset('storage/' . $product->image) : null))">
-                                @if($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="product-image">
+                            @php($productImageUrl = $product->imageUrl())
+                            <div class="product-card" onclick="addToCart({{ $product->id }}, @js($product->name), {{ (float) $product->price_usd }}, {{ (float) $product->price_khr }}, @js($productImageUrl))">
+                                @if($productImageUrl)
+                                    <img src="{{ $productImageUrl }}" alt="{{ $product->name }}" class="product-image">
                                 @else
                                     <div class="product-image d-flex align-items-center justify-content-center">
                                         <i class="fas fa-image text-muted"></i>

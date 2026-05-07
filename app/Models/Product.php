@@ -23,6 +23,15 @@ class Product extends Model
         'price_usd' => 'decimal:2',
     ];
 
+    public function imageUrl(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        return route('products.image', ['filename' => ltrim($this->image, '/')]);
+    }
+
     /**
      * Get the inventory record associated with the product.
      */
