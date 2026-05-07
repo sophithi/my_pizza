@@ -586,7 +586,7 @@
 
             {{-- Packing labels (admin + staff inventory + staff office + manager) --}}
             @if($isAdmin || $isManager || $isStaff || $isInventory)
-                <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') || request()->is('print*') ? 'active' : '' }}">
+                <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') ? 'active' : '' }}">
                     <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
                 </a>
             @endif

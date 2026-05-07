@@ -182,12 +182,33 @@
             text-align: right;
         }
 
+        .free-products-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+            text-align: left;
+        }
+
+        .free-product-item {
+            margin: 2px 0 2px 12px;
+            color: #059669;
+            text-align: left;
+        }
+
+        .notes-section-title {
+            font-weight: 600;
+            margin: 8px 0 4px;
+            color: #333;
+            font-size: 14px;
+        }
+
         .notes {
             margin-top: 14px;
             padding: 10px;
             background: #f8f9fa;
             border-radius: 6px;
             font-size: 14px;
+            text-align: left;
         }
 
         .notes-title {
@@ -220,18 +241,107 @@
         }
 
         @media print {
+            @page {
+                size: A5 portrait;
+                margin: 5mm;
+            }
+
+            html,
             body {
                 padding: 0;
+                margin: 0;
+                font-size: 11px;
+                line-height: 1.25;
             }
 
             .sticker {
                 border: none;
-                padding: 0;
+                padding: 0 1mm;
                 max-width: 100%;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
 
             .no-print {
                 display: none !important;
+            }
+
+            .header {
+                margin-bottom: 8px;
+                padding-bottom: 6px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .invoice-number {
+                font-size: 15px;
+            }
+
+            .invoice-details p,
+            .customer-info p,
+            .invoice-info p,
+            .customer-line,
+            th,
+            td,
+            .total-row,
+            .notes,
+            .footer {
+                font-size: 11px;
+            }
+
+            .section {
+                margin-bottom: 7px;
+            }
+
+            .section-title {
+                font-size: 11px;
+            }
+
+            table {
+                margin: 6px 0;
+            }
+
+            th,
+            td {
+                padding: 4px 6px;
+            }
+
+            .totals {
+                margin-top: 4px;
+            }
+
+            .totals-box {
+                width: 205px;
+            }
+
+            .total-row {
+                padding: 3px 0;
+            }
+
+            .grand-total {
+                padding: 6px;
+                margin-top: 4px;
+                font-size: 12px;
+            }
+
+            .grand-total .amount {
+                font-size: 14px;
+            }
+
+            .notes {
+                margin-top: 8px;
+                padding: 7px;
+            }
+
+            .notes-section-title {
+                margin-top: 5px;
+            }
+
+            .footer {
+                margin-top: 8px;
+                padding-top: 6px;
             }
         }
     </style>
@@ -326,7 +436,14 @@
 
         @php
             $orderItems = $invoice->order?->items ?? collect();
+            $paidItems = $orderItems->filter(function ($item) {
+                return (float) $item->unit_price > 0;
+            });
             $subtotalKhr = $orderItems->sum(function ($item) {
+                if ((float) $item->unit_price <= 0) {
+                    return 0;
+                }
+
                 return (float) ($item->product?->price_khr ?? 0) * (float) $item->quantity;
             });
             $discountKhr = (float) $invoice->discount_amount * 4000;
@@ -344,8 +461,8 @@
                 </tr>
             </thead>
             <tbody>
-                @if($orderItems->count() > 0)
-                    @foreach ($orderItems as $item)
+                @if($paidItems->count() > 0)
+                    @foreach ($paidItems as $item)
                         @php
                             $unitPriceKhr = (float) ($item->product?->price_khr ?? 0);
                             $totalPriceKhr = $unitPriceKhr * (float) $item->quantity;
@@ -405,22 +522,20 @@
 
 
 
-        <div class="free-products">
-          @if($invoice->order && count($invoice->order->freeitems ?? []) > 0)
-                <div style="margin-top: 10px;">
-                    <strong>Free Items:</strong>
+        @if(($invoice->order && $invoice->order->freeItems->count() > 0) || $invoice->notes)
+            <div class="notes">
+                @if($invoice->order && $invoice->order->freeItems->count() > 0)
+                    <div class="free-products-title">free ជូនអតិថិជន</div>
                     @foreach($invoice->order->freeItems as $freeItem)
-                        <p style="margin: 2px 0; color: #059669;">
+                        <p class="free-product-item">
                             {{ $freeItem->product->name ?? 'N/A' }} (x{{ $freeItem->quantity ?? 1 }})
                         </p>
                     @endforeach
-                </div>
-            @endif
-        </div>
-        @if($invoice->notes)
-            <div class="notes">
-                <div class="notes-title">ផ្សេងៗ</div>
-                {{ $invoice->notes }}
+                @endif
+                @if($invoice->notes)
+                    <div class="notes-section-title">ផ្សេងៗ</div>
+                    <div>{{ $invoice->notes }}</div>
+                @endif
             </div>
         @endif
 

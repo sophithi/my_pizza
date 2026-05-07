@@ -65,6 +65,22 @@ class Order extends Model
     }
 
     /**
+     * Get paid items in this order.
+     */
+    public function paidItems()
+    {
+        return $this->hasMany(OrderItem::class)->where('unit_price', '>', 0);
+    }
+
+    /**
+     * Get free items in this order.
+     */
+    public function freeItems()
+    {
+        return $this->hasMany(OrderItem::class)->where('unit_price', '=', 0);
+    }
+
+    /**
      * Get all products in this order.
      */
     public function products()

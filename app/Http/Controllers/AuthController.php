@@ -27,12 +27,17 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string',
             'password' => 'required|min:6',
         ]);
 
-        // Attempt to authenticate
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        $login = trim($request->login);
+        $user = User::where('name', $login)
+            ->orWhere('email', $login)
+            ->first();
+
+        // Attempt to authenticate with the matching account.
+        if ($user && Auth::attempt(['email' => $user->email, 'password' => $request->password])) {
             $user = Auth::user();
 
             // Record login activity
@@ -55,8 +60,8 @@ class AuthController extends Controller
         }
 
         return back()
-            ->withInput($request->only('email'))
-            ->withErrors(['email' => 'Invalid email or password']);
+            ->withInput($request->only('login'))
+            ->withErrors(['login' => 'Invalid username or password']);
     }
 
     /**

@@ -87,7 +87,7 @@ Route::middleware('auth')->group(function () {
 
 
         // Payment management
-        Route::resource('payments', PaymentController::class);
+        Route::resource('payments', PaymentController::class)->only(['index', 'store', 'update']);
         Route::get('payments/export/excel', [PaymentController::class, 'exportExcel'])->name('payments.export.excel');
         Route::get('payments/export/pdf', [PaymentController::class, 'exportPdf'])->name('payments.export.pdf');
         Route::post('orders/{order}/payments', [PaymentController::class, 'recordOrderPayment'])->name('orders.payments.store');
@@ -113,7 +113,7 @@ Route::middleware('auth')->group(function () {
     // ============================================
     // ALL USERS - Orders (view, create, edit)
     // ============================================
-    Route::middleware('role:admin,manager,staff,')->group(function () {
+    Route::middleware('role:admin,manager,staff')->group(function () {
         Route::get('orders', function () {
             return redirect()->route('orders.create');
         })->name('orders.index');
@@ -137,7 +137,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:admin,manager,staff_inventory')->group(function () {
         Route::get('invoices/export/report', [InvoiceController::class, 'exportReport'])->name('invoices.export');
-        Route::resource('invoices', InvoiceController::class);
+        Route::resource('invoices', InvoiceController::class)->only(['edit', 'update', 'destroy']);
         Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     });
 
@@ -148,10 +148,6 @@ Route::middleware('auth')->group(function () {
         Route::get('packing/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('packing.prep');
         Route::get('packing/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('packing.customer');
 
-        // Legacy URLs kept so older buttons/bookmarks do not break.
-        Route::get('print/index', [InvoiceController::class, 'printIndex'])->name('print.index');
-        Route::get('print/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('print.prep');
-        Route::get('print/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('print.customer');
     });
 
     // Invoice index/show view access. Staff can only view; admin/manager/staff_inventory use full routes above for write actions.

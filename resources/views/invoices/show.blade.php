@@ -487,16 +487,23 @@
                         </thead>
                         <tbody>
                             @forelse($items as $item)
+                                @php
+                                    $isFreeItem = (float) $item->unit_price <= 0;
+                                @endphp
                                 <tr>
                                     <td class="fw-bold">{{ $item->product?->name ?? 'N/A' }}</td>
                                     <td class="text-center">{{ number_format($item->quantity) }}</td>
                                     <td class="text-end">
-                                        <strong>${{ number_format($item->unit_price, 2) }}</strong>
-                                        <div class="text-muted small">៛{{ number_format($item->unit_price * 4000) }}</div>
+                                        @unless($isFreeItem)
+                                            <strong>${{ number_format($item->unit_price, 2) }}</strong>
+                                            <div class="text-muted small">៛{{ number_format($item->unit_price * 4000) }}</div>
+                                        @endunless
                                     </td>
                                     <td class="text-end">
-                                        <strong>${{ number_format($item->total_price, 2) }}</strong>
-                                        <div class="text-muted small">៛{{ number_format($item->total_price * 4000) }}</div>
+                                        @unless($isFreeItem)
+                                            <strong>${{ number_format($item->total_price, 2) }}</strong>
+                                            <div class="text-muted small">៛{{ number_format($item->total_price * 4000) }}</div>
+                                        @endunless
                                     </td>
                                 </tr>
                             @empty

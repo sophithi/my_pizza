@@ -333,7 +333,7 @@
                                     <button class="btn btn-sm btn-outline-secondary"
                                         onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
                                         data-bs-target="#paymentModal">
-                                        {{ $payment->payment_id ? 'check' : 'កត់ត្រា' }}
+                                        {{ $payment->payment_id ? 'ពិនិត្យការទូទាត់' : 'ពិនិត្យការទូទាត់' }}
                                     </button>
                                 </td>
                             </tr>

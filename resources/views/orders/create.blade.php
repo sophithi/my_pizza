@@ -48,13 +48,46 @@
         font-size: 20px;
     }
 
+    .product-tools {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .product-search {
+        position: relative;
+    }
+
+    .product-search i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 13px;
+        pointer-events: none;
+    }
+
+    .product-search input {
+        padding-left: 38px;
+    }
+
+    .product-count {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 16px;
-        max-height: 750px;
+        grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+        gap: 12px;
+        max-height: 560px;
         overflow-y: auto;
-        padding: 24px;
+        padding: 14px;
         background: var(--surface);
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -70,12 +103,13 @@
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
+        min-height: 184px;
     }
 
     .product-card:hover {
         border-color: var(--accent);
-        box-shadow: 0 8px 16px rgba(232, 93, 36, 0.2);
-        transform: translateY(-6px);
+        box-shadow: 0 6px 14px rgba(232, 93, 36, 0.16);
+        transform: translateY(-2px);
     }
 
     .product-card.selected {
@@ -103,7 +137,7 @@
 
     .product-image {
         width: 100%;
-        height: 100px;
+        height: 88px;
         object-fit: cover;
         border-radius: 6px;
         margin-bottom: 10px;
@@ -123,6 +157,10 @@
         font-size: 13px;
         color: var(--accent);
         font-weight: 700;
+    }
+
+    .product-card.is-hidden {
+        display: none;
     }
 
     .card {
@@ -324,6 +362,17 @@
         font-size: 13px;
         font-weight: 600;
         transition: all 0.2s ease;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
     }
 
     .qty-stepper .qty-input {
@@ -706,6 +755,19 @@
     }
 
     @media (max-width: 576px) {
+        .product-tools {
+            grid-template-columns: 1fr;
+        }
+
+        .product-count {
+            text-align: right;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+            max-height: 420px;
+        }
+
         .invoice-item-actions,
         .order-details-grid,
         .button-group {
@@ -915,12 +977,6 @@
                     <div class="customer-info-item">
                         <strong>ឈ្មោះ:</strong> <span id="customer_name">-</span>
                     </div>
-                    <!-- <div class="customer-info-item">
-                        <strong>លេខទំនាក់ទំនង:</strong> <span id="customer_phone">-</span>
-                    </div>
-                    <div class="customer-info-item">
-                        <strong>ទីតាំង:</strong> <span id="customer_location">-</span>
-                    </div> -->
                 </div>
             </div>
         </div>
@@ -931,16 +987,26 @@
                      សូមជ្រើសរើសទំនិញ
                 </h4>
 
+                <div class="product-tools">
+                    <div class="product-search">
+                        <i class="fas fa-search"></i>
+                        <input type="search" id="productSearch" class="form-control" placeholder="ស្វែងរកទំនិញ">
+                    </div>
+                    <div class="product-count">
+                        <span id="visibleProductCount">{{ $products->count() }}</span> / {{ $products->count() }}
+                    </div>
+                </div>
+
                 <div class="products-grid" id="productsGrid">
                     @forelse($products as $product)
-                    <div class="product-card" onclick="addToCart({{ $product->id }}, '{{ $product->name }}',
+                    <div class="product-card" data-product-name="{{ Str::lower($product->name) }}" onclick="addToCart({{ $product->id }}, @js($product->name),
                     {{ $product->price_usd }},
                      {{ $product->price_khr }},
-                     '{{ asset('storage/' . $product->image) }}')">
+                     @js(asset('storage/' . $product->image)))">
                         @if($product->image)
                             <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="product-image">
                         @else
-                            <div style="width: 100%; height: 100px; background: var(--bg); border-radius: 6px;
+                            <div style="width: 100%; height: 88px; background: var(--bg); border-radius: 6px;
                             display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
                                 <i class="fas fa-image" style="font-size: 24px; color: var(--text-muted);"></i>
                             </div>
@@ -1155,6 +1221,10 @@
             $('#customer_id').trigger('change');
         }
 
+        $('#productSearch').on('input', function() {
+            filterProducts(this.value);
+        });
+
         // Discount checkbox
         // Tax checkbox
         $('#applyTax').on('change', function() {
@@ -1169,6 +1239,22 @@
             calculateTotal();
         });
     });
+
+    function filterProducts(searchValue) {
+        const query = String(searchValue || '').trim().toLowerCase();
+        let visibleCount = 0;
+
+        $('.product-card').each(function() {
+            const productName = String($(this).data('product-name') || '');
+            const isMatch = !query || productName.includes(query);
+            $(this).toggleClass('is-hidden', !isMatch);
+            if (isMatch) {
+                visibleCount += 1;
+            }
+        });
+
+        $('#visibleProductCount').text(visibleCount);
+    }
 
     function addToCart(productId, productName, price, priceKhr, imageUrl) {
         if (cart[productId]) {

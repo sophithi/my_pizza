@@ -222,7 +222,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($invoice->order->items as $i => $item)
+                @foreach($invoice->order->items->filter(fn($item) => (float) $item->unit_price > 0)->values() as $i => $item)
                     <tr>
                         <td>{{ $i + 1 }}</td>
                         <td>

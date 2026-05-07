@@ -226,14 +226,14 @@
                 <form action="{{ route('login.post') }}" method="POST" autocomplete="off">
                     @csrf
 
-                    <!-- Email -->
+                    <!-- Username -->
                     <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input type="email" id="email" name="email"
-                            class="form-control @error('email') is-invalid @enderror"
-                            placeholder="user1@pizzahappyfamily.com" value="{{ old('email') }}" required autofocus
-                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                        @error('email')
+                        <label class="form-label" for="login">Username</label>
+                        <input type="text" id="login" name="login"
+                            class="form-control @error('login') is-invalid @enderror"
+                            placeholder="Enter Username" value="{{ old('login') }}" required autofocus
+                            autocomplete="username" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        @error('login')
                             <span class="error-text">{{ $message }}</span>
                         @enderror
                     </div>
