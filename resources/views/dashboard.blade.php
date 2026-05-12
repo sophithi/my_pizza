@@ -510,7 +510,7 @@
                         @endforeach
                     </div>
 
-                    <div class="status-grid">
+                    <!-- <div class="status-grid">
                         <div class="status-tile">
                             <strong>{{ $order_status['pending'] }}</strong>
                             <span>Pending Orders</span>
@@ -527,7 +527,7 @@
                             <strong>{{ $stats['recovery_rate'] }}%</strong>
                             <span>Completion Rate</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 

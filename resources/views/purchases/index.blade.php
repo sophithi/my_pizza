@@ -291,6 +291,11 @@
                                         <span class="expense-khr">៛{{ number_format($purchase->total_amount * $exchangeRate) }}</span>
                                     </td>
                                     <td>
+                                        <span class="text_description">
+
+                                        </span>
+                                    </td>
+                                    <td>
                                         <span class="expense-status {{ $purchase->status }}">
                                             {{ $statusLabels[$purchase->status] ?? ucfirst($purchase->status) }}
                                         </span>

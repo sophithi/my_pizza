@@ -245,7 +245,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" style="text-align:center;padding:20px;color:#999">មិនមានទិន្នន័យការទូទាត់ទ</td>
+                    <td colspan="8" style="text-align:center;padding:20px;color:#999">មិនមានទិន្នន័យការទូទាត់</td>
                 </tr>
             @endforelse
         </tbody>

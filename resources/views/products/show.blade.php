@@ -17,7 +17,8 @@
                         <div style="text-align: right;">
                             <h3 style="font-size: 24px; color: #e85d24; font-weight: 700; margin: 0;">
                                 ${{ number_format($product->price_usd, 2) }}</h3>
-                            <p style="color: #6c757d; font-size: 12px; margin: 4px 0 0 0;">ខ្នាត: {{ $unitLabels[$product->unit] ?? $product->unit }} </p>
+                            <p style="color: #6c757d; font-size: 12px; margin: 4px 0 0 0;">
+                                ខ្នាត: {{ $unitLabels[$product->unit] ?? $product->unit }} </p>
                         </div>
                     </div>
 
@@ -64,7 +65,7 @@
             @if($product->inventory)
                 <div class="card border-0 shadow-sm" style="border-radius: 12px;">
                     <div class="card-body" style="padding: 28px;">
-                        <h4 style="font-size: 18px; font-weight: 700; color: #1a1d29; margin-bottom: 20px;">ព័ត៌មានឃ្លាំង</h4>
+                        <h4 style="font-size: 18px; font-weight: 700; color: #1a1d29; margin-bottom: 20px;">ព័ត៌មាននៃស្តុកទំនិញ</h4>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div>
                                 <p style="color: #6c757d; font-weight: 600; margin-bottom: 4px;">ស្តុកបច្ចុប្បន្ន</p>
