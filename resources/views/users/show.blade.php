@@ -171,7 +171,7 @@
         <div class="user-hero-pattern"></div>
         <div class="user-hero-left">
             @if($user->profile_image)
-                <img src="{{ Storage::url($user->profile_image) }}" alt="{{ $user->name }}" class="user-hero-avatar">
+                <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}" class="user-hero-avatar">
             @else
                 <div class="user-hero-avatar-ph">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
             @endif
