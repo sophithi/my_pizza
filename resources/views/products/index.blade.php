@@ -148,9 +148,7 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $products->links() }}
-    </div>
+    
 
 @endsection
 <!-- <article class="menu-card" data-category="package3">
