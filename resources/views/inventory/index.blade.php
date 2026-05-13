@@ -890,9 +890,6 @@
                 </div>
             </div>
 
-            <div class="mt-4">
-                {{ $inventories->links() }}
-            </div>
         @else
             <div class="empty-state">
                 <i class="fas fa-box-open"></i>
