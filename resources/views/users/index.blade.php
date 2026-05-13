@@ -46,7 +46,7 @@
                             <tr style="border-bottom: 1px solid #e9ecef;">
                                 <td style="padding: 12px;">
                                     @if($user->profile_image)
-                                        <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}"
+                                        <img src="{{ Storage::url($user->profile_image) }} " alt="{{ $user->name }}"
                                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                                     @else
                                         <div
@@ -123,8 +123,6 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $users->links() }}
-    </div>
+
 
 @endsection

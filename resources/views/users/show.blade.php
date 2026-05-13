@@ -171,7 +171,7 @@
         <div class="user-hero-pattern"></div>
         <div class="user-hero-left">
             @if($user->profile_image)
-                <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}" class="user-hero-avatar">
+                <img src="{{ Storage::url($user->profile_image) }}" alt="{{ $user->name }}" class="user-hero-avatar">
             @else
                 <div class="user-hero-avatar-ph">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
             @endif
@@ -196,7 +196,7 @@
 
     <!-- Filter Bar -->
     <form class="filter-bar" method="GET" action="{{ route('users.show', $user) }}" id="filterForm">
-    
+
         <input type="hidden" name="period" id="periodInput" value="{{ $period }}">
 
         <button type="submit" class="filter-btn {{ $period === 'today' ? 'active' : '' }}" onclick="document.getElementById('periodInput').value='today'">
@@ -221,7 +221,7 @@
     </form>
 
     <!-- Period Label -->
-    <div style="margin-bottom: 16px;"> 
+    <div style="margin-bottom: 16px;">
         <span class="period-label">
             <i class="fas fa-clock"></i>
             {{ $start->translatedFormat('d M Y') }} — {{ $end->translatedFormat('d M Y') }}
