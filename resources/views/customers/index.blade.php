@@ -334,7 +334,7 @@
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>សកម្ម</option>
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>អសកម្ម</option>
                 </select>
-          
+
                 <a href="{{ route('customers.index') }}" class="customer-btn customer-btn-soft">
                     <i class="fas fa-rotate-left"></i>
                 </a>
@@ -449,9 +449,7 @@
             </div>
         </div>
 
-        <div class="mt-4">
-            {{ $customers->links() }}
-        </div>
+    
     </div>
 
     @push('scripts')
