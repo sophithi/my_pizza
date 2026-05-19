@@ -152,8 +152,47 @@ class OrderController extends Controller
         $products = \App\Models\Product::all();
         $deliveries = \App\Models\Delivery::all();
 
-        return view('orders.edit', compact('order', 'customers', 'products', 'deliveries'));
+        // Prepare data for JSON encoding
+        $existingOrderItems = $order->paidItems->map(fn($item) => [
+            'product_id'      => $item->product_id,
+            'quantity'        => $item->quantity,
+            'unit_price'      => $item->unit_price,
+            'discount_percent'=> $item->discount_percent ?? 0,
+        ])->values();
+
+        $existingFreeProducts = $order->freeItems->map(fn($fp) => [
+            'product_id' => $fp->product_id,
+            'qty'        => $fp->quantity ?? 1,
+        ])->values();
+
+        $deliveryOptions = $deliveries->map(fn($d) => [
+            'id' => $d->id,
+            'name' => $d->delivery_name,
+            'price_khr' => $d->delivery_price_khr
+        ])->values();
+
+        // allProducts as keyed object (for lookup by ID)
+        $allProducts = $products->keyBy('id')->map(fn($p) => [
+            'id'        => $p->id,
+            'name'      => $p->name,
+            'price_usd' => $p->price_usd,
+            'price_khr' => $p->price_khr,
+            'image_url' => $p->imageUrl(),
+        ]);
+
+        // productsArray for dropdowns (regular array)
+        $productsArray = $products->map(fn($p) => [
+            'id'   => $p->id,
+            'name' => $p->name,
+        ])->values();
+
+        return view('orders.edit', compact(
+            'order', 'customers', 'products', 'deliveries',
+            'existingOrderItems', 'existingFreeProducts',
+            'deliveryOptions', 'allProducts', 'productsArray'
+        ));
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -201,6 +240,21 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'total_price' => $item['total_price'],
+                ]);
+            }
+
+            foreach (($validated['free_products'] ?? []) as $freeProduct) {
+                if (empty($freeProduct['product_id']) || empty($freeProduct['qty'])) {
+                    continue;
+                }
+
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $freeProduct['product_id'],
+                    'delivery_id' => $delivery?->id,
+                    'quantity' => (int) $freeProduct['qty'],
+                    'unit_price' => 0,
+                    'total_price' => 0,
                 ]);
             }
 

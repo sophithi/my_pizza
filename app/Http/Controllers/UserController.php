@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class UserController extends Controller
@@ -47,6 +48,8 @@ class UserController extends Controller
             $file->move(public_path('storage/users'), $filename);
             $validated['profile_image'] = 'storage/users/' . $filename;
         }
+
+        $validated['password'] = Hash::make($validated['password']);
 
         User::create([
             ...$validated,
@@ -136,6 +139,8 @@ class UserController extends Controller
 
         if (empty($validated['password'])) {
             unset($validated['password']);
+        } else {
+            $validated['password'] = Hash::make($validated['password']);
         }
 
         if ($request->hasFile('profile_image')) {

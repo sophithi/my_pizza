@@ -1,693 +1,1574 @@
 @extends('layouts.app')
 
-@section('title', 'កែបញ្ជាទិញ')
+@section('title', 'កែប្រែការបញ្ជាទិញ #{{ $order->id }}')
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    .order-edit {
+    :root {
         --accent: #e85d24;
-        --accent-dark: #d94a10;
-        --border: #e5e7eb;
-        --muted: #6b7280;
-        --surface: #fff;
-        --text: #111827;
-        --bg: #f5f7fa;
-        --danger: #dc2626;
-        --shadow: 0 12px 32px rgba(15, 23, 42, .07);
+        --bg: #f4f5f7;
+        --surface: #ffffff;
+        --border: #e9ecef;
+        --text: #1a1d29;
+        --text-muted: #6c757d;
+        --success: #28a745;
+        --warning: #ffc107;
+        --danger: #dc3545;
     }
 
-    .edit-header {
-        align-items: flex-start;
+    body { background: var(--bg); }
+
+    .page-header {
+        margin-bottom: 20px;
         display: flex;
-        gap: 16px;
         justify-content: space-between;
-        margin-bottom: 16px;
+        align-items: center;
     }
 
-    .edit-title {
-        color: var(--text);
+    .page-title {
         font-size: 28px;
-        font-weight: 900;
+        font-weight: 700;
+        color: var(--text);
         margin: 0;
     }
 
-    .edit-subtitle {
-        color: var(--muted);
-        margin: 6px 0 0;
-    }
-
-    .edit-shell {
-        display: grid;
-        gap: 16px;
-        grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr);
-    }
-
-    .edit-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        box-shadow: var(--shadow);
-        padding: 16px;
-    }
-
-    .section-title {
-        align-items: center;
+    .product-section-title {
+        font-size: 18px;
+        font-weight: 700;
         color: var(--text);
+        margin-bottom: 18px;
         display: flex;
-        font-size: 17px;
-        font-weight: 900;
-        gap: 9px;
-        margin: 0 0 14px;
-    }
-
-    .section-title i {
         align-items: center;
-        background: #fff7ed;
-        border-radius: 8px;
-        color: var(--accent);
-        display: inline-flex;
-        height: 30px;
-        justify-content: center;
-        width: 30px;
-    }
-
-    .form-label {
-        color: var(--text);
-        font-size: 13px;
-        font-weight: 800;
-        margin-bottom: 7px;
-    }
-
-    .form-control,
-    .form-select {
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        min-height: 42px;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(232, 93, 36, .12);
-    }
-
-    .customer-card {
-        background: #f9fafb;
-        border: 1px solid #eef2f7;
-        border-radius: 8px;
-        display: grid;
         gap: 12px;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        margin-top: 12px;
-        padding: 12px;
     }
 
-    .customer-label {
-        color: var(--muted);
+    .product-section-title i {
+        color: var(--accent);
+        font-size: 20px;
+    }
+
+    .product-tools {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .product-search {
+        position: relative;
+    }
+
+    .product-search i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 13px;
+        pointer-events: none;
+    }
+
+    .product-search input {
+        padding-left: 38px;
+    }
+
+    .product-count {
+        color: var(--text-muted);
         font-size: 12px;
         font-weight: 800;
-        margin-bottom: 3px;
-    }
-
-    .customer-value {
-        color: var(--text);
-        font-weight: 800;
-        overflow-wrap: anywhere;
+        white-space: nowrap;
     }
 
     .products-grid {
         display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
         gap: 12px;
-        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
         max-height: 560px;
         overflow-y: auto;
-        padding-right: 4px;
+        padding: 14px;
+        background: var(--surface);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid var(--border);
     }
 
     .product-card {
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        cursor: pointer;
-        min-height: 154px;
-        padding: 10px;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
         text-align: center;
-        transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        min-height: 184px;
     }
 
     .product-card:hover {
         border-color: var(--accent);
-        box-shadow: 0 10px 20px rgba(232, 93, 36, .13);
+        box-shadow: 0 6px 14px rgba(232, 93, 36, 0.16);
         transform: translateY(-2px);
     }
 
+    .product-card.selected {
+        border-color: var(--accent);
+        background: linear-gradient(135deg, rgba(232, 93, 36, 0.05) 0%, rgba(232, 93, 36, 0.02) 100%);
+        box-shadow: 0 6px 12px rgba(232, 93, 36, 0.15);
+    }
+
+    .product-card.selected::after {
+        content: '✓';
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: var(--accent);
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 12px;
+    }
+
     .product-image {
-        aspect-ratio: 1.25 / 1;
-        background: var(--bg);
-        border-radius: 6px;
-        object-fit: cover;
         width: 100%;
+        height: 88px;
+        object-fit: cover;
+        border-radius: 6px;
+        margin-bottom: 10px;
     }
 
     .product-name {
-        color: var(--text);
         font-size: 13px;
-        font-weight: 800;
-        margin-top: 9px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-price {
+        font-size: 13px;
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    .product-card.is-hidden {
+        display: none;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 10px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background: var(--surface);
+        color: var(--text);
+        width: 100%;
+        font-family: inherit;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(232, 93, 36, 0.1);
+    }
+
+    textarea.form-control {
+        resize: none;
+        min-height: 100px;
+    }
+
+    .customer-info-card {
+        padding: 16px;
+        background: linear-gradient(135deg, rgba(232, 93, 36, 0.05) 0%, rgba(232, 93, 36, 0.02) 100%);
+        border-radius: 8px;
+        border-left: 4px solid var(--accent);
+        margin-top: 16px;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    .customer-info-item {
+        margin: 8px 0;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .customer-info-item strong {
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .invoice-items {
+        max-height: 260px;
+        overflow-y: auto;
+        margin-bottom: 12px;
+    }
+
+    .invoice-item {
+        display: grid;
+        grid-template-columns: 54px 1fr;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 8px;
+        margin-bottom: 6px;
+        transition: all 0.2s ease;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .invoice-item-thumb {
+        width: 54px;
+        height: 54px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        color: var(--text-muted);
+        font-size: 18px;
+    }
+
+    .invoice-item-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .invoice-item-content {
+        min-width: 0;
+    }
+
+    .invoice-item:hover {
+        background: rgba(232, 93, 36, 0.02);
+    }
+
+    .invoice-item-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .invoice-item-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 3px;
+        line-height: 1.45;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .product-price {
+    .invoice-item-qty {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .invoice-item-total {
+        text-align: right;
         color: var(--accent);
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .invoice-item-total span {
+        display: block;
+        color: var(--text-muted);
         font-size: 12px;
-        font-weight: 900;
-        margin-top: 3px;
+        font-weight: 600;
+        margin-top: 2px;
     }
 
-    .cart-panel {
-        position: sticky;
-        top: 88px;
-    }
-
-    .cart-items {
+    .invoice-item-actions {
         display: grid;
-        gap: 10px;
-        max-height: 360px;
-        overflow-y: auto;
-    }
-
-    .cart-item {
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 12px;
-    }
-
-    .cart-item-top {
-        align-items: flex-start;
-        display: flex;
-        gap: 10px;
-        justify-content: space-between;
-    }
-
-    .cart-item-name {
-        color: var(--text);
-        font-weight: 900;
-    }
-
-    .cart-item-price {
-        color: var(--muted);
-        font-size: 12px;
-        font-weight: 700;
-        margin-top: 3px;
-    }
-
-    .cart-controls {
-        align-items: center;
-        display: grid;
+        grid-template-columns: 112px minmax(76px, 92px) 36px;
         gap: 8px;
-        grid-template-columns: 76px 92px 36px;
-        margin-top: 10px;
-    }
-
-    .cart-controls input {
-        border: 1px solid var(--border);
-        border-radius: 7px;
-        min-height: 34px;
-        padding: 5px 8px;
-        width: 100%;
-    }
-
-    .remove-btn {
         align-items: center;
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 7px;
-        color: var(--danger);
-        display: inline-flex;
-        height: 34px;
-        justify-content: center;
-        width: 36px;
     }
 
-    .summary-box {
-        background: #fbfdff;
+    .control-label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    .qty-stepper {
+        display: grid;
+        grid-template-columns: 32px 48px 32px;
         border: 1px solid var(--border);
         border-radius: 8px;
-        margin-top: 14px;
-        padding: 14px;
+        overflow: hidden;
+        background: var(--surface);
+    }
+
+    .qty-stepper button {
+        border: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-weight: 800;
+        cursor: pointer;
+        min-height: 34px;
+    }
+
+    .qty-stepper button:hover {
+        color: var(--accent);
+        background: rgba(232, 93, 36, 0.08);
+    }
+
+    .qty-input,
+    .discount-input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    .qty-stepper .qty-input {
+        border: 0;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        border-radius: 0;
+        min-height: 34px;
+    }
+
+    .discount-inline {
+        position: relative;
+    }
+
+    .discount-inline .discount-input {
+        height: 36px;
+        padding-right: 20px;
+    }
+
+    .discount-inline span {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 12px;
+        font-weight: 800;
+        pointer-events: none;
+    }
+
+    .qty-input:focus,
+    .discount-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(232, 93, 36, 0.1);
+    }
+
+    .btn-remove {
+        background: linear-gradient(135deg, var(--danger) 0%, #bb2d3b 100%);
+        color: white;
+        border: none;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .btn-remove:hover {
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .invoice-summary {
+        background: #f7f8fa;
+        padding: 14px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
     }
 
     .summary-row {
-        align-items: center;
-        border-bottom: 1px solid #eef2f7;
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: var(--text);
     }
 
-    .summary-row:last-child {
-        border-bottom: 0;
-    }
-
-    .summary-total {
-        background: linear-gradient(135deg, #fff7ed, #ffedd5);
-        border: 1px solid #fed7aa;
-        border-radius: 8px;
-        color: var(--accent-dark);
-        font-size: 20px;
-        font-weight: 900;
-        margin-top: 10px;
-        padding: 12px;
-    }
-
-    .action-row {
-        display: flex;
-        gap: 10px;
+    .summary-row.total {
+        border-top: 2px solid var(--border);
+        padding-top: 14px;
         margin-top: 14px;
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--accent);
     }
 
-    .edit-btn {
-        align-items: center;
-        border: 0;
+    .summary-row input[type="number"] {
+        width: 60px;
+        padding: 4px 8px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        text-align: right;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 24px 12px;
+        color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+        font-size: 42px;
+        margin-bottom: 12px;
+        opacity: 0.6;
+    }
+
+    .empty-state-text {
+        font-size: 15px;
+        margin-bottom: 8px;
+        color: var(--text);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent) 0%, #d94a10 100%);
+        color: white;
+        padding: 12px 28px;
+        border: none;
         border-radius: 8px;
-        display: inline-flex;
-        font-weight: 900;
-        gap: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        flex: 1;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
         justify-content: center;
-        min-height: 42px;
-        padding: 10px 14px;
+        gap: 8px;
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 8px 20px rgba(232, 93, 36, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: var(--bg);
+        color: var(--text);
+        padding: 12px 28px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
         text-decoration: none;
-        width: 100%;
+        font-weight: 600;
+        flex: 1;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
 
-    .edit-btn-primary {
-        background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-        color: #fff;
+    .btn-secondary:hover {
+        background: var(--surface);
+        border-color: var(--accent);
+        color: var(--accent);
     }
 
-    .edit-btn-primary:hover {
-        color: #fff;
+    .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 0;
     }
 
-    .edit-btn-soft {
-        background: #f3f4f6;
-        color: #374151;
+    .button-group .btn-primary,
+    .button-group .btn-secondary {
+        font-size: 14px;
+        padding: 12px 24px;
+        border-radius: 8px;
     }
 
-    .empty-cart {
-        color: var(--muted);
-        padding: 26px 12px;
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        color: #721c24;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        height: 44px;
+        padding: 6px 0;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: var(--text);
+        line-height: 32px;
+        font-size: 14px;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(232, 93, 36, 0.1);
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .col-lg-7 { animation: slideUp 0.6s ease-out; }
+    .col-lg-5 { animation: slideUp 0.6s ease-out 0.1s both; }
+
+    .order-side {
+        position: sticky;
+        top: 92px;
+        align-self: flex-start;
+    }
+
+    .checkout-card {
+        max-height: calc(100vh - 112px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .checkout-card .card-body {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .checkout-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .checkout-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: var(--text);
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .checkout-title i {
+        color: var(--accent);
+    }
+
+    .cart-count-pill {
+        background: rgba(232, 93, 36, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(232, 93, 36, 0.24);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .checkout-scroll {
+        overflow-y: auto;
+        padding: 18px 20px;
+        min-height: 0;
+    }
+
+    .checkout-section {
+        margin-bottom: 18px;
+    }
+
+    .checkout-section-title {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--text);
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .checkout-section-title i {
+        color: var(--accent);
+    }
+
+    .order-details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .order-details-grid .od-field {
+        margin-bottom: 0;
+    }
+
+    .order-details-grid .full-span {
+        grid-column: 1 / -1;
+    }
+
+    .checkout-actions {
+        padding: 12px 20px 16px;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        box-shadow: 0 -8px 18px rgba(26, 29, 41, 0.06);
+    }
+
+    /* Order Details Fields */
+    .od-field {
+        margin-bottom: 16px;
+        position: relative;
+    }
+
+    .od-label {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .od-label i {
+        color: var(--accent);
+        font-size: 13px;
+        width: 16px;
         text-align: center;
     }
 
-    @media (max-width: 1100px) {
-        .edit-shell {
-            grid-template-columns: 1fr;
+    .od-select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236c757d' d='M6 8.825L0.375 3.175 1.275 2.275 6 7 10.725 2.275 11.625 3.175z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 36px;
+    }
+
+    .delivery-combo {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 92px;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .box-inline {
+        position: relative;
+    }
+
+    .box-inline input {
+        height: 100%;
+        padding-top: 18px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .box-inline span {
+        position: absolute;
+        top: 5px;
+        left: 0;
+        right: 0;
+        color: var(--text-muted);
+        font-size: 10px;
+        font-weight: 800;
+        text-align: center;
+        pointer-events: none;
+    }
+
+    /* Edit mode badge */
+    .edit-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(232, 93, 36, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(232, 93, 36, 0.3);
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    @media (max-width: 992px) {
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         }
 
-        .cart-panel {
+        .order-side {
             position: static;
+        }
+
+        .checkout-card {
+            max-height: none;
         }
     }
 
-    @media (max-width: 700px) {
-        .edit-header,
-        .action-row {
-            flex-direction: column;
-        }
-
-        .customer-card {
+    @media (max-width: 576px) {
+        .product-tools {
             grid-template-columns: 1fr;
         }
+
+        .product-count {
+            text-align: right;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+            max-height: 420px;
+        }
+
+        .invoice-item-actions,
+        .order-details-grid,
+        .button-group {
+            grid-template-columns: 1fr;
+            display: grid;
+        }
+
+        .btn-remove {
+            width: 100%;
+        }
+
+        .delivery-combo {
+            grid-template-columns: 1fr 86px;
+        }
+    }
+
+    .row {
+        margin-left: -8px;
+        margin-right: -8px;
+    }
+
+    [class*='col-'] {
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-bottom: 8px;
+    }
+
+    /* Toast Notification */
+    .toast-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 9998;
+        opacity: 0;
+        transition: opacity 0.3s;
+        display: none;
+    }
+    .toast-overlay.show { display: block; opacity: 1; }
+
+    .toast-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 32px 36px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        z-index: 9999;
+        text-align: center;
+        min-width: 320px;
+        max-width: 400px;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: none;
+    }
+    .toast-box.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    .toast-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 24px;
+    }
+    .toast-icon.warning { background: #fff3cd; color: #d97706; }
+    .toast-icon.error { background: #fee2e2; color: #dc2626; }
+    .toast-icon.success { background: #d1fae5; color: #059669; }
+
+    .toast-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+    .toast-message {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+    .toast-btn {
+        background: linear-gradient(135deg, var(--accent) 0%, #d94a10 100%);
+        color: #fff;
+        border: none;
+        padding: 10px 32px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .toast-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(232,93,36,0.3); }
+
+    /* Free Products Section */
+    .free-product-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding: 12px;
+        background: rgba(232, 93, 36, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .free-product-row select,
+    .free-product-row input {
+        flex: 1;
+    }
+
+    .free-product-row input[type="number"] {
+        flex: 0 0 80px;
+    }
+
+    .btn-remove-free {
+        background: var(--danger);
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        flex: 0 0 auto;
+    }
+
+    .btn-remove-free:hover {
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-sm {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    .mt-2 {
+        margin-top: 12px;
     }
 </style>
 @endpush
 
 @section('content')
-@php
-    $initialCart = $order->items->mapWithKeys(function ($item) {
-        $product = $item->product;
-        $unitPrice = (float) $item->unit_price;
-        $lineTotal = (float) $item->total_price;
-        $qty = max((int) $item->quantity, 1);
-        $effectiveUnit = $lineTotal / $qty;
 
-        return [
-            (string) $item->product_id => [
-                'name' => $product?->name ?? 'N/A',
-                'price' => $unitPrice,
-                'price_khr' => (float) ($product?->price_khr ?? $unitPrice * 4000),
-                'qty' => $qty,
-                'discount' => $unitPrice > 0 ? round((1 - ($effectiveUnit / $unitPrice)) * 100, 2) : 0,
-                'image' => $product?->imageUrl(),
-            ],
-        ];
-    });
-@endphp
+@if ($errors->any())
+<div class="alert alert-danger">
+    <ul style="margin: 0; padding-left: 20px;">
+        @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
 
-<div class="container-fluid py-4 order-edit">
-    <div class="edit-header">
-        <div>
-            <h2 class="edit-title">កែបញ្ជាទិញ #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</h2>
-            <p class="edit-subtitle">កែអតិថិជន ទំនិញ ចំនួន ការដឹកជញ្ជូន និងស្ថានភាពបង់ប្រាក់</p>
-        </div>
-        <a href="{{ $order->invoice ? route('invoices.show', $order->invoice) : route('orders.show', $order) }}" class="edit-btn edit-btn-soft" style="width:auto;">
-            <i class="fas fa-arrow-left"></i> ត្រឡប់ក្រោយ
-        </a>
-    </div>
+<div class="row">
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <!-- Left Section: Products -->
+    <div class="col-lg-7">
 
-    <form action="{{ route('orders.update', $order) }}" method="POST" id="orderEditForm">
-        @csrf
-        @method('PUT')
+        <!-- Customer Selection -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="product-section-title">
+                    <i class="fas fa-user-circle"></i> សូមជ្រើសរើសអតិថិជន
+                </h4>
 
-        <div class="edit-shell">
-            <div>
-                <div class="edit-card mb-3">
-                    <h3 class="section-title"><i class="fas fa-user"></i> អតិថិជន</h3>
+                <div class="od-field">
                     <select name="customer_id" id="customer_id" class="form-control select2-customer" required>
                         <option value="">សូមស្វែងរកអតិថិជន</option>
                         @foreach($customers as $customer)
                             <option value="{{ $customer->id }}"
                                 data-name="{{ $customer->name }}"
                                 data-phone="{{ $customer->phone }}"
-                                data-location="{{ $customer->location ?? $customer->city ?? $customer->address }}"
+                                data-location="{{ $customer->location }}"
                                 {{ (string) old('customer_id', $order->customer_id) === (string) $customer->id ? 'selected' : '' }}>
                                 {{ $customer->name }}
                             </option>
                         @endforeach
                     </select>
-
-                    <div class="customer-card" id="customerInfo">
-                        <div>
-                            <div class="customer-label">ឈ្មោះ</div>
-                            <div class="customer-value" id="customerName">-</div>
-                        </div>
-                        <div>
-                            <div class="customer-label">លេខទូរស័ព្ទ</div>
-                            <div class="customer-value" id="customerPhone">-</div>
-                        </div>
-                        <div>
-                            <div class="customer-label">ទីតាំង</div>
-                            <div class="customer-value" id="customerLocation">-</div>
-                        </div>
-                    </div>
                 </div>
 
-                <div class="edit-card">
-                    <h3 class="section-title"><i class="fas fa-pizza-slice"></i> ទំនិញ</h3>
-                    <div class="products-grid">
-                        @foreach($products as $product)
-                            @php($productImageUrl = $product->imageUrl())
-                            <div class="product-card" onclick="addToCart({{ $product->id }}, @js($product->name), {{ (float) $product->price_usd }}, {{ (float) $product->price_khr }}, @js($productImageUrl))">
-                                @if($productImageUrl)
-                                    <img src="{{ $productImageUrl }}" alt="{{ $product->name }}" class="product-image">
-                                @else
-                                    <div class="product-image d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-image text-muted"></i>
-                                    </div>
-                                @endif
-                                <div class="product-name" title="{{ $product->name }}">{{ $product->name }}</div>
-                                <div class="product-price">${{ number_format($product->price_usd, 2) }}</div>
-                                <div class="text-muted small fw-bold">៛{{ number_format($product->price_khr, 0) }}</div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            <div class="cart-panel">
-                <div class="edit-card">
-                    <h3 class="section-title"><i class="fas fa-receipt"></i> មុខទំនិញក្នុងបញ្ជាទិញ</h3>
-
-                    <div class="cart-items" id="cartItems"></div>
-
-                    <div class="summary-box">
-                        <div class="summary-row">
-                            <span class="text-muted fw-bold">Subtotal</span>
-                            <strong>$<span id="subtotalText">0.00</span></strong>
-                        </div>
-                        <div class="summary-row">
-                            <span class="text-muted fw-bold">Discount</span>
-                            <strong class="text-danger">-$<span id="discountText">0.00</span></strong>
-                        </div>
-                        <div class="summary-row">
-                            <span class="text-muted fw-bold">Delivery</span>
-                            <strong>
-                                $<span id="deliveryUsdText">0.00</span>
-                                <span class="text-muted small d-block text-end">៛<span id="deliveryKhrText">0</span></span>
-                            </strong>
-                        </div>
-                        <div class="summary-total d-flex justify-content-between align-items-center">
-                            <span>សរុប</span>
-                            <span>$<span id="totalText">0.00</span></span>
-                        </div>
-                    </div>
-
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <label class="form-label">កាលបរិច្ឆេទ</label>
-                            <input type="datetime-local" name="order_date" class="form-control"
-                                value="{{ old('order_date', $order->order_date->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">ស្ថានភាពបង់ប្រាក់</label>
-                            <select name="payment_status" class="form-select">
-                                <option value="unpaid" {{ old('payment_status', $order->payment_status) === 'unpaid' ? 'selected' : '' }}>មិនទាន់បង់</option>
-                                <option value="partial" {{ old('payment_status', $order->payment_status) === 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
-                                <option value="paid" {{ old('payment_status', $order->payment_status) === 'paid' ? 'selected' : '' }}>បានបង់</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">ការដឹកជញ្ជូន</label>
-                        <select name="delivery_id" id="delivery_id" class="form-select">
-                            <option value="" data-price="0">គ្មាន</option>
-                            @foreach($deliveries as $delivery)
-                                <option value="{{ $delivery->id }}" data-price="{{ $delivery->delivery_price_khr }}"
-                                    {{ (string) old('delivery_id', $order->delivery_id) === (string) $delivery->id ? 'selected' : '' }}>
-                                    {{ $delivery->delivery_name }}
-                                </option>
-                            @endforeach
-
-                        </select>
-
-                    </div>
-                      <div class="col-md-6">
-                            <div class="od-field">
-                                <label class="od-label">ចំនួនកេស</label>
-                                <input type="number" name="box_qty" id="box_qty" class="form-control" min="1" value="{{ old('box_qty', $order->box_qty ?? 1) }}">
-                            </div>
-                        </div>
-
-                    <div class="mt-3">
-                        <label class="form-label">កំណត់ចំណាំ</label>
-                        <textarea name="notes" class="form-control" rows="3">{{ old('notes', $order->notes) }}</textarea>
-                    </div>
-
-                    <input type="hidden" name="order_items" id="order_items">
-                    <input type="hidden" name="subtotal" id="subtotalInput">
-                    <input type="hidden" name="discount_amount" id="discountInput">
-                    <input type="hidden" name="delivery_fee_khr" id="deliveryFeeInput">
-                    <input type="hidden" name="total_amount" id="totalInput">
-
-                    <div class="action-row">
-                        <button type="submit" class="edit-btn edit-btn-primary">
-                            <i class="fas fa-save"></i> រក្សាទុក
-                        </button>
-                        <a href="{{ $order->invoice ? route('invoices.show', $order->invoice) : route('orders.show', $order) }}" class="edit-btn edit-btn-soft">
-                            <i class="fas fa-times"></i> បោះបង់
-                        </a>
+                <div id="customer_info_card" class="customer-info-card" style="display: none;">
+                    <div class="customer-info-item">
+                        <strong>ឈ្មោះ:</strong> <span id="customer_name">-</span>
                     </div>
                 </div>
             </div>
         </div>
-    </form>
+
+        <!-- Products Section -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="product-section-title">
+                     សូមជ្រើសរើសទំនិញ
+                </h4>
+
+                <div class="product-tools">
+                    <div class="product-search">
+                        <i class="fas fa-search"></i>
+                        <input type="search" id="productSearch" class="form-control" placeholder="ស្វែងរកទំនិញ">
+                    </div>
+                    <div class="product-count">
+                        <span id="visibleProductCount">{{ $products->count() }}</span> / {{ $products->count() }}
+                    </div>
+                </div>
+
+                <div class="products-grid" id="productsGrid">
+                    @forelse($products as $product)
+                    @php($productImageUrl = $product->imageUrl())
+                    <div class="product-card" data-product-id="{{ $product->id }}" data-product-name="{{ Str::lower($product->name) }}" onclick="addToCart({{ $product->id }}, @js($product->name),
+                    {{ $product->price_usd }},
+                     {{ $product->price_khr }},
+                     @js($productImageUrl))">
+                        @if($productImageUrl)
+                            <img src="{{ $productImageUrl }}" alt="{{ $product->name }}" class="product-image">
+                        @else
+                            <div style="width: 100%; height: 88px; background: var(--bg); border-radius: 6px;
+                            display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                <i class="fas fa-image" style="font-size: 24px; color: var(--text-muted);"></i>
+                            </div>
+                        @endif
+                        <div class="product-name" title="{{ $product->name }}">{{ $product->name }}</div>
+                        <div style="font-size: 12px; margin-bottom: 6px;">
+                            <div style="color: var(--accent); font-weight: 700;">${{ number_format($product->price_usd, 2) }}</div>
+                            <div style="color: var(--text-muted); font-weight: 600;">៛{{ number_format($product->price_khr, 0) }}</div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state-icon"></div>
+                        <div class="empty-state-text">មិនមានទំនិញទេ</div>
+                        <a href="{{ route('products.index') }}" style="color: var(--accent); text-decoration: none; font-weight: 600;">បន្ថែមទំនិញ→</a>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Section: Order Form -->
+    <div class="col-lg-5 order-side">
+        {{-- Use PUT method for update --}}
+        <form action="{{ route('orders.update', $order->id) }}" method="POST" id="orderForm">
+            @csrf
+            @method('PUT')
+
+            <div class="card checkout-card">
+                <div class="card-body">
+                    <div class="checkout-header">
+                        <h4 class="checkout-title">
+                           កែប្រែការបញ្ជាទិញ
+                        </h4>
+                        <span class="edit-badge">
+                            <i class="fas fa-pencil-alt"></i> #{{ $order->id }}
+                        </span>
+                    </div>
+
+                    <div class="checkout-scroll">
+                        <div class="checkout-section">
+
+                            <div class="invoice-items" id="invoiceItems">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div>
+                                    <div class="empty-state-text">សូមជ្រើសរើសមុខទំនិញ</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden inputs for form submission -->
+                        <input type="hidden" id="hidden_customer_id" name="customer_id">
+                        <input type="hidden" id="order_items" name="order_items" value="[]">
+                        <input type="hidden" id="subtotal_amount" name="subtotal">
+                        <input type="hidden" id="discount_amount" name="discount_amount">
+                        <input type="hidden" id="delivery_fee_khr" name="delivery_fee_khr" value="0">
+                        <input type="hidden" id="total_amount_input" name="total_amount">
+                        <input type="hidden" name="order_date" value="{{ old('order_date', optional($order->order_date)->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i') ?? now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}">
+
+                        <div class="checkout-section">
+                            <div class="order-details-grid">
+
+                                <div class="od-field">
+                                    <label class="od-label"><i class="fas fa-money-bill-wave"></i> ការបង់ប្រាក់</label>
+                                    <select name="payment_status" class="form-control od-select">
+                                        <option value="unpaid"  {{ old('payment_status', $order->payment_status) == 'unpaid'  ? 'selected' : '' }}>មិនទាន់បង់</option>
+                                        <option value="partial" {{ old('payment_status', $order->payment_status) == 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
+                                        <option value="paid"    {{ old('payment_status', $order->payment_status) == 'paid'    ? 'selected' : '' }}>បានបង់</option>
+                                    </select>
+                                </div>
+
+                                <div class="od-field">
+                                    <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន</label>
+                                    <div class="delivery-combo">
+                                        <select id="delivery_select" name="delivery_id" class="form-control od-select">
+                                            <option value="">សូមជ្រើសរើស</option>
+                                            @foreach($deliveries as $delivery)
+                                                <option value="{{ $delivery->id }}"
+                                                    data-name="{{ $delivery->delivery_name }}"
+                                                    data-price="{{ $delivery->delivery_price_khr }}"
+                                                    {{ old('delivery_id', $order->delivery_id) == $delivery->id ? 'selected' : '' }}>
+                                                    {{ $delivery->delivery_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="box-inline">
+                                            <span>កេស</span>
+                                            <input type="number" id="box_qty" name="box_qty" class="form-control" min="1" value="{{ old('box_qty', $order->box_qty ?? 1) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="od-field full-span">
+                                    <label class="od-label"><i class="fas fa-gift"></i> Free ជូនអតិថិជន</label>
+                                    <div id="freeProductsContainer"></div>
+                                    <button type="button" id="addFreeProductBtn" class="btn btn-sm btn-outline-primary mt-2">
+                                         +Add Free
+                                    </button>
+                                </div>
+
+                                <div class="od-field full-span">
+                                    <label class="od-label"><i class="fas fa-sticky-note"></i> ផ្សេងៗ</label>
+                                    <textarea name="notes" class="form-control" rows="2" placeholder="...">{{ old('notes', $order->notes) }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkout-section">
+                        <div class="invoice-summary">
+                            <div class="summary-row">
+                                <span>សរុប (USD / KHR):</span>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 600;">$<span id="subtotal">0.00</span></div>
+                                    <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="subtotal_khr">0</span></div>
+                                </div>
+                            </div>
+
+                            <div class="summary-row" id="discountAmountRow">
+                                <span style="font-weight: 600;">បញ្ចុះតម្លៃសរុប:</span>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 600; color: var(--danger);">-$<span id="discountAmount">0.00</span></div>
+                                    <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">-៛<span id="discountAmount_khr">0</span></div>
+                                </div>
+                            </div>
+
+                            <div class="summary-row" id="deliveryFeeRow">
+                                <span style="font-weight: 600;">ការដឹកជញ្ជូន:</span>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 600;">$<span id="deliveryFeeUsd">0.00</span></div>
+                                    <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="deliveryFeeKhr">0</span></div>
+                                </div>
+                            </div>
+
+                            <div class="summary-row total">
+                                <span>តម្លៃសរុប:</span>
+                                <div style="text-align: right;">
+                                    <div>$<span id="totalAmount">0.00</span></div>
+                                    <div style="color: var(--accent); font-size: 13px;">៛<span id="totalAmount_khr">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkout-actions button-group">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> រក្សាទុក
+                        </button>
+                        <a href="{{ route('orders.show', $order->id) }}" class="btn-secondary">
+                            <i class="fas fa-times"></i> បោះបង់
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
 </div>
-@endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+    let cart = {};
     const exchangeRate = 4000;
-    let cart = @json($initialCart);
-    const originalDeliveryId = @json((string) $order->delivery_id);
-    const originalBoxQty = Math.max(parseInt(@json($order->box_qty ?? 1), 10) || 1, 1);
-    const originalDeliveryFeeKhr = parseFloat(@json((float) $order->delivery_fee_khr)) || 0;
-    const originalDeliveryUnitKhr = originalBoxQty > 0 ? originalDeliveryFeeKhr / originalBoxQty : 0;
-    let deliverySelectionChanged = false;
+    let freeProductCount = 0;
 
-    $(document).ready(function () {
+
+    const existingOrderItems = @json($existingOrderItems);
+    const existingFreeProducts = @json($existingFreeProducts);
+    const deliveryOptions = @json($deliveryOptions);
+    const allProducts = @json($allProducts);
+
+    $(document).ready(function() {
+        // Initialize Select2
         $('.select2-customer').select2({
             placeholder: 'សូមស្វែងរកអតិថិជន',
             allowClear: true,
             width: '100%'
         });
 
-        $('#customer_id').on('change', updateCustomerInfo).trigger('change');
-        $('#delivery_id').on('change', function () {
-            deliverySelectionChanged = true;
-            renderCart();
+        // Handle customer selection
+        $('#customer_id').on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            const customerId = selectedOption.val();
+
+            // Sync to hidden input inside form
+            $('#hidden_customer_id').val(customerId);
+
+            if (customerId) {
+                const name = selectedOption.data('name') || '-';
+                $('#customer_name').text(name);
+                $('#customer_info_card').slideDown(300);
+            } else {
+                $('#customer_info_card').slideUp(300);
+            }
         });
-        $('#box_qty').on('change input', renderCart);
-        renderCart();
+
+        // Trigger change to show pre-selected customer info
+        if ($('#customer_id').val()) {
+            $('#customer_id').trigger('change');
+        }
+
+        // Handle adding free products
+        $('#addFreeProductBtn').on('click', function(e) {
+            e.preventDefault();
+            addFreeProductRow();
+        });
+
+        // Populate existing free product rows
+        if (existingFreeProducts && existingFreeProducts.length > 0) {
+            existingFreeProducts.forEach(function(fp) {
+                addFreeProductRow(fp.product_id, fp.qty);
+            });
+        } else {
+            addFreeProductRow();
+        }
+
+        $('#productSearch').on('input', function() {
+            filterProducts(this.value);
+        });
+
+        // Recalculate when delivery or box_qty changes
+        $('#delivery_select, #box_qty').on('change input', function() {
+            calculateTotal();
+            updateCartData();
+        });
+
+        // Pre-populate cart with existing order items
+        populateExistingCart();
     });
 
-    function updateCustomerInfo() {
-        const option = $('#customer_id option:selected');
-        $('#customerName').text(option.data('name') || '-');
-        $('#customerPhone').text(option.data('phone') || '-');
-        $('#customerLocation').text(option.data('location') || '-');
+    /**
+     * Pre-populate the cart from the existing order's items.
+     */
+    function populateExistingCart() {
+        if (!existingOrderItems || existingOrderItems.length === 0) return;
+
+        existingOrderItems.forEach(function(item) {
+            const pid = String(item.product_id);
+            const product = allProducts[pid];
+            if (!product) return;
+
+            cart[pid] = {
+                name:      product.name,
+                price:     parseFloat(product.price_usd) || 0,
+                price_khr: parseFloat(product.price_khr) || 0,
+                qty:       parseInt(item.quantity) || 1,
+                discount:  parseFloat(item.discount_percent) || 0,
+                image:     product.image_url || null
+            };
+        });
+
+        renderInvoice();
+        markSelectedProductCards();
     }
 
-    function addToCart(productId, name, price, priceKhr, image) {
-        if (cart[productId]) {
-            cart[productId].qty += 1;
+    /**
+     * Visually mark product cards that are already in the cart.
+     */
+    function markSelectedProductCards() {
+        Object.keys(cart).forEach(function(productId) {
+            $(`.product-card[data-product-id="${productId}"]`).addClass('selected');
+        });
+    }
+
+    function filterProducts(searchValue) {
+        const query = String(searchValue || '').trim().toLowerCase();
+        let visibleCount = 0;
+
+        $('.product-card').each(function() {
+            const productName = String($(this).data('product-name') || '');
+            const isMatch = !query || productName.includes(query);
+            $(this).toggleClass('is-hidden', !isMatch);
+            if (isMatch) visibleCount += 1;
+        });
+
+        $('#visibleProductCount').text(visibleCount);
+    }
+
+    function addToCart(productId, productName, price, priceKhr, imageUrl) {
+        const pid = String(productId);
+        if (cart[pid]) {
+            cart[pid].qty += 1;
         } else {
-            cart[productId] = {
-                name,
+            cart[pid] = {
+                name: productName,
                 price: parseFloat(price),
                 price_khr: parseFloat(priceKhr),
                 qty: 1,
                 discount: 0,
-                image
+                image: imageUrl
             };
         }
-
-        renderCart();
+        $(`.product-card[data-product-id="${pid}"]`).addClass('selected');
+        renderInvoice();
     }
 
-    function updateQty(productId, value) {
-        const qty = parseInt(value, 10);
-        if (!cart[productId]) return;
-        cart[productId].qty = Math.max(qty || 1, 1);
-        renderCart();
+    function removeFromCart(productId) {
+        const pid = String(productId);
+        delete cart[pid];
+        $(`.product-card[data-product-id="${pid}"]`).removeClass('selected');
+        renderInvoice();
     }
 
-    function updateDiscount(productId, value) {
-        if (!cart[productId]) return;
-        cart[productId].discount = Math.min(Math.max(parseFloat(value) || 0, 0), 100);
-        renderCart();
-    }
-
-    function removeItem(productId) {
-        delete cart[productId];
-        renderCart();
-    }
-
-    function getDeliveryFeeKhr() {
-        const selectedDeliveryId = String($('#delivery_id').val() || '');
-        const isOriginalDelivery = selectedDeliveryId === originalDeliveryId;
-        const deliveryPriceKhr = isOriginalDelivery && !deliverySelectionChanged
-            ? originalDeliveryUnitKhr
-            : (parseFloat($('#delivery_id option:selected').data('price') || 0) || 0);
-        const boxQty = Math.max(parseInt($('#box_qty').val() || 1, 10) || 1, 1);
-        return deliveryPriceKhr * boxQty;
-    }
-
-    function renderCart() {
-        const box = $('#cartItems');
-        const entries = Object.entries(cart);
-
-        if (entries.length === 0) {
-            box.html('<div class="empty-cart">មិនមានទំនិញក្នុងបញ្ជាទិញ</div>');
+    function updateQuantity(productId, newQty) {
+        const pid = String(productId);
+        newQty = parseInt(newQty) || 1;
+        if (newQty <= 0) {
+            removeFromCart(pid);
         } else {
-            box.html(entries.map(([productId, item]) => {
-                const discount = parseFloat(item.discount || 0);
-                const unit = item.price * (1 - discount / 100);
-                const line = unit * item.qty;
+            cart[pid].qty = newQty;
+            renderInvoice();
+        }
+    }
 
-                return `
-                    <div class="cart-item">
-                        <div class="cart-item-top">
-                            <div>
-                                <div class="cart-item-name">${escapeHtml(item.name)}</div>
-                                <div class="cart-item-price">$${unit.toFixed(2)} x ${item.qty} = $${line.toFixed(2)}</div>
-                            </div>
-                            <strong>$${line.toFixed(2)}</strong>
+    function renderInvoice() {
+        const invoiceItems = $('#invoiceItems');
+        let html = '';
+        const cartCount = Object.values(cart).reduce((total, item) => total + (parseInt(item.qty) || 0), 0);
+        $('#cartCount').text(cartCount);
+
+        if (Object.keys(cart).length === 0) {
+            invoiceItems.html(`
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="empty-state-text">សូមជ្រើសរើសមុខទំនិញ</div>
+                </div>
+            `);
+        } else {
+            Object.entries(cart).forEach(([productId, item]) => {
+                const discountPercent = parseFloat(item.discount || 0);
+                const discountedPrice = item.price * (1 - discountPercent / 100);
+                const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
+                const itemTotal = discountedPrice * item.qty;
+                const itemTotalKhr = discountedPriceKhr * item.qty;
+
+                html += `
+                    <div class="invoice-item">
+                        <div class="invoice-item-thumb">
+                            ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : '<i class="fas fa-image"></i>'}
                         </div>
-                        <div class="cart-controls">
-                            <input type="number" min="1" value="${item.qty}" onchange="updateQty(${productId}, this.value)" title="Quantity">
-                            <input type="number" min="0" max="100" step="0.1" value="${discount}" onchange="updateDiscount(${productId}, this.value)" title="Discount percent">
-                            <button type="button" class="remove-btn" onclick="removeItem(${productId})" title="Remove">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <div class="invoice-item-content">
+                            <div class="invoice-item-header">
+                                <div>
+                                    <div class="invoice-item-name">${escapeHtml(item.name)}</div>
+                                    <div class="invoice-item-qty">
+                                        $${discountedPrice.toFixed(2)} / ៛${Math.round(discountedPriceKhr).toLocaleString()} × ${item.qty}
+                                        ${discountPercent > 0 ? `<span style="color: var(--danger); margin-left: 8px;">-${discountPercent}%</span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="invoice-item-total">
+                                    $${itemTotal.toFixed(2)}
+                                    <span>៛${Math.round(itemTotalKhr).toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <div class="invoice-item-actions">
+                                <div class="qty-stepper">
+                                    <button type="button" onclick="updateQuantity(${productId}, ${item.qty - 1})">−</button>
+                                    <input type="number" class="qty-input" value="${item.qty}" onchange="updateQuantity(${productId}, this.value)" min="1">
+                                    <button type="button" onclick="updateQuantity(${productId}, ${item.qty + 1})">+</button>
+                                </div>
+                                <div class="discount-inline">
+                                    <input type="number" class="discount-input" value="${discountPercent}" onchange="updateItemDiscount(${productId}, this.value)" min="0" max="100" step="0.1">
+                                    <span>%</span>
+                                </div>
+                                <button type="button" class="btn-remove" onclick="removeFromCart(${productId})" title="Remove item">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
-            }).join(''));
-        }
-
-        updateTotals();
-    }
-
-    function updateTotals() {
-        let subtotal = 0;
-        let discountTotal = 0;
-        const orderItems = [];
-
-        Object.entries(cart).forEach(([productId, item]) => {
-            const qty = parseInt(item.qty, 10) || 1;
-            const discount = parseFloat(item.discount || 0);
-            const originalLine = item.price * qty;
-            const discountedUnit = item.price * (1 - discount / 100);
-            const lineTotal = discountedUnit * qty;
-
-            subtotal += lineTotal;
-            discountTotal += originalLine - lineTotal;
-
-            orderItems.push({
-                product_id: parseInt(productId, 10),
-                quantity: qty,
-                unit_price: parseFloat(item.price),
-                total_price: lineTotal
             });
-        });
-
-        const deliveryFeeKhr = getDeliveryFeeKhr();
-        const deliveryFeeUsd = deliveryFeeKhr / exchangeRate;
-        const total = subtotal + deliveryFeeUsd;
-
-        $('#subtotalText').text(subtotal.toFixed(2));
-        $('#discountText').text(discountTotal.toFixed(2));
-        $('#deliveryUsdText').text(deliveryFeeUsd.toFixed(2));
-        $('#deliveryKhrText').text(Math.round(deliveryFeeKhr).toLocaleString());
-        $('#totalText').text(total.toFixed(2));
-
-        $('#order_items').val(JSON.stringify(orderItems));
-        $('#subtotalInput').val(subtotal.toFixed(2));
-        $('#discountInput').val(discountTotal.toFixed(2));
-        $('#deliveryFeeInput').val(deliveryFeeKhr.toFixed(2));
-        $('#totalInput').val(total.toFixed(2));
-    }
-
-    document.getElementById('orderEditForm').addEventListener('submit', function (event) {
-        if (Object.keys(cart).length === 0) {
-            event.preventDefault();
-            alert('សូមបន្ថែមទំនិញយ៉ាងហោចណាស់ ១ មុខ');
+            invoiceItems.html(html);
         }
-    });
+
+        calculateTotal();
+        updateCartData();
+    }
 
     function escapeHtml(value) {
         return String(value)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function updateItemDiscount(productId, discountPercent) {
+        const pid = String(productId);
+        const percent = parseFloat(discountPercent) || 0;
+        if (cart[pid]) {
+            cart[pid].discount = Math.min(Math.max(percent, 0), 100);
+            renderInvoice();
+        }
+    }
+
+    function getBoxQty() {
+        return Math.max(parseInt($('#box_qty').val() || 1, 10) || 1, 1);
+    }
+
+    function getSelectedDeliveryFeeKhr() {
+        const selected = $('#delivery_select option:selected');
+        const deliveryPriceKhr = parseFloat(selected.data('price') || 0) || 0;
+        return deliveryPriceKhr * getBoxQty();
+    }
+
+    function calculateTotal() {
+        let subtotal = 0;
+        let subtotalKhr = 0;
+        let totalDiscount = 0;
+        let totalDiscountKhr = 0;
+
+        Object.values(cart).forEach(item => {
+            const discountPercent = parseFloat(item.discount || 0);
+            const discountedPrice = item.price * (1 - discountPercent / 100);
+            const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
+            const itemDiscount = item.price * item.qty - discountedPrice * item.qty;
+            const itemDiscountKhr = item.price_khr * item.qty - discountedPriceKhr * item.qty;
+
+            subtotal += discountedPrice * item.qty;
+            subtotalKhr += discountedPriceKhr * item.qty;
+            totalDiscount += itemDiscount;
+            totalDiscountKhr += itemDiscountKhr;
+        });
+
+        const deliveryFeeKhr = getSelectedDeliveryFeeKhr();
+        const deliveryFeeUsd = deliveryFeeKhr / exchangeRate;
+        let total = subtotal + deliveryFeeUsd;
+        let totalKhr = subtotalKhr + deliveryFeeKhr;
+
+        $('#subtotal').text(subtotal.toFixed(2));
+        $('#discountAmount').text(totalDiscount.toFixed(2));
+        $('#deliveryFeeUsd').text(deliveryFeeUsd.toFixed(2));
+        $('#totalAmount').text(total.toFixed(2));
+
+        $('#subtotal_khr').text(subtotalKhr.toLocaleString());
+        $('#discountAmount_khr').text(Math.round(totalDiscountKhr).toLocaleString());
+        $('#deliveryFeeKhr').text(Math.round(deliveryFeeKhr).toLocaleString());
+        $('#totalAmount_khr').text(Math.round(totalKhr).toLocaleString());
+
+        $('#subtotal_amount').val(subtotal.toFixed(2));
+        $('#discount_amount').val(totalDiscount.toFixed(2));
+        $('#delivery_fee_khr').val(deliveryFeeKhr.toFixed(2));
+        $('#total_amount_input').val(total.toFixed(2));
+    }
+
+    function updateCartData() {
+        const deliveryId = $('#delivery_select').val() || null;
+        const orderItems = [];
+        Object.entries(cart).forEach(([productId, item]) => {
+            const discountPercent = parseFloat(item.discount || 0);
+            const discountedPrice = item.price * (1 - discountPercent / 100);
+            orderItems.push({
+                product_id: parseInt(productId),
+                quantity: item.qty,
+                unit_price: item.price,
+                discount_percent: discountPercent,
+                total_price: discountedPrice * item.qty,
+                delivery_id: deliveryId ? parseInt(deliveryId) : null
+            });
+        });
+        $('#order_items').val(JSON.stringify(orderItems));
+    }
+
+    // Form validation
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+        if (!document.getElementById('hidden_customer_id').value) {
+            e.preventDefault();
+            showToast('warning', '⚠️', 'សូមជ្រើសរើសអតិថិជន', 'សូមជ្រើសរើសអតិថិជនមុននឹងបញ្ជាទិញ');
+            return false;
+        }
+        if (Object.keys(cart).length === 0) {
+            e.preventDefault();
+            showToast('warning', '🛒', 'សូមបន្ថែមទំនិញ', 'សូមជ្រើសរើសទំនិញ');
+            return false;
+        }
+    });
+
+    function showToast(type, icon, title, message) {
+        $('.toast-overlay, .toast-box').remove();
+
+        const overlay = $('<div class="toast-overlay"></div>');
+        const box = $(`
+            <div class="toast-box">
+                <div class="toast-icon ${type}">${icon}</div>
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+                <button class="toast-btn" onclick="closeToast()">ជ្រើសរើស</button>
+            </div>
+        `);
+
+        $('body').append(overlay).append(box);
+        requestAnimationFrame(() => {
+            overlay.addClass('show');
+            box.addClass('show');
+        });
+
+        overlay.on('click', closeToast);
+    }
+
+    function closeToast() {
+        $('.toast-overlay').removeClass('show');
+        $('.toast-box').removeClass('show');
+        setTimeout(() => { $('.toast-overlay, .toast-box').remove(); }, 300);
+    }
+
+    // Free Product Functions
+    function addFreeProductRow(selectedProductId = null, qty = 1) {
+        const rowId = freeProductCount++;
+        // Use the allProducts directly since it's now an object keyed by ID
+        const productArray = Object.values(allProducts);
+
+        let selectHTML = '<option value="">សូមជ្រើសរើស</option>';
+        productArray.forEach(product => {
+            const isSelected = selectedProductId && product.id == selectedProductId ? 'selected' : '';
+            selectHTML += `<option value="${product.id}" ${isSelected}>${product.name}</option>`;
+        });
+
+        const rowHTML = `
+            <div class="free-product-row" id="freeRow${rowId}">
+                <select name="free_products[${rowId}][product_id]" class="form-control od-select">
+                    ${selectHTML}
+                </select>
+                <input type="number" name="free_products[${rowId}][qty]" class="form-control" min="0" placeholder="ចំនួន" value="${qty}">
+                <button type="button" class="btn-remove-free" onclick="removeFreeProductRow(${rowId})">
+                    <i class="fas fa-trash"></i> លុប
+                </button>
+            </div>
+        `;
+
+        $('#freeProductsContainer').append(rowHTML);
+    }
+
+    function removeFreeProductRow(rowId) {
+        $(`#freeRow${rowId}`).slideUp(300, function() {
+            $(this).remove();
+            if ($('.free-product-row').length === 0) {
+                addFreeProductRow();
+            }
+        });
     }
 </script>
 @endpush
+
+@endsection

@@ -37,6 +37,9 @@ class UpdateOrderRequest extends FormRequest
             'payment_status' => 'in:unpaid,partial,paid',
             'notes' => 'nullable|string',
             'order_items' => 'required|json',
+            'free_products' => 'nullable|array',
+            'free_products.*.product_id' => 'nullable|exists:products,id',
+            'free_products.*.qty' => 'nullable|integer|min:1',
         ];
     }
 }
