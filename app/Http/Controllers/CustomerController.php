@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
@@ -99,6 +100,12 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
         $customer->update($request->validated());
+
+        $returnUrl = $request->input('return_url');
+        if ($returnUrl && (Str::startsWith($returnUrl, '/') || parse_url($returnUrl, PHP_URL_HOST) === $request->getHost())) {
+            return redirect($returnUrl)->with('success', 'Customer updated successfully.');
+        }
+
         return redirect()->route('customers.show', $customer)->with('success', 'Customer updated successfully.');
     }
 

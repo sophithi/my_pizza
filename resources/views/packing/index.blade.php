@@ -63,6 +63,76 @@
             background: #f9fafb;
             opacity: .78;
         }
+
+        .packing-print-dropdown {
+            position: relative;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .packing-print-dropdown .trigger {
+            border: none;
+            background: #1a1d29;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background .2s, transform .2s;
+        }
+
+        .packing-print-dropdown .trigger:hover,
+        .packing-print-dropdown .trigger:focus {
+            background: #111827;
+        }
+
+        .packing-print-dropdown .trigger .caret {
+            transition: transform .2s ease;
+        }
+
+        .packing-print-dropdown.open .trigger .caret {
+            transform: rotate(180deg);
+        }
+
+        .packing-print-dropdown .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, .12);
+            border-radius: 12px;
+            min-width: 240px;
+            z-index: 20;
+            overflow: hidden;
+        }
+
+        .packing-print-dropdown.open .dropdown-menu {
+            display: block;
+        }
+
+        .packing-print-dropdown .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            color: #1f2937;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background .2s;
+        }
+
+        .packing-print-dropdown .dropdown-menu a:hover {
+            background: #f8fafc;
+        }
+
+        .packing-print-dropdown .dropdown-menu a + a {
+            border-top: 1px solid #e5e7eb;
+        }
     </style>
 @endpush
 
@@ -170,6 +240,23 @@
                                                     @endif
                                                 </td>
                                                 <td style="text-align:right">
+                                                    <div class="packing-print-dropdown" style="margin-right:6px;">
+                                                        <button type="button" class="trigger" aria-haspopup="menu" aria-expanded="false" onclick="togglePackingPrintDropdown(this)">
+                                                            <i class="fas fa-print"></i>
+                                                            បិតលើកេស
+                                                            <i class="fas fa-caret-down caret"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu" role="menu">
+                                                            <a href="{{ route('packing.delivery_pizza', $invoice) }}" target="_blank" role="menuitem">
+                                                                <i class="fas fa-pizza-slice"></i>
+                                                                <span>ភីហ្សា គ្រួសាររីករាយ</span>
+                                                            </a>
+                                                            <a href="{{ route('packing.delivery_mayo', $invoice) }}" target="_blank" role="menuitem">
+                                                                <i class="fas fa-box-open"></i>
+                                                                <span>ម៉ាយូនេស បន្ទាយឆ្មា</span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
                                                     <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="btn"
                                                         style="background:#1a1d29;color:white;border:none;padding:6px 10px;border-radius:6px;font-weight:600;margin-right:6px;">
                                                         <i class="fas fa-print"></i> រៀបចំទំនិញ
@@ -240,6 +327,33 @@
             });
 
             refreshPackingPage(readRefreshSignal());
+
+            const packingDropdowns = document.querySelectorAll('.packing-print-dropdown');
+
+            window.togglePackingPrintDropdown = function(button) {
+                const dropdown = button.closest('.packing-print-dropdown');
+                const isOpen = dropdown.classList.toggle('open');
+                button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+                packingDropdowns.forEach((other) => {
+                    if (other !== dropdown) {
+                        other.classList.remove('open');
+                        const otherButton = other.querySelector('.trigger');
+                        otherButton?.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            };
+
+            document.addEventListener('click', (event) => {
+                if ([...packingDropdowns].some((dropdown) => dropdown.contains(event.target))) {
+                    return;
+                }
+                packingDropdowns.forEach((dropdown) => {
+                    dropdown.classList.remove('open');
+                    const button = dropdown.querySelector('.trigger');
+                    button?.setAttribute('aria-expanded', 'false');
+                });
+            });
 
             setInterval(() => {
                 if (document.hidden) {

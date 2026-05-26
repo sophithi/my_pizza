@@ -297,7 +297,7 @@ class InvoiceController extends Controller
         };
     }
 
-  
+
     public function create()
     {
         return redirect()->route('orders.create')->with('info', 'វិក្ក័យប័ត្របានបង្កើតដោយស្វយប្រវត្តិ នៅពេលដែលលទ្ធផលបញ្ចប់។');
@@ -356,7 +356,7 @@ class InvoiceController extends Controller
         return back()->with('success', 'បានរៀបចំរួចរាល់');
     }
 
-  
+
     public function store(Request $request)
     {
         return redirect()->route('orders.index')->with('info', 'វិក្ក័យប័ត្របានបង្កើតដោយស្វ័យប្រវត្តិ');
@@ -426,6 +426,26 @@ class InvoiceController extends Controller
         // For prep view, return to packing index by default
         $backUrl = route('packing.index');
         return view('packing.sticker-prep', compact('invoice', 'backUrl'));
+    }
+
+    /**
+     * Show the delivery sticker for pizza/all-products orders.
+     */
+    public function stickerReady(Invoice $invoice)
+    {
+        $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
+        $backUrl = route('packing.index');
+        return view('packing.delivery_pizza', compact('invoice', 'backUrl'));
+    }
+
+    /**
+     * Show the delivery sticker for mayonnaise-only orders.
+     */
+    public function stickerMayo(Invoice $invoice)
+    {
+        $invoice->load('order.customer', 'order.items.product');
+        $backUrl = route('packing.index');
+        return view('packing.delivery_mayo', compact('invoice', 'backUrl'));
     }
 
     /**

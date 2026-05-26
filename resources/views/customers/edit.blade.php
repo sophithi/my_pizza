@@ -58,7 +58,7 @@
                 <h2 class="mb-1" style="font-size: 28px; font-weight: 800; color: #0f172a;">កែប្រែព័ត៌មានអតិថិជន</h2>
                 <p class="text-muted mb-0">Update customer information for {{ $customer->name }}.</p>
             </div>
-         
+
         </div>
 
         @if ($errors->any())
@@ -76,6 +76,7 @@
         <form action="{{ route('customers.update', $customer) }}" method="POST" autocomplete="off">
             @csrf
             @method('PUT')
+            <input type="hidden" name="return_url" value="{{ request()->query('return_url') }}">
 
             <div class="customer-section">
                 <div class="customer-section-title">
@@ -156,7 +157,7 @@
                 <button type="submit" class="btn btn-orange px-4">
                     <i class="fas fa-save me-1"></i> Save Changes
                 </button>
-                <a href="{{ route('customers.show', $customer) }}" class="btn btn-outline-secondary px-4">
+                <a href="{{ request()->query('return_url') ? request()->query('return_url') : route('customers.show', $customer) }}" class="btn btn-outline-secondary px-4">
                     Cancel
                 </a>
             </div>

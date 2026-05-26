@@ -149,6 +149,9 @@ Route::middleware('auth')->group(function () {
         Route::get('packing/index', [InvoiceController::class, 'printIndex'])->name('packing.index');
         Route::post('packing/{invoice}/complete', [InvoiceController::class, 'markPackingCompleted'])->name('packing.complete');
         Route::get('packing/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('packing.prep');
+        Route::get('packing/{invoice}/ready', [InvoiceController::class, 'stickerReady'])->name('packing.delivery_pizza');
+        Route::get('packing/{invoice}/mayo', [InvoiceController::class, 'stickerMayo'])->name('packing.delivery_mayo');
+
         Route::get('packing/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('packing.customer');
 
     });

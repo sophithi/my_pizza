@@ -69,7 +69,7 @@
             width: auto;
             display: block;
             border-radius: 8px;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
             flex-shrink: 0;
         }
 
@@ -469,9 +469,9 @@
                 padding: 12px 16px;
             }
 
-        .topbar .page-title {
-            font-size: 17px;
-        }
+            .topbar .page-title {
+                font-size: 17px;
+            }
 
             .exchange-chip {
                 display: none;
@@ -533,19 +533,21 @@
 
             {{-- Customers & Orders (admin, manager, staff office) --}}
             @if(!$isInventory)
-              
+
                 <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}">
                     <i class="fas fa-shopping-cart"></i><span>ចេញវិក្ក័យបត្រ</span>
                 </a>
-                  <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
+                <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i><span>អតិថិជន</span>
                 </a>
             @endif
-                  {{-- Invoices (admin, manager, staff office) --}}
+            {{-- Invoices (admin, manager, staff office) --}}
             @if($isAdminOrManager || $isOfficeStaff)
                 <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
                     <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
+
                 </a>
+
             @endif
 
             {{-- Payments (admin & manager only) --}}
@@ -575,22 +577,24 @@
 
             {{-- Inventory (everyone except none) --}}
             @if($isAdmin || $isManager || $isStaff || $isInventory)
-                <a href="{{ route('inventory.index', ['period' => 'today']) }}" class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
+                <a href="{{ route('inventory.index', ['period' => 'today']) }}"
+                    class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
                     <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
                 </a>
             @endif
 
-            
 
-      
+
+
 
             {{-- Packing labels (admin + staff inventory + staff office + manager) --}}
             @if($isAdmin || $isManager || $isStaff || $isInventory)
                 <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') ? 'active' : '' }}">
                     <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
                 </a>
+
             @endif
-            
+
             {{-- Deliveries (admin, manager, staff office) --}}
             @if($isAdminOrManager || $isOfficeStaff)
                 <a href="/deliveries" class="nav-link {{ request()->is('deliveries*') ? 'active' : '' }}">
@@ -636,7 +640,8 @@
                     style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #e9ecef; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 220px; z-index: 1000;">
                     <div style="padding: 12px 16px; border-bottom: 1px solid #e9ecef;">
                         <div style="font-size: 13px; font-weight: 600; color: #1a1d29;">
-                            {{ auth()->user()->name ?? 'Admin' }}</div>
+                            {{ auth()->user()->name ?? 'Admin' }}
+                        </div>
                         <div style="font-size: 12px; color: #6c757d; margin-top: 4px;">{{ auth()->user()->email }}</div>
                     </div>
                     <a href="{{ route('profile.edit') }}"

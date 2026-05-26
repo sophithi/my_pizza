@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'កែប្រែការបញ្ជាទិញ #{{ $order->id }}')
+@section('title', 'កែប្រែការបញ្ជាទិញ ')
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -226,6 +226,82 @@
     .customer-info-item strong {
         color: var(--text);
         font-weight: 600;
+    }
+
+    .customer-info-grid {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .customer-info-meta {
+        display: grid;
+        gap: 10px;
+    }
+
+    .customer-info-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .customer-info-row strong {
+        color: var(--text);
+        font-weight: 700;
+    }
+
+    .customer-info-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .customer-notes {
+        font-size: 13px;
+        color: var(--text);
+        line-height: 1.5;
+        padding: 12px 14px;
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 10px;
+    }
+
+    .customer-info-item .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .customer-info-item .badge:not(.badge-custom) {
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .badge-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-inactive {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .badge-default {
+        background: #e2e8f0;
+        color: #334155;
     }
 
     .invoice-items {
@@ -522,6 +598,40 @@
         background: var(--surface);
         border-color: var(--accent);
         color: var(--accent);
+    }
+
+    .customer-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-weight: 700;
+        transition: all 0.2s ease;
+        min-height: 44px;
+    }
+
+    .customer-action-btn-primary {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(232, 93, 36, .16);
+    }
+
+    .customer-action-btn-secondary {
+        background: #fff;
+        color: var(--text);
+        border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .customer-action-btn-secondary:hover {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .customer-action-btn.disabled,
+    .customer-action-btn[aria-disabled="true"] {
+        opacity: 0.55;
+        pointer-events: none;
     }
 
     .button-group {
@@ -972,24 +1082,65 @@
                     <i class="fas fa-user-circle"></i> សូមជ្រើសរើសអតិថិជន
                 </h4>
 
-                <div class="od-field">
-                    <select name="customer_id" id="customer_id" class="form-control select2-customer" required>
-                        <option value="">សូមស្វែងរកអតិថិជន</option>
-                        @foreach($customers as $customer)
-                            <option value="{{ $customer->id }}"
-                                data-name="{{ $customer->name }}"
-                                data-phone="{{ $customer->phone }}"
-                                data-location="{{ $customer->location }}"
-                                {{ (string) old('customer_id', $order->customer_id) === (string) $customer->id ? 'selected' : '' }}>
-                                {{ $customer->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                <div class="od-field" style="display:grid; gap: 14px;">
+                    <div style="display:flex; flex-wrap:wrap; gap: 14px; align-items:flex-end; justify-content:space-between;">
+                        <div style="flex:1; min-width:220px;">
+                            <label for="customer_id" class="form-label">សូមជ្រើសរើសអតិថិជន</label>
+                            <select name="customer_id" id="customer_id" class="form-control select2-customer" required>
+                                <option value="">សូមស្វែងរកឈ្មោះ / ទូរសព្ទ / ទីតាំង</option>
+                                @foreach($customers as $customer)
+                                    <option value="{{ $customer->id }}"
+                                        data-name="{{ $customer->name }}"
+                                        data-phone="{{ $customer->phone }}"
+                                        data-address="{{ $customer->address }}"
+                                        data-city="{{ $customer->city }}"
+                                        data-type="{{ $customer->type }}"
+                                        data-status="{{ $customer->status }}"
+                                        data-notes="{{ $customer->notes }}"
+                                        {{ (string) old('customer_id', $order->customer_id) === (string) $customer->id ? 'selected' : '' }}>
+                                        {{ $customer->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap: 10px;">
+                            <a href="{{ route('customers.create') }}" target="_blank" class="customer-action-btn customer-action-btn-primary">
+                                <i class="fas fa-user-plus"></i> អតិថិជនថ្មី
+                            </a>
+                            <a href="#" id="editCustomerBtn" target="_blank" class="customer-action-btn customer-action-btn-secondary disabled" aria-disabled="true">
+                                <i class="fas fa-user-edit"></i> កែប្រែ
+                            </a>
+                        </div>
+                    </div>
 
-                <div id="customer_info_card" class="customer-info-card" style="display: none;">
-                    <div class="customer-info-item">
-                        <strong>ឈ្មោះ:</strong> <span id="customer_name">-</span>
+                    <div id="customer_info_card" class="customer-info-card" style="display: none;">
+                        <div class="customer-info-grid">
+                            <div class="customer-info-meta">
+                                <div class="customer-info-row" style="justify-content:space-between; gap:12px; border-bottom:1px solid rgba(0,0,0,0.08); padding-bottom:8px;">
+                                    <strong id="customer_name">-</strong>
+                                    <span id="customer_type" class="customer-info-badge badge-default">-</span>
+                                </div>
+                                <div class="customer-info-row">
+                                    <strong>ទូរសព្ទ:</strong>
+                                    <span id="customer_phone">-</span>
+                                </div>
+                                <div class="customer-info-row">
+                                    <strong>អាសយដ្ឋាន:</strong>
+                                    <span id="customer_address">-</span>
+                                </div>
+                                <div class="customer-info-row">
+                                    <strong>ក្រុង/ខេត្ត:</strong>
+                                    <span id="customer_city">-</span>
+                                </div>
+                                <div class="customer-info-row">
+                                    <strong>ស្ថានភាព:</strong>
+                                    <span id="customer_status" class="customer-info-badge badge-default">-</span>
+                                </div>
+                            </div>
+                            <div id="notes_section" style="display:none;">
+                                <div class="customer-notes" id="customer_notes">-</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1059,9 +1210,6 @@
                         <h4 class="checkout-title">
                            កែប្រែការបញ្ជាទិញ
                         </h4>
-                        <span class="edit-badge">
-                            <i class="fas fa-pencil-alt"></i> #{{ $order->id }}
-                        </span>
                     </div>
 
                     <div class="checkout-scroll">
@@ -1115,6 +1263,11 @@
                                             <input type="number" id="box_qty" name="box_qty" class="form-control" min="1" value="{{ old('box_qty', $order->box_qty ?? 1) }}">
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="od-field" id="taxi_phone_field" style="display:none;">
+                                    <label class="od-label"><i class="fas fa-phone"></i> លេខទូរស័ព្ទតាក់ស៊ី</label>
+                                    <input type="text" id="taxi_phone" name="taxi_phone" class="form-control" value="{{ old('taxi_phone', $order->taxi_phone ?? '') }}">
                                 </div>
 
                                 <div class="od-field full-span">
@@ -1196,13 +1349,59 @@
     const existingFreeProducts = @json($existingFreeProducts);
     const deliveryOptions = @json($deliveryOptions);
     const allProducts = @json($allProducts);
+    const customerEditUrlBase = '{{ url('customers') }}';
+    const customerEditReturnUrl = encodeURIComponent(window.location.href);
+
+    function customerMatcher(params, data) {
+        if ($.trim(params.term) === '') {
+            return data;
+        }
+
+        const term = params.term.toLowerCase();
+        const optionText = (data.text || '').toLowerCase();
+        const phone = ($(data.element).data('phone') || '').toString().toLowerCase();
+        const address = ($(data.element).data('address') || '').toString().toLowerCase();
+        const normalizedTerm = term.replace(/\D/g, '');
+        const normalizedPhone = phone.replace(/\D/g, '');
+
+        if (optionText.indexOf(term) > -1 || address.indexOf(term) > -1) {
+            return data;
+        }
+        if (normalizedTerm && normalizedPhone.indexOf(normalizedTerm) > -1) {
+            return data;
+        }
+        if (phone.indexOf(term) > -1) {
+            return data;
+        }
+        return null;
+    }
+
+    function customerTemplateResult(result) {
+        if (!result.id) {
+            return result.text;
+        }
+
+        const phone = $(result.element).data('phone');
+        const address = $(result.element).data('address');
+        const $wrapper = $('<div></div>');
+        $wrapper.append($('<div></div>').text(result.text));
+        if (phone) {
+            $wrapper.append($('<div style="font-size: 12px; color: #6c757d;"></div>').text('📞 ' + phone));
+        }
+        if (address) {
+            $wrapper.append($('<div style="font-size: 12px; color: #6c757d;"></div>').text(address));
+        }
+        return $wrapper;
+    }
 
     $(document).ready(function() {
         // Initialize Select2
         $('.select2-customer').select2({
             placeholder: 'សូមស្វែងរកអតិថិជន',
             allowClear: true,
-            width: '100%'
+            width: '100%',
+            matcher: customerMatcher,
+            templateResult: customerTemplateResult
         });
 
         // Handle customer selection
@@ -1215,9 +1414,43 @@
 
             if (customerId) {
                 const name = selectedOption.data('name') || '-';
+                const phone = selectedOption.data('phone') || '-';
+                const address = selectedOption.data('address') || '-';
+                const city = selectedOption.data('city') || '-';
+                const type = selectedOption.data('type') || '-';
+                const status = selectedOption.data('status') || '-';
+                const notes = selectedOption.data('notes') || '-';
+
                 $('#customer_name').text(name);
+                $('#customer_phone').text(phone);
+                $('#customer_address').text(address);
+                $('#customer_city').text(city);
+                $('#customer_type').text(type || 'N/A');
+                $('#customer_status').text(status || 'Unknown');
+
+                $('#editCustomerBtn')
+                    .attr('href', `${customerEditUrlBase}/${customerId}/edit?return_url=${customerEditReturnUrl}`)
+                    .removeClass('disabled')
+                    .attr('aria-disabled', 'false');
+
+                const statusLower = status ? status.toLowerCase() : '';
+                const badgeClass = ['active', 'inactive'].includes(statusLower) ? 'badge-' + statusLower : 'badge-default';
+                $('#customer_type').removeClass('badge-active badge-inactive badge-default').addClass(badgeClass);
+                $('#customer_status').removeClass('badge-active badge-inactive badge-default').addClass(badgeClass);
+
+                if (notes && notes.trim() !== '') {
+                    $('#customer_notes').text(notes);
+                    $('#notes_section').slideDown(200);
+                } else {
+                    $('#notes_section').slideUp(200);
+                }
+
                 $('#customer_info_card').slideDown(300);
             } else {
+                $('#editCustomerBtn')
+                    .attr('href', '#')
+                    .addClass('disabled')
+                    .attr('aria-disabled', 'true');
                 $('#customer_info_card').slideUp(300);
             }
         });
@@ -1246,11 +1479,25 @@
             filterProducts(this.value);
         });
 
+        function updateTaxiPhoneVisibility() {
+            const selectedName = $('#delivery_select option:selected').data('name') || '';
+            const showTaxi = selectedName.toString().toLowerCase().includes('តាក់សុី');
+            if (showTaxi) {
+                $('#taxi_phone_field').slideDown(180);
+            } else {
+                $('#taxi_phone_field').slideUp(180);
+                $('#taxi_phone').val('');
+            }
+        }
+
         // Recalculate when delivery or box_qty changes
         $('#delivery_select, #box_qty').on('change input', function() {
             calculateTotal();
             updateCartData();
+            updateTaxiPhoneVisibility();
         });
+
+        updateTaxiPhoneVisibility();
 
         // Pre-populate cart with existing order items
         populateExistingCart();

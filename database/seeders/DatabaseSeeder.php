@@ -23,6 +23,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Create user admin account
+        User::firstOrCreate(
+            ['email' => 'user_admin@admin.com'],
+            [
+                'name' => 'User Admin',
+                'password' => bcrypt('admin123'),
+                'role' => 'admin',
+            ]
+        );
+
         // Call seeders
         $this->call([
             ProductSeeder::class,
