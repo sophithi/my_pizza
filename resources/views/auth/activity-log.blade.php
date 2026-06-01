@@ -302,10 +302,7 @@
                 </tbody>
             </table>
 
-            <!-- Pagination -->
-            <div style="margin-top: 32px;">
-                {{ $activities->links() }}
-            </div>
+
         @else
             <div class="empty-state">
                 <div class="empty-icon"></div>
