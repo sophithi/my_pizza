@@ -10,8 +10,7 @@ class PaymentsExport
     ) {}
 
     /**
-     * Stream a UTF-8 CSV (opens perfectly in Excel, LibreOffice, Google Sheets).
-     * Zero extra packages required.
+     * Stream a UTF-8 CSV file optimized for Excel
      */
     public function download(string $filename = 'payments.csv')
     {
@@ -20,30 +19,43 @@ class PaymentsExport
         // UTF-8 BOM — makes Excel auto-detect encoding (important for Khmer names)
         fputs($handle, "\xEF\xBB\xBF");
 
-        // Heading row
+        // Professional Heading row
         fputcsv($handle, [
             'លេខការបញ្ជាទិញ',
             'ឈ្មោះអតិថិជន',
-            'កាលបរិច្ឆេទបញ្ជាទិញ',
-            'សរុបការបញ្ជាទិញ ($)',
-            'ចំនួនបានបង់ ($)',
-            'ចំនួននៅសល់ ($)',
-            'វិធីបង់ប្រាក់',
+            'កាលបរិច្ឆេទ',
+            'សរុប ($)',
+            'សរុប (៛)',
+            'បានបង់ ($)',
+            'បានបង់ (៛)',
+            'នៅសល់ ($)',
+            'នៅសល់ (៛)',
+            'វិធីបង់',
             'ស្ថានភាព',
             'កំណត់ចំណាំ',
         ]);
 
-        // Data rows
+        $exchangeRate = 4000;
+
+        // Data rows with dual currency
         foreach ($this->payments as $p) {
+            $totalKhr = ($p->total_amount ?? 0) * $exchangeRate;
+            $paidKhr = ($p->paid_amount ?? 0) * $exchangeRate;
+            $balance = $p->balance ?? max(0, ($p->total_amount ?? 0) - ($p->paid_amount ?? 0));
+            $balanceKhr = $balance * $exchangeRate;
+
             fputcsv($handle, [
-                $this->asExcelText($p->order_id),
-                $p->customer_name,
-                $this->asExcelText(\Carbon\Carbon::parse($p->order_date)->format('Y-m-d')),
-                number_format($p->total_amount, 2),
-                number_format($p->paid_amount, 2),
-                number_format($p->balance ?? max(0, $p->total_amount - $p->paid_amount), 2),
-                $p->method,
-                $this->statusLabel($p->status),
+                $p->order_id ?? '',
+                $p->customer_name ?? '',
+                \Carbon\Carbon::parse($p->order_date)->format('Y-m-d'),
+                number_format($p->total_amount ?? 0, 2),
+                number_format($totalKhr, 0),
+                number_format($p->paid_amount ?? 0, 2),
+                number_format($paidKhr, 0),
+                number_format($balance, 2),
+                number_format($balanceKhr, 0),
+                $p->method ?? '',
+                $this->statusLabel($p->status ?? ''),
                 $p->notes ?? '',
             ]);
         }
@@ -59,11 +71,6 @@ class PaymentsExport
             'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
             'Expires'             => '0',
         ]);
-    }
-
-    private function asExcelText(string $value): string
-    {
-        return '="' . str_replace('"', '""', $value) . '"';
     }
 
     private function statusLabel(string $status): string

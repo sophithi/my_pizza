@@ -164,11 +164,11 @@
 
     <div class="header">
         <div>
-            <div class="brand"> Pizza Happy Family | ភីហ្សា គ្រួសាររីករាយ</div>
+            <div class="brand"> ភីហ្សា គ្រួសាររីករាយ | Pizza Happy Family </div>
             <div class="brand-sub">របាយការណ៍ចំណូលពីការទូទាត់</div>
         </div>
         <div class="report-meta">
-            បង្កើតនៅ៖ {{ now()->format('d M Y, H:i') }}<br>
+            បានធ្វើនៅ៖ {{ now()->format('d M Y, H:i') }}<br>
 
         </div>
     </div>

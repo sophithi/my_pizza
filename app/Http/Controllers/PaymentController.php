@@ -6,7 +6,6 @@ use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Exports\PaymentsExport;
 
 class PaymentController extends Controller
 {
@@ -270,9 +269,9 @@ class PaymentController extends Controller
     {
         $payments = $this->applyFilters($request)->get()
             ->map(fn($order) => $this->mapOrderToPaymentRow($order));
-        $label    = $this->periodLabel($request);
+        $periodLabel = $this->periodLabel($request);
 
-        return (new PaymentsExport($payments, $label))->download('Pizza_Happy_Family_Payments.csv');
+        return view('payments.export', compact('payments', 'periodLabel'));
     }
 
     // ─── Export PDF ───────────────────────────────────────────────────────────

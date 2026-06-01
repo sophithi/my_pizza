@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ចំណូលពីការទូទាត់')
+@section('title', 'របាយការណ៍ចំណូលពីការទូទាត់')
 
 @push('styles')
     <style>
@@ -161,7 +161,7 @@
             </h4>
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ route('payments.export.excel', request()->query()) }}" class="btn btn-outline-success btn-sm">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>  CSV
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>  Excel
                 </a>
                 <a href="{{ route('payments.export.pdf', request()->query()) }}" class="btn btn-outline-danger btn-sm"
                     target="_blank">

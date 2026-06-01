@@ -577,38 +577,7 @@
                 paymentFilter.addEventListener('change', filterTable);
             });
 
-            // Export to CSV
-            // function exportToCSV() {
-            //     const table = document.getElementById('tableBody');
-            //     if (!table) return;
 
-            //     let csv = "Order ID,Customer,Items,Date,Amount,Status,Payment\n";
-
-            //     table.querySelectorAll('tr').forEach(row => {
-            //         if (row.style.display === 'none') return;
-            //         const cells = row.querySelectorAll('td');
-            //         if (cells.length > 0) {
-            //             const orderId = cells[0]?.textContent.trim() || '';
-            //             const customer = cells[1]?.textContent.trim() || '';
-            //             const items = cells[2]?.textContent.trim() || '';
-            //             const date = cells[3]?.textContent.trim().split('\n')[0] || '';
-            //             const amount = cells[4]?.textContent.trim() || '';
-            //             const status = cells[5]?.textContent.trim().replace(/[^\w\s]/g, '') || '';
-            //             const payment = cells[6]?.textContent.trim().replace(/[^\w\s]/g, '') || '';
-
-            //             csv += `"${orderId}","${customer}","${items}","${date}","${amount}","${status}","${payment}"\n`;
-            //         }
-            //     });
-
-            //     const blob = new Blob([csv], { type: 'text/csv' });
-            //     const url = window.URL.createObjectURL(blob);
-            //     const a = document.createElement('a');
-            //     a.href = url;
-            //     a.download = 'orders_' + new Date().toISOString().slice(0, 10) + '.csv';
-            //     a.click();
-            //     window.URL.revokeObjectURL(url);
-            // }
-            // Export to CSV
             function exportToCSV() {
                 const table = document.getElementById('tableBody');
                 if (!table) return;

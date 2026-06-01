@@ -242,28 +242,28 @@
                                                 <td style="text-align:right">
                                                     <div class="packing-print-dropdown" style="margin-right:6px;">
                                                         <button type="button" class="trigger" aria-haspopup="menu" aria-expanded="false" onclick="togglePackingPrintDropdown(this)">
-                                                            <i class="fas fa-print"></i>
+
                                                             បិតលើកេស
                                                             <i class="fas fa-caret-down caret"></i>
                                                         </button>
                                                         <div class="dropdown-menu" role="menu">
                                                             <a href="{{ route('packing.delivery_pizza', $invoice) }}" target="_blank" role="menuitem">
-                                                                <i class="fas fa-pizza-slice"></i>
+
                                                                 <span>ភីហ្សា គ្រួសាររីករាយ</span>
                                                             </a>
                                                             <a href="{{ route('packing.delivery_mayo', $invoice) }}" target="_blank" role="menuitem">
-                                                                <i class="fas fa-box-open"></i>
+
                                                                 <span>ម៉ាយូនេស បន្ទាយឆ្មា</span>
                                                             </a>
                                                         </div>
                                                     </div>
                                                     <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="btn"
                                                         style="background:#1a1d29;color:white;border:none;padding:6px 10px;border-radius:6px;font-weight:600;margin-right:6px;">
-                                                        <i class="fas fa-print"></i> រៀបចំទំនិញ
+                                                        រៀបចំទំនិញ
                                                     </a>
                                                     <a href="{{ route('packing.customer', $invoice) }}" target="_blank" class="btn"
                                                         style="background:#e85d24;color:white;border:none;padding:6px 10px;border-radius:6px;font-weight:600;">
-                                                        <i class="fas fa-print"></i> វិក្ក័យបត្រភ្ញៀវ
+                                                        វិក្ក័យបត្រភ្ញៀវ
                                                     </a>
 
                                                 </td>
