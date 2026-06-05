@@ -147,6 +147,10 @@
         border-radius: 0;
     }
 }
+
+.pager-wrap {
+    margin-top: 16px;
+}
 </style>
 @endpush
 
@@ -351,7 +355,7 @@
         </div>
 
         {{-- Pagination --}}
-        <div class="mt-3">
+        <div class="pager-wrap">
             {{ $payments->withQueryString()->links() }}
         </div>
 

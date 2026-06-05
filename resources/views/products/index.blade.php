@@ -34,13 +34,17 @@
             background: #dc3545;
             color: #fff;
         }
+
+        .pager-wrap {
+            margin-top: 16px;
+        }
     </style>
 
     <div class="mb-4 d-flex justify-content-between align-items-center">
-        <h2 style="font-size: 24px; font-weight: 700; color: #1a1d29; margin: 0;">Products</h2>
+        <h2 style="font-size: 24px; font-weight: 700; color: #1a1d29; margin: 0;">ទំនិញទាំងអស់</h2>
         <a href="{{ route('products.create') }}" class="btn"
             style="background: linear-gradient(135deg, #e85d24 0%, #d94a10 100%); color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
-            <i class="fas fa-plus"></i> Add Product
+            <i class="fas fa-plus"></i> បង្កើតទំនិញថ្មី
         </a>
     </div>
 
@@ -103,7 +107,7 @@
                                 {{ $unitLabels[$product->unit] ?? $product->unit }}
                                 </td>
                                 @php
-                                    // Use stored fields directly (no recalculation)
+
                                     $usd = $product->price_usd ?? 0;
                                     $khr = $product->price_khr ?? 0;
                                 @endphp
@@ -138,8 +142,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" style="padding: 32px; text-align: center; color: #6c757d;">No products found. <a
-                                        href="{{ route('products.create') }}">Create one now</a></td>
+                                <td colspan="7" style="padding: 32px; text-align: center; color: #6c757d;">រកមិនឃើញទំនិញ. <a
+                                        href="{{ route('products.create') }}">បង្កើតទំនិញ</a></td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -148,31 +152,8 @@
         </div>
     </div>
 
-    
+    <div class="pager-wrap">
+        {{ $products->links('pagination::bootstrap-5') }}
+    </div>
 
 @endsection
-<!-- <article class="menu-card" data-category="package3">
-    <div class="menu-badge">អាចបញ្ជាទិញ</div>
-    <div class="menu-img">
-
-        <div class="menu-photo-wrap">
-            <img class="menu-photo" src="assets/images/festino_cheese.jpg" alt="ឈីសដើម Mozzarella Festino" loading="lazy" />
-        </div>
-    </div>
-    <div class="menu-body">
-        <div class="menu-row">
-            <h3 class="menu-name">ឈីសដើម Mozzarella Festino 2.38kg</h3>
-            <span class="menu-price">៛80000</span>
-        </div>
-        <p class="khmer">ឈីសគុណភាពខ្ពស់ លាយរលាយបានល្អ ទាញខ្សែស្អាត សមស្របសម្រាប់ភីហ្សា
-            ទំនង់ 2.38 គីឡូក្រាម
-            រលាយល្អ ទាញខ្សែស្អាត
-            សម្រាប់ហាង និងអាជីវកម្ម</p>
-        <div class="menu-actions">
-            <a class="btn btn-telegram" href="https://t.me/pizzahappyfamily193" target="_blank" rel="noopener">Contact
-                on Telegram</a>
-            <a class="btn btn-facebook" href="https://www.facebook.com/pizzahappyfamily" target="_blank"
-                rel="noopener noreferrer">Contact on Facebook</a>
-        </div>
-    </div>
-</article> -->

@@ -654,6 +654,10 @@
                 width: 100%;
             }
         }
+
+        .pager-wrap {
+            margin-top: 16px;
+        }
     </style>
 @endpush
 
@@ -945,6 +949,7 @@
                 </div>
             </form>
         </div>
+        <div class="pager-wrap">{{ $inventories->links('pagination::bootstrap-5') }}</div>
     </div>
 @endsection
 

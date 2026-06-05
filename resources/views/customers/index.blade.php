@@ -269,6 +269,10 @@
             }
         }
 
+        .pager-wrap {
+            margin-top: 16px;
+        }
+
         @media (max-width: 560px) {
             .stats-grid {
                 grid-template-columns: 1fr;
@@ -447,9 +451,10 @@
                     </tbody>
                 </table>
             </div>
-        </div>
 
-    
+        </div>
+            <div class="pager-wrap">{{ $customers->links('pagination::bootstrap-5') }}</div>
+
     </div>
 
     @push('scripts')

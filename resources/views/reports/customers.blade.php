@@ -28,7 +28,7 @@
         .report-table th { background:var(--soft); color:var(--muted); font-size:13px; font-weight:900; padding:11px 12px; text-transform:uppercase; }
         .report-table td { padding:11px 12px; vertical-align:middle; }
         .badge-count { background:#eef2ff; border-radius:999px; color:#3730a3; display:inline-flex; font-weight:900; min-width:34px; justify-content:center; padding:4px 10px; }
-        .pager-wrap { margin-top:16px; }
+
         .empty-note { color:var(--muted); padding:22px 16px; text-align:center; }
         @media (max-width:1100px){ .metric-grid{grid-template-columns:1fr 1fr;} }
         @media (max-width:760px){ .report-head{align-items:stretch; flex-direction:column;} .filter-row,.metric-grid{grid-template-columns:1fr;} }
@@ -118,6 +118,6 @@
             </div>
         </div>
 
-        <div class="pager-wrap">{{ $customerActivity->links() }}</div>
+        <div class="pager-wrap">{{ $customerActivity->links('pagination::bootstrap-5') }}</div>
     </div>
 @endsection

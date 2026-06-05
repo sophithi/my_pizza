@@ -199,6 +199,10 @@
                 flex-direction: column;
             }
         }
+
+        .pager-wrap {
+            margin-top: 16px;
+        }
     </style>
 @endpush
 
@@ -324,7 +328,7 @@
                     </table>
                 </div>
 
-                <div class="p-3">
+                <div class="pager-wrap">
                     {{ $purchases->links() }}
                 </div>
             @else

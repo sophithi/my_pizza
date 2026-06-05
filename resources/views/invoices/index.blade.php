@@ -328,6 +328,10 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .pager-wrap {
+            margin-top: 16px;
+        }
     </style>
 @endpush
 
@@ -511,8 +515,7 @@
             </div>
         </div>
 
-        <div class="mt-4">
-            {{ $invoices->links() }}
+        <div class="pager-wrap">{{ $invoices->links() }}
         </div>
     </div>
 

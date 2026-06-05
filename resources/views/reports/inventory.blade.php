@@ -142,6 +142,5 @@
             </div>
         </div>
 
-        <div class="pager-wrap">{{ $inventory->links() }}</div>
     </div>
 @endsection
