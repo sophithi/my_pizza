@@ -67,6 +67,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('inventory', InventoryController::class);
         Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
         Route::post('inventory/{inventory}/restock', [InventoryController::class, 'restock'])->name('inventory.restock');
+        Route::get('inventory/export/excel', [InventoryController::class, 'exportExcel'])->name('inventory.export.excel');
+        Route::get('inventory/export/pdf', [InventoryController::class, 'exportPdf'])->name('inventory.export.pdf');
     });
 
     // ============================================
@@ -106,6 +108,8 @@ Route::middleware('auth')->group(function () {
             ->where('filename', '.*')
             ->name('products.image');
         Route::resource('products', ProductController::class);
+        Route::get('products/export/excel', [ProductController::class, 'exportExcel'])->name('products.export.excel');
+        Route::get('products/export/pdf', [ProductController::class, 'exportPdf'])->name('products.export.pdf');
     });
 
     // Delivery management
@@ -167,6 +171,8 @@ Route::middleware('auth')->group(function () {
     // ============================================
     Route::middleware('role:staff,manager,admin')->group(function () {
         Route::resource('customers', CustomerController::class);
+        Route::get('customers/export/excel', [CustomerController::class, 'exportExcel'])->name('customers.export.excel');
+        Route::get('customers/export/pdf', [CustomerController::class, 'exportPdf'])->name('customers.export.pdf');
     });
 
     // ============================================

@@ -292,9 +292,17 @@
                 <h2 class="customer-title">អតិថិជន</h2>
                 <p class="customer-subtitle">ស្វែងរកអតិថិជន មើលប្រវត្តិបញ្ជាទិញ និងបង្កើតការបញ្ជាទិញថ្មីបានរហ័ស។</p>
             </div>
-            <a href="{{ route('customers.create') }}" class="customer-btn customer-btn-primary">
-                <i class="fas fa-plus"></i> បន្ថែមអតិថិជនថ្មី
-            </a>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="{{ route('customers.export.excel', request()->query()) }}" class="customer-btn customer-btn-soft" title="នាំចេញ Excel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a href="{{ route('customers.export.pdf', request()->query()) }}" class="customer-btn customer-btn-soft" target="_blank" title="នាំចេញ PDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <a href="{{ route('customers.create') }}" class="customer-btn customer-btn-primary">
+                    <i class="fas fa-plus"></i> បន្ថែមអតិថិជនថ្មី
+                </a>
+            </div>
         </div>
 
         @if($message = Session::get('success'))

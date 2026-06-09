@@ -6,11 +6,14 @@ use App\Models\Inventory;
 use App\Models\InventoryMovement;
 use App\Http\Requests\StoreInventoryRequest;
 use App\Http\Requests\UpdateInventoryRequest;
+use App\Traits\ExportableSpreadsheet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Style\DataType;
 
 class InventoryController extends Controller
 {
+    use ExportableSpreadsheet;
     /**
      * Display a listing of the resource.
      */
@@ -256,5 +259,77 @@ class InventoryController extends Controller
             'quantity_after' => $quantityAfter,
             'note' => $note,
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $inventories = $this->getInventoriesForFilter($request);
+        $spreadsheet = $this->createBrandedSpreadsheet('Inventory', 'របាយការណ៍ស្តុកទំនិញ', 8);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headers = ['ល.រ', 'ទំនិញ', 'ប្រភេទ', 'ទីតាំង', 'ចំនួន', 'កម្រិតម៉ូលឹង', 'ស្ថានភាព', 'កាលបរិច្ឆេទ'];
+        $headerRow = 6;
+
+        foreach ($headers as $index => $header) {
+            $sheet->setCellValue(chr(65 + $index) . $headerRow, $header);
+        }
+
+        $row = 7;
+        $number = 1;
+        foreach ($inventories as $inv) {
+            $status = $inv->quantity <= 0 ? 'អស់' : ($inv->quantity <= $inv->reorder_level ? 'ជិត' : 'មាន');
+            $sheet->setCellValue("A{$row}", $number);
+            $sheet->setCellValue("B{$row}", $inv->product?->name ?? '—');
+            $sheet->setCellValue("C{$row}", $inv->product?->category ?? '—');
+            $sheet->setCellValue("D{$row}", $inv->warehouse_location ?? '—');
+            $sheet->setCellValue("E{$row}", $inv->quantity);
+            $sheet->setCellValue("F{$row}", $inv->reorder_level);
+            $sheet->setCellValue("G{$row}", $status);
+            $sheet->setCellValue("H{$row}", $inv->updated_at?->format('d/m/Y') ?? '—');
+            $row++;
+            $number++;
+        }
+
+        $lastRow = max(7, $row - 1);
+        $this->styleTableHeaders($sheet, "A{$headerRow}:H{$headerRow}", "A{$headerRow}:H{$lastRow}");
+        $this->applyStripeRows($sheet, 7, $lastRow);
+
+        // Set column widths
+        $sheet->getColumnDimension('A')->setWidth(8);
+        $sheet->getColumnDimension('B')->setWidth(20);
+        $sheet->getColumnDimension('C')->setWidth(14);
+        $sheet->getColumnDimension('D')->setWidth(14);
+        $sheet->getColumnDimension('E')->setWidth(10);
+        $sheet->getColumnDimension('F')->setWidth(12);
+        $sheet->getColumnDimension('G')->setWidth(12);
+        $sheet->getColumnDimension('H')->setWidth(13);
+
+        return $this->downloadSpreadsheet($spreadsheet, 'inventory_' . now()->format('Y-m-d') . '.xlsx');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $inventories = $this->getInventoriesForFilter($request);
+        return view('inventory.pdf', compact('inventories'));
+    }
+
+    private function getInventoriesForFilter(Request $request)
+    {
+        return Inventory::with('product')
+            ->when($request->filled('search'), function($q) use ($request) {
+                $q->where('warehouse_location', 'like', "%{$request->search}%")
+                  ->orWhereHas('product', fn($q) => $q->where('name', 'like', "%{$request->search}%"));
+            })
+            ->when($request->filled('status'), function($q) use ($request) {
+                if ($request->status === 'out') {
+                    $q->where('quantity', '<=', 0);
+                } elseif ($request->status === 'low') {
+                    $q->whereRaw('quantity > 0 AND quantity <= reorder_level');
+                } elseif ($request->status === 'in') {
+                    $q->whereRaw('quantity > reorder_level');
+                }
+            })
+            ->latest()
+            ->get();
     }
 }

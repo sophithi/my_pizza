@@ -630,8 +630,8 @@
                 <button class="user-avatar" id="userDropdownToggle" title="User menu"
                     style="border: none; cursor: pointer; padding:0; overflow: hidden;">
                     @php $u = auth()->user(); @endphp
-                    @if(!empty($u->profile_image) && file_exists(storage_path($u->profile_image)))
-                        <img src="{{ storage_path($u->profile_image) }}" alt="{{ $u->name }}" class="user-avatar-img">
+                    @if(!empty($u->profile_image) && file_exists(Storage::url($u->profile_image)))
+                        <img src="{{Storage::url($u->profile_image) }}" alt="{{ $u->name }}" class="user-avatar-img">
                     @else
                         {{ strtoupper(substr($u->name ?? 'A', 0, 1)) }}
                     @endif

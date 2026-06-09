@@ -673,9 +673,17 @@
                 <h2 class="inventory-title">ស្តុកទំនិញ</h2>
                 <p class="inventory-subtitle">តាមដានចំនួនទំនិញ កម្រិតស្តុក និងទីតាំងស្តុកសម្រាប់ការរៀបចំទំនិញ</p>
             </div>
-            <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
-                <i class="fas fa-plus"></i> បន្ថែមស្តុក
-            </a>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="{{ route('inventory.export.excel', request()->query()) }}" class="inventory-btn inventory-btn-soft" title="នាំចេញ Excel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a href="{{ route('inventory.export.pdf', request()->query()) }}" class="inventory-btn inventory-btn-soft" target="_blank" title="នាំចេញ PDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
+                    <i class="fas fa-plus"></i> បន្ថែមស្តុក
+                </a>
+            </div>
         </div>
 
         @if($message = Session::get('success'))

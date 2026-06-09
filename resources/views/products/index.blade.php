@@ -40,12 +40,19 @@
         }
     </style>
 
-    <div class="mb-4 d-flex justify-content-between align-items-center">
+    <div class="mb-4 d-flex justify-content-between align-items-center" style="gap: 8px; flex-wrap: wrap;">
         <h2 style="font-size: 24px; font-weight: 700; color: #1a1d29; margin: 0;">ទំនិញទាំងអស់</h2>
-        <a href="{{ route('products.create') }}" class="btn"
-            style="background: linear-gradient(135deg, #e85d24 0%, #d94a10 100%); color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
-            <i class="fas fa-plus"></i> បង្កើតទំនិញថ្មី
-        </a>
+        <div style="display: flex; gap: 8px;">
+            <a href="{{ route('products.export.excel') }}" class="btn btn-outline-success btn-sm">
+                <i class="fas fa-file-excel"></i> Excel
+            </a>
+            <a href="{{ route('products.export.pdf') }}" class="btn btn-outline-danger btn-sm" target="_blank">
+                <i class="fas fa-file-pdf"></i> PDF
+            </a>
+            <a href="{{ route('products.create') }}" class="btn" style="background: linear-gradient(135deg, #e85d24 0%, #d94a10 100%); color: #fff; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
+                <i class="fas fa-plus"></i> បង្កើតទំនិញថ្មី
+            </a>
+        </div>
     </div>
 
     @if($message = Session::get('success'))
