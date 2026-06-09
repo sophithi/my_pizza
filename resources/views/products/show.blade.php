@@ -17,8 +17,22 @@
                         <div style="text-align: right;">
                             <h3 style="font-size: 24px; color: #e85d24; font-weight: 700; margin: 0;">
                                 ${{ number_format($product->price_usd, 2) }}</h3>
-                            <p style="color: #6c757d; font-size: 12px; margin: 4px 0 0 0;">
-                                ខ្នាត: {{ $unitLabels[$product->unit] ?? $product->unit }} </p>
+                             @php
+                                    $unitLabels = [
+                                        'kg' => 'គីឡូក្រាម',
+                                        'g' => 'ក្រាម',
+                                        'L' => 'លីត្រ',
+                                        'ml' => 'កំប៉ុង',
+                                        'pcs' => 'បន្ទះ',
+                                        'bag' => 'ដើម',
+                                        'box1' => 'កេស',
+                                        'box2' => 'ប្រអប់',
+                                        'pack' => 'កញ្ចប់',
+                                    ];
+                                @endphp
+                                <td style="padding: 12px; color: #6c757d;">
+                                {{ $unitLabels[$product->unit] ?? $product->unit }}
+                                </td>
                         </div>
                     </div>
 

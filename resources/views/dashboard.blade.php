@@ -464,7 +464,7 @@
     <div class="dashboard-page">
         <section class="dash-hero">
             <div class="dash-brand">
-                <img src="{{ Storage::url('assets/logos/logo_pizza.png') }}" alt="Pizza Happy Family Logo">
+                <img src="{{ asset('assets/logos/logo_pizza.png') }}" alt="Pizza Happy Family Logo">
                 <div>
                     <h1 class="dash-title">Pizza Happy Family</h1>
                     <p class="dash-subtitle">Welcome back, {{ auth()->user()->name ?? 'Admin' }}.</p>
