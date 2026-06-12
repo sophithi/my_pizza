@@ -152,7 +152,7 @@
                 <th width="18%">ឈ្មោះ</th>
                 <th width="12%">ប្រភព</th>
                 <th width="14%">ទូរស័ព្ទ</th>
-                <th width="16%">ឰង</th>
+                <th width="16%">ទីតាំង</th>
                 <th width="10%">បញ្ជាទិញ</th>
                 <th width="14%">ចំណាយ</th>
                 <th width="12%">ស្ថានភាព</th>

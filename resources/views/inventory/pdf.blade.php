@@ -41,7 +41,7 @@
                 <th width="14%">ប្រភេទ</th>
                 <th width="14%">ទីតាំង</th>
                 <th width="10%">ចំនួន</th>
-                <th width="12%">ម៉ូលឹង</th>
+                <th width="12%">កម្រិត</th>
                 <th width="12%">ស្ថានភាព</th>
                 <th width="12%">កាលបរិច្ឆេទ</th>
             </tr>
@@ -69,7 +69,7 @@
     </table>
 
     <div class="footer">
-        សរុបចំនួនលេខ: {{ $inventories->count() }} | គ្រូបុគ្គលិក Pizza Happy Family
+        សរុបចំនួនលេខ: {{ $inventories->count() }} |  Pizza Happy Family
     </div>
 </body>
 </html>
