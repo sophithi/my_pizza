@@ -267,7 +267,7 @@ class InventoryController extends Controller
         $spreadsheet = $this->createBrandedSpreadsheet('Inventory', 'របាយការណ៍ស្តុកទំនិញ', 8);
         $sheet = $spreadsheet->getActiveSheet();
 
-        $headers = ['ល.រ', 'ទំនិញ', 'ប្រភេទ', 'ទីតាំង', 'ចំនួន', 'កម្រិតម៉ូលឹង', 'ស្ថានភាព', 'កាលបរិច្ឆេទ'];
+        $headers = ['ល.រ', 'ទំនិញ', 'ប្រភេទ', 'ទីតាំង', 'ចំនួន', 'កម្រិត', 'ស្ថានភាព', 'កាលបរិច្ឆេទ'];
         $headerRow = 6;
 
         foreach ($headers as $index => $header) {

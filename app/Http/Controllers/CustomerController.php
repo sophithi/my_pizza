@@ -149,7 +149,7 @@ class CustomerController extends Controller
         $spreadsheet = $this->createBrandedSpreadsheet('Customers', 'របាយការណ៍អតិថិជន', 9);
         $sheet = $spreadsheet->getActiveSheet();
 
-        $headers = ['ល.រ', 'ឈ្មោះ', 'ប្រភព', 'ទូរស័ព្ទ', 'ឰង', 'ការបញ្ជាទិញ', 'ចំណាយសរុប', 'បង្កើតថ្ងៃ', 'ស្ថានភាព'];
+        $headers = ['ល.រ', 'ឈ្មោះ', 'ប្រភព', 'ទូរស័ព្ទ', 'ទីតាំង', 'ការបញ្ជាទិញ', 'ចំណាយសរុប', 'បង្កើតថ្ងៃ', 'ស្ថានភាព'];
         $headerRow = 6;
 
         foreach ($headers as $index => $header) {
