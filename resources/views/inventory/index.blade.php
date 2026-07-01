@@ -959,7 +959,7 @@
         </div>
     </div>
       <div class="pager-wrap">
-        {{ $inventory->links('pagination::bootstrap-5') }}
+        {{ $inventories->links('pagination::bootstrap-5') }}
     </div>
 @endsection
 
