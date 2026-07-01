@@ -451,9 +451,10 @@
             </div>
         </div>
 
-        <div class="mt-3">
-            {{ $deliveries->links() }}
-        </div>
+      
+    </div>
+     <div class="pager-wrap">
+        {{ $deliveries->links('pagination::bootstrap-5') }}
     </div>
 @endsection
 

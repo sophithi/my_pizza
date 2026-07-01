@@ -284,6 +284,9 @@
             </div>
         </div>
     </div>
+     <div class="pager-wrap">
+        {{ $packing->links('pagination::bootstrap-5') }}
+    </div>
 @endsection
 
 @push('scripts')

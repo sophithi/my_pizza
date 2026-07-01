@@ -542,9 +542,8 @@
         </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="mt-4">
-        {{ $orders->links() }}
+    <div class="pager-wrap">
+        {{ $orders->links('pagination::bootstrap-5') }}
     </div>
 
     @push('scripts')
