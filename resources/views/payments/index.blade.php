@@ -444,7 +444,11 @@
                 </form>
             </div>
         </div>
+        
     </div>
+     <div class="pager-wrap">{{ $payments->links() }}
+        </div>
+   
 @endsection
 
 @push('scripts')

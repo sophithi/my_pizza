@@ -68,9 +68,11 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
             $data['image'] = $imagePath;
+            
         }
 
         $product = Product::create($data);
+      
         return redirect()->route('products.show', $product)->with('success', 'Product created successfully.');
     }
 
@@ -110,6 +112,8 @@ class ProductController extends Controller
         }
 
         $product->update($data);
+        $product->allow_custom_price = $request->boolean('allow_custom_price');
+        $product->save();
         return redirect()->route('products.show', $product)->with('success', 'Product updated successfully.');
     }
 

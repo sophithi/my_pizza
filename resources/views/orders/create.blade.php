@@ -504,16 +504,6 @@
         color: var(--accent);
     }
 
-    .summary-row input[type="number"] {
-        width: 60px;
-        padding: 4px 8px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        text-align: right;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
     .empty-state {
         text-align: center;
         padding: 24px 12px;
@@ -761,7 +751,6 @@
         box-shadow: 0 -8px 18px rgba(26, 29, 41, 0.06);
     }
 
-    /* Order Details Fields */
     .od-field {
         margin-bottom: 16px;
         position: relative;
@@ -825,68 +814,10 @@
         pointer-events: none;
     }
 
-    @media (max-width: 992px) {
-        .products-grid {
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        }
-
-        .order-side {
-            position: static;
-        }
-
-        .checkout-card {
-            max-height: none;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .product-tools {
-            grid-template-columns: 1fr;
-        }
-
-        .product-count {
-            text-align: right;
-        }
-
-        .products-grid {
-            grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-            max-height: 420px;
-        }
-
-        .invoice-item-actions,
-        .order-details-grid,
-        .button-group {
-            grid-template-columns: 1fr;
-            display: grid;
-        }
-
-        .btn-remove {
-            width: 100%;
-        }
-
-        .delivery-combo {
-            grid-template-columns: 1fr 86px;
-        }
-    }
-
-    .row {
-        margin-left: -8px;
-        margin-right: -8px;
-    }
-
-    [class*='col-'] {
-        padding-left: 8px;
-        padding-right: 8px;
-        margin-bottom: 8px;
-    }
-
     /* Toast Notification */
     .toast-overlay {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.4);
         z-index: 9998;
         opacity: 0;
@@ -897,8 +828,7 @@
 
     .toast-box {
         position: fixed;
-        top: 50%;
-        left: 50%;
+        top: 50%; left: 50%;
         transform: translate(-50%, -50%) scale(0.9);
         background: var(--surface);
         border-radius: 16px;
@@ -915,41 +845,23 @@
     .toast-box.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
     .toast-icon {
-        width: 56px;
-        height: 56px;
+        width: 56px; height: 56px;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         margin: 0 auto 16px;
         font-size: 24px;
     }
     .toast-icon.warning { background: #fff3cd; color: #d97706; }
-    .toast-icon.error { background: #fee2e2; color: #dc2626; }
+    .toast-icon.error   { background: #fee2e2; color: #dc2626; }
     .toast-icon.success { background: #d1fae5; color: #059669; }
 
-    .toast-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--text);
-        margin-bottom: 8px;
-    }
-    .toast-message {
-        font-size: 14px;
-        color: var(--text-muted);
-        margin-bottom: 20px;
-        line-height: 1.5;
-    }
+    .toast-title   { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .toast-message { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
     .toast-btn {
         background: linear-gradient(135deg, var(--accent) 0%, #d94a10 100%);
-        color: #fff;
-        border: none;
-        padding: 10px 32px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
+        color: #fff; border: none; padding: 10px 32px;
+        border-radius: 10px; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: all 0.2s;
     }
     .toast-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(232,93,36,0.3); }
 
@@ -966,56 +878,229 @@
     }
 
     .free-product-row select,
-    .free-product-row input {
-        flex: 1;
-    }
+    .free-product-row input { flex: 1; }
 
-    .free-product-row input[type="number"] {
-        flex: 0 0 80px;
-    }
+    .free-product-row input[type="number"] { flex: 0 0 80px; }
 
     .btn-remove-free {
         background: var(--danger);
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 12px;
-        transition: all 0.2s ease;
-        flex: 0 0 auto;
+        color: white; border: none;
+        padding: 8px 12px; border-radius: 6px;
+        cursor: pointer; font-size: 12px;
+        transition: all 0.2s ease; flex: 0 0 auto;
     }
-
-    .btn-remove-free:hover {
-        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-        transform: translateY(-1px);
-    }
+    .btn-remove-free:hover { box-shadow: 0 4px 12px rgba(220,53,69,0.3); transform: translateY(-1px); }
 
     .btn-outline-primary {
-        background: transparent;
+        background: transparent; color: var(--accent);
+        border: 1px solid var(--accent); padding: 8px 16px;
+        border-radius: 6px; cursor: pointer; font-weight: 600;
+        font-size: 13px; transition: all 0.2s ease;
+    }
+    .btn-outline-primary:hover { background: var(--accent); color: white; }
+
+    .btn-sm   { padding: 8px 14px; font-size: 12px; }
+    .mt-2     { margin-top: 12px; }
+
+    /* Custom Price Modal */
+    .cpm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.48);
+        z-index: 9500;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .cpm-overlay.show { display: flex; }
+
+    .cpm-modal {
+        background: var(--surface);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        width: 100%;
+        max-width: 420px;
+        overflow: hidden;
+        animation: slideDown 0.25s ease-out;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+    }
+
+    .cpm-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .cpm-thumb {
+        width: 48px; height: 48px;
+        border-radius: 10px;
+        background: rgba(232,93,36,.1);
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden; flex-shrink: 0;
+    }
+
+    .cpm-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .cpm-body { padding: 18px 20px; }
+
+    .cpm-orig-prices {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .cpm-orig-box {
+        border-radius: 8px;
+        padding: 10px 12px;
+        border: 1px solid;
+    }
+
+    .cpm-orig-box.usd {
+        background: rgba(40,167,69,.08);
+        border-color: rgba(40,167,69,.22);
+    }
+
+    .cpm-orig-box.khr {
+        background: var(--bg);
+        border-color: var(--border);
+    }
+
+    .cpm-orig-label {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 4px;
+    }
+
+    .cpm-orig-box.usd .cpm-orig-label { color: #166534; }
+    .cpm-orig-box.khr .cpm-orig-label { color: var(--text-muted); }
+
+    .cpm-orig-val { font-size: 17px; font-weight: 700; }
+    .cpm-orig-box.usd .cpm-orig-val { color: #166534; }
+    .cpm-orig-box.khr .cpm-orig-val { color: var(--text); }
+
+    .cpm-field { margin-bottom: 14px; }
+
+    .cpm-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+    }
+
+    .cpm-label i { color: var(--accent); margin-right: 4px; }
+
+    .cpm-prefix-wrap { position: relative; }
+
+    .cpm-prefix {
+        position: absolute;
+        left: 11px; top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-weight: 700;
+        font-size: 14px;
+        pointer-events: none;
+    }
+
+    .cpm-prefix-wrap .form-control { padding-left: 26px; }
+    .cpm-prefix-wrap.khr .form-control { padding-left: 30px; }
+
+    .cpm-qty-stepper {
+        display: grid;
+        grid-template-columns: 38px 1fr 38px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .cpm-qty-stepper button {
+        background: var(--bg); border: none;
+        cursor: pointer; font-size: 20px;
+        font-weight: 700; color: var(--text);
+        min-height: 40px; transition: all 0.2s;
+    }
+    .cpm-qty-stepper button:hover { color: var(--accent); background: rgba(232,93,36,.08); }
+
+    .cpm-qty-stepper input {
+        border: none;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        border-radius: 0;
+        text-align: center;
+        font-size: 15px;
+        font-weight: 700;
+        min-height: 40px;
+        width: 100%;
+        background: var(--surface);
+        color: var(--text);
+        font-family: inherit;
+    }
+    .cpm-qty-stepper input:focus { outline: none; }
+
+    .cpm-total-bar {
+        background: rgba(232,93,36,.07);
+        border: 1px solid rgba(232,93,36,.2);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cpm-total-label { font-size: 13px; color: var(--accent); font-weight: 700; }
+
+    .cpm-total-usd { font-size: 17px; font-weight: 700; color: var(--accent); text-align: right; }
+    .cpm-total-khr { font-size: 12px; color: var(--accent); opacity: .8; text-align: right; }
+
+    .cpm-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    /* Custom price badge on cart item */
+    .custom-price-badge {
+        display: inline-block;
+        background: rgba(232,93,36,.12);
         color: var(--accent);
-        border: 1px solid var(--accent);
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 13px;
-        transition: all 0.2s ease;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 999px;
+        margin-left: 6px;
+        vertical-align: middle;
     }
 
-    .btn-outline-primary:hover {
-        background: var(--accent);
-        color: white;
+    @media (max-width: 992px) {
+        .products-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+        .order-side { position: static; }
+        .checkout-card { max-height: none; }
     }
 
-    .btn-sm {
-        padding: 8px 14px;
-        font-size: 12px;
+    @media (max-width: 576px) {
+        .product-tools { grid-template-columns: 1fr; }
+        .product-count { text-align: right; }
+        .products-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); max-height: 420px; }
+        .invoice-item-actions,
+        .order-details-grid,
+        .button-group { grid-template-columns: 1fr; display: grid; }
+        .btn-remove { width: 100%; }
+        .delivery-combo { grid-template-columns: 1fr 86px; }
+        .cpm-orig-prices { grid-template-columns: 1fr; }
+        .cpm-actions { grid-template-columns: 1fr; }
     }
 
-    .mt-2 {
-        margin-top: 12px;
-    }
+    .row { margin-left: -8px; margin-right: -8px; }
+    [class*='col-'] { padding-left: 8px; padding-right: 8px; margin-bottom: 8px; }
 </style>
 @endpush
 
@@ -1057,8 +1142,7 @@
                                         data-type="{{ $customer->type ?? 'N/A' }}"
                                         data-status="{{ $customer->status ?? 'Unknown' }}"
                                         data-notes="{{ $customer->notes ?? '' }}"
-                                        {{ (string) old('customer_id', $selectedCustomerId ?? '') ===
-                                        (string) $customer->id ? 'selected' : '' }}>
+                                        {{ (string) old('customer_id', $selectedCustomerId ?? '') === (string) $customer->id ? 'selected' : '' }}>
                                         {{ $customer->name }}
                                     </option>
                                 @endforeach
@@ -1102,11 +1186,12 @@
                 </div>
             </div>
         </div>
+
         <!-- Products Section -->
         <div class="card">
             <div class="card-body">
                 <h4 class="product-section-title">
-                     សូមជ្រើសរើសទំនិញ
+                    សូមជ្រើសរើសទំនិញ
                 </h4>
 
                 <div class="product-tools">
@@ -1122,15 +1207,22 @@
                 <div class="products-grid" id="productsGrid">
                     @forelse($products as $product)
                     @php($productImageUrl = $product->imageUrl())
-                    <div class="product-card" data-product-name="{{ Str::lower($product->name) }}" onclick="addToCart({{ $product->id }}, @js($product->name),
-                    {{ $product->price_usd }},
-                     {{ $product->price_khr }},
-                     @js($productImageUrl))">
+                    <div class="product-card"
+                        data-product-name="{{ Str::lower($product->name) }}"
+                        onclick="addToCart(
+                            {{ $product->id }},
+                            @js($product->name),
+                            {{ $product->price_usd }},
+                            {{ $product->price_khr }},
+                            {{ $product->allow_custom_price ? 'true' : 'false' }},
+                            @js($productImageUrl)
+                        )">
+                        
                         @if($productImageUrl)
                             <img src="{{ $productImageUrl }}" alt="{{ $product->name }}" class="product-image">
                         @else
                             <div style="width: 100%; height: 88px; background: var(--bg); border-radius: 6px;
-                            display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
                                 <i class="fas fa-image" style="font-size: 24px; color: var(--text-muted);"></i>
                             </div>
                         @endif
@@ -1139,12 +1231,17 @@
                             <div style="color: var(--accent); font-weight: 700;">${{ number_format($product->price_usd, 2) }}</div>
                             <div style="color: var(--text-muted); font-weight: 600;">៛{{ number_format($product->price_khr, 0) }}</div>
                         </div>
+                        @if($product->allow_custom_price)
+                            <div style="font-size: 10px; color: var(--accent); font-weight: 700; margin-top: 4px;">
+                                <i class="fas fa-tag" style="font-size:9px;"></i> តម្លៃកំណត់ផ្ទាល់
+                            </div>
+                        @endif
                     </div>
                     @empty
                     <div class="empty-state" style="grid-column: 1 / -1;">
                         <div class="empty-state-icon"></div>
                         <div class="empty-state-text">មិនមានទំនិញទេ</div>
-                        <a href="{{ route('products.index') }}" style="color: var(--accent); text-decoration: none; font-weight: 600;">បន្ថែមទំនិញ→</a>
+                        <a href="{{ route('products.index') }}" style="color: var(--accent); text-decoration: none; font-weight: 600;">បន្ថែមទំនិញ →</a>
                     </div>
                     @endforelse
                 </div>
@@ -1152,6 +1249,7 @@
         </div>
 
     </div>
+
     <!-- Right Section: Order Form -->
     <div class="col-lg-5 order-side">
         <form action="{{ route('orders.store') }}" method="POST" id="orderForm">
@@ -1161,13 +1259,13 @@
                 <div class="card-body">
                     <div class="checkout-header">
                         <h4 class="checkout-title">
-                           បញ្ជាទិញ
+                            បញ្ជាទិញ
                         </h4>
+                        
                     </div>
 
                     <div class="checkout-scroll">
                         <div class="checkout-section">
-
                             <div class="invoice-items" id="invoiceItems">
                                 <div class="empty-state">
                                     <div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div>
@@ -1176,29 +1274,24 @@
                             </div>
                         </div>
 
-
                         <!-- Hidden inputs for form submission -->
                         <input type="hidden" id="hidden_customer_id" name="customer_id">
                         <input type="hidden" id="order_items" name="order_items" value="[]">
                         <input type="hidden" id="subtotal_amount" name="subtotal">
-
                         <input type="hidden" id="discount_amount" name="discount_amount">
                         <input type="hidden" id="delivery_fee_khr" name="delivery_fee_khr" value="0">
                         <input type="hidden" id="total_amount_input" name="total_amount">
                         <input type="hidden" name="order_date" value="{{ old('order_date', now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}">
 
                         <div class="checkout-section">
-
-
                             <div class="order-details-grid">
-
 
                                 <div class="od-field">
                                     <label class="od-label"><i class="fas fa-money-bill-wave"></i> ការបង់ប្រាក់</label>
                                     <select name="payment_status" class="form-control od-select">
-                                        <option value="unpaid" {{ old('payment_status') == 'unpaid' ? 'selected' : '' }}>មិនទាន់បង់</option>
+                                        <option value="unpaid"  {{ old('payment_status') == 'unpaid'  ? 'selected' : '' }}>មិនទាន់បង់</option>
                                         <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
-                                        <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>បានបង់</option>
+                                        <option value="paid"    {{ old('payment_status') == 'paid'    ? 'selected' : '' }}>បានបង់</option>
                                     </select>
                                 </div>
 
@@ -1208,76 +1301,79 @@
                                         <select id="delivery_select" name="delivery_id" class="form-control od-select">
                                             <option value="">សូមជ្រើសរើស</option>
                                             @foreach($deliveries as $delivery)
-                                                <option value="{{ $delivery->id }}" data-name="{{ $delivery->delivery_name }}" data-price="{{ $delivery->delivery_price_khr }}">
-                                                    {{ $delivery->delivery_name  }}
+                                                <option value="{{ $delivery->id }}"
+                                                    data-name="{{ $delivery->delivery_name }}"
+                                                    data-price="{{ $delivery->delivery_price_khr }}">
+                                                    {{ $delivery->delivery_name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                         <div class="box-inline">
                                             <span>កេស</span>
-                                            <input type="number" id="box_qty" name="box_qty" class="form-control" min="1" value="{{ old('box_qty', 1) }}">
+                                            <input type="number" id="box_qty" name="box_qty" class="form-control" min="1" 
+                                            value="{{ old('box_qty', 1) }}">
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="od-field" id="taxi_phone_field" style="display:none;">
                                     <label class="od-label"><i class="fas fa-phone"></i> លេខទូរស័ព្ទតាក់ស៊ី</label>
-                                    <input type="text" id="taxi_phone" name="taxi_phone" class="form-control" value="{{ old('taxi_phone') }}" placeholder="បញ្ចូលលេខទូរស័ព្ទ taxi">
+                                    <input type="text" id="taxi_phone" name="taxi_phone" class="form-control"
+                                        value="{{ old('taxi_phone') }}" placeholder="បញ្ចូលលេខទូរស័ព្ទ taxi">
                                 </div>
 
                                 <div class="od-field full-span">
                                     <label class="od-label"><i class="fas fa-gift"></i> Free ជូនអតិថិជន</label>
                                     <div id="freeProductsContainer"></div>
                                     <button type="button" id="addFreeProductBtn" class="btn btn-sm btn-outline-primary mt-2">
-                                         +Add Free
+                                        + Add Free
                                     </button>
                                 </div>
 
                                 <div class="od-field full-span">
                                     <label class="od-label"><i class="fas fa-sticky-note"></i> ផ្សេងៗ</label>
-                                    <textarea name="notes" class="form-control" rows="2" placeholder="..." style="resize: none;">{{ old('notes') }}</textarea>
+                                    <textarea name="notes" class="form-control" rows="2" placeholder="...">{{ old('notes') }}</textarea>
                                 </div>
+
                             </div>
                         </div>
                     </div>
 
-                        <div class="checkout-section">
-                            <div class="invoice-summary">
-                                <div class="summary-row">
-                                    <span>សរុប (USD / KHR):</span>
-                                    <div style="text-align: right;">
-                                        <div style="font-weight: 600;">$<span id="subtotal">0.00</span></div>
-                                        <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="subtotal_khr">0</span></div>
-                                    </div>
+                    <div class="checkout-section" style="padding: 0 20px;">
+                        <div class="invoice-summary">
+                            <div class="summary-row">
+                                <span>សរុប (USD / KHR):</span>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 600;">$<span id="subtotal">0.00</span></div>
+                                    <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="subtotal_khr">0</span></div>
                                 </div>
+                            </div>
 
-                                <div class="summary-row" id="discountAmountRow">
-                                    <span style="font-weight: 600;">បញ្ចុះតម្លៃសរុប:</span>
-                                    <div style="text-align: right;">
-                                        <div style="font-weight: 600; color: var(--danger);">-$<span id="discountAmount">0.00</span></div>
-                                        <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">-៛<span id="discountAmount_khr">0</span></div>
-                                    </div>
+                            <div class="summary-row">
+                                <span style="font-weight: 600;">បញ្ចុះតម្លៃសរុប:</span>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 600; color: var(--danger);">-$<span id="discountAmount">0.00</span></div>
+                                    <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">-៛<span id="discountAmount_khr">0</span></div>
                                 </div>
+                            </div>
 
-                                <div class="summary-row" id="deliveryFeeRow">
-                                    <span style="font-weight: 600;">ការដឹកជញ្ជូន:</span>
-                                    <div style="text-align: right;">
-                                        <div style="font-weight: 600;">$<span id="deliveryFeeUsd">0.00</span></div>
-                                        <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="deliveryFeeKhr">0</span></div>
-                                    </div>
+                            <div class="summary-row">
+                                <span style="font-weight: 600;">ការដឹកជញ្ជូន:</span>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 600;">$<span id="deliveryFeeUsd">0.00</span></div>
+                                    <div style="font-weight: 600; color: var(--text-muted); font-size: 12px;">៛<span id="deliveryFeeKhr">0</span></div>
                                 </div>
+                            </div>
 
-
-                                <div class="summary-row total">
-                                    <span>តម្លៃសរុប:</span>
-                                    <div style="text-align: right;">
-                                        <div>$<span id="totalAmount">0.00</span></div>
-                                        <div style="color: var(--accent); font-size: 13px;">៛<span id="totalAmount_khr">0</span></div>
-                                    </div>
+                            <div class="summary-row total">
+                                <span>តម្លៃសរុប:</span>
+                                <div style="text-align: right;">
+                                    <div>$<span id="totalAmount">0.00</span></div>
+                                    <div style="color: var(--accent); font-size: 13px;">៛<span id="totalAmount_khr">0</span></div>
                                 </div>
                             </div>
                         </div>
-
+                    </div>
 
                     <div class="checkout-actions button-group">
                         <button type="submit" class="btn-primary">
@@ -1287,52 +1383,137 @@
                             <i class="fas fa-times"></i> បោះបង់
                         </a>
                     </div>
-                </div>
 
+                </div>
             </div>
         </form>
     </div>
 </div>
 
+<!-- ===== Custom Price Modal ===== -->
+<div id="cpmOverlay" class="cpm-overlay" onclick="cpmOverlayClick(event)">
+    <div class="cpm-modal">
+
+        <div class="cpm-header">
+            <div class="cpm-thumb" id="cpm_thumb">
+                <i class="fas fa-tag" style="color:var(--accent); font-size:18px;"></i>
+            </div>
+            <div style="min-width:0; flex:1;">
+                <div id="cpm_name" style="font-size:15px; font-weight:700; color:var(--text);
+                    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">កំណត់តម្លៃតាមចង់បាន</div>
+            </div>
+            <button type="button" onclick="cpmClose()"
+                style="background:none; border:none; cursor:pointer; color:var(--text-muted);
+                    font-size:22px; padding:4px 6px; border-radius:6px; line-height:1; flex-shrink:0;"
+                title="បិទ">&times;</button>
+        </div>
+
+        <div class="cpm-body">
+
+            <!-- Original prices reference -->
+            <div class="cpm-orig-prices">
+                <div class="cpm-orig-box usd">
+                    <div class="cpm-orig-label">តម្លៃដើម USD</div>
+                    <div class="cpm-orig-val" id="cpm_orig_usd">$0.00</div>
+                </div>
+                <div class="cpm-orig-box khr">
+                    <div class="cpm-orig-label">តម្លៃដើម KHR</div>
+                    <div class="cpm-orig-val" id="cpm_orig_khr">៛0</div>
+                </div>
+            </div>
+
+            <!-- Custom USD price -->
+            <div class="cpm-field">
+                <label class="cpm-label">
+                    <i class="fas fa-dollar-sign"></i> តម្លៃថ្មី (USD)
+                </label>
+                <div class="cpm-prefix-wrap">
+                    <span class="cpm-prefix">$</span>
+                    <input type="number" id="cpm_usd" class="form-control"
+                        min="0" step="0.01"
+                        oninput="cpmSyncKhr(this.value); cpmUpdateTotal()">
+                </div>
+            </div>
+
+            <!-- Custom KHR price -->
+            <div class="cpm-field">
+                <label class="cpm-label">
+                    <i class="fas fa-coins"></i> តម្លៃថ្មី (KHR)
+                </label>
+                <div class="cpm-prefix-wrap khr">
+                    <span class="cpm-prefix">៛</span>
+                    <input type="number" id="cpm_khr" class="form-control"
+                        min="0" step="100"
+                        oninput="cpmSyncUsd(this.value); cpmUpdateTotal()">
+                </div>
+            </div>
+
+            <!-- Quantity stepper -->
+            <div class="cpm-field">
+                <label class="cpm-label">
+                    <i class="fas fa-layer-group"></i> ចំនួន
+                </label>
+                <div class="cpm-qty-stepper">
+                    <button type="button" onclick="cpmStepQty(-1)">−</button>
+                    <input type="number" id="cpm_qty" value="1" min="1"
+                        oninput="cpmUpdateTotal()">
+                    <button type="button" onclick="cpmStepQty(1)">+</button>
+                </div>
+            </div>
+
+            <!-- Live total -->
+            <div class="cpm-total-bar">
+                <span class="cpm-total-label">សរុប</span>
+                <div>
+                    <div class="cpm-total-usd" id="cpm_total_usd">$0.00</div>
+                    <div class="cpm-total-khr" id="cpm_total_khr">៛0</div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="cpm-actions">
+                <button type="button" onclick="cpmClose()" class="btn-secondary" style="justify-content:center;">
+                    <i class="fas fa-times"></i> បោះបង់
+                </button>
+                <button type="button" onclick="cpmConfirm()" class="btn-primary" style="justify-content:center;">
+                    <i class="fas fa-shopping-cart"></i> បញ្ជាក់
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- ===== End Custom Price Modal ===== -->
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+    /* ─── State ─────────────────────────────────────────────── */
     let cart = {};
     const exchangeRate = 4000;
     let freeProductCount = 0;
+    let customProduct = null;   // holds product pending custom-price input
 
-    // Delivery options from server
-    const deliveryOptions = @json($deliveries->map(fn($d) => ['id' => $d->id, 'name' => $d->delivery_name, 'price_khr' => $d->delivery_price_khr]));
-    const productOptions = @json($products->map(fn($p) => ['id' => $p->id, 'name' => $p->name]));
-    const customerEditUrlBase = '{{ url('customers') }}';
+    const customerEditUrlBase  = '{{ url('customers') }}';
     const customerEditReturnUrl = encodeURIComponent(window.location.href);
 
-    $(document).ready(function() {
-        // Initialize Select2 with phone-number-aware matching
+    /* ─── Select2 + customer card ───────────────────────────── */
+    $(document).ready(function () {
+
         function customerMatcher(params, data) {
-            if ($.trim(params.term) === '') {
-                return data;
-            }
-
-            const term = params.term.toLowerCase();
-            const optionText = (data.text || '').toLowerCase();
-            const phone = ($(data.element).data('phone') || '').toString().toLowerCase();
-            const normalizedTerm = term.replace(/\D/g, '');
+            if ($.trim(params.term) === '') return data;
+            const term            = params.term.toLowerCase();
+            const optionText      = (data.text || '').toLowerCase();
+            const phone           = ($(data.element).data('phone') || '').toString().toLowerCase();
+            const normalizedTerm  = term.replace(/\D/g, '');
             const normalizedPhone = phone.replace(/\D/g, '');
-            const address = ($(data.element).data('address') || '').toString().toLowerCase();
+            const address         = ($(data.element).data('address') || '').toString().toLowerCase();
 
-            if (optionText.indexOf(term) > -1 || address.indexOf(term) > -1) {
-                return data;
-            }
-
-            if (normalizedTerm && normalizedPhone.indexOf(normalizedTerm) > -1) {
-                return data;
-            }
-
-            if (phone.indexOf(term) > -1) {
-                return data;
-            }
-
+            if (optionText.indexOf(term) > -1)            return data;
+            if (address.indexOf(term) > -1)               return data;
+            if (normalizedTerm && normalizedPhone.indexOf(normalizedTerm) > -1) return data;
+            if (phone.indexOf(term) > -1)                 return data;
             return null;
         }
 
@@ -1341,141 +1522,99 @@
             allowClear: true,
             width: '100%',
             matcher: customerMatcher,
-            templateResult: function(result) {
-                if (!result.id) {
-                    return result.text;
-                }
-
-                const phone = $(result.element).data('phone');
+            templateResult: function (result) {
+                if (!result.id) return result.text;
+                const phone   = $(result.element).data('phone');
                 const address = $(result.element).data('address');
                 const display = $('<div></div>');
                 display.append($('<div></div>').text(result.text));
-                if (phone) {
-                    display.append($('<div style="font-size: 12px; color: #6c757d;"></div>').text('📞 ' + phone));
-                }
-                if (address) {
-                    display.append($('<div style="font-size: 12px; color: #6c757d;"></div>').text(address));
-                }
+                if (phone)   display.append($('<div style="font-size:12px;color:#6c757d;"></div>').text('📞 ' + phone));
+                if (address) display.append($('<div style="font-size:12px;color:#6c757d;"></div>').text(address));
                 return display;
             }
         });
 
-           // Handle customer selection
-        $('#customer_id').on('change', function() {
-            const selectedOption = $(this).find('option:selected');
-            const customerId = selectedOption.val();
+        $('#customer_id').on('change', function () {
+            const opt      = $(this).find('option:selected');
+            const custId   = opt.val();
+            $('#hidden_customer_id').val(custId);
 
-            // Sync to hidden input inside form
-            $('#hidden_customer_id').val(customerId);
-
-            if (customerId) {
-                const name = selectedOption.data('name') || '-';
-                const phone = selectedOption.data('phone') || '-';
-                const address = selectedOption.data('address') || '-';
-                const type = selectedOption.data('type') || '-';
-                const status = selectedOption.data('status') || '-';
-                const notes = selectedOption.data('notes') || '-';
+            if (custId) {
+                const name    = opt.data('name')    || '-';
+                const phone   = opt.data('phone')   || '-';
+                const address = opt.data('address') || '-';
+                const type    = opt.data('type')    || 'N/A';
+                const status  = opt.data('status')  || 'Unknown';
+                const notes   = opt.data('notes')   || '';
 
                 $('#customer_name').text(name);
                 $('#customer_phone').text(phone);
                 $('#customer_address').text(address);
-
-                $('#customer_type').text(type || 'N/A');
-                $('#customer_status').text(status || 'Unknown');
+                $('#customer_type').text(type);
+                $('#customer_status').text(status);
 
                 $('#editCustomerBtn')
-                    .attr('href', `${customerEditUrlBase}/${customerId}/edit?return_url=${customerEditReturnUrl}`)
-                    .removeClass('disabled')
-                    .attr('aria-disabled', 'false');
+                    .attr('href', `${customerEditUrlBase}/${custId}/edit?return_url=${customerEditReturnUrl}`)
+                    .removeClass('disabled').attr('aria-disabled', 'false');
 
-                const statusLower = status ? status.toLowerCase() : '';
-                const badgeClass = ['active', 'inactive'].includes(statusLower)
-                    ? 'badge-' + statusLower
-                    : 'badge-default';
+                const statusLower = status.toLowerCase();
+                const badgeClass  = ['active','inactive'].includes(statusLower) ? 'badge-' + statusLower : 'badge-default';
 
-                $('#customer_type')
-                    .removeClass('badge-active badge-inactive badge-default')
-                    .addClass(badgeClass);
+                $('#customer_type').removeClass('badge-active badge-inactive badge-default').addClass(badgeClass);
+                $('#customer_status').removeClass('badge-active badge-inactive badge-default').addClass(badgeClass);
 
-                $('#customer_status')
-                    .removeClass('badge-active badge-inactive badge-default')
-                    .addClass(badgeClass);
-
-                // Show notes section only if notes exist
                 if (notes && notes.trim() !== '') {
                     $('#customer_notes').text(notes);
                     $('#notes_section').slideDown(200);
                 } else {
                     $('#notes_section').slideUp(200);
                 }
-
                 $('#customer_info_card').slideDown(300);
             } else {
-                $('#editCustomerBtn')
-                    .attr('href', '#')
-                    .addClass('disabled')
-                    .attr('aria-disabled', 'true');
-
+                $('#editCustomerBtn').attr('href','#').addClass('disabled').attr('aria-disabled','true');
                 $('#customer_info_card').slideUp(300);
             }
         });
 
-        // Trigger change to show pre-selected customer info
-        if ($('#customer_id').val()) {
-            $('#customer_id').trigger('change');
-        }
+        if ($('#customer_id').val()) $('#customer_id').trigger('change');
 
-        // Handle adding free products
-        $('#addFreeProductBtn').on('click', function(e) {
-            e.preventDefault();
-            addFreeProductRow();
-        });
-
-        // Add initial free product row
-        addFreeProductRow();
-
-        if ($('#customer_id').val()) {
-            $('#customer_id').trigger('change');
-        }
-
-        $('#productSearch').on('input', function() {
-            filterProducts(this.value);
-        });
-
-        // Discount checkbox
-        // Tax checkbox
-        $('#applyTax').on('change', function() {
-            if (this.checked) {
-                $('#taxRow').show();
-                $('#taxAmountRow').show();
-            } else {
-                $('#taxRow').hide();
-                $('#taxAmountRow').hide();
-                $('#taxPercent').val(0);
-            }
+        /* ── delivery / box_qty ── */
+        $('#delivery_select, #box_qty').on('change input', function () {
             calculateTotal();
+            updateCartData();
+            updateTaxiPhoneVisibility();
         });
+        updateTaxiPhoneVisibility();
+
+        /* ── product search ── */
+        $('#productSearch').on('input', function () { filterProducts(this.value); });
+
+        /* ── free products ── */
+        $('#addFreeProductBtn').on('click', function (e) { e.preventDefault(); addFreeProductRow(); });
+        addFreeProductRow();
     });
 
+    /* ─── Product search filter ─────────────────────────────── */
     function filterProducts(searchValue) {
         const query = String(searchValue || '').trim().toLowerCase();
-        let visibleCount = 0;
-
-        $('.product-card').each(function() {
-            const productName = String($(this).data('product-name') || '');
-            const isMatch = !query || productName.includes(query);
+        let visible = 0;
+        $('.product-card').each(function () {
+            const name    = String($(this).data('product-name') || '');
+            const isMatch = !query || name.includes(query);
             $(this).toggleClass('is-hidden', !isMatch);
-            if (isMatch) {
-                visibleCount += 1;
-            }
+            if (isMatch) visible++;
         });
-
-        $('#visibleProductCount').text(visibleCount);
+        $('#visibleProductCount').text(visible);
     }
 
-    function addToCart(productId, productName, price, priceKhr, imageUrl) {
+    /* ─── Add to cart ───────────────────────────────────────── */
+    function addToCart(productId, productName, price, priceKhr, allowCustomPrice, imageUrl) {
+        if (allowCustomPrice) {
+            openCustomPriceModal(productId, productName, price, priceKhr, imageUrl);
+            return;
+        }
         if (cart[productId]) {
-            cart[productId].qty += 1;
+            cart[productId].qty++;
         } else {
             cart[productId] = {
                 name: productName,
@@ -1483,7 +1622,8 @@
                 price_khr: parseFloat(priceKhr),
                 qty: 1,
                 discount: 0,
-                image: imageUrl
+                image: imageUrl,
+                is_custom_price: false
             };
         }
         renderInvoice();
@@ -1496,18 +1636,100 @@
 
     function updateQuantity(productId, newQty) {
         newQty = parseInt(newQty) || 1;
-        if (newQty <= 0) {
-            removeFromCart(productId);
-        } else {
-            cart[productId].qty = newQty;
+        if (newQty <= 0) removeFromCart(productId);
+        else { cart[productId].qty = newQty; renderInvoice(); }
+    }
+
+    function updateItemDiscount(productId, discountPercent) {
+        const pct = parseFloat(discountPercent) || 0;
+        if (cart[productId]) {
+            cart[productId].discount = Math.min(Math.max(pct, 0), 100);
             renderInvoice();
         }
     }
 
+    /* ─── Custom Price Modal ────────────────────────────────── */
+    function openCustomPriceModal(id, name, usd, khr, image) {
+        customProduct = { id, name, usd: parseFloat(usd), khr: parseFloat(khr), image };
+
+        document.getElementById('cpm_name').innerText     = name;
+        document.getElementById('cpm_orig_usd').innerText = '$' + parseFloat(usd).toFixed(2);
+        document.getElementById('cpm_orig_khr').innerText = '៛' + Math.round(khr).toLocaleString();
+        document.getElementById('cpm_usd').value          = parseFloat(usd).toFixed(2);
+        document.getElementById('cpm_khr').value          = Math.round(khr);
+        document.getElementById('cpm_qty').value          = 1;
+
+        const thumb = document.getElementById('cpm_thumb');
+        thumb.innerHTML = image
+            ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(name)}">`
+            : '<i class="fas fa-tag" style="color:var(--accent); font-size:18px;"></i>';
+
+        cpmUpdateTotal();
+        document.getElementById('cpmOverlay').classList.add('show');
+    }
+
+    function cpmClose() {
+        document.getElementById('cpmOverlay').classList.remove('show');
+        customProduct = null;
+    }
+
+    function cpmOverlayClick(e) {
+        if (e.target === document.getElementById('cpmOverlay')) cpmClose();
+    }
+
+    function cpmSyncKhr(usdVal) {
+        document.getElementById('cpm_khr').value = Math.round(parseFloat(usdVal || 0) * exchangeRate);
+    }
+
+    function cpmSyncUsd(khrVal) {
+        document.getElementById('cpm_usd').value = (parseFloat(khrVal || 0) / exchangeRate).toFixed(2);
+    }
+
+    function cpmStepQty(delta) {
+        const input = document.getElementById('cpm_qty');
+        input.value = Math.max(1, (parseInt(input.value) || 1) + delta);
+        cpmUpdateTotal();
+    }
+
+    function cpmUpdateTotal() {
+        const usd = parseFloat(document.getElementById('cpm_usd').value) || 0;
+        const khr = parseFloat(document.getElementById('cpm_khr').value) || 0;
+        const qty = parseInt(document.getElementById('cpm_qty').value)   || 1;
+        document.getElementById('cpm_total_usd').innerText = '$' + (usd * qty).toFixed(2);
+        document.getElementById('cpm_total_khr').innerText = '៛' + Math.round(khr * qty).toLocaleString();
+    }
+
+    function cpmConfirm() {
+        if (!customProduct) return;
+        const usd = parseFloat(document.getElementById('cpm_usd').value) || 0;
+        const khr = parseFloat(document.getElementById('cpm_khr').value) || 0;
+        const qty = Math.max(1, parseInt(document.getElementById('cpm_qty').value) || 1);
+        const id  = customProduct.id;
+
+        if (cart[id]) {
+            cart[id].qty         += qty;
+            cart[id].price        = usd;
+            cart[id].price_khr    = khr;
+            cart[id].is_custom_price = true;
+        } else {
+            cart[id] = {
+                name: customProduct.name,
+                price: usd,
+                price_khr: khr,
+                qty: qty,
+                discount: 0,
+                image: customProduct.image,
+                is_custom_price: true
+            };
+        }
+        cpmClose();
+        renderInvoice();
+    }
+
+    /* ─── Render invoice ────────────────────────────────────── */
     function renderInvoice() {
         const invoiceItems = $('#invoiceItems');
-        let html = '';
-        const cartCount = Object.values(cart).reduce((total, item) => total + (parseInt(item.qty) || 0), 0);
+        const cartCount    = Object.values(cart).reduce((t, i) => t + (parseInt(i.qty) || 0), 0);
         $('#cartCount').text(cartCount);
 
         if (Object.keys(cart).length === 0) {
@@ -1515,54 +1737,55 @@
                 <div class="empty-state">
                     <div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div>
                     <div class="empty-state-text">សូមជ្រើសរើសមុខទំនិញ</div>
-                </div>
-            `);
+                </div>`);
         } else {
+            let html = '';
             Object.entries(cart).forEach(([productId, item]) => {
-                // Calculate discounted price per item
-                const discountPercent = parseFloat(item.discount || 0);
-                const discountedPrice = item.price * (1 - discountPercent / 100);
-                const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
-
-                const itemTotal = discountedPrice * item.qty;
-                const itemTotalKhr = discountedPriceKhr * item.qty;
+                const disc            = parseFloat(item.discount || 0);
+                const discPrice       = item.price     * (1 - disc / 100);
+                const discPriceKhr    = item.price_khr * (1 - disc / 100);
+                const itemTotal       = discPrice    * item.qty;
+                const itemTotalKhr    = discPriceKhr * item.qty;
+                const customBadge     = item.is_custom_price
+                    ? '<span class="custom-price-badge">-</span>' : '';
 
                 html += `
-                    <div class="invoice-item">
-                        <div class="invoice-item-thumb">
-                            ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : '<i class="fas fa-image"></i>'}
+                <div class="invoice-item">
+                    <div class="invoice-item-thumb">
+                        ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : '<i class="fas fa-image"></i>'}
+                    </div>
+                    <div class="invoice-item-content">
+                        <div class="invoice-item-header">
+                            <div>
+                                <div class="invoice-item-name">${escapeHtml(item.name)}${customBadge}</div>
+                                <div class="invoice-item-qty">
+                                    $${discPrice.toFixed(2)} / ៛${Math.round(discPriceKhr).toLocaleString()} × ${item.qty}
+                                    ${disc > 0 ? `<span style="color:var(--danger);margin-left:8px;">-${disc}%</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="invoice-item-total">
+                                $${itemTotal.toFixed(2)}
+                                <span>៛${Math.round(itemTotalKhr).toLocaleString()}</span>
+                            </div>
                         </div>
-                        <div class="invoice-item-content">
-                            <div class="invoice-item-header">
-                                <div>
-                                    <div class="invoice-item-name">${escapeHtml(item.name)}</div>
-                                    <div class="invoice-item-qty">
-                                        $${discountedPrice.toFixed(2)} / ៛${Math.round(discountedPriceKhr).toLocaleString()} × ${item.qty}
-                                        ${discountPercent > 0 ? `<span style="color: var(--danger); margin-left: 8px;">-${discountPercent}%</span>` : ''}
-                                    </div>
-                                </div>
-                                <div class="invoice-item-total">
-                                    $${itemTotal.toFixed(2)}
-                                    <span>៛${Math.round(itemTotalKhr).toLocaleString()}</span>
-                                </div>
+                        <div class="invoice-item-actions">
+                            <div class="qty-stepper">
+                                <button type="button" onclick="updateQuantity(${productId}, ${item.qty - 1})">−</button>
+                                <input type="number" class="qty-input" value="${item.qty}"
+                                    onchange="updateQuantity(${productId}, this.value)" min="1">
+                                <button type="button" onclick="updateQuantity(${productId}, ${item.qty + 1})">+</button>
                             </div>
-                            <div class="invoice-item-actions">
-                                <div class="qty-stepper">
-                                    <button type="button" onclick="updateQuantity(${productId}, ${item.qty - 1})">−</button>
-                                    <input type="number" class="qty-input" value="${item.qty}" onchange="updateQuantity(${productId}, this.value)" min="1">
-                                    <button type="button" onclick="updateQuantity(${productId}, ${item.qty + 1})">+</button>
-                                </div>
-                                <div class="discount-inline">
-                                    <input type="number" class="discount-input" value="${discountPercent}" onchange="updateItemDiscount(${productId}, this.value)" min="0" max="100" step="0.1">
-                                    <span>%</span>
-                                </div>
-                                <button type="button" class="btn-remove" onclick="removeFromCart(${productId})" title="Remove item">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                            <div class="discount-inline">
+                                <input type="number" class="discount-input" value="${disc}"
+                                    onchange="updateItemDiscount(${productId}, this.value)" min="0" max="100" step="0.1">
+                                <span>%</span>
                             </div>
+                            <button type="button" class="btn-remove" onclick="removeFromCart(${productId})" title="Remove">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
-                `;
+                </div>`;
             });
             invoiceItems.html(html);
         }
@@ -1571,43 +1794,12 @@
         updateCartData();
     }
 
+    /* ─── Helpers ───────────────────────────────────────────── */
     function escapeHtml(value) {
         return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
-    function updateItemDiscount(productId, discountPercent) {
-        const percent = parseFloat(discountPercent) || 0;
-        if (cart[productId]) {
-            cart[productId].discount = Math.min(Math.max(percent, 0), 100);
-            renderInvoice();
-        }
-    }
-
-    function updateTaxiPhoneVisibility() {
-        const selectedName = $('#delivery_select option:selected').data('name') || '';
-        const showTaxi = selectedName.toString().toLowerCase().includes('តាក់សុី');
-        if (showTaxi) {
-            $('#taxi_phone_field').slideDown(180);
-        } else {
-            $('#taxi_phone_field').slideUp(180);
-            $('#taxi_phone').val('');
-        }
-    }
-
-    // Update cart data when delivery selection changes
-    $(document).ready(function() {
-        $('#delivery_select, #box_qty').on('change input', function() {
-            calculateTotal();
-            updateCartData();
-            updateTaxiPhoneVisibility();
-        });
-
-        updateTaxiPhoneVisibility();
-    });
 
     function getBoxQty() {
         return Math.max(parseInt($('#box_qty').val() || 1, 10) || 1, 1);
@@ -1615,86 +1807,75 @@
 
     function getSelectedDeliveryFeeKhr() {
         const selected = $('#delivery_select option:selected');
-        const deliveryPriceKhr = parseFloat(selected.data('price') || 0) || 0;
-        return deliveryPriceKhr * getBoxQty();
+        return (parseFloat(selected.data('price') || 0) || 0) * getBoxQty();
     }
 
+    function updateTaxiPhoneVisibility() {
+        const name = ($('#delivery_select option:selected').data('name') || '').toString().toLowerCase();
+        if (name.includes('តាក់សុី')) {
+            $('#taxi_phone_field').slideDown(180);
+        } else {
+            $('#taxi_phone_field').slideUp(180);
+            $('#taxi_phone').val('');
+        }
+    }
+
+    /* ─── Calculate totals ──────────────────────────────────── */
     function calculateTotal() {
-        // Calculate subtotal with per-item discounts already applied
-        let subtotal = 0;
-        let subtotalKhr = 0;
-        let totalDiscount = 0;
-        let totalDiscountKhr = 0;
+        let subtotal = 0, subtotalKhr = 0, totalDiscount = 0, totalDiscountKhr = 0;
 
         Object.values(cart).forEach(item => {
-            const discountPercent = parseFloat(item.discount || 0);
-            const discountedPrice = item.price * (1 - discountPercent / 100);
-            const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
-
-            // Calculate discount amount for this item
-            const itemDiscount = item.price * item.qty - discountedPrice * item.qty;
-            const itemDiscountKhr = item.price_khr * item.qty - discountedPriceKhr * item.qty;
-
-            subtotal += discountedPrice * item.qty;
-            subtotalKhr += discountedPriceKhr * item.qty;
-            totalDiscount += itemDiscount;
-            totalDiscountKhr += itemDiscountKhr;
+            const disc          = parseFloat(item.discount || 0);
+            const discPrice     = item.price     * (1 - disc / 100);
+            const discPriceKhr  = item.price_khr * (1 - disc / 100);
+            subtotal         += discPrice    * item.qty;
+            subtotalKhr      += discPriceKhr * item.qty;
+            totalDiscount    += (item.price     * item.qty) - (discPrice    * item.qty);
+            totalDiscountKhr += (item.price_khr * item.qty) - (discPriceKhr * item.qty);
         });
-
-        let tax = 0;
-        let taxKhr = 0;
-        if ($('#applyTax').is(':checked')) {
-            tax = (subtotal * parseInt($('#taxPercent').val() || 0)) / 100;
-            taxKhr = (subtotalKhr * parseInt($('#taxPercent').val() || 0)) / 100;
-        }
 
         const deliveryFeeKhr = getSelectedDeliveryFeeKhr();
         const deliveryFeeUsd = deliveryFeeKhr / exchangeRate;
-        let total = subtotal + tax + deliveryFeeUsd;
-        let totalKhr = subtotalKhr + taxKhr + deliveryFeeKhr;
+        const total          = subtotal    + deliveryFeeUsd;
+        const totalKhr       = subtotalKhr + deliveryFeeKhr;
 
-        // Update USD displays
         $('#subtotal').text(subtotal.toFixed(2));
+        $('#subtotal_khr').text(Math.round(subtotalKhr).toLocaleString());
         $('#discountAmount').text(totalDiscount.toFixed(2));
-        $('#taxAmount').text(tax.toFixed(2));
-        $('#deliveryFeeUsd').text(deliveryFeeUsd.toFixed(2));
-        $('#totalAmount').text(total.toFixed(2));
-
-        // Update KHR displays
-        $('#subtotal_khr').text(subtotalKhr.toLocaleString());
         $('#discountAmount_khr').text(Math.round(totalDiscountKhr).toLocaleString());
-        $('#taxAmount_khr').text(Math.round(taxKhr).toLocaleString());
+        $('#deliveryFeeUsd').text(deliveryFeeUsd.toFixed(2));
         $('#deliveryFeeKhr').text(Math.round(deliveryFeeKhr).toLocaleString());
+        $('#totalAmount').text(total.toFixed(2));
         $('#totalAmount_khr').text(Math.round(totalKhr).toLocaleString());
 
-        // Update hidden inputs
         $('#subtotal_amount').val(subtotal.toFixed(2));
-        $('#tax_amount').val(tax.toFixed(2));
         $('#discount_amount').val(totalDiscount.toFixed(2));
         $('#delivery_fee_khr').val(deliveryFeeKhr.toFixed(2));
         $('#total_amount_input').val(total.toFixed(2));
     }
 
+    /* ─── Sync cart JSON to hidden input ────────────────────── */
     function updateCartData() {
         const deliveryId = $('#delivery_select').val() || null;
         const orderItems = [];
         Object.entries(cart).forEach(([productId, item]) => {
-            const discountPercent = parseFloat(item.discount || 0);
-            const discountedPrice = item.price * (1 - discountPercent / 100);
+            const disc         = parseFloat(item.discount || 0);
+            const discPrice    = item.price * (1 - disc / 100);
             orderItems.push({
-                product_id: parseInt(productId),
-                quantity: item.qty,
-                unit_price: item.price,
-                discount_percent: discountPercent,
-                total_price: discountedPrice * item.qty,
-                delivery_id: deliveryId ? parseInt(deliveryId) : null
+                product_id:       parseInt(productId),
+                quantity:         item.qty,
+                unit_price:       item.price,
+                discount_percent: disc,
+                total_price:      discPrice * item.qty,
+                is_custom_price:  item.is_custom_price || false,
+                delivery_id:      deliveryId ? parseInt(deliveryId) : null
             });
         });
         $('#order_items').val(JSON.stringify(orderItems));
     }
 
-    // Form validation
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
+    /* ─── Form validation ───────────────────────────────────── */
+    document.getElementById('orderForm').addEventListener('submit', function (e) {
         if (!document.getElementById('hidden_customer_id').value) {
             e.preventDefault();
             showToast('warning', '⚠️', 'សូមជ្រើសរើសអតិថិជន', 'សូមជ្រើសរើសអតិថិជនមុននឹងបញ្ជាទិញ');
@@ -1707,26 +1888,19 @@
         }
     });
 
+    /* ─── Toast ─────────────────────────────────────────────── */
     function showToast(type, icon, title, message) {
-        // Remove any existing toast
         $('.toast-overlay, .toast-box').remove();
-
         const overlay = $('<div class="toast-overlay"></div>');
         const box = $(`
             <div class="toast-box">
                 <div class="toast-icon ${type}">${icon}</div>
                 <div class="toast-title">${title}</div>
                 <div class="toast-message">${message}</div>
-                <button class="toast-btn" onclick="closeToast()">ជ្រើសរើស</button>
-            </div>
-        `);
-
+                <button class="toast-btn" onclick="closeToast()">យល់ព្រម</button>
+            </div>`);
         $('body').append(overlay).append(box);
-        requestAnimationFrame(() => {
-            overlay.addClass('show');
-            box.addClass('show');
-        });
-
+        requestAnimationFrame(() => { overlay.addClass('show'); box.addClass('show'); });
         overlay.on('click', closeToast);
     }
 
@@ -1736,38 +1910,28 @@
         setTimeout(() => { $('.toast-overlay, .toast-box').remove(); }, 300);
     }
 
-    // Free Product Functions
+    /* ─── Free product rows ─────────────────────────────────── */
     function addFreeProductRow() {
         const rowId = freeProductCount++;
-        const productOptions = @json($products);
+        const products = @json($products);
+        let opts = '<option value="">សូមជ្រើសរើស</option>';
+        products.forEach(p => { opts += `<option value="${p.id}">${p.name}</option>`; });
 
-        let selectHTML = '<option value="">សូមជ្រើសរើស</option>';
-        productOptions.forEach(product => {
-            selectHTML += `<option value="${product.id}">${product.name}</option>`;
-        });
-
-        const rowHTML = `
+        $('#freeProductsContainer').append(`
             <div class="free-product-row" id="freeRow${rowId}">
-                <select name="free_products[${rowId}][product_id]" class="form-control od-select">
-                    ${selectHTML}
-                </select>
-                <input type="number" name="free_products[${rowId}][qty]" class="form-control" min="0" placeholder="ចំនួន" value="1">
+                <select name="free_products[${rowId}][product_id]" class="form-control od-select">${opts}</select>
+                <input type="number" name="free_products[${rowId}][qty]" class="form-control"
+                    min="0" placeholder="ចំនួន" value="1">
                 <button type="button" class="btn-remove-free" onclick="removeFreeProductRow(${rowId})">
                     <i class="fas fa-trash"></i> លុប
                 </button>
-            </div>
-        `;
-
-        $('#freeProductsContainer').append(rowHTML);
+            </div>`);
     }
 
     function removeFreeProductRow(rowId) {
-        $(`#freeRow${rowId}`).slideUp(300, function() {
+        $(`#freeRow${rowId}`).slideUp(300, function () {
             $(this).remove();
-            // If all rows are removed, add one empty row back
-            if ($('.free-product-row').length === 0) {
-                addFreeProductRow();
-            }
+            if ($('.free-product-row').length === 0) addFreeProductRow();
         });
     }
 </script>

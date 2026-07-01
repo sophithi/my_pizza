@@ -19,6 +19,7 @@ class UpdateProductRequest extends FormRequest
             'sku'         => 'required|string|unique:products,sku,' . $this->product->id,
             'price_khr'   => 'required_without:price_usd|numeric|min:0',
             'price_usd'   => 'required_without:price_khr|numeric|min:0',
+            'allow_custom_price'=>'nullable|boolean',
             'category'    => 'required|string|max:255',
             'unit'        => 'required|string',
             'supplier'    => 'nullable|string|max:255',

@@ -15,6 +15,7 @@ class Product extends Model
     'unit',
     'price_usd',
     'price_khr',
+    'allow_custom_price',
     'supplier',
 ];
 

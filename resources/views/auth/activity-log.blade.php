@@ -301,7 +301,9 @@
                     @endforeach
                 </tbody>
             </table>
-
+         <div class="pager-wrap">
+                    {{ $purchases->links() }}
+                </div>
 
         @else
             <div class="empty-state">
@@ -312,5 +314,6 @@
         @endif
 
     </div>
+
 
 @endsection

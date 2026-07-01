@@ -31,6 +31,7 @@ class StoreOrderRequest extends FormRequest
             'order_date' => 'required|date',
             'subtotal' => 'required|numeric|min:0',
             'tax_amount' => 'nullable|numeric|min:0',
+            'taxi_phone' => 'nullable|string|max:20',
             'discount_amount' => 'nullable|numeric|min:0',
             'delivery_fee_khr' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',

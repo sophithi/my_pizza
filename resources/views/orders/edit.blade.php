@@ -864,6 +864,184 @@
         font-weight: 700;
     }
 
+    /* Custom Price Modal */
+    .cpm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.48);
+        z-index: 9500;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .cpm-overlay.show { display: flex; }
+
+    .cpm-modal {
+        background: var(--surface);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        width: 100%;
+        max-width: 420px;
+        overflow: hidden;
+        animation: slideDown 0.25s ease-out;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+    }
+
+    .cpm-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .cpm-thumb {
+        width: 48px; height: 48px;
+        border-radius: 10px;
+        background: rgba(232,93,36,.1);
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden; flex-shrink: 0;
+    }
+
+    .cpm-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .cpm-body { padding: 18px 20px; }
+
+    .cpm-orig-prices {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .cpm-orig-box {
+        border-radius: 8px;
+        padding: 10px 12px;
+        border: 1px solid;
+    }
+
+    .cpm-orig-box.usd {
+        background: rgba(40,167,69,.08);
+        border-color: rgba(40,167,69,.22);
+    }
+
+    .cpm-orig-box.khr {
+        background: var(--bg);
+        border-color: var(--border);
+    }
+
+    .cpm-orig-label {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 4px;
+    }
+
+    .cpm-orig-box.usd .cpm-orig-label { color: #166534; }
+    .cpm-orig-box.khr .cpm-orig-label { color: var(--text-muted); }
+
+    .cpm-orig-val { font-size: 17px; font-weight: 700; }
+    .cpm-orig-box.usd .cpm-orig-val { color: #166534; }
+    .cpm-orig-box.khr .cpm-orig-val { color: var(--text); }
+
+    .cpm-field { margin-bottom: 14px; }
+
+    .cpm-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+    }
+
+    .cpm-label i { color: var(--accent); margin-right: 4px; }
+
+    .cpm-prefix-wrap { position: relative; }
+
+    .cpm-prefix {
+        position: absolute;
+        left: 11px; top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-weight: 700;
+        font-size: 14px;
+        pointer-events: none;
+    }
+
+    .cpm-prefix-wrap .form-control { padding-left: 26px; }
+    .cpm-prefix-wrap.khr .form-control { padding-left: 30px; }
+
+    .cpm-qty-stepper {
+        display: grid;
+        grid-template-columns: 38px 1fr 38px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .cpm-qty-stepper button {
+        background: var(--bg); border: none;
+        cursor: pointer; font-size: 20px;
+        font-weight: 700; color: var(--text);
+        min-height: 40px; transition: all 0.2s;
+    }
+    .cpm-qty-stepper button:hover { color: var(--accent); background: rgba(232,93,36,.08); }
+
+    .cpm-qty-stepper input {
+        border: none;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        border-radius: 0;
+        text-align: center;
+        font-size: 15px;
+        font-weight: 700;
+        min-height: 40px;
+        width: 100%;
+        background: var(--surface);
+        color: var(--text);
+        font-family: inherit;
+    }
+    .cpm-qty-stepper input:focus { outline: none; }
+
+    .cpm-total-bar {
+        background: rgba(232,93,36,.07);
+        border: 1px solid rgba(232,93,36,.2);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cpm-total-label { font-size: 13px; color: var(--accent); font-weight: 700; }
+
+    .cpm-total-usd { font-size: 17px; font-weight: 700; color: var(--accent); text-align: right; }
+    .cpm-total-khr { font-size: 12px; color: var(--accent); opacity: .8; text-align: right; }
+
+    .cpm-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    /* Custom price badge on cart item */
+    .custom-price-badge {
+        display: inline-block;
+        background: rgba(232,93,36,.12);
+        color: var(--accent);
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 999px;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+
     @media (max-width: 992px) {
         .products-grid {
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -906,6 +1084,9 @@
         .delivery-combo {
             grid-template-columns: 1fr 86px;
         }
+
+        .cpm-orig-prices { grid-template-columns: 1fr; }
+        .cpm-actions { grid-template-columns: 1fr; }
     }
 
     .row {
@@ -1166,10 +1347,17 @@
                 <div class="products-grid" id="productsGrid">
                     @forelse($products as $product)
                     @php($productImageUrl = $product->imageUrl())
-                    <div class="product-card" data-product-id="{{ $product->id }}" data-product-name="{{ Str::lower($product->name) }}" onclick="addToCart({{ $product->id }}, @js($product->name),
-                    {{ $product->price_usd }},
-                     {{ $product->price_khr }},
-                     @js($productImageUrl))">
+                    <div class="product-card"
+                        data-product-id="{{ $product->id }}"
+                        data-product-name="{{ Str::lower($product->name) }}"
+                        onclick="addToCart(
+                            {{ $product->id }},
+                            @js($product->name),
+                            {{ $product->price_usd }},
+                            {{ $product->price_khr }},
+                            {{ $product->allow_custom_price ? 'true' : 'false' }},
+                            @js($productImageUrl)
+                        )">
                         @if($productImageUrl)
                             <img src="{{ $productImageUrl }}" alt="{{ $product->name }}" class="product-image">
                         @else
@@ -1183,6 +1371,11 @@
                             <div style="color: var(--accent); font-weight: 700;">${{ number_format($product->price_usd, 2) }}</div>
                             <div style="color: var(--text-muted); font-weight: 600;">៛{{ number_format($product->price_khr, 0) }}</div>
                         </div>
+                        @if($product->allow_custom_price)
+                            <div style="font-size: 10px; color: var(--accent); font-weight: 700; margin-top: 4px;">
+                                <i class="fas fa-tag" style="font-size:9px;"></i> តម្លៃកំណត់ផ្ទាល់
+                            </div>
+                        @endif
                     </div>
                     @empty
                     <div class="empty-state" style="grid-column: 1 / -1;">
@@ -1210,6 +1403,7 @@
                         <h4 class="checkout-title">
                            កែប្រែការបញ្ជាទិញ
                         </h4>
+                        <span class="cart-count-pill"><span id="cartCount">0</span> មុខ</span>
                     </div>
 
                     <div class="checkout-scroll">
@@ -1230,7 +1424,8 @@
                         <input type="hidden" id="discount_amount" name="discount_amount">
                         <input type="hidden" id="delivery_fee_khr" name="delivery_fee_khr" value="0">
                         <input type="hidden" id="total_amount_input" name="total_amount">
-                        <input type="hidden" name="order_date" value="{{ old('order_date', optional($order->order_date)->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i') ?? now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}">
+                        <input type="hidden" name="order_date" 
+                        value="{{ old('order_date', optional($order->order_date)->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i') ?? now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d\TH:i')) }}">
 
                         <div class="checkout-section">
                             <div class="order-details-grid">
@@ -1286,7 +1481,7 @@
                         </div>
                     </div>
 
-                    <div class="checkout-section">
+                    <div class="checkout-section" style="padding: 0 20px;">
                         <div class="invoice-summary">
                             <div class="summary-row">
                                 <span>សរុប (USD / KHR):</span>
@@ -1337,13 +1532,110 @@
     </div>
 </div>
 
+<!-- ===== Custom Price Modal ===== -->
+<div id="cpmOverlay" class="cpm-overlay" onclick="cpmOverlayClick(event)">
+    <div class="cpm-modal">
+
+        <div class="cpm-header">
+            <div class="cpm-thumb" id="cpm_thumb">
+                <i class="fas fa-tag" style="color:var(--accent); font-size:18px;"></i>
+            </div>
+            <div style="min-width:0; flex:1;">
+                <div id="cpm_name" style="font-size:15px; font-weight:700; color:var(--text);
+                    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">កំណត់តម្លៃតាមចង់បាន</div>
+            </div>
+            <button type="button" onclick="cpmClose()"
+                style="background:none; border:none; cursor:pointer; color:var(--text-muted);
+                    font-size:22px; padding:4px 6px; border-radius:6px; line-height:1; flex-shrink:0;"
+                title="បិទ">&times;</button>
+        </div>
+
+        <div class="cpm-body">
+
+            <!-- Original prices reference -->
+            <div class="cpm-orig-prices">
+                <div class="cpm-orig-box usd">
+                    <div class="cpm-orig-label">តម្លៃដើម USD</div>
+                    <div class="cpm-orig-val" id="cpm_orig_usd">$0.00</div>
+                </div>
+                <div class="cpm-orig-box khr">
+                    <div class="cpm-orig-label">តម្លៃដើម KHR</div>
+                    <div class="cpm-orig-val" id="cpm_orig_khr">៛0</div>
+                </div>
+            </div>
+
+            <!-- Custom USD price -->
+            <div class="cpm-field">
+                <label class="cpm-label">
+                    <i class="fas fa-dollar-sign"></i> តម្លៃថ្មី (USD)
+                </label>
+                <div class="cpm-prefix-wrap">
+                    <span class="cpm-prefix">$</span>
+                    <input type="number" id="cpm_usd" class="form-control"
+                        min="0" step="0.01"
+                        oninput="cpmSyncKhr(this.value); cpmUpdateTotal()">
+                </div>
+            </div>
+
+            <!-- Custom KHR price -->
+            <div class="cpm-field">
+                <label class="cpm-label">
+                    <i class="fas fa-coins"></i> តម្លៃថ្មី (KHR)
+                </label>
+                <div class="cpm-prefix-wrap khr">
+                    <span class="cpm-prefix">៛</span>
+                    <input type="number" id="cpm_khr" class="form-control"
+                        min="0" step="100"
+                        oninput="cpmSyncUsd(this.value); cpmUpdateTotal()">
+                </div>
+            </div>
+
+            <!-- Quantity stepper -->
+            <div class="cpm-field">
+                <label class="cpm-label">
+                    <i class="fas fa-layer-group"></i> ចំនួន
+                </label>
+                <div class="cpm-qty-stepper">
+                    <button type="button" onclick="cpmStepQty(-1)">−</button>
+                    <input type="number" id="cpm_qty" value="1" min="1"
+                        oninput="cpmUpdateTotal()">
+                    <button type="button" onclick="cpmStepQty(1)">+</button>
+                </div>
+            </div>
+
+            <!-- Live total -->
+            <div class="cpm-total-bar">
+                <span class="cpm-total-label">សរុប</span>
+                <div>
+                    <div class="cpm-total-usd" id="cpm_total_usd">$0.00</div>
+                    <div class="cpm-total-khr" id="cpm_total_khr">៛0</div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="cpm-actions">
+                <button type="button" onclick="cpmClose()" class="btn-secondary" style="justify-content:center;">
+                    <i class="fas fa-times"></i> បោះបង់
+                </button>
+                <button type="button" onclick="cpmConfirm()" class="btn-primary" style="justify-content:center;">
+                    <i class="fas fa-shopping-cart"></i> បញ្ជាក់
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- ===== End Custom Price Modal ===== -->
+
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     let cart = {};
     const exchangeRate = 4000;
     let freeProductCount = 0;
-
+    let customProduct = null;   // holds product pending custom-price input
 
     const existingOrderItems = @json($existingOrderItems);
     const existingFreeProducts = @json($existingFreeProducts);
@@ -1392,6 +1684,85 @@
             $wrapper.append($('<div style="font-size: 12px; color: #6c757d;"></div>').text(address));
         }
         return $wrapper;
+    }
+
+    /* ─── Custom Price Modal ────────────────────────────────── */
+    function openCustomPriceModal(id, name, usd, khr, image) {
+        customProduct = { id, name, usd: parseFloat(usd), khr: parseFloat(khr), image };
+
+        document.getElementById('cpm_name').innerText     = name;
+        document.getElementById('cpm_orig_usd').innerText = '$' + parseFloat(usd).toFixed(2);
+        document.getElementById('cpm_orig_khr').innerText = '៛' + Math.round(khr).toLocaleString();
+        document.getElementById('cpm_usd').value          = parseFloat(usd).toFixed(2);
+        document.getElementById('cpm_khr').value          = Math.round(khr);
+        document.getElementById('cpm_qty').value          = 1;
+
+        const thumb = document.getElementById('cpm_thumb');
+        thumb.innerHTML = image
+            ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(name)}">`
+            : '<i class="fas fa-tag" style="color:var(--accent); font-size:18px;"></i>';
+
+        cpmUpdateTotal();
+        document.getElementById('cpmOverlay').classList.add('show');
+    }
+
+    function cpmClose() {
+        document.getElementById('cpmOverlay').classList.remove('show');
+        customProduct = null;
+    }
+
+    function cpmOverlayClick(e) {
+        if (e.target === document.getElementById('cpmOverlay')) cpmClose();
+    }
+
+    function cpmSyncKhr(usdVal) {
+        document.getElementById('cpm_khr').value = Math.round(parseFloat(usdVal || 0) * exchangeRate);
+    }
+
+    function cpmSyncUsd(khrVal) {
+        document.getElementById('cpm_usd').value = (parseFloat(khrVal || 0) / exchangeRate).toFixed(2);
+    }
+
+    function cpmStepQty(delta) {
+        const input = document.getElementById('cpm_qty');
+        input.value = Math.max(1, (parseInt(input.value) || 1) + delta);
+        cpmUpdateTotal();
+    }
+
+    function cpmUpdateTotal() {
+        const usd = parseFloat(document.getElementById('cpm_usd').value) || 0;
+        const khr = parseFloat(document.getElementById('cpm_khr').value) || 0;
+        const qty = parseInt(document.getElementById('cpm_qty').value)   || 1;
+        document.getElementById('cpm_total_usd').innerText = '$' + (usd * qty).toFixed(2);
+        document.getElementById('cpm_total_khr').innerText = '៛' + Math.round(khr * qty).toLocaleString();
+    }
+
+    function cpmConfirm() {
+        if (!customProduct) return;
+        const usd = parseFloat(document.getElementById('cpm_usd').value) || 0;
+        const khr = parseFloat(document.getElementById('cpm_khr').value) || 0;
+        const qty = Math.max(1, parseInt(document.getElementById('cpm_qty').value) || 1);
+        const id  = String(customProduct.id);
+
+        if (cart[id]) {
+            cart[id].qty             += qty;
+            cart[id].price             = usd;
+            cart[id].price_khr         = khr;
+            cart[id].is_custom_price   = true;
+        } else {
+            cart[id] = {
+                name: customProduct.name,
+                price: usd,
+                price_khr: khr,
+                qty: qty,
+                discount: 0,
+                image: customProduct.image,
+                is_custom_price: true
+            };
+        }
+        $(`.product-card[data-product-id="${id}"]`).addClass('selected');
+        cpmClose();
+        renderInvoice();
     }
 
     $(document).ready(function() {
@@ -1505,6 +1876,10 @@
 
     /**
      * Pre-populate the cart from the existing order's items.
+     * IMPORTANT: always trust the saved order item's own price/discount/
+     * custom-price flag — never overwrite with the product's current
+     * live price, or any custom price set at checkout time is lost
+     * the moment someone opens the edit page.
      */
     function populateExistingCart() {
         if (!existingOrderItems || existingOrderItems.length === 0) return;
@@ -1514,13 +1889,23 @@
             const product = allProducts[pid];
             if (!product) return;
 
+            const hasCustomPrice = !!item.is_custom_price;
+            const unitPrice = parseFloat(item.unit_price);
+            const unitPriceKhr = item.unit_price_khr != null
+                ? parseFloat(item.unit_price_khr)
+                : unitPrice * exchangeRate;
+
             cart[pid] = {
                 name:      product.name,
-                price:     parseFloat(product.price_usd) || 0,
-                price_khr: parseFloat(product.price_khr) || 0,
+                // Use the price actually saved on the order item.
+                // Only fall back to the product's live price if the
+                // order item itself has no price recorded at all.
+                price:     !isNaN(unitPrice) ? unitPrice : (parseFloat(product.price_usd) || 0),
+                price_khr: !isNaN(unitPriceKhr) ? unitPriceKhr : (parseFloat(product.price_khr) || 0),
                 qty:       parseInt(item.quantity) || 1,
                 discount:  parseFloat(item.discount_percent) || 0,
-                image:     product.image_url || null
+                image:     product.image_url || null,
+                is_custom_price: hasCustomPrice
             };
         });
 
@@ -1551,8 +1936,16 @@
         $('#visibleProductCount').text(visibleCount);
     }
 
-    function addToCart(productId, productName, price, priceKhr, imageUrl) {
+    function addToCart(productId, productName, price, priceKhr, allowCustomPrice, imageUrl) {
         const pid = String(productId);
+
+        // If this product allows a custom price, open the modal first
+        // instead of silently adding it with the catalog price.
+        if (allowCustomPrice) {
+            openCustomPriceModal(pid, productName, price, priceKhr, imageUrl);
+            return;
+        }
+
         if (cart[pid]) {
             cart[pid].qty += 1;
         } else {
@@ -1562,7 +1955,8 @@
                 price_khr: parseFloat(priceKhr),
                 qty: 1,
                 discount: 0,
-                image: imageUrl
+                image: imageUrl,
+                is_custom_price: false
             };
         }
         $(`.product-card[data-product-id="${pid}"]`).addClass('selected');
@@ -1607,6 +2001,8 @@
                 const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
                 const itemTotal = discountedPrice * item.qty;
                 const itemTotalKhr = discountedPriceKhr * item.qty;
+                const customBadge = item.is_custom_price
+                    ? '<span class="custom-price-badge"><i class="fas fa-tag"></i> តម្លៃពិសេស</span>' : '';
 
                 html += `
                     <div class="invoice-item">
@@ -1616,7 +2012,7 @@
                         <div class="invoice-item-content">
                             <div class="invoice-item-header">
                                 <div>
-                                    <div class="invoice-item-name">${escapeHtml(item.name)}</div>
+                                    <div class="invoice-item-name">${escapeHtml(item.name)}${customBadge}</div>
                                     <div class="invoice-item-qty">
                                         $${discountedPrice.toFixed(2)} / ៛${Math.round(discountedPriceKhr).toLocaleString()} × ${item.qty}
                                         ${discountPercent > 0 ? `<span style="color: var(--danger); margin-left: 8px;">-${discountPercent}%</span>` : ''}
@@ -1709,7 +2105,7 @@
         $('#deliveryFeeUsd').text(deliveryFeeUsd.toFixed(2));
         $('#totalAmount').text(total.toFixed(2));
 
-        $('#subtotal_khr').text(subtotalKhr.toLocaleString());
+        $('#subtotal_khr').text(Math.round(subtotalKhr).toLocaleString());
         $('#discountAmount_khr').text(Math.round(totalDiscountKhr).toLocaleString());
         $('#deliveryFeeKhr').text(Math.round(deliveryFeeKhr).toLocaleString());
         $('#totalAmount_khr').text(Math.round(totalKhr).toLocaleString());
@@ -1730,8 +2126,10 @@
                 product_id: parseInt(productId),
                 quantity: item.qty,
                 unit_price: item.price,
+                unit_price_khr: item.price_khr,
                 discount_percent: discountPercent,
                 total_price: discountedPrice * item.qty,
+                is_custom_price: item.is_custom_price || false,
                 delivery_id: deliveryId ? parseInt(deliveryId) : null
             });
         });

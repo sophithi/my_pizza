@@ -74,9 +74,14 @@
                                     @enderror
                                 </div>
                             </div>
-
                         </div>
-
+                        <div class="form-group">
+                         <label>
+                         <input type="checkbox" name="allow_custom_price" value="1" {{ old('allow_custom_price', $product->allow_custom_price ?? false) ? 'checked' : '' }}>
+                          អនុញ្ញាតតម្លៃកំណត់ផ្ទាល់ (Custom Price)
+                         </label>
+                        </div>
+                       
                         {{-- Category + Unit --}}
                         <div class="row">
                             <div class="col-md-6">

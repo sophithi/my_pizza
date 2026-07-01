@@ -19,6 +19,7 @@ class StoreProductRequest extends FormRequest
             'sku'         => 'required|string|unique:products,sku',
             'price_khr'   => 'required_without:price_usd|numeric|min:0',
             'price_usd'   => 'required_without:price_khr|numeric|min:0',
+                'allow_custom_price'=>'nullable|boolean',
             'category'    => 'required|string|max:255',
             'unit'        => 'required|string|in:kg,g,L,ml,pcs,box,box1,box2,pack,bag',
             'supplier'    => 'nullable|string|max:255',

@@ -381,7 +381,6 @@
                     class="quick-filter {{ request('period') === 'month' ? 'active' : '' }}">
                     <i class="fas fa-calendar-alt"></i> ខែនេះ
                 </a>
-
             </div>
 
             <div class="filter-row">
@@ -419,7 +418,7 @@
                             <th>លេខវិក្ក័យបត្រ</th>
                             <th>អតិថិជន</th>
                             <th>បញ្ជាទិញ</th>
-                            <th>ចំនួនទំនិញ</th>
+                 
                             <th>ទឹកប្រាក់</th>
                             <th>កាលបរិច្ឆេទ</th>
                             <th>ការបង់ប្រាក់</th>
@@ -441,7 +440,7 @@
                                     @endif
                                 </td>
                                 <td class="text-muted">#{{ $invoice->order?->id ?? 'N/A' }}</td>
-                                <td>{{ number_format($invoice->items_count) }}</td>
+              
                                 <td>
                                     <div class="fw-bold">៛{{ number_format($invoice->total_khr, 0) }}</div>
                                     <div class="text-muted small fw-bold">${{ number_format($invoice->total_amount, 2) }}</div>

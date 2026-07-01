@@ -282,6 +282,18 @@
         font-size: 14px;
     }
 
+    .custom-price-tag {
+        display: inline-block;
+        background: rgba(232, 93, 36, 0.1);
+        color: var(--accent);
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+
     .text-center { text-align: center; }
     .text-right { text-align: right; }
 
@@ -507,6 +519,90 @@
             @endif
         </div>
     </div>
+
+    <!-- Order Items -->
+    <!-- @if($order->items && $order->items->count())
+    <div class="section">
+        <div class="section-header">
+            <div class="icon"><i class="fas fa-box"></i></div>
+            <h3>មុខទំនិញ</h3>
+        </div>
+        <div class="section-body" style="padding: 0;">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th class="item-num">#</th>
+                        <th>ទំនិញ</th>
+                        <th class="text-center">ចំនួន</th>
+                        <th class="text-right">តម្លៃឯកតា</th>
+                        <th class="text-right">សរុប</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($order->items as $index => $item)
+                    @php
+                        // Always read the price actually charged on this order item,
+                        // never the product's current live price — this preserves
+                        // custom prices entered at checkout.
+                        $unitUsd  = $item->unit_price;
+                        $unitKhr  = $item->unit_price_khr ?? ($item->unit_price * 4000);
+                        $lineUsd  = $item->total_price ?? ($unitUsd * $item->quantity);
+                        $lineKhr  = $unitKhr * $item->quantity;
+                    @endphp
+                    <tr>
+                        <td class="item-num">{{ $index + 1 }}</td>
+                        <td class="item-name">
+                            {{ $item->product->name ?? $item->product_name ?? '-' }}
+                            @if($item->is_custom_price)
+                                <span class="custom-price-tag"><i class="fas fa-tag"></i> តម្លៃពិសេស</span>
+                            @endif
+                            @if($item->discount_percent > 0)
+                                <span class="custom-price-tag" style="background: var(--danger-bg); color: var(--danger);">
+                                    -{{ rtrim(rtrim(number_format($item->discount_percent, 1), '0'), '.') }}%
+                                </span>
+                            @endif
+                        </td>
+                        <td class="item-qty text-center">{{ $item->quantity }}</td>
+                        <td class="item-price text-right">
+                            ${{ number_format($unitUsd, 2) }}<br>
+                            <span style="color: var(--text-muted); font-weight: 600; font-size: 12px;">៛{{ number_format($unitKhr, 0) }}</span>
+                        </td>
+                        <td class="item-price text-right">
+                            ${{ number_format($lineUsd, 2) }}<br>
+                            <span style="color: var(--text-muted); font-weight: 600; font-size: 12px;">៛{{ number_format($lineKhr, 0) }}</span>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary-footer">
+            <div class="summary-table">
+                <div class="summary-line">
+                    <span class="label">សរុបរង:</span>
+                    <span class="value">${{ number_format($order->subtotal ?? $order->total_amount, 2) }}</span>
+                </div>
+                @if((float) ($order->discount_amount ?? 0) > 0)
+                <div class="summary-line discount">
+                    <span class="label">បញ្ចុះតម្លៃ:</span>
+                    <span class="value">-${{ number_format($order->discount_amount, 2) }}</span>
+                </div>
+                @endif
+                @if((float) $order->delivery_fee_khr > 0)
+                <div class="summary-line">
+                    <span class="label">ការដឹកជញ្ជូន:</span>
+                    <span class="value">៛{{ number_format($order->delivery_fee_khr, 0) }}</span>
+                </div>
+                @endif
+                <div class="summary-line total">
+                    <span class="label">តម្លៃសរុប:</span>
+                    <span class="value">${{ number_format($order->total_amount, 2) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif -->
 
     <!-- Preparation Info -->
     @if($order->prepared_by)

@@ -352,8 +352,6 @@
         <div class="header">
             <div>
                 <div class="logo">PizzaHappyFamily</div>
-
-
             </div>
             <div class="invoice-details">
                 <div class="invoice-number">{{ $invoice->invoice_number }}</div>
@@ -396,19 +394,25 @@
                                 @if($deliveryGroups->count() === 1)
                                     @php
                                         $firstDeliveryItem = $deliveryItems->first();
+                                        $deliveryRecord = $firstDeliveryItem->delivery;
                                     @endphp
-                                    <p style="margin: 2px 0;">{{ $firstDeliveryItem->delivery->delivery_name ?? 'មិនមាន' }}</p>
+                                    <p style="margin: 2px 0;">{{ $deliveryRecord->delivery_name ?? 'មិនមាន' }}</p>
                                 @else
                                     @foreach($deliveryGroups as $group)
                                         @php
                                             $firstDeliveryItem = $group->first();
+                                            $deliveryRecord = $firstDeliveryItem->delivery;
                                             $productNames = $group->map(fn($item) => $item->product->name ?? 'ទំនិញ')->join(', ');
                                         @endphp
                                         <p style="margin: 2px 0;">
-                                            {{ $firstDeliveryItem->delivery->delivery_name ?? 'មិនមាន' }}:
+                                            {{ $deliveryRecord->delivery_name ?? 'មិនមាន' }}:
                                             {{ $productNames }}
                                         </p>
                                     @endforeach
+                                @endif
+
+                                @if(!empty($invoice->order->taxi_phone))
+                                    <p style="margin: 2px 0;"><strong>:</strong> {{ $invoice->order->taxi_phone }}</p>
                                 @endif
                             </div>
                         @endif
@@ -439,14 +443,17 @@
             $paidItems = $orderItems->filter(function ($item) {
                 return (float) $item->unit_price > 0;
             });
-            $subtotalKhr = $orderItems->sum(function ($item) {
+            // KHR amounts are now derived from each item's actual unit_price (custom or default)
+            // using a fixed exchange rate of 4000, rather than the product's flat base price_khr.
+            $exchangeRate = 4000;
+            $subtotalKhr = $orderItems->sum(function ($item) use ($exchangeRate) {
                 if ((float) $item->unit_price <= 0) {
                     return 0;
                 }
 
-                return (float) ($item->product?->price_khr ?? 0) * (float) $item->quantity;
+                return (float) $item->unit_price * (float) $item->quantity * $exchangeRate;
             });
-            $discountKhr = (float) $invoice->discount_amount * 4000;
+            $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
             $grandTotalKhr = $subtotalKhr - $discountKhr + (float) $invoice->delivery_fee_khr;
         @endphp
 
@@ -464,7 +471,7 @@
                 @if($paidItems->count() > 0)
                     @foreach ($paidItems as $item)
                         @php
-                            $unitPriceKhr = (float) ($item->product?->price_khr ?? 0);
+                            $unitPriceKhr = (float) $item->unit_price * $exchangeRate;
                             $totalPriceKhr = $unitPriceKhr * (float) $item->quantity;
                         @endphp
                         <tr>
@@ -476,6 +483,7 @@
                             <td class="text-right">៛{{ number_format($totalPriceKhr, 0) }}</td>
                         </tr>
                     @endforeach
+
                 @else
                     <tr>
                         <td colspan="5" style="text-align: center; padding: 20px; color: #999;">No items found</td>
@@ -489,15 +497,16 @@
                 <div class="total-row">
                     <span>Subtotal:</span>
                     <span>${{ number_format($invoice->subtotal, 2) }}</span>
+                    <div class="total-row" style="border-bottom: none; padding-bottom: 0;">
+                    <span >៛{{ number_format($subtotalKhr, 0) }}</span>
+                 </div>
                 </div>
-                <div class="total-row" style="border-bottom: none; padding-bottom: 0;">
-                    <span></span>
-                    <span style="color: #888; font-size: 13px;">៛{{ number_format($subtotalKhr, 0) }}</span>
-                </div>
+                
                 <div class="total-row">
                     <span>បញ្ចុះតម្លៃ:</span>
                     <span>-${{ number_format($invoice->discount_amount, 2) }}</span>
-
+                       <div class="total-row" style="border-bottom: none; padding-bottom: 0;"></div>
+                    <span>-៛{{ number_format($discountKhr, 0) }}</span>
                 </div>
                 @if((float) $invoice->delivery_fee_khr > 0)
                     <div class="total-row">
@@ -519,8 +528,6 @@
                 </div>
             </div>
         </div>
-
-
 
         @if(($invoice->order && $invoice->order->freeItems->count() > 0) || $invoice->notes)
             <div class="notes">

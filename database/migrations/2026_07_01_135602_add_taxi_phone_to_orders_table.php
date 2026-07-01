@@ -12,9 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            if (!Schema::hasColumn('orders', 'taxi_phone')) {
-                $table->string('taxi_phone')->nullable()->after('delivery_id')->comment('Phone number for taxi delivery');
-            }
+             $table->string('taxi_phone')->nullable()->after('delivery_id');
         });
     }
 
@@ -24,9 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            if (Schema::hasColumn('orders', 'taxi_phone')) {
-                $table->dropColumn('taxi_phone');
-            }
+              $table->dropColumn('taxi_phone');
         });
     }
 };

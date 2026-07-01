@@ -283,6 +283,34 @@
             vertical-align: middle;
         }
 
+        .free-item-row {
+            background: #f0fdf4;
+        }
+
+        .free-item-badge {
+            background: #dcfce7;
+            color: #166534;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .custom-price-badge {
+            display: inline-block;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
         .totals-panel {
             background: #fbfdff;
             border-left: 1px solid var(--border);
@@ -291,11 +319,23 @@
         }
 
         .total-row {
-            align-items: center;
+            align-items: flex-start;
             border-bottom: 1px solid #eef2f7;
             display: flex;
             justify-content: space-between;
             padding: 8px 0;
+        }
+
+        .total-row .value-block {
+            text-align: right;
+        }
+
+        .total-row .value-khr {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 2px;
         }
 
         .grand-total {
@@ -310,6 +350,16 @@
             color: var(--accent-dark);
             font-size: 24px;
             font-weight: 900;
+        }
+
+        .grand-total .amount-khr {
+            color: var(--accent-dark);
+            font-size: 13px;
+            font-weight: 700;
+            opacity: .85;
+            display: block;
+            text-align: right;
+            margin-top: 2px;
         }
 
         .note-card {
@@ -354,6 +404,12 @@
     @php
         $customer = $invoice->order?->customer;
         $items = $invoice->order?->items ?? collect();
+
+        // Compute subtotal in KHR independently (don't reuse a stray $item from the loop)
+        $exchangeRate = 4000;
+        $subtotalKhr = (float) $invoice->subtotal * $exchangeRate;
+        $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
+        $totalKhr    = (float) $invoice->total_amount * $exchangeRate;
     @endphp
 
     <div class="container-fluid py-4 invoice-show">
@@ -367,7 +423,6 @@
             <div class="invoice-heading">
                 <h2 class="invoice-title">{{ $invoice->invoice_number }}</h2>
                 <p class="invoice-subtitle">ព័ត៌មានលម្អិតវិក្ក័យបត្រ និងទំនិញដែលបានបញ្ជាទិញ</p>
-
             </div>
 
             <div class="invoice-actions">
@@ -471,7 +526,9 @@
         <div class="items-card">
             <div class="items-header">
                 <h3 class="items-title">ទំនិញក្នុងវិក្ក័យបត្រ</h3>
-                <span class="text-muted fw-bold">{{ number_format($items->count()) }} មុខទំនិញ</span>
+                <!-- <span class="text-muted fw-bold">
+                    {{ number_format($items->count()) }} មុខទំនិញ
+                </span> -->
             </div>
 
             <div class="items-body">
@@ -486,25 +543,37 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($items as $item)
+                            @forelse($items as $row)
                                 @php
-                                    $isFreeItem = (float) $item->unit_price <= 0;
+                                    $isFreeItem = (float) $row->unit_price <= 0;
+                                    $rowUnitKhr  = (float) $row->unit_price * $exchangeRate;
+                                    $rowTotalKhr = (float) $row->total_price * $exchangeRate;
                                 @endphp
-                                <tr>
-                                    <td class="fw-bold">{{ $item->product?->name ?? 'N/A' }}</td>
-                                    <td class="text-center">{{ number_format($item->quantity) }}</td>
-                                    <td class="text-end">
-                                        @unless($isFreeItem)
-                                            <strong>${{ number_format($item->unit_price, 2) }}</strong>
-                                            <div class="text-muted small">៛{{ number_format($item->unit_price * 4000) }}</div>
-                                        @endunless
+                                <tr @class(['free-item-row' => $isFreeItem])>
+                                    <td class="fw-bold">
+                                        {{ $row->product?->name ?? 'N/A' }}
+                                        @if(!empty($row->is_custom_price))
+                                            <span class="custom-price-badge"><i class="fas fa-tag"></i> តម្លៃពិសេស</span>
+                                        @endif
                                     </td>
-                                    <td class="text-end">
-                                        @unless($isFreeItem)
-                                            <strong>${{ number_format($item->total_price, 2) }}</strong>
-                                            <div class="text-muted small">៛{{ number_format($item->total_price * 4000) }}</div>
-                                        @endunless
-                                    </td>
+                                    <td class="text-center">{{ number_format($row->quantity) }}</td>
+
+                                    @if($isFreeItem)
+                                        <td class="text-end" colspan="2">
+                                            <span class="free-item-badge">
+                                                <i class="fas fa-gift"></i> ឥតគិតថ្លៃ (Free)
+                                            </span>
+                                        </td>
+                                    @else
+                                        <td class="text-end">
+                                            <strong>${{ number_format($row->unit_price, 2) }}</strong>
+                                            <div class="text-muted small">៛{{ number_format($rowUnitKhr, 0) }}</div>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong>${{ number_format($row->total_price, 2) }}</strong>
+                                            <div class="text-muted small">៛{{ number_format($rowTotalKhr, 0) }}</div>
+                                        </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>
@@ -518,28 +587,41 @@
                 <div class="totals-panel">
                     <div class="total-row">
                         <span class="text-muted fw-bold">Subtotal</span>
-                        <strong>${{ number_format($invoice->subtotal, 2) }}</strong>
-
+                        <div class="value-block">
+                            <strong>${{ number_format($invoice->subtotal, 2) }}</strong>
+                            <span class="value-khr">៛{{ number_format($subtotalKhr, 0) }}</span>
+                        </div>
                     </div>
-                    <div class="total-row">
-                        <span class="text-muted fw-bold">Discount</span>
-                        <strong>${{ number_format($invoice->discount_amount, 2) }}</strong>
 
-                    </div>
-                    @if((float) $invoice->delivery_fee_khr > 0)
+                    @if((float) $invoice->discount_amount > 0)
                         <div class="total-row">
-                            <span class="text-muted fw-bold">Delivery
-                                {{ $invoice->order?->delivery ? '(' . $invoice->order->delivery->delivery_name . ')' : '' }}</span>
-                            <strong>
-                                ${{ number_format($invoice->delivery_fee_usd, 2) }}
-                                <span
-                                    class="text-muted small d-block text-end">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</span>
-                            </strong>
+                            <span class="text-muted fw-bold">Discount</span>
+                            <div class="value-block">
+                                <strong style="color:#dc2626;">-${{ number_format($invoice->discount_amount, 2) }}</strong>
+                                <span class="value-khr">-៛{{ number_format($discountKhr, 0) }}</span>
+                            </div>
                         </div>
                     @endif
-                    <div class="grand-total d-flex justify-content-between align-items-center">
+
+                    @if((float) $invoice->delivery_fee_khr > 0)
+                        <div class="total-row">
+                            <span class="text-muted fw-bold">
+                                Delivery
+                                {{ $invoice->order?->delivery ? '(' . $invoice->order->delivery->delivery_name . ')' : '' }}
+                            </span>
+                            <div class="value-block">
+                                <strong>${{ number_format($invoice->delivery_fee_usd, 2) }}</strong>
+                                <span class="value-khr">៛{{ number_format($invoice->delivery_fee_khr, 0) }}</span>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="grand-total d-flex justify-content-between align-items-start">
                         <span class="fw-bold">សរុបទឹកប្រាក់</span>
-                        <span class="amount">${{ number_format($invoice->total_amount, 2) }}</span>
+                        <div>
+                            <span class="amount">${{ number_format($invoice->total_amount, 2) }}</span>
+                            <span class="amount-khr">៛{{ number_format($totalKhr, 0) }}</span>
+                        </div>
                     </div>
                 </div>
             </div>

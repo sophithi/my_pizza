@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('sku')->unique();
             $table->decimal('price_usd', 10, 2);
             $table->decimal('price_khr', 12, 2)->nullable();
+             $table->boolean('allow_custom_price')->default(false);
             $table->string('category')->default('General');
             $table->string('unit')->default('kg'); // kg, ltr, pcs, etc.
             $table->string('supplier')->nullable();

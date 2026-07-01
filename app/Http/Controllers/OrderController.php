@@ -36,7 +36,9 @@ class OrderController extends Controller
         $products = \App\Models\Product::all();
         $deliveries = \App\Models\Delivery::all();
         $selectedCustomerId = request('customer_id');
-        return view('orders.create', compact('customers', 'products', 'deliveries', 'selectedCustomerId'));
+        return 
+        view('orders.create', 
+        compact('customers', 'products', 'deliveries', 'selectedCustomerId'));
     }
 
     /**
@@ -58,6 +60,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
+                'taxi_phone' => $validated['taxi_phone'] ?? null, 
                 'box_qty' => $boxQty,
                 'user_id' => auth()->id(),
                 'order_date' => $validated['order_date'],
@@ -82,6 +85,7 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'total_price' => $item['total_price'],
+                    
                 ]);
             }
 
