@@ -1913,7 +1913,7 @@
     /* ─── Free product rows ─────────────────────────────────── */
     function addFreeProductRow() {
         const rowId = freeProductCount++;
-        const products = @json($products);
+        const products = @json($products->where('allow_free', true)->values());
         let opts = '<option value="">សូមជ្រើសរើស</option>';
         products.forEach(p => { opts += `<option value="${p.id}">${p.name}</option>`; });
 

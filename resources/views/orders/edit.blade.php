@@ -1403,7 +1403,7 @@
                         <h4 class="checkout-title">
                            កែប្រែការបញ្ជាទិញ
                         </h4>
-                        <span class="cart-count-pill"><span id="cartCount">0</span> មុខ</span>
+                      
                     </div>
 
                     <div class="checkout-scroll">
@@ -2178,39 +2178,46 @@
         setTimeout(() => { $('.toast-overlay, .toast-box').remove(); }, 300);
     }
 
-    // Free Product Functions
+  // Free Product Functions
     function addFreeProductRow(selectedProductId = null, qty = 1) {
-        const rowId = freeProductCount++;
-        // Use the allProducts directly since it's now an object keyed by ID
-        const productArray = Object.values(allProducts);
+    const rowId = freeProductCount++;
 
-        let selectHTML = '<option value="">សូមជ្រើសរើស</option>';
-        productArray.forEach(product => {
-            const isSelected = selectedProductId && product.id == selectedProductId ? 'selected' : '';
-            selectHTML += `<option value="${product.id}" ${isSelected}>${product.name}</option>`;
-        });
+    // Only products flagged as allow_free show up in this dropdown
+    const freeEligibleProducts = @json($products->where('allow_free', true)->keyBy('id'));
+    let productArray = Object.values(freeEligibleProducts);
 
-        const rowHTML = `
-            <div class="free-product-row" id="freeRow${rowId}">
-                <select name="free_products[${rowId}][product_id]" class="form-control od-select">
-                    ${selectHTML}
-                </select>
-                <input type="number" name="free_products[${rowId}][qty]" class="form-control" min="0" placeholder="ចំនួន" value="${qty}">
-                <button type="button" class="btn-remove-free" onclick="removeFreeProductRow(${rowId})">
-                    <i class="fas fa-trash"></i> លុប
-                </button>
-            </div>
-        `;
+  
+    if (selectedProductId && !freeEligibleProducts[selectedProductId] && allProducts[selectedProductId]) {
+        productArray = [...productArray, allProducts[selectedProductId]];
+    }
 
-        $('#freeProductsContainer').append(rowHTML);
+    let selectHTML = '<option value="">សូមជ្រើសរើស</option>';
+    productArray.forEach(product => {
+        const isSelected = selectedProductId && product.id == selectedProductId ? 'selected' : '';
+        selectHTML += `<option value="${product.id}" ${isSelected}>${product.name}</option>`;
+    });
+
+    const rowHTML = `
+        <div class="free-product-row" id="freeRow${rowId}">
+            <select name="free_products[${rowId}][product_id]" class="form-control od-select">
+                ${selectHTML}
+            </select>
+            <input type="number" name="free_products[${rowId}][qty]" class="form-control" min="0" placeholder="ចំនួន" value="${qty}">
+            <button type="button" class="btn-remove-free" onclick="removeFreeProductRow(${rowId})">
+                <i class="fas fa-trash"></i> លុប
+            </button>
+        </div>
+         `;
+
+      $('#freeProductsContainer').append(rowHTML);
     }
 
     function removeFreeProductRow(rowId) {
-        $(`#freeRow${rowId}`).slideUp(300, function() {
-            $(this).remove();
-            if ($('.free-product-row').length === 0) {
-                addFreeProductRow();
-            }
+         $(`#freeRow${rowId}`).slideUp(300, function() {
+             $(this).remove();
+             if ($('.free-product-row').length === 0) {
+            addFreeProductRow();
+           }
         });
     }
 </script>

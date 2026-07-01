@@ -60,7 +60,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
-                'taxi_phone' => $validated['taxi_phone'] ?? null, 
+                'taxi_phone' => $validated['taxi_phone'] ?? null,     
                 'box_qty' => $boxQty,
                 'user_id' => auth()->id(),
                 'order_date' => $validated['order_date'],

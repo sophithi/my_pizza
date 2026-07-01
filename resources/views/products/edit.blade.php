@@ -75,11 +75,19 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="form-group">
                          <label>
-                         <input type="checkbox" name="allow_custom_price" value="1" {{ old('allow_custom_price', $product->allow_custom_price ?? false) ? 'checked' : '' }}>
-                          អនុញ្ញាតតម្លៃកំណត់ផ្ទាល់ (Custom Price)
-                         </label>
+                             <input type="checkbox" name="allow_custom_price" value="1" {{ old('allow_custom_price', $product->allow_custom_price ?? false) ? 'checked' : '' }}>
+                            អនុញ្ញាតកំណត់តម្លៃថ្មី (Custom Price)
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                         <label>
+                             <input type="checkbox" name="allow_free" value="1" {{ old('allow_free', $product->allow_free ?? false) ? 'checked' : '' }}>
+                                ទំនិញអាចfree (allow free)
+                             </label>
                         </div>
                        
                         {{-- Category + Unit --}}

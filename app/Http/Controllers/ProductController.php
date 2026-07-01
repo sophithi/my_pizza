@@ -114,6 +114,9 @@ class ProductController extends Controller
         $product->update($data);
         $product->allow_custom_price = $request->boolean('allow_custom_price');
         $product->save();
+        $product->allow_free = $request->boolean('allow_free');
+        $product->save();
+        
         return redirect()->route('products.show', $product)->with('success', 'Product updated successfully.');
     }
 

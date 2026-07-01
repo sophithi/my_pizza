@@ -84,6 +84,8 @@
                             <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">
                                 Custom Price</th>
                             <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">
+                                Allow Free</th>
+                            <th style="padding: 12px; font-weight: 600; color: #1a1d29; font-size: 12px; text-transform: uppercase;">
                                 Actions</th>
                         </tr>
                     </thead>
@@ -144,6 +146,21 @@
                                         </span>
                                     @endif
                                 </td>
+
+                                <td style="padding: 12px;">
+                                    @if($product->allow_free)
+                                        <span style="background: #fff3cd; color: #24e8069f; padding: 4px 12px;
+                                            border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap;">
+                                            <i class="fas fa-tag"></i> បើក
+                                        </span>
+                                    @else
+                                        <span style="background: #e9ecef; color: #6c757d; padding: 4px 12px;
+                                            border-radius: 999px; font-size: 11px; font-weight: 600;">
+                                            បិទ
+                                        </span>
+                                    @endif
+                                </td>
+
 
                                 <td style="padding: 12px;">
                                     <a href="{{ route('products.show', $product) }}" class="btn-action btn-edit"
