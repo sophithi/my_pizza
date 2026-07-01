@@ -957,7 +957,10 @@
                 </div>
             </form>
         </div>
-        <div class="pager-wrap">{{ $inventories->links('pagination::bootstrap-5') }}</div>
+          <div class="pager-wrap">
+        {{ $inventory->links('pagination::bootstrap-5') }}
+    </div>
+
     </div>
 @endsection
 
