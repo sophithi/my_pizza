@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="{{ asset('js/html2pdf.bundle.min.js') }}"
+        onerror="alert('FAILED TO LOAD html2pdf.js — check Network tab')"></script>
+
     <title>Customer INV - {{ $invoice->invoice_number }}</title>
     <style>
         @page {
@@ -344,17 +346,35 @@
                 margin-top: 8px;
                 padding-top: 6px;
             }
+
+            tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .totals,
+            .notes,
+            .footer {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .header {
+                page-break-after: avoid;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="sticker" id="invoice-content">
+
         <div class="header">
             <div>
                 <div class="logo">PizzaHappyFamily</div>
             </div>
             <div class="invoice-details">
+
                 <div class="invoice-number">{{ $invoice->invoice_number }}</div>
                 <p>កាលបរិច្ឆេទ: {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</p>
             </div>
@@ -562,28 +582,45 @@
             style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
             Print Sticker
         </button>
-        <button onclick="saveAsPDF()"
-            style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-            Save
-        </button>
-        <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}"
-            style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-            ← Back
-        </a>
-    </div>
-    <script>
-        function saveAsPDF() {
-            const element = document.getElementById('invoice-content');
-            const opt = {
-                margin: 0.2,
-                filename: 'PHF-{{ $invoice->invoice_number }}.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: 'a5', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
-        }
-    </script>
+        <div class="save-dropdown-wrapper" style="position: relative; display: inline-block;">
+            <button onclick="saveAsPDF()"
+                style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                Save PDF
+            </button>
+
+            <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}"
+                style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                ← Back
+            </a>
+        </div>
+        <script>
+            const invoiceNumber = '{{ $invoice->invoice_number }}';
+
+            function saveAsPDF() {
+                const element = document.getElementById('invoice-content');
+
+                if (!element) {
+                    alert('Error: invoice-content element not found');
+                    return;
+                }
+
+                if (typeof html2pdf === 'undefined') {
+                    alert('Error: html2pdf library not loaded. Check the script tag in <head>.');
+                    return;
+                }
+
+                const opt = {
+                    margin: 0.15,
+                    filename: `invoice-${invoiceNumber}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' },
+                    jsPDF: { unit: 'in', format: 'a5', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+
+                html2pdf().set(opt).from(element).save();
+            }
+        </script>
 </body>
 
 </html>
