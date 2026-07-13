@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Packing INV - {{ $invoice->invoice_number }}</title>
     <style>
         @page {
@@ -198,7 +199,7 @@
 </head>
 
 <body>
-    <div class="sticker">
+    <div class="sticker" id="">
         <div class="sticker-header">
             <span class="sticker-title">ទំនិញដែលត្រូវរៀបចំ</span>
         </div>
@@ -272,6 +273,7 @@
             style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
             Print
         </button>
+       
         <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}"
             style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
             ← Back

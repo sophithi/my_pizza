@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <title>Customer INV - {{ $invoice->invoice_number }}</title>
     <style>
         @page {
@@ -348,7 +349,7 @@
 </head>
 
 <body>
-    <div class="sticker">
+    <div class="sticker" id="invoice-content">
         <div class="header">
             <div>
                 <div class="logo">PizzaHappyFamily</div>
@@ -498,14 +499,14 @@
                     <span>Subtotal:</span>
                     <span>${{ number_format($invoice->subtotal, 2) }}</span>
                     <div class="total-row" style="border-bottom: none; padding-bottom: 0;">
-                    <span >៛{{ number_format($subtotalKhr, 0) }}</span>
-                 </div>
+                        <span>៛{{ number_format($subtotalKhr, 0) }}</span>
+                    </div>
                 </div>
-                
+
                 <div class="total-row">
                     <span>បញ្ចុះតម្លៃ:</span>
                     <span>-${{ number_format($invoice->discount_amount, 2) }}</span>
-                       <div class="total-row" style="border-bottom: none; padding-bottom: 0;"></div>
+                    <div class="total-row" style="border-bottom: none; padding-bottom: 0;"></div>
                     <span>-៛{{ number_format($discountKhr, 0) }}</span>
                 </div>
                 @if((float) $invoice->delivery_fee_khr > 0)
@@ -561,11 +562,28 @@
             style="background: #e85d24; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
             Print Sticker
         </button>
+        <button onclick="saveAsPDF()"
+            style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Save
+        </button>
         <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}"
             style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
             ← Back
         </a>
     </div>
+    <script>
+        function saveAsPDF() {
+            const element = document.getElementById('invoice-content');
+            const opt = {
+                margin: 0.2,
+                filename: 'PHF-{{ $invoice->invoice_number }}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'a5', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
 </body>
 
 </html>

@@ -514,10 +514,10 @@
             </div>
         </div>
 
-        <div class="pager-wrap">{{ $invoices->links() }}
-        </div>
+       
     </div>
-
+ <div class="pager-wrap">{{ $invoices->links('pagination::bootstrap-5') }}
+        </div>
     @push('scripts')
         <script>
             (function () {
@@ -559,7 +559,9 @@
                     dateInput.addEventListener('change', syncDatePlaceholder);
                     syncDatePlaceholder();
                 }
+                
             })();
+            
         </script>
     @endpush
 @endsection
