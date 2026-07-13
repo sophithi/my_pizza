@@ -157,7 +157,9 @@ Route::middleware('auth')->group(function () {
         Route::get('packing/{invoice}/mayo', [InvoiceController::class, 'stickerMayo'])->name('packing.delivery_mayo');
 
         Route::get('packing/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('packing.customer');
-
+        // routes/web.php
+        Route::get('/packing/sticker/{invoice}/download', [InvoiceController::class, 'downloadSticker'])
+            ->name('packing.sticker.download');
     });
 
     // Invoice index/show view access. Staff can only view; admin/manager/staff_inventory use full routes above for write actions.

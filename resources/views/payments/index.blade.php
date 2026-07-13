@@ -291,7 +291,8 @@
                             <th>សរុបការបញ្ជាទិញ</th>
                             <th>បានបង់</th>
                             <th>នៅសល់</th>
-                            <th>វិធីបង់</th>
+                            <th>វិធីបង់</th>      
+                            <th>note</th>
                             <th>ស្ថានភាព</th>
                             <th class="text-center">សកម្មភាព</th>
                         </tr>
@@ -328,6 +329,21 @@
                                     @endif
                                 </td>
                                 <td class="small text-muted">{{ $payment->method }}</td>
+                             
+                                <td>
+                                    <div class="small text-muted" style="max-width: 200px;">
+                                        @if($payment->notes)
+                                            {{ $payment->notes }}
+                                        @else
+                                            —
+                                        @endif
+                                        @if($payment->has_exchange_rate_variance)
+                                            <div class="text-warning mt-1">
+                                                ⚠️ {{ strlen($payment->exchange_rate_notes) > 40 ? substr($payment->exchange_rate_notes, 0, 40) . '...' : $payment->exchange_rate_notes }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td>
                                     <span class="badge rounded-pill px-3 py-1 badge-{{ $payment->status }}">
                                         {{ $payment->status === 'pending' ? 'មិនទាន់បង់' : ($payment->status === 'partial' ? 'បង់ខ្លះ' : 'បានបង់') }}
@@ -343,7 +359,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-5">
+                                <td colspan="10" class="text-center text-muted py-5">
                                     <i class="bi bi-inbox fs-3 d-block mb-2"></i>
                                     មិនមានទិន្នន័យការទូទាត់
                                 </td>
@@ -404,7 +420,7 @@
                                             placeholder="0" oninput="syncTotalFromKhr()">
                                     </div>
                                 </div>
-                                <div class="currency-hint">1 USD = ៛{{ number_format($exchangeRate, 0) }}</div>
+                                <input type="hidden" name="exchange_rate" id="f_exchange_rate" value="{{ $exchangeRate }}">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -608,5 +624,36 @@
             document.body.classList.remove('modal-open');
             document.body.style.removeProperty('padding-right');
         });
+
+        /**
+         * Update exchange rate for payment processing
+         * Handles different exchange rates when rates fluctuate
+         */
+        function updateExchangeRate(rate) {
+            const currentRate = parseFloat(document.getElementById('f_exchange_rate').value);
+            const totalKhr = parseFloat(document.getElementById('f_total_khr').value) || 0;
+            
+            // Update the hidden exchange rate field
+            document.getElementById('f_exchange_rate').value = rate;
+            
+            // Update KHR value if coming from USD
+            const totalUsd = parseFloat(document.getElementById('f_total').value) || 0;
+            if (totalUsd > 0) {
+                const newKhr = Math.round(totalUsd * rate);
+                document.getElementById('f_total_khr').value = newKhr;
+            }
+            
+            // Update payment lines with new exchange rate
+            paymentLines.forEach(line => {
+                if (line.currency === 'KHR') {
+                    // Recalculate USD amount with new rate
+                    line.originalKhr = line.amount;
+                }
+            });
+            
+            // Show notification
+            const rateLabel = rate === 3800 ? '📉 Low (3800)' : (rate === 4200 ? '📈 High (4200)' : 'Standard (4000)');
+            console.log(`Exchange rate updated to: ${rateLabel}`);
+        }
     </script>
 @endpush

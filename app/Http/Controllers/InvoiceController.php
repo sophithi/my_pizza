@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 class InvoiceController extends Controller
 {
     /**
@@ -367,11 +367,11 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-         $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'items.product');
+        $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'items.product');
 
-    $allSameDelivery = false;
+        $allSameDelivery = false;
 
-    return view('invoices.show', compact('invoice', 'allSameDelivery'));
+        return view('invoices.show', compact('invoice', 'allSameDelivery'));
     }
 
     /**
@@ -459,5 +459,27 @@ class InvoiceController extends Controller
             : route('invoices.show', $invoice);
 
         return view('packing.sticker-customer', compact('invoice', 'backUrl'));
+    }
+
+    public function downloadSticker(Invoice $invoice)
+    {
+        try {
+            $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
+            
+            $pdf = Pdf::loadView('packing.sticker-customer', [
+                'invoice' => $invoice,
+                'backUrl' => null,
+            ])->setPaper('a5', 'portrait');
+
+            $filename = $invoice->invoice_number . '.pdf';
+            
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            \Log::error('PDF Download Error: ' . $e->getMessage(), [
+                'invoice_id' => $invoice->id,
+                'error' => $e->getFile() . ':' . $e->getLine()
+            ]);
+            return response()->json(['error' => 'Failed to generate PDF'], 500);
+        }
     }
 }

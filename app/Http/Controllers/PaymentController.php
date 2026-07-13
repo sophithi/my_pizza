@@ -101,6 +101,9 @@ class PaymentController extends Controller
             ])->values() ?? [],
             'status' => $status,
             'notes' => $payment?->notes ?? $order->notes,
+            'exchange_rate' => (float) ($payment?->exchange_rate ?? 4000),
+            'exchange_rate_notes' => $payment?->exchange_rate_notes,
+            'has_exchange_rate_variance' => !empty($payment?->exchange_rate_notes),
         ];
     }
 
@@ -167,7 +170,39 @@ class PaymentController extends Controller
         $data['order_id'] = $order->id;
         $data['order_date'] = $order->order_date;
         $data['total_amount'] = $order->total_amount;
-        abort_if((float) $data['paid_amount'] > (float) $data['total_amount'], 422, 'Paid amount cannot be greater than the order total.');
+        
+        // Calculate average exchange rate from payment lines
+        $avgExchangeRate = collect($lines)->avg('exchange_rate') ?? self::EXCHANGE_RATE;
+        $data['exchange_rate'] = $avgExchangeRate;
+        
+        // Generate payment notes showing what was paid in each currency
+        $paymentNotes = $this->generatePaymentNotes($lines, $avgExchangeRate);
+        if ($paymentNotes) {
+            $data['notes'] = $paymentNotes;
+        }
+        
+        // Check for overpayment with exchange rate tolerance
+        $overage = (float) $data['paid_amount'] - (float) $data['total_amount'];
+        if ($overage > 0) {
+            // Check if payment includes multiple currencies (more lenient tolerance)
+            $hasMultipleCurrencies = count(collect($lines)->pluck('currency')->unique()) > 1;
+            
+            // Allow generous overage tolerance for exchange rate fluctuations
+            if ($hasMultipleCurrencies) {
+                // For multi-currency: 15% or $100 USD (whichever is smaller)
+                $tolerance = min((float) $data['total_amount'] * 0.15, 100);
+            } else {
+                // For single currency: 10% or $50 USD
+                $tolerance = min((float) $data['total_amount'] * 0.10, 50);
+            }
+            
+            if ($overage > $tolerance) {
+                abort(422, "Paid amount cannot exceed order total by more than \${$tolerance}. Overage: \${$overage}");
+            } else {
+                // Store note about overpayment for display in payment table
+                $data['exchange_rate_notes'] = "Overpaid: +\${$overage} (within tolerance)";
+            }
+        }
 
         // Auto-set status
         $data['status'] = $this->resolveStatus($data['total_amount'], $data['paid_amount']);
@@ -230,7 +265,40 @@ class PaymentController extends Controller
         $data['order_id'] = $order->id;
         $data['order_date'] = $order->order_date;
         $data['total_amount'] = $order->total_amount;
-        abort_if((float) $data['paid_amount'] > (float) $data['total_amount'], 422, 'Paid amount cannot be greater than the order total.');
+        
+        // Calculate average exchange rate from payment lines
+        $avgExchangeRate = collect($lines)->avg('exchange_rate') ?? self::EXCHANGE_RATE;
+        $data['exchange_rate'] = $avgExchangeRate;
+        
+        // Generate payment notes showing what was paid in each currency
+        $paymentNotes = $this->generatePaymentNotes($lines, $avgExchangeRate);
+        if ($paymentNotes) {
+            $data['notes'] = $paymentNotes;
+        }
+        
+        // Check for overpayment with exchange rate tolerance
+        $overage = (float) $data['paid_amount'] - (float) $data['total_amount'];
+        if ($overage > 0) {
+            // Check if payment includes multiple currencies (more lenient tolerance)
+            $hasMultipleCurrencies = count(collect($lines)->pluck('currency')->unique()) > 1;
+            
+            // Allow generous overage tolerance for exchange rate fluctuations
+            if ($hasMultipleCurrencies) {
+                // For multi-currency: 15% or $100 USD (whichever is smaller)
+                $tolerance = min((float) $data['total_amount'] * 0.15, 100);
+            } else {
+                // For single currency: 10% or $50 USD
+                $tolerance = min((float) $data['total_amount'] * 0.10, 50);
+            }
+            
+            if ($overage > $tolerance) {
+                abort(422, "Paid amount cannot exceed order total by more than \${$tolerance}. Overage: \${$overage}");
+            } else {
+                // Store note about overpayment for display in payment table
+                $data['exchange_rate_notes'] = "Overpaid: +\${$overage} (within tolerance)";
+            }
+        }
+        
         $data['status']      = $this->resolveStatus($data['total_amount'], $data['paid_amount']);
         $data['method'] = $this->summarizeMethods($lines);
         unset($data['payment_lines']);
@@ -317,6 +385,7 @@ class PaymentController extends Controller
 
     private function parsePaymentLines(Request $request): array
     {
+        $exchangeRate = (float) $request->input('exchange_rate', self::EXCHANGE_RATE);
         $rawLines = json_decode($request->input('payment_lines', '[]'), true);
 
         if (!is_array($rawLines) || empty($rawLines)) {
@@ -327,16 +396,16 @@ class PaymentController extends Controller
                 'currency' => 'USD',
                 'amount_original' => $amount,
                 'amount_usd' => $amount,
-                'exchange_rate' => self::EXCHANGE_RATE,
+                'exchange_rate' => $exchangeRate,
             ]] : [];
         }
 
         return collect($rawLines)
-            ->map(function ($line) {
+            ->map(function ($line) use ($exchangeRate) {
                 $currency = strtoupper($line['currency'] ?? 'USD') === 'KHR' ? 'KHR' : 'USD';
                 $amountOriginal = max(0, (float) ($line['amount'] ?? 0));
                 $amountUsd = $currency === 'KHR'
-                    ? round($amountOriginal / self::EXCHANGE_RATE, 2)
+                    ? round($amountOriginal / $exchangeRate, 2)
                     : round($amountOriginal, 2);
 
                 return [
@@ -344,7 +413,7 @@ class PaymentController extends Controller
                     'currency' => $currency,
                     'amount_original' => $amountOriginal,
                     'amount_usd' => $amountUsd,
-                    'exchange_rate' => self::EXCHANGE_RATE,
+                    'exchange_rate' => $exchangeRate,
                 ];
             })
             ->filter(fn($line) => $line['amount_original'] > 0)
@@ -359,6 +428,37 @@ class PaymentController extends Controller
         }
 
         return collect($lines)->pluck('method')->unique()->join(' + ');
+    }
+
+    private function generatePaymentNotes(array $lines, float $exchangeRate): ?string
+    {
+        if (empty($lines)) {
+            return null;
+        }
+
+        // Group lines by currency
+        $usdLines = collect($lines)->where('currency', 'USD');
+        $khrLines = collect($lines)->where('currency', 'KHR');
+
+        $parts = [];
+
+        if ($usdLines->isNotEmpty()) {
+            $usdTotal = $usdLines->sum('amount_original');
+            $parts[] = sprintf("$%.2f USD", $usdTotal);
+        }
+
+        if ($khrLines->isNotEmpty()) {
+            $khrTotal = $khrLines->sum('amount_original');
+            $parts[] = sprintf("៛%s KHR", number_format($khrTotal, 0));
+        }
+
+        if (count($parts) > 1) {
+            return 'Paid: ' . implode(' + ', $parts) . " @ ៛" . number_format($exchangeRate, 0) . "/USD";
+        } elseif (count($parts) === 1) {
+            return 'Paid: ' . $parts[0];
+        }
+
+        return null;
     }
 
     private function syncPaymentLines(Payment $payment, array $lines): void

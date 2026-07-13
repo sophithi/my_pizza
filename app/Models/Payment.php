@@ -15,6 +15,8 @@ class Payment extends Model
         'order_date',
         'total_amount',
         'paid_amount',
+        'exchange_rate',
+        'exchange_rate_notes',
         'method',
         'status',   // paid | partial | pending
         'notes',
@@ -24,6 +26,7 @@ class Payment extends Model
         'order_date'   => 'date',
         'total_amount' => 'float',
         'paid_amount'  => 'float',
+        'exchange_rate' => 'float',
     ];
 
     public function lines()
@@ -34,6 +37,40 @@ class Payment extends Model
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Check if payment overage is acceptable due to exchange rate differences
+     * Allows up to 2% or $5 USD, whichever is smaller
+     */
+    public function isOverageAcceptable(float $overage): bool
+    {
+        $tolerance = min((float) $this->total_amount * 0.02, 5);
+        return abs($overage) <= $tolerance;
+    }
+
+    /**
+     * Get exchange rate notes safely
+     */
+    public function getExchangeRateNotesAttribute(): ?string
+    {
+        return $this->attributes['exchange_rate_notes'] ?? null;
+    }
+
+    /**
+     * Get exchange rate safely with fallback
+     */
+    public function getExchangeRateAttribute(): float
+    {
+        return (float) ($this->attributes['exchange_rate'] ?? 4000);
+    }
+
+    /**
+     * Check if has exchange rate variance
+     */
+    public function hasExchangeRateVariance(): bool
+    {
+        return !empty($this->attributes['exchange_rate_notes'] ?? null);
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────
