@@ -404,12 +404,22 @@
     @php
         $customer = $invoice->order?->customer;
         $items = $invoice->order?->items ?? collect();
-
-        // Compute subtotal in KHR independently (don't reuse a stray $item from the loop)
         $exchangeRate = 4000;
-        $subtotalKhr = (float) $invoice->subtotal * $exchangeRate;
+
+        $getUnitKhr = function ($item) use ($exchangeRate) {
+            $isCustom = $item->product
+                && (float) $item->unit_price !== (float) $item->product->price_usd;
+
+            return $isCustom
+                ? (float) $item->unit_price * $exchangeRate
+                : (float) ($item->product->price_khr ?? 0);
+        };
+
+        $subtotalKhr = $items->sum(function ($item) use ($getUnitKhr) {
+            return $getUnitKhr($item) * (float) $item->quantity;
+        });
         $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
-        $totalKhr    = (float) $invoice->total_amount * $exchangeRate;
+        $totalKhr = $subtotalKhr - $discountKhr + (float) ($invoice->delivery_fee_khr ?? 0);
     @endphp
 
     <div class="container-fluid py-4 invoice-show">
@@ -527,8 +537,8 @@
             <div class="items-header">
                 <h3 class="items-title">ទំនិញក្នុងវិក្ក័យបត្រ</h3>
                 <!-- <span class="text-muted fw-bold">
-                    {{ number_format($items->count()) }} មុខទំនិញ
-                </span> -->
+                        {{ number_format($items->count()) }} មុខទំនិញ
+                    </span> -->
             </div>
 
             <div class="items-body">
@@ -546,9 +556,10 @@
                             @forelse($items as $row)
                                 @php
                                     $isFreeItem = (float) $row->unit_price <= 0;
-                                    $rowUnitKhr  = (float) $row->unit_price * $exchangeRate;
-                                    $rowTotalKhr = (float) $row->total_price * $exchangeRate;
+                                    $rowUnitKhr = $getUnitKhr($row);
+                                    $rowTotalKhr = $rowUnitKhr * (float) $row->quantity;
                                 @endphp
+
                                 <tr @class(['free-item-row' => $isFreeItem])>
                                     <td class="fw-bold">
                                         {{ $row->product?->name ?? 'N/A' }}

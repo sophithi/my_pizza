@@ -595,14 +595,22 @@
                 return (float) $item->unit_price > 0;
             });
 
-            $subtotalKhr = $paidItems->sum(function ($item) use ($exchangeRate) {
-                return (float) $item->unit_price * $exchangeRate * (float) $item->quantity;
+            $getUnitKhr = function ($item) use ($exchangeRate) {
+                $isCustom = $item->product
+                    && (float) $item->unit_price !== (float) $item->product->price_usd;
+
+                return $isCustom
+                    ? (float) $item->unit_price * $exchangeRate
+                    : (float) ($item->product->price_khr ?? 0);
+            };
+
+            $subtotalKhr = $paidItems->sum(function ($item) use ($getUnitKhr) {
+                return $getUnitKhr($item) * (float) $item->quantity;
             });
 
             $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
             $grandTotalKhr = $subtotalKhr - $discountKhr + (float) $invoice->delivery_fee_khr;
         @endphp
-
         <table>
             <thead>
                 <tr>
@@ -614,10 +622,9 @@
                 </tr>
             </thead>
             <tbody>
-
                 @foreach ($paidItems as $item)
                     @php
-                        $unitPriceKhr = (float) $item->unit_price * $exchangeRate;
+                        $unitPriceKhr = $getUnitKhr($item);
                         $totalPriceKhr = $unitPriceKhr * (float) $item->quantity;
                     @endphp
                     <tr>
@@ -632,28 +639,6 @@
                         </td>
                     </tr>
                 @endforeach
-                <!-- @if($paidItems->count() > 0)
-                    @foreach ($paidItems as $item)
-                        @php
-                            $unitPriceKhr = (float) $item->product->price_khr;
-                            $totalPriceKhr = $unitPriceKhr * (float) $item->quantity;
-                        @endphp
-                        <tr>
-                            <td>{{ $item->product->name ?? 'N/A' }}</td>
-                            <td class="text-right">{{ $item->quantity }} x</td>
-                            <td class="text-right">
-                                ៛{{ number_format($unitPriceKhr, 0) }}/${{ number_format($item->unit_price, 2) }}</td>
-                            <td class="text-right">${{ number_format($item->total_price, 2) }}</td>
-                            <td class="text-right">
-                                <span class="value-khr">៛{{ number_format($subtotalKhr, 0) }}</span>
-                            </td>
-                        </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 20px; color: #999;">No items found</td>
-                    </tr>
-                @endif -->
             </tbody>
         </table>
         <div class="totals">
@@ -693,7 +678,6 @@
                 </div>
             </div>
         </div>
-
         @if(($invoice->order && $invoice->order->freeItems->count() > 0) || $invoice->notes)
             <div class="notes">
                 @if($invoice->order && $invoice->order->freeItems->count() > 0)
