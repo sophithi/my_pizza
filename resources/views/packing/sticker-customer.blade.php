@@ -605,7 +605,12 @@
             };
 
             $subtotalKhr = $paidItems->sum(function ($item) use ($getUnitKhr) {
-                return $getUnitKhr($item) * (float) $item->quantity;
+                $unitKhr = $getUnitKhr($item);
+                $lineKhr = $unitKhr * (float) $item->quantity;
+                $discountPercent = (float) ($item->discount_percent ?? 0);
+                $lineDiscountKhr = $lineKhr * ($discountPercent / 100);
+
+                return $lineKhr - $lineDiscountKhr;
             });
 
             $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
@@ -617,7 +622,7 @@
                     <th>រាយនាមមុខទំនិញ</th>
                     <th class="text-right">ចំនួន</th>
                     <th class="text-right">តម្លៃ</th>
-                    <th class="text-right">សរុប (USD)</th>
+                    <th class="text-right">បញ្ចុះតម្លៃ</th>
                     <th class="text-right">សរុប (KHR)</th>
                 </tr>
             </thead>
@@ -625,15 +630,25 @@
                 @foreach ($paidItems as $item)
                     @php
                         $unitPriceKhr = $getUnitKhr($item);
-                        $totalPriceKhr = $unitPriceKhr * (float) $item->quantity;
+                        $lineKhr = $unitPriceKhr * (float) $item->quantity;
+                        $discountPercent = (float) ($item->discount_percent ?? 0);
+                        $lineDiscountKhr = $lineKhr * ($discountPercent / 100);
+                        $totalPriceKhr = $lineKhr - $lineDiscountKhr;
                     @endphp
                     <tr>
                         <td>{{ $item->product->name ?? 'N/A' }}</td>
                         <td class="text-right">{{ $item->quantity }} x</td>
                         <td class="text-right">
-                            ៛{{ number_format($unitPriceKhr, 0) }}/${{ number_format($item->unit_price, 2) }}
+                            ៛{{ number_format($unitPriceKhr, 0) }}
                         </td>
-                        <td class="text-right">${{ number_format($item->total_price, 2) }}</td>
+                        <td class="text-right">
+                            @if($discountPercent > 0)
+                                {{ number_format($discountPercent, 0) }}%
+                                <!-- <span class="khr-sub">-៛{{ number_format($lineDiscountKhr, 0) }}</span> -->
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td class="text-right">
                             <span class="value-khr">៛{{ number_format($totalPriceKhr, 0) }}</span>
                         </td>

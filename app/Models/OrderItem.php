@@ -13,11 +13,13 @@ class OrderItem extends Model
         'quantity',
         'unit_price',
         'total_price',
+        'discount_percent',
     ];
 
     protected $casts = [
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'discount_percent' => 'decimal:2',
     ];
 
     /**

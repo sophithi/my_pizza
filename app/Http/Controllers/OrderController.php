@@ -36,9 +36,11 @@ class OrderController extends Controller
         $products = \App\Models\Product::all();
         $deliveries = \App\Models\Delivery::all();
         $selectedCustomerId = request('customer_id');
-        return 
-        view('orders.create', 
-        compact('customers', 'products', 'deliveries', 'selectedCustomerId'));
+        return
+            view(
+                'orders.create',
+                compact('customers', 'products', 'deliveries', 'selectedCustomerId')
+            );
     }
 
     /**
@@ -60,7 +62,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
-                'taxi_phone' => $validated['taxi_phone'] ?? null,     
+                'taxi_phone' => $validated['taxi_phone'] ?? null,
                 'box_qty' => $boxQty,
                 'user_id' => auth()->id(),
                 'order_date' => $validated['order_date'],
@@ -85,7 +87,7 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'total_price' => $item['total_price'],
-                    
+                    'discount_percent' => $item['discount_percent'] ?? 0,
                 ]);
             }
 
@@ -158,15 +160,15 @@ class OrderController extends Controller
 
         // Prepare data for JSON encoding
         $existingOrderItems = $order->paidItems->map(fn($item) => [
-            'product_id'      => $item->product_id,
-            'quantity'        => $item->quantity,
-            'unit_price'      => $item->unit_price,
-            'discount_percent'=> $item->discount_percent ?? 0,
+            'product_id' => $item->product_id,
+            'quantity' => $item->quantity,
+            'unit_price' => $item->unit_price,
+            'discount_percent' => $item->discount_percent ?? 0,
         ])->values();
 
         $existingFreeProducts = $order->freeItems->map(fn($fp) => [
             'product_id' => $fp->product_id,
-            'qty'        => $fp->quantity ?? 1,
+            'qty' => $fp->quantity ?? 1,
         ])->values();
 
         $deliveryOptions = $deliveries->map(fn($d) => [
@@ -177,8 +179,8 @@ class OrderController extends Controller
 
         // allProducts as keyed object (for lookup by ID)
         $allProducts = $products->keyBy('id')->map(fn($p) => [
-            'id'        => $p->id,
-            'name'      => $p->name,
+            'id' => $p->id,
+            'name' => $p->name,
             'price_usd' => $p->price_usd,
             'price_khr' => $p->price_khr,
             'image_url' => $p->imageUrl(),
@@ -186,14 +188,20 @@ class OrderController extends Controller
 
         // productsArray for dropdowns (regular array)
         $productsArray = $products->map(fn($p) => [
-            'id'   => $p->id,
+            'id' => $p->id,
             'name' => $p->name,
         ])->values();
 
         return view('orders.edit', compact(
-            'order', 'customers', 'products', 'deliveries',
-            'existingOrderItems', 'existingFreeProducts',
-            'deliveryOptions', 'allProducts', 'productsArray'
+            'order',
+            'customers',
+            'products',
+            'deliveries',
+            'existingOrderItems',
+            'existingFreeProducts',
+            'deliveryOptions',
+            'allProducts',
+            'productsArray'
         ));
     }
 
@@ -244,6 +252,7 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'total_price' => $item['total_price'],
+                    'discount_percent' => $item['discount_percent'] ?? 0,
                 ]);
             }
 

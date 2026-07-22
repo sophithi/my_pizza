@@ -336,6 +336,30 @@
 @endpush
 
 @section('content')
+    @php
+        $exchangeRate = 4000;
+
+        $getUnitKhr = function ($item) use ($exchangeRate) {
+            $isCustom = $item->product
+                && (float) $item->unit_price !== (float) $item->product->price_usd;
+
+            return $isCustom
+                ? (float) $item->unit_price * $exchangeRate
+                : (float) ($item->product->price_khr ?? 0);
+        };
+
+        $calcTotalKhr = function ($invoice) use ($getUnitKhr, $exchangeRate) {
+            $items = $invoice->order?->items ?? collect();
+
+            $subtotalKhr = $items->sum(function ($item) use ($getUnitKhr) {
+                return $getUnitKhr($item) * (float) $item->quantity;
+            });
+
+            $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
+
+            return $subtotalKhr - $discountKhr + (float) ($invoice->delivery_fee_khr ?? 0);
+        };
+    @endphp
     <div class="container-fluid py-4 invoice-page">
         <div class="invoice-header">
             <div>
@@ -362,7 +386,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-label">ចំនួនទឹកប្រាក់</div>
-                <div class="stat-value">៛{{ number_format($stats['amount_khr'], 0) }}</div>
+                <div class="stat-value">{{ number_format($stats['amount_khr'] ?? 0, 0) }}</div>
                 <div class="text-muted small fw-bold">${{ number_format($stats['amount_usd'], 2) }}</div>
             </div>
         </div>
@@ -384,8 +408,7 @@
             </div>
 
             <div class="filter-row">
-                <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                    placeholder="...">
+                <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="...">
 
                 <select name="status" class="form-select">
                     <option value="all">គ្រប់ស្ថានភាព</option>
@@ -426,6 +449,7 @@
                     </thead>
                     <tbody>
                         @forelse ($invoices as $invoice)
+                            @php $rowTotalKhr = $calcTotalKhr($invoice); @endphp
                             <tr>
                                 <td>
                                     <a href="{{ route('invoices.show', $invoice) }}" class="invoice-number">
@@ -439,27 +463,16 @@
                                     @endif
                                 </td>
                                 <td class="text-muted">#{{ $invoice->order?->id ?? 'N/A' }}</td>
-              
                                 <td>
-                                    <div class="fw-bold">៛{{ number_format($invoice->total_khr, 0) }}</div>
+                                    <div class="fw-bold">៛{{ number_format($rowTotalKhr, 0) }}</div>
                                     <div class="text-muted small fw-bold">${{ number_format($invoice->total_amount, 2) }}</div>
                                 </td>
-                                <td class="text-muted">{{ $invoice->invoice_date?->format('d/m/Y') ?? 'N/A' }}
-                                </td>
+                                <td class="text-muted">{{ $invoice->invoice_date?->format('d/m/Y') ?? 'N/A' }}</td>
                                 <td>
                                     @if($invoice->status === 'paid')
                                         <span class="status-pill status-paid">
                                             <i class="fas fa-check-circle"></i> បានទូទាត់
                                         </span>
-                                    @if ($invoice->status === 'send'
-
-                                    )
-                                        <span class="status-pill status-send">
-                                            <i class="fas fa-check-circle"></i>ទូទាត់ខ្លះ
-                                        </span>
-
-                                    @endif
-
                                     @elseif($invoice->status === 'cancelled')
                                         <span class="status-pill status-cancelled">
                                             <i class="fas fa-times-circle"></i> មិនទូទាត់
@@ -494,7 +507,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8">
+                                <td colspan="7">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">
                                             <i class="fas fa-file-invoice"></i>
@@ -512,11 +525,10 @@
                 </table>
             </div>
         </div>
-
-       
     </div>
- <div class="pager-wrap">{{ $invoices->links('pagination::bootstrap-5') }}
-        </div>
+
+    <div class="pager-wrap">{{ $invoices->links('pagination::bootstrap-5') }}
+    </div>
     @push('scripts')
         <script>
             (function () {
@@ -558,9 +570,9 @@
                     dateInput.addEventListener('change', syncDatePlaceholder);
                     syncDatePlaceholder();
                 }
-                
+
             })();
-            
+
         </script>
     @endpush
 @endsection
