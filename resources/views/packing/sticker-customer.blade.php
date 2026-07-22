@@ -614,7 +614,7 @@
             });
 
             $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
-            $grandTotalKhr = $subtotalKhr - $discountKhr + (float) $invoice->delivery_fee_khr;
+            $grandTotalKhr = $subtotalKhr + (float) $invoice->delivery_fee_khr;
         @endphp
         <table>
             <thead>
@@ -666,13 +666,13 @@
                     </span>
                 </div>
 
-                <div class="total-row">
+                <!-- <div class="total-row">
                     <span>បញ្ចុះតម្លៃ:</span>
                     <span class="amount-col">
                         -${{ number_format($invoice->discount_amount, 2) }}
                         <span class="khr-sub">-៛{{ number_format($discountKhr, 0) }}</span>
                     </span>
-                </div>
+                </div> -->
 
                 @if((float) $invoice->delivery_fee_khr > 0)
                     <div class="total-row">
