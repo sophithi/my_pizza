@@ -142,7 +142,7 @@ Route::middleware('auth')->group(function () {
         Route::post('invoices/{invoice}/send-to-packing', [InvoiceController::class, 'sendToPacking'])->name('invoices.send-to-packing');
     });
 
-    Route::middleware('role:admin,manager,staff_inventory')->group(function () {
+    Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
         Route::get('invoices/export/report', [InvoiceController::class, 'exportReport'])->name('invoices.export');
         Route::resource('invoices', InvoiceController::class)->only(['edit', 'update', 'destroy']);
         Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
