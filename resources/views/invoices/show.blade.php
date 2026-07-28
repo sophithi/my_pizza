@@ -404,27 +404,14 @@
     @php
         $customer = $invoice->order?->customer;
         $items = $invoice->order?->items ?? collect();
-        $exchangeRate = 4000;
 
-        $getUnitKhr = function ($item) {
-            return $item->displayUnitKhr();
-        };
-
-        // Gross (pre-discount) sums built per item, the same way the row table
-        // does it, so Subtotal - Discount + Delivery always equals Total in
-        // both currencies — converting the USD discount at a flat rate would
-        // drift from the real KHR discount whenever a custom KHR price is used.
-        $grossSubtotalUsd = $items->sum(function ($item) {
-            return (float) $item->unit_price * (float) $item->quantity;
-        });
-        $subtotalKhr = $items->sum(function ($item) use ($getUnitKhr) {
-            return $getUnitKhr($item) * (float) $item->quantity;
-        });
-        $discountKhr = $items->sum(function ($item) use ($getUnitKhr) {
-            $discount = (float) ($item->discount_percent ?? 0);
-            return $getUnitKhr($item) * (float) $item->quantity * ($discount / 100);
-        });
-        $totalKhr = $subtotalKhr - $discountKhr + (float) ($invoice->delivery_fee_khr ?? 0);
+        // Canonical totals — see Order::grossSubtotalUsd/Khr(), itemDiscountKhr(),
+        // totalKhr(), so this always matches the order/invoice list/packing pages
+        // instead of re-deriving its own formula.
+        $grossSubtotalUsd = $invoice->order?->grossSubtotalUsd() ?? 0;
+        $subtotalKhr = $invoice->order?->grossSubtotalKhr() ?? 0;
+        $discountKhr = $invoice->order?->itemDiscountKhr() ?? 0;
+        $totalKhr = $invoice->order?->totalKhr() ?? 0;
     @endphp
 
     <div class="container-fluid py-4 invoice-show">
@@ -554,6 +541,7 @@
                                 <th>ទំនិញ</th>
                                 <th class="text-center">ចំនួន</th>
                                 <th class="text-end">តម្លៃ</th>
+                                <th class="text-end">បញ្ចុះតម្លៃ</th>
                                 <th class="text-end">សរុប</th>
                             </tr>
                         </thead>
@@ -562,8 +550,8 @@
                                 @php
                                     $isFreeItem = (float) $row->unit_price <= 0;
                                     $rowDiscount = (float) ($row->discount_percent ?? 0);
-                                    $rowUnitKhr = $getUnitKhr($row);
-                                    $rowTotalKhr = $rowUnitKhr * (float) $row->quantity * (1 - $rowDiscount / 100);
+                                    $rowUnitKhr = $row->displayUnitKhr();
+                                    $rowTotalKhr = $row->lineTotalKhr();
                                 @endphp
 
                                 <tr @class(['free-item-row' => $isFreeItem])>
@@ -576,7 +564,7 @@
                                     <td class="text-center">{{ number_format($row->quantity) }}</td>
 
                                     @if($isFreeItem)
-                                        <td class="text-end" colspan="2">
+                                        <td class="text-end" colspan="3">
                                             <span class="free-item-badge">
                                                 <i class="fas fa-gift"></i> ឥតគិតថ្លៃ (Free)
                                             </span>
@@ -587,6 +575,13 @@
                                             <div class="text-muted small">៛{{ number_format($rowUnitKhr, 0) }}</div>
                                         </td>
                                         <td class="text-end">
+                                            @if($rowDiscount > 0)
+                                                {{ rtrim(rtrim(number_format($rowDiscount, 1), '0'), '.') }}%
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td class="text-end">
                                             <strong>${{ number_format($row->total_price, 2) }}</strong>
                                             <div class="text-muted small">៛{{ number_format($rowTotalKhr, 0) }}</div>
                                         </td>
@@ -594,7 +589,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-5">មិនមានទំនិញក្នុងវិក្ក័យបត្រនេះទេ</td>
+                                    <td colspan="5" class="text-center text-muted py-5">មិនមានទំនិញក្នុងវិក្ក័យបត្រនេះទេ</td>
                                 </tr>
                             @endforelse
                         </tbody>

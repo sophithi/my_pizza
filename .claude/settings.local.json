@@ -6,7 +6,8 @@
       "Bash(php -l resources/views/packing/sticker-customer.blade.php)",
       "Bash(php -l app/Http/Controllers/InvoiceController.php)",
       "Bash(php -l routes/web.php)",
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "Bash(git fetch *)"
     ]
   }
 }

@@ -337,26 +337,10 @@
 
 @section('content')
     @php
-        $getUnitKhr = function ($item) {
-            return $item->displayUnitKhr();
-        };
-
-        $calcTotalKhr = function ($invoice) use ($getUnitKhr) {
-            $items = $invoice->order?->items ?? collect();
-
-            $subtotalKhr = $items->sum(function ($item) use ($getUnitKhr) {
-                return $getUnitKhr($item) * (float) $item->quantity;
-            });
-
-            // Sum each item's own KHR discount rather than converting the USD
-            // discount at a flat rate — that drifts whenever a custom KHR
-            // price is used (it doesn't sit at an exact 4000 rate from USD).
-            $discountKhr = $items->sum(function ($item) use ($getUnitKhr) {
-                $discount = (float) ($item->discount_percent ?? 0);
-                return $getUnitKhr($item) * (float) $item->quantity * ($discount / 100);
-            });
-
-            return $subtotalKhr - $discountKhr + (float) ($invoice->delivery_fee_khr ?? 0);
+        // Canonical total — see Order::totalKhr(), so this always matches
+        // the order/invoice show pages instead of re-deriving its own formula.
+        $calcTotalKhr = function ($invoice) {
+            return $invoice->order?->totalKhr() ?? 0;
         };
     @endphp
     <div class="container-fluid py-4 invoice-page">

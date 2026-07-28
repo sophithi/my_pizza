@@ -498,14 +498,7 @@
     @endif
 
     @php
-        // Sum each item's actual charged KHR price (custom or catalog),
-        // never a blanket USD->KHR conversion of the order total — that
-        // would ignore custom prices entered at checkout.
-        $heroItemsKhr = $order->items->sum(function ($item) {
-            $discount = (float) ($item->discount_percent ?? 0);
-            return $item->displayUnitKhr() * (float) $item->quantity * (1 - $discount / 100);
-        });
-        $heroTotalKhr = $heroItemsKhr - ((float) $order->discount_amount * 4000) + (float) $order->delivery_fee_khr;
+        $heroTotalKhr = $order->totalKhr();
     @endphp
     <!-- Hero Header -->
     <div class="order-hero">

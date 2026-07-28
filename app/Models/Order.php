@@ -122,4 +122,53 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'prepared_by');
     }
+
+    /**
+     * Canonical price totals — every page (order, invoice, packing sticker)
+     * should read totals through these instead of re-deriving its own
+     * formula, mirroring how orders/create.blade.php computes them.
+     */
+
+    /**
+     * Gross (pre-discount) USD subtotal, summed from items.
+     */
+    public function grossSubtotalUsd(): float
+    {
+        return (float) $this->items->sum(function ($item) {
+            return (float) $item->unit_price * (float) $item->quantity;
+        });
+    }
+
+    /**
+     * Gross (pre-discount) KHR subtotal, summed from items.
+     */
+    public function grossSubtotalKhr(): float
+    {
+        return (float) $this->items->sum(function ($item) {
+            return $item->displayUnitKhr() * (float) $item->quantity;
+        });
+    }
+
+    /**
+     * Total KHR discount, summed from each item's own discount_percent
+     * applied to its own KHR price — never a flat-rate conversion of the
+     * USD discount, which drifts whenever a custom KHR price is used.
+     */
+    public function itemDiscountKhr(): float
+    {
+        return (float) $this->items->sum(function ($item) {
+            $discount = (float) ($item->discount_percent ?? 0);
+
+            return $item->displayUnitKhr() * (float) $item->quantity * ($discount / 100);
+        });
+    }
+
+    /**
+     * Net KHR total actually charged: gross subtotal minus each item's own
+     * discount, plus delivery.
+     */
+    public function totalKhr(): float
+    {
+        return $this->grossSubtotalKhr() - $this->itemDiscountKhr() + (float) $this->delivery_fee_khr;
+    }
 }

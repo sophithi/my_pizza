@@ -1423,20 +1423,7 @@
                 </div>
             </div>
 
-            <!-- Custom USD price -->
-            <div class="cpm-field">
-                <label class="cpm-label">
-                    <i class="fas fa-dollar-sign"></i> តម្លៃថ្មី (USD)
-                </label>
-                <div class="cpm-prefix-wrap">
-                    <span class="cpm-prefix">$</span>
-                    <input type="number" id="cpm_usd" class="form-control"
-                        min="0" step="0.01"
-                        oninput="cpmSyncKhr(this.value); cpmUpdateTotal()">
-                </div>
-            </div>
-
-            <!-- Custom KHR price -->
+            <!-- Custom KHR price (base currency — type this one) -->
             <div class="cpm-field">
                 <label class="cpm-label">
                     <i class="fas fa-coins"></i> តម្លៃថ្មី (KHR)
@@ -1446,6 +1433,19 @@
                     <input type="number" id="cpm_khr" class="form-control"
                         min="0" step="100"
                         oninput="cpmSyncUsd(this.value); cpmUpdateTotal()">
+                </div>
+            </div>
+
+            <!-- Custom USD price (computed from KHR — for reference/record only) -->
+            <div class="cpm-field">
+                <label class="cpm-label">
+                    <i class="fas fa-dollar-sign"></i> តម្លៃថ្មី (USD)
+                </label>
+                <div class="cpm-prefix-wrap">
+                    <span class="cpm-prefix">$</span>
+                    <input type="number" id="cpm_usd" class="form-control"
+                        min="0" step="0.01"
+                        oninput="cpmSyncKhr(this.value); cpmUpdateTotal()">
                 </div>
             </div>
 

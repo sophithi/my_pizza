@@ -614,28 +614,17 @@
         </div>
 
         @php
-            $exchangeRate = 4000;
-
             $orderItems = $invoice->order?->items ?? collect();
             $paidItems = $orderItems->filter(function ($item) {
                 return (float) $item->unit_price > 0;
             });
 
-            $getUnitKhr = function ($item) {
-                return $item->displayUnitKhr();
-            };
-
-            $subtotalKhr = $paidItems->sum(function ($item) use ($getUnitKhr) {
-                $unitKhr = $getUnitKhr($item);
-                $lineKhr = $unitKhr * (float) $item->quantity;
-                $discountPercent = (float) ($item->discount_percent ?? 0);
-                $lineDiscountKhr = $lineKhr * ($discountPercent / 100);
-
-                return $lineKhr - $lineDiscountKhr;
-            });
-
-            $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
-            $grandTotalKhr = $subtotalKhr + (float) $invoice->delivery_fee_khr;
+            // Canonical totals — see Order::grossSubtotalKhr()/itemDiscountKhr()/
+            // totalKhr(), so this always matches the order/invoice pages instead
+            // of re-deriving its own formula. Free items contribute 0 either way,
+            // so summing over all items here gives the same result as $paidItems.
+            $subtotalKhr = ($invoice->order?->grossSubtotalKhr() ?? 0) - ($invoice->order?->itemDiscountKhr() ?? 0);
+            $grandTotalKhr = $invoice->order?->totalKhr() ?? 0;
         @endphp
         <table>
             <thead>
@@ -650,11 +639,10 @@
             <tbody>
                 @foreach ($paidItems as $item)
                     @php
-                        $unitPriceKhr = $getUnitKhr($item);
-                        $lineKhr = $unitPriceKhr * (float) $item->quantity;
+                        $unitPriceKhr = $item->displayUnitKhr();
                         $discountPercent = (float) ($item->discount_percent ?? 0);
-                        $lineDiscountKhr = $lineKhr * ($discountPercent / 100);
-                        $totalPriceKhr = $lineKhr - $lineDiscountKhr;
+                        $lineDiscountKhr = $unitPriceKhr * (float) $item->quantity * ($discountPercent / 100);
+                        $totalPriceKhr = $item->lineTotalKhr();
                     @endphp
                     <tr>
                         <td>{{ $item->product->name ?? 'N/A' }}</td>
@@ -686,14 +674,6 @@
                         <span class="khr-sub">៛{{ number_format($subtotalKhr, 0) }}</span>
                     </span>
                 </div>
-
-                <!-- <div class="total-row">
-                    <span>បញ្ចុះតម្លៃ:</span>
-                    <span class="amount-col">
-                        -${{ number_format($invoice->discount_amount, 2) }}
-                        <span class="khr-sub">-៛{{ number_format($discountKhr, 0) }}</span>
-                    </span>
-                </div> -->
 
                 @if((float) $invoice->delivery_fee_khr > 0)
                     <div class="total-row">

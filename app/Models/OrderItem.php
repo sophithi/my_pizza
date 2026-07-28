@@ -40,6 +40,17 @@ class OrderItem extends Model
     }
 
     /**
+     * This line's KHR total actually charged: unit KHR price x quantity,
+     * with this item's own discount_percent applied.
+     */
+    public function lineTotalKhr(): float
+    {
+        $discount = (float) ($this->discount_percent ?? 0);
+
+        return $this->displayUnitKhr() * (float) $this->quantity * (1 - $discount / 100);
+    }
+
+    /**
      * Get the order associated with this item.
      */
     public function order()

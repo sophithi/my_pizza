@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\UserActivity;
+use App\Services\TelegramNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -55,6 +56,12 @@ class AuthController extends Controller
                 'last_login_ip' => $request->ip(),
                 'last_login_user_agent' => $request->userAgent(),
             ]);
+
+            TelegramNotifier::send(
+                "🔐 Login: {$user->name} ({$user->email})\n"
+                . "IP: {$request->ip()}\n"
+                . 'Time: ' . now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d h:i A')
+            );
 
             return redirect()->route('dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
         }

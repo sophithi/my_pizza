@@ -280,11 +280,11 @@ class InvoiceController extends Controller
 
     private function invoiceTotalKhr(Invoice $invoice): float
     {
-        $itemsTotalKhr = $invoice->order?->items?->sum(function ($item) {
-            return $item->displayUnitKhr() * (float) $item->quantity;
-        }) ?? 0;
-
-        return $itemsTotalKhr - ((float) $invoice->discount_amount * 4000) + (float) $invoice->delivery_fee_khr;
+        // Canonical total — see Order::totalKhr(), so this always matches
+        // the order/invoice/packing pages instead of re-deriving its own
+        // formula (which previously converted the USD discount at a flat
+        // rate, drifting whenever a custom KHR price was used).
+        return $invoice->order?->totalKhr() ?? 0;
     }
 
     private function invoiceStatusLabel(?string $status): string

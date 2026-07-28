@@ -276,36 +276,6 @@
             gap: 12px;
         }
 
-        .exchange-chip {
-            align-items: center;
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-            border-radius: 999px;
-            color: #9a3412;
-            display: inline-flex;
-            font-size: 12px;
-            font-weight: 800;
-            gap: 7px;
-            min-height: 34px;
-            padding: 7px 12px;
-            white-space: nowrap;
-        }
-
-        .exchange-chip i {
-            color: #e85d24;
-        }
-
-        .exchange-chip small {
-            background: #dcfce7;
-            border-radius: 999px;
-            color: #047857;
-            font-size: 10px;
-            font-weight: 900;
-            line-height: 1;
-            padding: 4px 6px;
-            text-transform: uppercase;
-        }
-
         .user-avatar {
             width: 38px;
             height: 38px;
@@ -472,10 +442,6 @@
             .topbar .page-title {
                 font-size: 17px;
             }
-
-            .exchange-chip {
-                display: none;
-            }
         }
 
         /* Khmer helper class */
@@ -619,13 +585,6 @@
             <h1 class="page-title">@yield('title', 'Dashboard')</h1>
         </div>
         <div class="user-info">
-            <div class="exchange-chip" title="អត្រាប្តូរប្រាក់">
-                <i class="fas fa-money-bill-wave"></i>
-                <span>1 USD = ៛{{ number_format($globalExchangeRate['rate'] ?? 4000, 0) }}</span>
-                @if(($globalExchangeRate['source'] ?? 'local') === 'live')
-                    <small>Live</small>
-                @endif
-            </div>
             <div style="position: relative;">
                 <button class="user-avatar" id="userDropdownToggle" title="User menu"
                     style="border: none; cursor: pointer; padding:0; overflow: hidden;">

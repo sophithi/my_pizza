@@ -64,74 +64,131 @@
             opacity: .78;
         }
 
-        .packing-print-dropdown {
-            position: relative;
-            display: inline-block;
+        .packing-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .packing-filter {
+            align-items: center;
+            background: #fff;
+            border: 1.5px solid #e9ecef;
+            border-radius: 8px;
+            color: #6c757d;
+            display: inline-flex;
+            font-size: 13px;
+            font-weight: 600;
+            gap: 7px;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: all .2s;
+        }
+
+        .packing-filter.active {
+            background: #e85d24;
+            border-color: #e85d24;
+            color: #fff;
+        }
+
+        .packing-date-filter {
+            align-items: center;
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .packing-date-filter input[type="date"] {
+            border: 1.5px solid #e9ecef;
+            border-radius: 8px;
+            color: #1a1d29;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+        }
+
+        .packing-date-filter button {
+            background: #e85d24;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+        }
+
+        .packing-table th {
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 14px 16px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .packing-table td {
+            padding: 14px 16px;
             vertical-align: middle;
         }
 
-        .packing-print-dropdown .trigger {
+        .packing-table tr:hover td {
+            background: #fbfdff;
+        }
+
+        .packing-action-btn {
+            align-items: center;
             border: none;
-            background: #1a1d29;
-            color: white;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 6px;
+            color: #fff;
             display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: background .2s, transform .2s;
-        }
-
-        .packing-print-dropdown .trigger:hover,
-        .packing-print-dropdown .trigger:focus {
-            background: #111827;
-        }
-
-        .packing-print-dropdown .trigger .caret {
-            transition: transform .2s ease;
-        }
-
-        .packing-print-dropdown.open .trigger .caret {
-            transform: rotate(180deg);
-        }
-
-        .packing-print-dropdown .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background: #fff;
-            border: 1px solid #d1d5db;
-            box-shadow: 0 15px 30px rgba(15, 23, 42, .12);
-            border-radius: 12px;
-            min-width: 240px;
-            z-index: 20;
-            overflow: hidden;
-        }
-
-        .packing-print-dropdown.open .dropdown-menu {
-            display: block;
-        }
-
-        .packing-print-dropdown .dropdown-menu a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 14px;
-            color: #1f2937;
-            text-decoration: none;
             font-size: 13px;
-            transition: background .2s;
+            font-weight: 600;
+            justify-content: center;
+            margin-right: 6px;
+            padding: 6px 12px;
+            text-decoration: none;
         }
 
-        .packing-print-dropdown .dropdown-menu a:hover {
-            background: #f8fafc;
+        .packing-action-btn.dark {
+            background: #1a1d29;
         }
 
-        .packing-print-dropdown .dropdown-menu a + a {
-            border-top: 1px solid #e5e7eb;
+        .packing-action-btn.dark:hover {
+            background: #111827;
+            color: #fff;
+        }
+
+        .packing-action-btn.primary {
+            background: #e85d24;
+        }
+
+        .packing-action-btn.primary:hover {
+            background: #d94a10;
+            color: #fff;
+        }
+
+        .pager-wrap {
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+
+            .packing-filters,
+            .packing-date-filter {
+                width: 100%;
+            }
+
+            .packing-date-filter {
+                margin-left: 0;
+            }
+
+            .packing-filter {
+                flex: 1;
+                justify-content: center;
+            }
         }
     </style>
 @endpush
@@ -159,25 +216,24 @@
 
                     <input type="hidden" name="period" id="periodInput" value="{{ request('period') }}">
 
-                    <a href="{{ route('packing.index', ['period' => 'today']) }}"
-                        style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'today' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'today' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'today' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
-                        <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
-                    </a>
-                    <a href="{{ route('packing.index', ['period' => 'yesterday']) }}"
-                        style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'yesterday' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'yesterday' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'yesterday' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
-                        <i class="fas fa-calendar-minus"></i> ម្សិលមិញ
-                    </a>
-                    <a href="{{ route('packing.index', ['period' => 'month']) }}"
-                        style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid {{ request('period') === 'month' ? '#e85d24' : '#e9ecef' }}; background: {{ request('period') === 'month' ? '#e85d24' : '#fff' }}; color: {{ request('period') === 'month' ? '#fff' : '#6c757d' }}; text-decoration: none; transition: all 0.2s;">
-                        <i class="fas fa-calendar-alt"></i> ខែនេះ
-                    </a>
+                    <div class="packing-filters">
+                        <a href="{{ route('packing.index', ['period' => 'today']) }}"
+                            class="packing-filter {{ request('period') === 'today' ? 'active' : '' }}">
+                            <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
+                        </a>
+                        <a href="{{ route('packing.index', ['period' => 'yesterday']) }}"
+                            class="packing-filter {{ request('period') === 'yesterday' ? 'active' : '' }}">
+                            <i class="fas fa-calendar-minus"></i> ម្សិលមិញ
+                        </a>
+                        <a href="{{ route('packing.index', ['period' => 'month']) }}"
+                            class="packing-filter {{ request('period') === 'month' ? 'active' : '' }}">
+                            <i class="fas fa-calendar-alt"></i> ខែនេះ
+                        </a>
+                    </div>
 
-
-                    <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-                        <input type="date" name="date" value="{{ request('date') }}"
-                            style="padding: 8px 14px; border-radius: 8px; border: 1.5px solid #e9ecef; font-size: 13px; font-weight: 600; color: #1a1d29;">
-                        <button type="submit"
-                            style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; background: #e85d24; color: #fff; cursor: pointer;">
+                    <div class="packing-date-filter">
+                        <input type="date" name="date" value="{{ request('date') }}">
+                        <button type="submit">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
@@ -192,8 +248,8 @@
                     <div class="card-body" style="padding:24px;">
                         @if($invoices->count())
                             <div class="table-responsive">
-                                <table class="table">
-                                    <thead style="background:#f8f9fa;">
+                                <table class="table packing-table">
+                                    <thead>
                                         <tr>
                                             <th>វិក័្កយបត្រ</th>
                                             <th>ឈ្មោះអតិថិជន</th>
@@ -239,37 +295,36 @@
                                                         </form>
                                                     @endif
                                                 </td>
-                                                <td style="text-align:right">
-                                                    <div class="packing-print-dropdown" style="margin-right:6px;">
-                                                        <button type="button" class="trigger" aria-haspopup="menu" aria-expanded="false" onclick="togglePackingPrintDropdown(this)">
-
+                                                <td class="text-end">
+                                                    <div class="dropdown d-inline-block">
+                                                        <button type="button" class="packing-action-btn dark dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-expanded="false">
                                                             បិតលើកេស
-                                                            <i class="fas fa-caret-down caret"></i>
                                                         </button>
-                                                        <div class="dropdown-menu" role="menu">
-                                                            <a href="{{ route('packing.delivery_pizza', $invoice) }}" target="_blank" role="menuitem">
-
-                                                                <span>ភីហ្សា គ្រួសាររីករាយ</span>
-                                                            </a>
-                                                            <a href="{{ route('packing.delivery_mayo', $invoice) }}" target="_blank" role="menuitem">
-
-                                                                <span>ម៉ាយូនេស បន្ទាយឆ្មា</span>
-                                                            </a>
-                                                              <a href="{{ route('packing.delivery_tamon', $invoice) }}" target="_blank" role="menuitem">
-
-                                                                <span>ម៉ាយូនេស តាម៉ាន់មានជ័យ</span>
-                                                            </a>
-                                                        </div>
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                            <li>
+                                                                <a class="dropdown-item" href="{{ route('packing.delivery_pizza', $invoice) }}" target="_blank">
+                                                                    ភីហ្សា គ្រួសាររីករាយ
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="{{ route('packing.delivery_mayo', $invoice) }}" target="_blank">
+                                                                    ម៉ាយូនេស បន្ទាយឆ្មា
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="{{ route('packing.delivery_tamon', $invoice) }}" target="_blank">
+                                                                    ម៉ាយូនេស តាម៉ាន់មានជ័យ
+                                                                </a>
+                                                            </li>
+                                                        </ul>
                                                     </div>
-                                                    <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="btn"
-                                                        style="background:#1a1d29;color:white;border:none;padding:6px 10px;border-radius:6px;font-weight:600;margin-right:6px;">
+                                                    <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="packing-action-btn dark">
                                                         រៀបចំទំនិញ
                                                     </a>
-                                                    <a href="{{ route('packing.customer', $invoice) }}" target="_blank" class="btn"
-                                                        style="background:#e85d24;color:white;border:none;padding:6px 10px;border-radius:6px;font-weight:600;">
+                                                    <a href="{{ route('packing.customer', $invoice) }}" target="_blank" class="packing-action-btn primary">
                                                         វិក្ក័យបត្រភ្ញៀវ
                                                     </a>
-
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -277,8 +332,8 @@
                                 </table>
                             </div>
 
-                            <div style="margin-top:12px;">
-                                {{ $invoices->links() }}
+                            <div class="pager-wrap">
+                                {{ $invoices->links('pagination::bootstrap-5') }}
                             </div>
                         @else
                             <p style="color:#666;">មិនទាន់មានវិក្ក័យបត្រ.</p>
@@ -333,33 +388,6 @@
             });
 
             refreshPackingPage(readRefreshSignal());
-
-            const packingDropdowns = document.querySelectorAll('.packing-print-dropdown');
-
-            window.togglePackingPrintDropdown = function(button) {
-                const dropdown = button.closest('.packing-print-dropdown');
-                const isOpen = dropdown.classList.toggle('open');
-                button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-
-                packingDropdowns.forEach((other) => {
-                    if (other !== dropdown) {
-                        other.classList.remove('open');
-                        const otherButton = other.querySelector('.trigger');
-                        otherButton?.setAttribute('aria-expanded', 'false');
-                    }
-                });
-            };
-
-            document.addEventListener('click', (event) => {
-                if ([...packingDropdowns].some((dropdown) => dropdown.contains(event.target))) {
-                    return;
-                }
-                packingDropdowns.forEach((dropdown) => {
-                    dropdown.classList.remove('open');
-                    const button = dropdown.querySelector('.trigger');
-                    button?.setAttribute('aria-expanded', 'false');
-                });
-            });
 
             setInterval(() => {
                 if (document.hidden) {

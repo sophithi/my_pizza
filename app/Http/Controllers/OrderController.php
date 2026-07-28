@@ -165,7 +165,9 @@ class OrderController extends Controller
             'product_id' => $item->product_id,
             'quantity' => $item->quantity,
             'unit_price' => $item->unit_price,
+            'unit_price_khr' => $item->unit_price_khr,
             'discount_percent' => $item->discount_percent ?? 0,
+            'is_custom_price' => $item->is_custom_price,
         ])->values();
 
         $existingFreeProducts = $order->freeItems->map(fn($fp) => [
