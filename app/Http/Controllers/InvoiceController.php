@@ -281,7 +281,7 @@ class InvoiceController extends Controller
     private function invoiceTotalKhr(Invoice $invoice): float
     {
         $itemsTotalKhr = $invoice->order?->items?->sum(function ($item) {
-            return (float) ($item->product?->price_khr ?? 0) * (float) $item->quantity;
+            return $item->displayUnitKhr() * (float) $item->quantity;
         }) ?? 0;
 
         return $itemsTotalKhr - ((float) $invoice->discount_amount * 4000) + (float) $invoice->delivery_fee_khr;
@@ -446,6 +446,16 @@ class InvoiceController extends Controller
         $invoice->load('order.customer', 'order.items.product');
         $backUrl = route('packing.index');
         return view('packing.delivery_mayo', compact('invoice', 'backUrl'));
+    }
+
+    /**
+     * Show the delivery sticker for Tamon deliveries.
+     */
+    public function stickerTamon(Invoice $invoice)
+    {
+        $invoice->load('order.customer', 'order.items.product');
+        $backUrl = route('packing.index');
+        return view('packing.delivery_tamon', compact('invoice', 'backUrl'));
     }
 
     /**

@@ -465,7 +465,6 @@
         </div>
 
     </div>{{-- /sticker --}}
-
     {{-- Screen buttons --}}
     <div class="no-print">
         <button type="button" class="btn btn-print" onclick="window.print(); return false;">

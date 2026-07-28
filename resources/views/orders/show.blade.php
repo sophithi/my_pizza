@@ -497,6 +497,16 @@
     </div>
     @endif
 
+    @php
+        // Sum each item's actual charged KHR price (custom or catalog),
+        // never a blanket USD->KHR conversion of the order total — that
+        // would ignore custom prices entered at checkout.
+        $heroItemsKhr = $order->items->sum(function ($item) {
+            $discount = (float) ($item->discount_percent ?? 0);
+            return $item->displayUnitKhr() * (float) $item->quantity * (1 - $discount / 100);
+        });
+        $heroTotalKhr = $heroItemsKhr - ((float) $order->discount_amount * 4000) + (float) $order->delivery_fee_khr;
+    @endphp
     <!-- Hero Header -->
     <div class="order-hero">
         <div class="hero-left">
@@ -511,7 +521,7 @@
         </div>
         <div class="hero-right">
             <div class="hero-total">${{ number_format($order->total_amount, 2) }}</div>
-            <div class="hero-total-khr">៛{{ number_format($order->total_amount * 4000, 0) }}</div>
+            <div class="hero-total-khr">៛{{ number_format($heroTotalKhr, 0) }}</div>
             @if((float) $order->delivery_fee_khr > 0)
                 <div style="font-size: 13px; margin-top: 6px; opacity: .9;">
                     {{ $order->delivery->delivery_name ?? 'Delivery' }}: ៛{{ number_format($order->delivery_fee_khr, 0) }}
@@ -545,7 +555,7 @@
                         // never the product's current live price — this preserves
                         // custom prices entered at checkout.
                         $unitUsd  = $item->unit_price;
-                        $unitKhr  = $item->unit_price_khr ?? ($item->unit_price * 4000);
+                        $unitKhr  = $item->displayUnitKhr();
                         $lineUsd  = $item->total_price ?? ($unitUsd * $item->quantity);
                         $lineKhr  = $unitKhr * $item->quantity;
                     @endphp

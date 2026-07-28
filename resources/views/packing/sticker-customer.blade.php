@@ -237,7 +237,33 @@
             border-top: 1px solid #ddd;
             text-align: center;
             color: #999;
-            font-size: 14px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .footer-meta {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #e5e5e5;
+            font-size: 11px;
+            color: #b3b3b3;
+        }
+
+        .footer-meta span:not(:last-child)::after {
+            content: "•";
+            margin-left: 10px;
+            color: #ddd;
+        }
+
+        .footer-brand {
+            color: #e85d24;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 2px;
         }
 
         .sticker-label {
@@ -595,13 +621,8 @@
                 return (float) $item->unit_price > 0;
             });
 
-            $getUnitKhr = function ($item) use ($exchangeRate) {
-                $isCustom = $item->product
-                    && (float) $item->unit_price !== (float) $item->product->price_usd;
-
-                return $isCustom
-                    ? (float) $item->unit_price * $exchangeRate
-                    : (float) ($item->product->price_khr ?? 0);
+            $getUnitKhr = function ($item) {
+                return $item->displayUnitKhr();
             };
 
             $subtotalKhr = $paidItems->sum(function ($item) use ($getUnitKhr) {
@@ -711,11 +732,17 @@
         @endif
 
         <div class="footer">
-            <p>@PizzaHappyFamily</p>
+            @if($invoice->order?->user)
+                <p class="footer-meta">
+                    @if($invoice->order?->user)
+                        <span>អ្នកចេញវិក្ក័យបត្រ: {{ $invoice->order->user->name }}</span>
+                         <span>អ្នករៀបទំនិញ: </span>
+                    @endif
+                       
+                </p>
+            @endif
             <p>សូមអគុណអតិថិជនសម្រាប់ការកម្មង់</p>
-            <p>ទំនាក់ទំនងក្រុមហ៊ុន៖</p>
-            <p>ទូរស័ព្ទ:095 423 334 | 088 5459 339 | 098 459 339</p>
-
+            <p>ទំនាក់ទំនងក្រុមហ៊ុន៖ 095 423 334 | 088 5459 339 | 098 459 339</p>
         </div>
     </div>
 

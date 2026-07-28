@@ -406,19 +406,24 @@
         $items = $invoice->order?->items ?? collect();
         $exchangeRate = 4000;
 
-        $getUnitKhr = function ($item) use ($exchangeRate) {
-            $isCustom = $item->product
-                && (float) $item->unit_price !== (float) $item->product->price_usd;
-
-            return $isCustom
-                ? (float) $item->unit_price * $exchangeRate
-                : (float) ($item->product->price_khr ?? 0);
+        $getUnitKhr = function ($item) {
+            return $item->displayUnitKhr();
         };
 
+        // Gross (pre-discount) sums built per item, the same way the row table
+        // does it, so Subtotal - Discount + Delivery always equals Total in
+        // both currencies — converting the USD discount at a flat rate would
+        // drift from the real KHR discount whenever a custom KHR price is used.
+        $grossSubtotalUsd = $items->sum(function ($item) {
+            return (float) $item->unit_price * (float) $item->quantity;
+        });
         $subtotalKhr = $items->sum(function ($item) use ($getUnitKhr) {
             return $getUnitKhr($item) * (float) $item->quantity;
         });
-        $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
+        $discountKhr = $items->sum(function ($item) use ($getUnitKhr) {
+            $discount = (float) ($item->discount_percent ?? 0);
+            return $getUnitKhr($item) * (float) $item->quantity * ($discount / 100);
+        });
         $totalKhr = $subtotalKhr - $discountKhr + (float) ($invoice->delivery_fee_khr ?? 0);
     @endphp
 
@@ -556,8 +561,9 @@
                             @forelse($items as $row)
                                 @php
                                     $isFreeItem = (float) $row->unit_price <= 0;
+                                    $rowDiscount = (float) ($row->discount_percent ?? 0);
                                     $rowUnitKhr = $getUnitKhr($row);
-                                    $rowTotalKhr = $rowUnitKhr * (float) $row->quantity;
+                                    $rowTotalKhr = $rowUnitKhr * (float) $row->quantity * (1 - $rowDiscount / 100);
                                 @endphp
 
                                 <tr @class(['free-item-row' => $isFreeItem])>
@@ -599,7 +605,7 @@
                     <div class="total-row">
                         <span class="text-muted fw-bold">Subtotal</span>
                         <div class="value-block">
-                            <strong>${{ number_format($invoice->subtotal, 2) }}</strong>
+                            <strong>${{ number_format($grossSubtotalUsd, 2) }}</strong>
                             <span class="value-khr">៛{{ number_format($subtotalKhr, 0) }}</span>
                         </div>
                     </div>

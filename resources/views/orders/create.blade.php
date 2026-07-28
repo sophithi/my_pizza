@@ -1823,6 +1823,7 @@
     /* ─── Calculate totals ──────────────────────────────────── */
     function calculateTotal() {
         let subtotal = 0, subtotalKhr = 0, totalDiscount = 0, totalDiscountKhr = 0;
+        let grossSubtotal = 0, grossSubtotalKhr = 0;
 
         Object.values(cart).forEach(item => {
             const disc          = parseFloat(item.discount || 0);
@@ -1830,6 +1831,8 @@
             const discPriceKhr  = item.price_khr * (1 - disc / 100);
             subtotal         += discPrice    * item.qty;
             subtotalKhr      += discPriceKhr * item.qty;
+            grossSubtotal    += item.price     * item.qty;
+            grossSubtotalKhr += item.price_khr * item.qty;
             totalDiscount    += (item.price     * item.qty) - (discPrice    * item.qty);
             totalDiscountKhr += (item.price_khr * item.qty) - (discPriceKhr * item.qty);
         });
@@ -1839,8 +1842,9 @@
         const total          = subtotal    + deliveryFeeUsd;
         const totalKhr       = subtotalKhr + deliveryFeeKhr;
 
-        $('#subtotal').text(subtotal.toFixed(2));
-        $('#subtotal_khr').text(Math.round(subtotalKhr).toLocaleString());
+        // Subtotal is shown before discount, so Subtotal - Discount + Delivery = Total reads correctly.
+        $('#subtotal').text(grossSubtotal.toFixed(2));
+        $('#subtotal_khr').text(Math.round(grossSubtotalKhr).toLocaleString());
         $('#discountAmount').text(totalDiscount.toFixed(2));
         $('#discountAmount_khr').text(Math.round(totalDiscountKhr).toLocaleString());
         $('#deliveryFeeUsd').text(deliveryFeeUsd.toFixed(2));
@@ -1865,6 +1869,7 @@
                 product_id:       parseInt(productId),
                 quantity:         item.qty,
                 unit_price:       item.price,
+                unit_price_khr:   item.price_khr,
                 discount_percent: disc,
                 total_price:      discPrice * item.qty,
                 is_custom_price:  item.is_custom_price || false,

@@ -86,8 +86,10 @@ class OrderController extends Controller
                     'delivery_id' => $delivery?->id,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
+                    'unit_price_khr' => $item['unit_price_khr'] ?? null,
                     'total_price' => $item['total_price'],
                     'discount_percent' => $item['discount_percent'] ?? 0,
+                    'is_custom_price' => $item['is_custom_price'] ?? false,
                 ]);
             }
 
@@ -251,8 +253,10 @@ class OrderController extends Controller
                     'delivery_id' => $delivery?->id,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
+                    'unit_price_khr' => $item['unit_price_khr'] ?? null,
                     'total_price' => $item['total_price'],
                     'discount_percent' => $item['discount_percent'] ?? 0,
+                    'is_custom_price' => $item['is_custom_price'] ?? false,
                 ]);
             }
 

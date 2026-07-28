@@ -337,25 +337,24 @@
 
 @section('content')
     @php
-        $exchangeRate = 4000;
-
-        $getUnitKhr = function ($item) use ($exchangeRate) {
-            $isCustom = $item->product
-                && (float) $item->unit_price !== (float) $item->product->price_usd;
-
-            return $isCustom
-                ? (float) $item->unit_price * $exchangeRate
-                : (float) ($item->product->price_khr ?? 0);
+        $getUnitKhr = function ($item) {
+            return $item->displayUnitKhr();
         };
 
-        $calcTotalKhr = function ($invoice) use ($getUnitKhr, $exchangeRate) {
+        $calcTotalKhr = function ($invoice) use ($getUnitKhr) {
             $items = $invoice->order?->items ?? collect();
 
             $subtotalKhr = $items->sum(function ($item) use ($getUnitKhr) {
                 return $getUnitKhr($item) * (float) $item->quantity;
             });
 
-            $discountKhr = (float) $invoice->discount_amount * $exchangeRate;
+            // Sum each item's own KHR discount rather than converting the USD
+            // discount at a flat rate — that drifts whenever a custom KHR
+            // price is used (it doesn't sit at an exact 4000 rate from USD).
+            $discountKhr = $items->sum(function ($item) use ($getUnitKhr) {
+                $discount = (float) ($item->discount_percent ?? 0);
+                return $getUnitKhr($item) * (float) $item->quantity * ($discount / 100);
+            });
 
             return $subtotalKhr - $discountKhr + (float) ($invoice->delivery_fee_khr ?? 0);
         };

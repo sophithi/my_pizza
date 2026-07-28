@@ -255,6 +255,10 @@
 
                                                                 <span>ម៉ាយូនេស បន្ទាយឆ្មា</span>
                                                             </a>
+                                                              <a href="{{ route('packing.delivery_tamon', $invoice) }}" target="_blank" role="menuitem">
+
+                                                                <span>ម៉ាយូនេស តាម៉ាន់មានជ័យ</span>
+                                                            </a>
                                                         </div>
                                                     </div>
                                                     <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="btn"

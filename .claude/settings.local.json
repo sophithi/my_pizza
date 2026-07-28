@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan tinker '--execute= *)",
+      "Bash(grep -n 'protected $fillable' -A 8 app/Models/User.php)",
+      "Bash(php -l resources/views/packing/sticker-customer.blade.php)",
+      "Bash(php -l app/Http/Controllers/InvoiceController.php)",
+      "Bash(php -l routes/web.php)",
+      "Bash(php artisan *)"
+    ]
+  }
+}

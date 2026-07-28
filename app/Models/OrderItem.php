@@ -12,15 +12,32 @@ class OrderItem extends Model
         'delivery_id',
         'quantity',
         'unit_price',
+        'unit_price_khr',
         'total_price',
         'discount_percent',
+        'is_custom_price',
     ];
 
     protected $casts = [
         'unit_price' => 'decimal:2',
+        'unit_price_khr' => 'decimal:2',
         'total_price' => 'decimal:2',
         'discount_percent' => 'decimal:2',
+        'is_custom_price' => 'boolean',
     ];
+
+    /**
+     * KHR unit price actually charged: the stored value if present,
+     * otherwise the USD price converted at $rate.
+     */
+    public function displayUnitKhr(int $rate = 4000): float
+    {
+        if ($this->unit_price_khr !== null) {
+            return (float) $this->unit_price_khr;
+        }
+
+        return (float) $this->unit_price * $rate;
+    }
 
     /**
      * Get the order associated with this item.
