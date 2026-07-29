@@ -543,6 +543,46 @@
     </div>
     @endif
 
+    <!-- Payment Info -->
+    @php($payment = $order->payments?->first())
+    @if($order->payment_status || $payment)
+    <div class="detail-section" style="margin-bottom: 1.5rem;">
+        <h3 class="section-title" style="font-size: 1rem;"> ព័ត៌មានការបង់ប្រាក់</h3>
+        <div style="display: flex; gap: 2rem; padding: 1rem; background: {{ $order->payment_status === 'paid' ? '#f0fdf4' : '#fffbeb' }}; border-radius: 10px; border: 1px solid {{ $order->payment_status === 'paid' ? '#bbf7d0' : '#fde68a' }};">
+            <div>
+                <span style="color: #6b7280; font-size: 0.85rem;">ស្ថានភាព</span><br>
+                <strong>
+                    @if($order->payment_status === 'paid')
+                        <span style="color: #059669;">✓ បានបង់</span>
+                    @elseif($order->payment_status === 'partial')
+                        <span style="color: #d97706;">◐ បង់ខ្លះ</span>
+                    @else
+                        <span style="color: #dc2626;">✗ មិនទាន់បង់</span>
+                    @endif
+                </strong>
+            </div>
+            @if($payment && $payment->method)
+            <div>
+                <span style="color: #6b7280; font-size: 0.85rem;">វិធីបង់ប្រាក់</span><br>
+                <strong>
+                    @if($payment->method === 'Cash')
+                        💵 ប្រាក់សម្រាប់
+                    @elseif($payment->method === 'ABA')
+                        🏦 ធនាគារ ABA
+                    @elseif($payment->method === 'ACLEDA')
+                        🏦 ធនាគារ ACLEDA
+                    @elseif($payment->method === 'Wing')
+                        📱 Wing Money
+                    @else
+                        {{ $payment->method }}
+                    @endif
+                </strong>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
+
     <!-- Actions -->
     <div class="actions-bar">
         {{-- 1) Print invoice for customer view --}}
