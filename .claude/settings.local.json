@@ -7,7 +7,10 @@
       "Bash(php -l app/Http/Controllers/InvoiceController.php)",
       "Bash(php -l routes/web.php)",
       "Bash(php artisan *)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(git check-ignore *)",
+      "Read(//c/Windows/System32/drivers/etc/**)",
+      "Read(//c/xampp/apache/conf/extra/**)"
     ]
   }
 }

@@ -79,7 +79,7 @@
                             <label class="form-label" style="font-weight: 600;">Profile Image</label>
                             @if($user->profile_image)
                                 <div style="margin-bottom: 12px;">
-                                    <img src="{{ Storage::url($user->profile_image) }}" alt="{{ $user->name }}"
+                                    <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}"
                                         style="width: 100px; height: 100px; border-radius: 8px; object-fit: cover;">
                                 </div>
                             @endif
