@@ -151,6 +151,99 @@
 .pager-wrap {
     margin-top: 16px;
 }
+
+/* Responsive Improvements */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 12px;
+    }
+
+    .money-stack {
+        line-height: 1.2;
+    }
+
+    .money-stack .usd {
+        font-size: 14px;
+    }
+
+    .money-stack .khr {
+        font-size: 10px;
+        margin-top: 1px;
+    }
+
+    .nav-link {
+        padding: 0.5rem 1rem !important;
+        font-size: 13px;
+    }
+
+    table thead th {
+        padding: 8px 4px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    table tbody td {
+        padding: 8px 4px;
+    }
+
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 576px) {
+    .d-flex.gap-2.flex-wrap {
+        flex-direction: column;
+    }
+
+    .d-flex.gap-2.flex-wrap > * {
+        width: 100%;
+    }
+
+    .form-control-sm {
+        padding: 6px;
+        font-size: 12px;
+    }
+
+    .payment-line-grid {
+        grid-template-columns: 1fr !important;
+        gap: 6px;
+    }
+
+    .currency-input-group {
+        flex-direction: column;
+    }
+
+    .currency-input-group .row {
+        flex-direction: column;
+    }
+
+    .money-stack .usd {
+        font-size: 13px;
+    }
+
+    .money-stack .khr {
+        font-size: 9px;
+    }
+
+    .payment-summary-box {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    table {
+        font-size: 11px;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+}
 </style>
 @endpush
 

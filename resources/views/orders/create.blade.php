@@ -1080,6 +1080,60 @@
         vertical-align: middle;
     }
 
+    /* Payment Methods Grid */
+    .payment-methods-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .payment-method-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px 12px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 13px;
+        font-weight: 600;
+        min-height: 110px;
+    }
+
+    .payment-method-btn i {
+        font-size: 24px;
+        color: var(--text-muted);
+        transition: color 0.3s ease;
+    }
+
+    .payment-method-btn:hover {
+        border-color: var(--accent);
+        background: rgba(232, 93, 36, 0.04);
+        box-shadow: 0 4px 12px rgba(232, 93, 36, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .payment-method-btn:hover i {
+        color: var(--accent);
+    }
+
+    .payment-method-btn.active {
+        border-color: var(--accent);
+        background: linear-gradient(135deg, rgba(232, 93, 36, 0.1) 0%, rgba(232, 93, 36, 0.05) 100%);
+        color: var(--accent);
+        box-shadow: 0 6px 16px rgba(232, 93, 36, 0.2);
+    }
+
+    .payment-method-btn.active i {
+        color: var(--accent);
+    }
+
     @media (max-width: 992px) {
         .products-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
         .order-side { position: static; }
@@ -1297,13 +1351,25 @@
 
                                 <div class="od-field" id="payment_method_field" style="display:none;">
                                     <label class="od-label"><i class="fas fa-credit-card"></i> វិធីបង់ប្រាក់</label>
-                                    <select name="payment_method" id="payment_method" class="form-control od-select">
-                                        <option value="">សូមជ្រើសរើស</option>
-                                        <option value="Cash" {{ old('payment_method') == 'Cash' ? 'selected' : '' }}>ប្រាក់សម្រាប់</option>
-                                        <option value="ABA" {{ old('payment_method') == 'ABA' ? 'selected' : '' }}>ធនាគារ ABA</option>
-                                        <option value="ACLEDA" {{ old('payment_method') == 'ACLEDA' ? 'selected' : '' }}>ធនាគារ ACLEDA</option>
-                                        <option value="Wing" {{ old('payment_method') == 'Wing' ? 'selected' : '' }}>Wing Money</option>
-                                    </select>
+                                    <input type="hidden" name="payment_method" id="payment_method" value="{{ old('payment_method', '') }}">
+                                    <div class="payment-methods-grid">
+                                        <button type="button" class="payment-method-btn" data-method="Cash" title="ប្រាក់សម្រាប់">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            <span>ប្រាក់សម្រាប់</span>
+                                        </button>
+                                        <button type="button" class="payment-method-btn" data-method="ABA" title="ធនាគារ ABA">
+                                            <i class="fas fa-university"></i>
+                                            <span>ABA</span>
+                                        </button>
+                                        <button type="button" class="payment-method-btn" data-method="ACLEDA" title="ធនាគារ ACLEDA">
+                                            <i class="fas fa-university"></i>
+                                            <span>ACLEDA</span>
+                                        </button>
+                                        <button type="button" class="payment-method-btn" data-method="Wing" title="Wing Money">
+                                            <i class="fas fa-mobile-alt"></i>
+                                            <span>Wing</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="od-field">
@@ -1963,21 +2029,41 @@
         });
     }
 
-    // Payment method visibility toggle
+    // Payment method visibility and selection
     document.addEventListener('DOMContentLoaded', function() {
         const paymentStatusSelect = document.getElementById('payment_status');
         const paymentMethodField = document.getElementById('payment_method_field');
-        const paymentMethodSelect = document.getElementById('payment_method');
+        const paymentMethodInput = document.getElementById('payment_method');
+        const paymentMethodBtns = document.querySelectorAll('.payment-method-btn');
 
         function togglePaymentMethod() {
             if (paymentStatusSelect.value === 'paid') {
                 paymentMethodField.style.display = 'block';
-                paymentMethodSelect.setAttribute('required', 'required');
+                paymentMethodInput.setAttribute('required', 'required');
             } else {
                 paymentMethodField.style.display = 'none';
-                paymentMethodSelect.removeAttribute('required');
+                paymentMethodInput.removeAttribute('required');
+                paymentMethodBtns.forEach(btn => btn.classList.remove('active'));
+                paymentMethodInput.value = '';
             }
         }
+
+        // Button selection handlers
+        paymentMethodBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const method = this.getAttribute('data-method');
+
+                paymentMethodBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                paymentMethodInput.value = method;
+            });
+
+            // Pre-select if value matches old selection
+            if (paymentMethodInput.value && btn.getAttribute('data-method') === paymentMethodInput.value) {
+                btn.classList.add('active');
+            }
+        });
 
         if (paymentStatusSelect) {
             paymentStatusSelect.addEventListener('change', togglePaymentMethod);

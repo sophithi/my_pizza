@@ -546,41 +546,75 @@
     <!-- Payment Info -->
     @php($payment = $order->payments?->first())
     @if($order->payment_status || $payment)
-    <div class="detail-section" style="margin-bottom: 1.5rem;">
+    <div class="detail-section payment-info-section" style="margin-bottom: 1.5rem;">
         <h3 class="section-title" style="font-size: 1rem;"> ព័ត៌មានការបង់ប្រាក់</h3>
-        <div style="display: flex; gap: 2rem; padding: 1rem; background: {{ $order->payment_status === 'paid' ? '#f0fdf4' : '#fffbeb' }}; border-radius: 10px; border: 1px solid {{ $order->payment_status === 'paid' ? '#bbf7d0' : '#fde68a' }};">
-            <div>
-                <span style="color: #6b7280; font-size: 0.85rem;">ស្ថានភាព</span><br>
-                <strong>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.2rem;">
+            <div style="padding: 1rem; background: {{ $order->payment_status === 'paid' ? '#f0fdf4' : '#fffbeb' }}; border-radius: 10px; border-left: 4px solid {{ $order->payment_status === 'paid' ? '#10b981' : '#f59e0b' }};">
+                <span style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">ស្ថានភាព</span>
+                <div style="margin-top: 8px;">
                     @if($order->payment_status === 'paid')
-                        <span style="color: #059669;">✓ បានបង់</span>
+                        <span style="color: #059669; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-check-circle"></i> បានបង់
+                        </span>
                     @elseif($order->payment_status === 'partial')
-                        <span style="color: #d97706;">◐ បង់ខ្លះ</span>
+                        <span style="color: #d97706; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-adjust"></i> បង់ខ្លះ
+                        </span>
                     @else
-                        <span style="color: #dc2626;">✗ មិនទាន់បង់</span>
+                        <span style="color: #dc2626; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-times-circle"></i> មិនទាន់បង់
+                        </span>
                     @endif
-                </strong>
+                </div>
             </div>
+
             @if($payment && $payment->method)
-            <div>
-                <span style="color: #6b7280; font-size: 0.85rem;">វិធីបង់ប្រាក់</span><br>
-                <strong>
+            <div style="padding: 1rem; background: #eff6ff; border-radius: 10px; border-left: 4px solid #3b82f6;">
+                <span style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">វិធីបង់ប្រាក់</span>
+                <div style="margin-top: 8px;">
                     @if($payment->method === 'Cash')
-                        💵 ប្រាក់សម្រាប់
+                        <span style="color: #059669; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-money-bill-wave"></i> ប្រាក់សម្រាប់
+                        </span>
                     @elseif($payment->method === 'ABA')
-                        🏦 ធនាគារ ABA
+                        <span style="color: #0891b2; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-university"></i> ABA Bank
+                        </span>
                     @elseif($payment->method === 'ACLEDA')
-                        🏦 ធនាគារ ACLEDA
+                        <span style="color: #059669; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-university"></i> ACLEDA
+                        </span>
                     @elseif($payment->method === 'Wing')
-                        📱 Wing Money
+                        <span style="color: #d97706; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-mobile-alt"></i> Wing Money
+                        </span>
                     @else
-                        {{ $payment->method }}
+                        <span style="color: #6366f1; font-size: 1.1rem; font-weight: 700;">
+                            <i class="fas fa-wallet"></i> {{ $payment->method }}
+                        </span>
                     @endif
-                </strong>
+                </div>
+            </div>
+            @endif
+
+            @if($payment)
+            <div style="padding: 1rem; background: #f3f4f6; border-radius: 10px; border-left: 4px solid #6b7280;">
+                <span style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">ថ្ងៃ</span>
+                <div style="margin-top: 8px; color: #374151; font-weight: 600;">
+                    {{ $payment->created_at ? $payment->created_at->setTimezone('Asia/Phnom_Penh')->translatedFormat('d M Y H:i') : 'N/A' }}
+                </div>
             </div>
             @endif
         </div>
     </div>
+
+    <style>
+        @media (max-width: 576px) {
+            .payment-info-section div[style*="display: grid"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
     @endif
 
     <!-- Actions -->
