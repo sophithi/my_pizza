@@ -50,20 +50,26 @@ class OrderController extends Controller
     {
         $validated = $request->validated();
         $delivery = !empty($validated['delivery_id']) ? Delivery::find($validated['delivery_id']) : null;
-        $boxQty = max((int) ($validated['box_qty'] ?? 1), 1);
-        $deliveryFeeKhr = $delivery ? (float) $delivery->delivery_price_khr * $boxQty : 0;
+        $smallPackQty = max((int) ($validated['small_pack_qty'] ?? 1), 0);
+        $bigPackQty = max((int) ($validated['big_pack_qty'] ?? 0), 0);
+        $boxQty = max($smallPackQty + $bigPackQty, 1);
+        $deliveryFeeKhr = $delivery
+            ? ($smallPackQty * (float) $delivery->delivery_price_khr) + ($bigPackQty * (float) $delivery->delivery_price_khr_big)
+            : 0;
         $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
         $subtotal = (float) $validated['subtotal'];
         $discountAmount = (float) ($validated['discount_amount'] ?? 0);
         $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
 
-        [$order, $invoiceNumber, $warnings] = DB::transaction(function () use ($validated, $delivery, $boxQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
+        [$order, $invoiceNumber, $warnings] = DB::transaction(function () use ($validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
             // Create the order
             $order = Order::create([
                 'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
                 'taxi_phone' => $validated['taxi_phone'] ?? null,
                 'box_qty' => $boxQty,
+                'small_pack_qty' => $smallPackQty,
+                'big_pack_qty' => $bigPackQty,
                 'user_id' => auth()->id(),
                 'order_date' => $validated['order_date'],
                 'code' => 'ORD-' . rand(1000, 9999),
@@ -178,7 +184,8 @@ class OrderController extends Controller
         $deliveryOptions = $deliveries->map(fn($d) => [
             'id' => $d->id,
             'name' => $d->delivery_name,
-            'price_khr' => $d->delivery_price_khr
+            'price_khr' => $d->delivery_price_khr,
+            'price_khr_big' => $d->delivery_price_khr_big,
         ])->values();
 
         // allProducts as keyed object (for lookup by ID)
@@ -217,14 +224,18 @@ class OrderController extends Controller
     {
         $validated = $request->validated();
         $delivery = !empty($validated['delivery_id']) ? Delivery::find($validated['delivery_id']) : null;
-        $boxQty = max((int) ($validated['box_qty'] ?? 1), 1);
-        $deliveryFeeKhr = $delivery ? (float) ($validated['delivery_fee_khr'] ?? 0) : 0;
+        $smallPackQty = max((int) ($validated['small_pack_qty'] ?? 1), 0);
+        $bigPackQty = max((int) ($validated['big_pack_qty'] ?? 0), 0);
+        $boxQty = max($smallPackQty + $bigPackQty, 1);
+        $deliveryFeeKhr = $delivery
+            ? ($smallPackQty * (float) $delivery->delivery_price_khr) + ($bigPackQty * (float) $delivery->delivery_price_khr_big)
+            : 0;
         $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
         $subtotal = (float) $validated['subtotal'];
         $discountAmount = (float) ($validated['discount_amount'] ?? 0);
         $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
 
-        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
+        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
             $wasStockDeducted = (bool) $order->stock_deducted;
 
             if ($wasStockDeducted) {
@@ -235,6 +246,8 @@ class OrderController extends Controller
                 'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
                 'box_qty' => $boxQty,
+                'small_pack_qty' => $smallPackQty,
+                'big_pack_qty' => $bigPackQty,
                 'order_date' => $validated['order_date'],
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,

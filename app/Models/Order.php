@@ -11,6 +11,8 @@ class Order extends Model
         'delivery_id',
         'taxi_phone',
         'box_qty',
+        'small_pack_qty',
+        'big_pack_qty',
         'user_id',
         'prepared_by',
         'prepared_at',
@@ -38,6 +40,8 @@ class Order extends Model
         'delivery_fee_usd' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'box_qty' => 'integer',
+        'small_pack_qty' => 'integer',
+        'big_pack_qty' => 'integer',
         'stock_deducted' => 'boolean',
     ];
 

@@ -33,10 +33,11 @@ class DeliveryController extends Controller
         $request->validate([
             'delivery_name' => 'required|string|max:255',
             'delivery_price_khr' => 'required|numeric|min:0',
+            'delivery_price_khr_big' => 'nullable|numeric|min:0',
             'delivery_desc' => 'nullable|string',
         ]);
 
-        Delivery::create($request->only('delivery_name', 'delivery_price_khr', 'delivery_desc'));
+        Delivery::create($request->only('delivery_name', 'delivery_price_khr', 'delivery_price_khr_big', 'delivery_desc'));
 
         return redirect()->route('deliveries.index')
             ->with('success', 'Created successfully!');
@@ -72,10 +73,11 @@ class DeliveryController extends Controller
         $request->validate([
             'delivery_name' => 'required|string|max:255',
             'delivery_price_khr' => 'required|numeric|min:0',
+            'delivery_price_khr_big' => 'nullable|numeric|min:0',
             'delivery_desc' => 'nullable|string',
         ]);
 
-        $delivery->update($request->only('delivery_name', 'delivery_price_khr', 'delivery_desc'));
+        $delivery->update($request->only('delivery_name', 'delivery_price_khr', 'delivery_price_khr_big', 'delivery_desc'));
 
         return redirect()->route('deliveries.index')
             ->with('success', 'Updated successfully!');

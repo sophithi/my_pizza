@@ -14,11 +14,13 @@ class Delivery extends Model
         'delivery_name',
 
         'delivery_price_khr',
+        'delivery_price_khr_big',
         'delivery_desc',
     ];
 
     protected $casts = [
         'delivery_price_khr' => 'decimal:0',
+        'delivery_price_khr_big' => 'decimal:0',
     ];
 
     public function orders()

@@ -822,7 +822,7 @@
 
     .delivery-combo {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 92px;
+        grid-template-columns: minmax(0, 1fr) 76px 76px;
         gap: 8px;
         align-items: stretch;
     }
@@ -1082,7 +1082,7 @@
         }
 
         .delivery-combo {
-            grid-template-columns: 1fr 86px;
+            grid-template-columns: 1fr 64px 64px;
         }
 
         .cpm-orig-prices { grid-template-columns: 1fr; }
@@ -1448,14 +1448,19 @@
                                                 <option value="{{ $delivery->id }}"
                                                     data-name="{{ $delivery->delivery_name }}"
                                                     data-price="{{ $delivery->delivery_price_khr }}"
+                                                    data-price-big="{{ $delivery->delivery_price_khr_big }}"
                                                     {{ old('delivery_id', $order->delivery_id) == $delivery->id ? 'selected' : '' }}>
                                                     {{ $delivery->delivery_name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                         <div class="box-inline">
-                                            <span>កេស</span>
-                                            <input type="number" id="box_qty" name="box_qty" class="form-control" min="1" value="{{ old('box_qty', $order->box_qty ?? 1) }}">
+                                            <span>តូច</span>
+                                            <input type="number" id="small_pack_qty" name="small_pack_qty" class="form-control" min="0" value="{{ old('small_pack_qty', $order->small_pack_qty ?? 1) }}">
+                                        </div>
+                                        <div class="box-inline">
+                                            <span>ធំ</span>
+                                            <input type="number" id="big_pack_qty" name="big_pack_qty" class="form-control" min="0" value="{{ old('big_pack_qty', $order->big_pack_qty ?? 0) }}">
                                         </div>
                                     </div>
                                 </div>
@@ -1861,8 +1866,8 @@
             }
         }
 
-        // Recalculate when delivery or box_qty changes
-        $('#delivery_select, #box_qty').on('change input', function() {
+        // Recalculate when delivery or pack qty changes
+        $('#delivery_select, #small_pack_qty, #big_pack_qty').on('change input', function() {
             calculateTotal();
             updateCartData();
             updateTaxiPhoneVisibility();
@@ -2066,14 +2071,19 @@
         }
     }
 
-    function getBoxQty() {
-        return Math.max(parseInt($('#box_qty').val() || 1, 10) || 1, 1);
+    function getSmallPackQty() {
+        return Math.max(parseInt($('#small_pack_qty').val() || 0, 10) || 0, 0);
+    }
+
+    function getBigPackQty() {
+        return Math.max(parseInt($('#big_pack_qty').val() || 0, 10) || 0, 0);
     }
 
     function getSelectedDeliveryFeeKhr() {
         const selected = $('#delivery_select option:selected');
-        const deliveryPriceKhr = parseFloat(selected.data('price') || 0) || 0;
-        return deliveryPriceKhr * getBoxQty();
+        const smallPrice = parseFloat(selected.data('price') || 0) || 0;
+        const bigPrice = parseFloat(selected.data('price-big') || 0) || 0;
+        return (smallPrice * getSmallPackQty()) + (bigPrice * getBigPackQty());
     }
 
     function calculateTotal() {

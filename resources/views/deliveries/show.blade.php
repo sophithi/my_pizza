@@ -467,8 +467,8 @@
                                         <th>Invoice #</th>
                                         <th>ឈ្មោះអតិថិជន</th>
                                         <th>ទំនាក់ទំនង</th>
-                                        <th style="text-align:center;">ចំនួនកេស</th>
-                                        <th style="text-align:right;">តម្លៃ/កេស</th>
+                                        <th style="text-align:center;">តូច</th>
+                                        <th style="text-align:center;">ធំ</th>
                                         <th style="text-align:right;">ថ្លៃដឹក</th>
                                         <th style="text-align:right;">តម្លៃសរុប</th>
                                     </tr>
@@ -479,8 +479,8 @@
                                             $invoice = $order->invoice;
                                             $customer = $order->customer;
                                             $deliveryFee = (float) $order->delivery_fee_khr;
-                                            $caseCount = max((int) ($order->box_qty ?? 1), 1);
-                                            $unitFee = $caseCount > 0 ? $deliveryFee / $caseCount : 0;
+                                            $smallQty = (int) ($order->small_pack_qty ?? $order->box_qty ?? 1);
+                                            $bigQty = (int) ($order->big_pack_qty ?? 0);
                                             $customerName = $customer?->name ?? 'N/A';
                                             $customerPhone = $customer?->phone ?? '—';
                                             $totalPrice = $invoice?->total_amount ?? $order->total_amount ?? 0;
@@ -489,10 +489,8 @@
                                             <td><span class="badge-inv">{{ $invoice?->invoice_number ?? 'N/A' }}</span></td>
                                             <td>{{ $customerName }}</td>
                                             <td>{{ $customerPhone }}</td>
-                                            <td style="text-align:center; font-weight:700;">{{ number_format($caseCount, 0) }}</td>
-                                            <td style="text-align:right; font-weight:700;">
-                                                ៛{{ number_format($unitFee, 0) }}
-                                            </td>
+                                            <td style="text-align:center; font-weight:700;">{{ number_format($smallQty, 0) }}</td>
+                                            <td style="text-align:center; font-weight:700;">{{ number_format($bigQty, 0) }}</td>
                                             <td style="text-align:right; font-weight:700; color:var(--accent);">
                                                 ៛{{ number_format($deliveryFee, 0) }}
                                             </td>

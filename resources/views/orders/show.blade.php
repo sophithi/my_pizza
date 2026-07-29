@@ -518,6 +518,9 @@
             @if((float) $order->delivery_fee_khr > 0)
                 <div style="font-size: 13px; margin-top: 6px; opacity: .9;">
                     {{ $order->delivery->delivery_name ?? 'Delivery' }}: ៛{{ number_format($order->delivery_fee_khr, 0) }}
+                    @if($order->small_pack_qty || $order->big_pack_qty)
+                        <span style="opacity:.85;">(តូច {{ $order->small_pack_qty ?? 0 }} + ធំ {{ $order->big_pack_qty ?? 0 }})</span>
+                    @endif
                 </div>
             @endif
         </div>

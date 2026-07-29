@@ -209,10 +209,17 @@
                         </div>
 
                         <div class="form-group">
-                            <label>តម្លៃក្នុង ១ កេស (៛) <span class="req">*</span></label>
+                            <label>តម្លៃកេសតូច (៛) <span class="req">*</span></label>
                             <input type="number" name="delivery_price_khr" id="deliveryPriceInput" class="form-control" step="1" min="0"
                                 value="{{ old('delivery_price_khr', $delivery->delivery_price_khr) }}" required>
                             @error('delivery_price_khr') <div class="error-msg">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label>តម្លៃកេសធំ (៛)</label>
+                            <input type="number" name="delivery_price_khr_big" id="deliveryPriceBigInput" class="form-control" step="1" min="0"
+                                value="{{ old('delivery_price_khr_big', $delivery->delivery_price_khr_big) }}">
+                            @error('delivery_price_khr_big') <div class="error-msg">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="form-group" style="margin-bottom: 0;">
@@ -227,12 +234,16 @@
                         <div class="price-preview-label">តម្លៃដឹកជញ្ជូន</div>
                         <div class="price-preview-main">៛<span id="priceOne">0</span></div>
                         <div class="price-preview-line">
-                            <span>1 កេស</span>
+                            <span>កេសតូច × 1</span>
                             <strong>៛<span id="priceOneLine">0</span></strong>
                         </div>
                         <div class="price-preview-line">
-                            <span>2 កេស</span>
-                            <strong>៛<span id="priceTwoLine">0</span></strong>
+                            <span>កេសធំ × 1</span>
+                            <strong>៛<span id="priceBigLine">0</span></strong>
+                        </div>
+                        <div class="price-preview-line">
+                            <span>តូច 1 + ធំ 1</span>
+                            <strong>៛<span id="priceCombinedLine">0</span></strong>
                         </div>
                     </div>
                 </div>
@@ -250,13 +261,16 @@
     <script>
         function updatePricePreview() {
             const price = Math.max(parseInt(document.getElementById('deliveryPriceInput').value || 0, 10) || 0, 0);
+            const priceBig = Math.max(parseInt(document.getElementById('deliveryPriceBigInput').value || 0, 10) || 0, 0);
             document.getElementById('priceOne').textContent = price.toLocaleString();
             document.getElementById('priceOneLine').textContent = price.toLocaleString();
-            document.getElementById('priceTwoLine').textContent = (price * 2).toLocaleString();
+            document.getElementById('priceBigLine').textContent = priceBig.toLocaleString();
+            document.getElementById('priceCombinedLine').textContent = (price + priceBig).toLocaleString();
         }
 
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('deliveryPriceInput')?.addEventListener('input', updatePricePreview);
+            document.getElementById('deliveryPriceBigInput')?.addEventListener('input', updatePricePreview);
             updatePricePreview();
         });
     </script>

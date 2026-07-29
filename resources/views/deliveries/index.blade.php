@@ -355,7 +355,7 @@
                         <tr>
                             <th style="width: 70px;">#</th>
                             <th>ប្រភេទដឹកជញ្ជូន</th>
-                            <th style="width: 150px;">តម្លៃ/កេស</th>
+                            <th style="width: 170px;">តម្លៃ/កេស (តូច/ធំ)</th>
                             <th style="width: 140px;">ចំនួនវិក្ក័យបត្រ</th>
                             <th class="text-end" style="width: 280px;">ផ្សេងៗ</th>
                         </tr>
@@ -369,7 +369,7 @@
                                     <div class="delivery-desc">{{ $delivery->delivery_desc ?: 'No note added' }}</div>
                                 </td>
                                 <td style="font-weight: 800; color: var(--accent);">
-                                    ៛{{ number_format($delivery->delivery_price_khr, 0) }}
+                                    ៛{{ number_format($delivery->delivery_price_khr, 0) }} / ៛{{ number_format($delivery->delivery_price_khr_big, 0) }}
                                 </td>
                                 <td style="text-align: center; font-weight: 700; color: var(--accent);">
                                     {{ $delivery->orders_count ?? 0 }}
@@ -405,8 +405,13 @@
                                         </div>
 
                                         <div class="detail-item">
-                                            <label>តម្លៃក្នុង ១ កេស</label>
+                                            <label>តម្លៃកេសតូច</label>
                                             <span class="accent">៛{{ number_format($delivery->delivery_price_khr, 0) }}</span>
+                                        </div>
+
+                                        <div class="detail-item">
+                                            <label>តម្លៃកេសធំ</label>
+                                            <span class="accent">៛{{ number_format($delivery->delivery_price_khr_big, 0) }}</span>
                                         </div>
 
                                         <div class="detail-item">
