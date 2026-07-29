@@ -224,13 +224,13 @@
                     </td>
                     <td>{{ \Carbon\Carbon::parse($payment->order_date)->format('d M Y') }}</td>
                     <td>${{ number_format($payment->total_amount, 2) }}<span
-                            class="khr">៛{{ number_format($payment->total_amount * $exchangeRate, 0) }}</span></td>
+                            class="khr">៛{{ number_format($payment->total_amount_khr, 0) }}</span></td>
                     <td style="color:#059669;font-weight:bold">${{ number_format($payment->paid_amount, 2) }}<span
-                            class="khr">៛{{ number_format($payment->paid_amount * $exchangeRate, 0) }}</span></td>
+                            class="khr">៛{{ number_format($payment->paid_amount_khr, 0) }}</span></td>
                     <td style="color:#dc2626">
                         @if($payment->balance > 0)
                             ${{ number_format($payment->balance, 2) }}<span
-                                class="khr">៛{{ number_format($payment->balance * $exchangeRate, 0) }}</span>
+                                class="khr">៛{{ number_format($payment->balance_khr, 0) }}</span>
                         @else
                             —
                         @endif

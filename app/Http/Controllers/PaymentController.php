@@ -81,6 +81,8 @@ class PaymentController extends Controller
         };
 
         $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
+        $totalAmountKhr = $payment?->total_amount_khr ?? $order->totalKhr();
+        $paidAmountKhr = $payment?->paid_amount_khr ?? 0;
 
         return (object) [
             'id' => $payment?->id,
@@ -90,8 +92,11 @@ class PaymentController extends Controller
             'order_id' => 'ORD-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
             'order_date' => $order->order_date,
             'total_amount' => (float) $order->total_amount,
+            'total_amount_khr' => (float) $totalAmountKhr,
             'paid_amount' => min((float) $order->total_amount, (float) $paidAmount),
+            'paid_amount_khr' => (float) $paidAmountKhr,
             'balance' => max(0, (float) $order->total_amount - (float) $paidAmount),
+            'balance_khr' => max(0, (float) $totalAmountKhr - (float) $paidAmountKhr),
             'method' => $payment?->method ?? '—',
             'lines' => $payment?->lines?->map(fn($line) => [
                 'method' => $line->method,
@@ -165,16 +170,19 @@ class PaymentController extends Controller
         ]);
 
         $lines = $this->parsePaymentLines($request);
-        $data['paid_amount'] = collect($lines)->sum('amount_usd');
+        $paidUsd = collect($lines)->sum('amount_usd');
+        $data['paid_amount'] = $paidUsd;
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
         $data['order_date'] = $order->order_date;
         $data['total_amount'] = $order->total_amount;
-        
+        $data['total_amount_khr'] = $order->totalKhr();
+        $data['paid_amount_khr'] = round($paidUsd * self::EXCHANGE_RATE, 2);
+
         // Calculate average exchange rate from payment lines
         $avgExchangeRate = collect($lines)->avg('exchange_rate') ?? self::EXCHANGE_RATE;
         $data['exchange_rate'] = $avgExchangeRate;
-        
+
         // Generate payment notes showing what was paid in each currency
         $paymentNotes = $this->generatePaymentNotes($lines, $avgExchangeRate);
         if ($paymentNotes) {
@@ -260,16 +268,19 @@ class PaymentController extends Controller
         ]);
 
         $lines = $this->parsePaymentLines($request);
-        $data['paid_amount'] = collect($lines)->sum('amount_usd');
+        $paidUsd = collect($lines)->sum('amount_usd');
+        $data['paid_amount'] = $paidUsd;
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
         $data['order_date'] = $order->order_date;
         $data['total_amount'] = $order->total_amount;
-        
+        $data['total_amount_khr'] = $order->totalKhr();
+        $data['paid_amount_khr'] = round($paidUsd * self::EXCHANGE_RATE, 2);
+
         // Calculate average exchange rate from payment lines
         $avgExchangeRate = collect($lines)->avg('exchange_rate') ?? self::EXCHANGE_RATE;
         $data['exchange_rate'] = $avgExchangeRate;
-        
+
         // Generate payment notes showing what was paid in each currency
         $paymentNotes = $this->generatePaymentNotes($lines, $avgExchangeRate);
         if ($paymentNotes) {

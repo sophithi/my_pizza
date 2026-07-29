@@ -309,20 +309,20 @@
                                 <td>
                                     <div class="money-stack">
                                         <span class="usd">${{ number_format($payment->total_amount, 2) }}</span>
-                                        <span class="khr">៛{{ number_format($payment->total_amount * $exchangeRate, 0) }}</span>
+                                        <span class="khr">៛{{ number_format($payment->total_amount_khr, 0) }}</span>
                                     </div>
                                 </td>
                                 <td class="text-success">
                                     <div class="money-stack">
                                         <span class="usd">${{ number_format($payment->paid_amount, 2) }}</span>
-                                        <span class="khr">៛{{ number_format($payment->paid_amount * $exchangeRate, 0) }}</span>
+                                        <span class="khr">៛{{ number_format($payment->paid_amount_khr, 0) }}</span>
                                     </div>
                                 </td>
                                 <td>
                                     @if($payment->balance > 0)
                                         <div class="money-stack text-danger">
                                             <span class="usd">${{ number_format($payment->balance, 2) }}</span>
-                                            <span class="khr">៛{{ number_format($payment->balance * $exchangeRate, 0) }}</span>
+                                            <span class="khr">៛{{ number_format($payment->balance_khr, 0) }}</span>
                                         </div>
                                     @else
                                         <span class="text-muted">—</span>
@@ -599,7 +599,7 @@
             document.getElementById('f_order_id').value = payment.order_id;
             document.getElementById('f_order_date').value = String(payment.order_date).slice(0, 10);
             document.getElementById('f_total').value = payment.total_amount;
-            document.getElementById('f_total_khr').value = usdToKhr(payment.total_amount);
+            document.getElementById('f_total_khr').value = payment.total_amount_khr || usdToKhr(payment.total_amount);
             document.getElementById('f_notes').value = payment.notes || '';
             document.getElementById('f_method').value = payment.method === '—' ? 'Cash' : payment.method;
             paymentLines = payment.lines && payment.lines.length

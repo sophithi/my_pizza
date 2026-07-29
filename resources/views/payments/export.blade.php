@@ -61,24 +61,24 @@ header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
             @php $exchangeRate = 4000; $totalUsd = 0; $totalKhr = 0; $paidUsd = 0; $paidKhr = 0; @endphp
             @forelse($payments as $payment)
                 @php
-                    $totalKhr = ($payment->total_amount ?? 0) * $exchangeRate;
-                    $paidKhr = ($payment->paid_amount ?? 0) * $exchangeRate;
-                    $balanceKhr = ($payment->balance ?? 0) * $exchangeRate;
+                    $itemTotalKhr = $payment->total_amount_khr ?? ($payment->total_amount ?? 0) * $exchangeRate;
+                    $itemPaidKhr = $payment->paid_amount_khr ?? ($payment->paid_amount ?? 0) * $exchangeRate;
+                    $itemBalanceKhr = $payment->balance_khr ?? ($payment->balance ?? 0) * $exchangeRate;
                     $totalUsd += $payment->total_amount ?? 0;
-                    $totalKhr += $totalKhr;
+                    $totalKhr += $itemTotalKhr;
                     $paidUsd += $payment->paid_amount ?? 0;
-                    $paidKhr += $paidKhr;
+                    $paidKhr += $itemPaidKhr;
                 @endphp
                 <tr>
                     <td>{{ $payment->order_id }}</td>
                     <td>{{ $payment->customer_name }}</td>
                     <td>{{ \Carbon\Carbon::parse($payment->order_date)->format('Y-m-d') }}</td>
                     <td class="currency">${{ number_format($payment->total_amount ?? 0, 2) }}</td>
-                    <td class="currency">៛{{ number_format($totalKhr, 0) }}</td>
+                    <td class="currency">៛{{ number_format($itemTotalKhr, 0) }}</td>
                     <td class="currency">${{ number_format($payment->paid_amount ?? 0, 2) }}</td>
-                    <td class="currency">៛{{ number_format($paidKhr, 0) }}</td>
+                    <td class="currency">៛{{ number_format($itemPaidKhr, 0) }}</td>
                     <td class="currency">${{ number_format($payment->balance ?? 0, 2) }}</td>
-                    <td class="currency">៛{{ number_format($balanceKhr, 0) }}</td>
+                    <td class="currency">៛{{ number_format($itemBalanceKhr, 0) }}</td>
                     <td>{{ $payment->method ?? '—' }}</td>
                     <td>
                         @if($payment->status === 'paid')

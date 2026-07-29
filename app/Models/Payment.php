@@ -14,7 +14,9 @@ class Payment extends Model
         'order_id',
         'order_date',
         'total_amount',
+        'total_amount_khr',
         'paid_amount',
+        'paid_amount_khr',
         'exchange_rate',
         'exchange_rate_notes',
         'method',
@@ -25,7 +27,9 @@ class Payment extends Model
     protected $casts = [
         'order_date'   => 'date',
         'total_amount' => 'float',
+        'total_amount_khr' => 'decimal:2',
         'paid_amount'  => 'float',
+        'paid_amount_khr' => 'decimal:2',
         'exchange_rate' => 'float',
     ];
 
