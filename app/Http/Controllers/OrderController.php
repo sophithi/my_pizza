@@ -133,6 +133,21 @@ class OrderController extends Controller
                 'notes' => $order->notes ?? null,
             ]);
 
+            // Create payment record if order is marked as paid
+            if ($validated['payment_status'] === 'paid') {
+                \App\Models\Payment::create([
+                    'order_id' => $order->id,
+                    'customer_name' => $order->customer?->name ?? 'Walk-in Customer',
+                    'order_date' => $order->order_date,
+                    'total_amount' => $order->total_amount,
+                    'total_amount_khr' => $order->totalKhr(),
+                    'paid_amount' => $order->total_amount,
+                    'paid_amount_khr' => $order->totalKhr(),
+                    'method' => $validated['payment_method'] ?? 'Cash',
+                    'status' => 'paid',
+                ]);
+            }
+
             return [$order, $invoiceNumber, $warnings];
         });
 

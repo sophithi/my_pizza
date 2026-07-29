@@ -38,6 +38,7 @@ class StoreOrderRequest extends FormRequest
             'total_amount' => 'required|numeric|min:0',
             'status' => 'in:pending,processing,completed,cancelled',
             'payment_status' => 'in:unpaid,partial,paid',
+            'payment_method' => 'nullable|in:Cash,ABA,ACLEDA,Wing',
             'notes' => 'nullable|string',
             'order_items' => 'required|json',
             'free_products' => 'nullable|array',

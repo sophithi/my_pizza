@@ -1288,10 +1288,21 @@
 
                                 <div class="od-field">
                                     <label class="od-label"><i class="fas fa-money-bill-wave"></i> ការបង់ប្រាក់</label>
-                                    <select name="payment_status" class="form-control od-select">
+                                    <select id="payment_status" name="payment_status" class="form-control od-select">
                                         <option value="unpaid"  {{ old('payment_status') == 'unpaid'  ? 'selected' : '' }}>មិនទាន់បង់</option>
                                         <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
                                         <option value="paid"    {{ old('payment_status') == 'paid'    ? 'selected' : '' }}>បានបង់</option>
+                                    </select>
+                                </div>
+
+                                <div class="od-field" id="payment_method_field" style="display:none;">
+                                    <label class="od-label"><i class="fas fa-credit-card"></i> វិធីបង់ប្រាក់</label>
+                                    <select name="payment_method" id="payment_method" class="form-control od-select">
+                                        <option value="">សូមជ្រើសរើស</option>
+                                        <option value="Cash" {{ old('payment_method') == 'Cash' ? 'selected' : '' }}>ប្រាក់សម្រាប់</option>
+                                        <option value="ABA" {{ old('payment_method') == 'ABA' ? 'selected' : '' }}>ធនាគារ ABA</option>
+                                        <option value="ACLEDA" {{ old('payment_method') == 'ACLEDA' ? 'selected' : '' }}>ធនាគារ ACLEDA</option>
+                                        <option value="Wing" {{ old('payment_method') == 'Wing' ? 'selected' : '' }}>Wing Money</option>
                                     </select>
                                 </div>
 
@@ -1951,6 +1962,28 @@
             if ($('.free-product-row').length === 0) addFreeProductRow();
         });
     }
+
+    // Payment method visibility toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentStatusSelect = document.getElementById('payment_status');
+        const paymentMethodField = document.getElementById('payment_method_field');
+        const paymentMethodSelect = document.getElementById('payment_method');
+
+        function togglePaymentMethod() {
+            if (paymentStatusSelect.value === 'paid') {
+                paymentMethodField.style.display = 'block';
+                paymentMethodSelect.setAttribute('required', 'required');
+            } else {
+                paymentMethodField.style.display = 'none';
+                paymentMethodSelect.removeAttribute('required');
+            }
+        }
+
+        if (paymentStatusSelect) {
+            paymentStatusSelect.addEventListener('change', togglePaymentMethod);
+            togglePaymentMethod();
+        }
+    });
 </script>
 @endpush
 
