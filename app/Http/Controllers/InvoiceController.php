@@ -26,8 +26,8 @@ class InvoiceController extends Controller
 
         $stats = [
             'total' => (clone $statsQuery)->count(),
-            'paid' => (clone $statsQuery)->where('status', 'paid')->count(),
-            'unpaid' => (clone $statsQuery)->where('status', '!=', 'paid')->count(),
+            'paid' => (clone $statsQuery)->whereHas('order', fn($q) => $q->where('payment_status', 'paid'))->count(),
+            'unpaid' => (clone $statsQuery)->whereHas('order', fn($q) => $q->where('payment_status', '!=', 'paid'))->count(),
             'amount_usd' => (clone $statsQuery)->sum('total_amount'),
             'amount_khr' => (clone $statsQuery)->get()->sum(fn($invoice) => $this->invoiceTotalKhr($invoice)),
         ];

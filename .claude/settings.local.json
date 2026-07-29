@@ -10,7 +10,8 @@
       "Bash(git fetch *)",
       "Bash(git check-ignore *)",
       "Read(//c/Windows/System32/drivers/etc/**)",
-      "Read(//c/xampp/apache/conf/extra/**)"
+      "Read(//c/xampp/apache/conf/extra/**)",
+      "Bash(grep -n 'protected $fillable\\\\|status' app/Models/Invoice.php)"
     ]
   }
 }

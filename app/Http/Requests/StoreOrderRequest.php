@@ -38,7 +38,21 @@ class StoreOrderRequest extends FormRequest
             'total_amount' => 'required|numeric|min:0',
             'status' => 'in:pending,processing,completed,cancelled',
             'payment_status' => 'in:unpaid,partial,paid',
-            'payment_method' => 'nullable|in:Cash,ABA,ACLEDA,Wing',
+            'payment_method' => ['nullable', function ($attribute, $value, $fail) {
+                if (!$value) {
+                    return;
+                }
+
+                $allowed = ['Cash', 'ABA', 'ACLEDA', 'Wing'];
+                $methods = array_filter(array_map('trim', explode('+', $value)));
+
+                foreach ($methods as $method) {
+                    if (!in_array($method, $allowed, true)) {
+                        $fail('The selected payment method is invalid.');
+                        return;
+                    }
+                }
+            }],
             'notes' => 'nullable|string',
             'order_items' => 'required|json',
             'free_products' => 'nullable|array',

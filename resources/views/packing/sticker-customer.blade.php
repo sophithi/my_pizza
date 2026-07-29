@@ -596,16 +596,12 @@
                 @endif
                 <p>
                     <strong>ការបង់ប្រាក់:</strong>
-                    @if($invoice->status === 'paid')
+                    @if($invoice->order?->payment_status === 'paid')
                         បានទូទាត់
-                    @elseif($invoice->status === 'draft')
-                        មិនទាន់ទូទាត់
-                    @elseif($invoice->status === 'pending')
+                    @elseif($invoice->order?->payment_status === 'partial')
                         បង់មួយផ្នែក
-                    @elseif($invoice->status === 'cancelled')
-                        មិនទូទាត់
                     @else
-                        {{ $invoice->status }}
+                        មិនទាន់ទូទាត់
                     @endif
 
                 </p>

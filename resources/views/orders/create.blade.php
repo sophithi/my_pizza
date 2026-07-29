@@ -786,32 +786,44 @@
 
     .delivery-combo {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 76px 76px;
+        grid-template-columns: minmax(0, 1fr) 92px 92px;
         gap: 8px;
         align-items: stretch;
     }
 
     .box-inline {
-        position: relative;
-    }
-
-    .box-inline input {
-        height: 100%;
-        padding-top: 18px;
-        text-align: center;
-        font-weight: 700;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        overflow: hidden;
     }
 
     .box-inline span {
-        position: absolute;
-        top: 5px;
-        left: 0;
-        right: 0;
+        background: var(--bg);
         color: var(--text-muted);
         font-size: 10px;
         font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
         text-align: center;
-        pointer-events: none;
+        padding: 4px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .box-inline input {
+        flex: 1;
+        border: 0;
+        border-radius: 0;
+        text-align: center;
+        font-weight: 700;
+        min-height: 32px;
+    }
+
+    .box-inline input:focus {
+        outline: none;
+        box-shadow: inset 0 0 0 2px rgba(232, 93, 36, 0.15);
     }
 
     /* Toast Notification */
@@ -1418,7 +1430,7 @@
                                     </select>
                                 </div>
 
-                                <div class="od-field" id="payment_method_field" style="display:none;">
+                                <div class="od-field full-span" id="payment_method_field" style="display:none;">
                                     <label class="od-label"><i class="fas fa-credit-card"></i> វិធីបង់ប្រាក់</label>
 
                                     <!-- Selected Methods Display -->
@@ -1448,18 +1460,14 @@
                                             <span class="method-check" style="display:none;">✓</span>
                                         </button>
                                         <button type="button" class="payment-method-btn" data-method="Wing" title="Wing Money">
-                                            <i class="fas fa-mobile-alt"></i>
+                                            <i class="fas fa-university"></i>
                                             <span>Wing</span>
                                             <span class="method-check" style="display:none;">✓</span>
                                         </button>
                                     </div>
-
-                                    <div style="font-size: 12px; color: #6b7280; margin-top: 8px; font-style: italic;">
-                                        💡 ជ្រើសរើសវិធីបង់មួយ ឬច្រើន (ឧ. Bank + Cash)
-                                    </div>
                                 </div>
 
-                                <div class="od-field">
+                                <div class="od-field full-span">
                                     <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន</label>
                                     <div class="delivery-combo">
                                         <select id="delivery_select" name="delivery_id" class="form-control od-select">
@@ -1486,7 +1494,7 @@
                                     </div>
                                 </div>
 
-                                <div class="od-field" id="taxi_phone_field" style="display:none;">
+                                <div class="od-field full-span" id="taxi_phone_field" style="display:none;">
                                     <label class="od-label"><i class="fas fa-phone"></i> លេខទូរស័ព្ទតាក់ស៊ី</label>
                                     <input type="text" id="taxi_phone" name="taxi_phone" class="form-control"
                                         value="{{ old('taxi_phone') }}" placeholder="បញ្ចូលលេខទូរស័ព្ទ taxi">
