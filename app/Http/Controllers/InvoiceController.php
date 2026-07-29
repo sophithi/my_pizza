@@ -422,7 +422,7 @@ class InvoiceController extends Controller
      */
     public function stickerPrep(Invoice $invoice)
     {
-        $invoice->load('order.customer', 'order.items.product');
+        $invoice->load('order.customer', 'order.items.product', 'order.delivery');
         // For prep view, return to packing index by default
         $backUrl = route('packing.index');
         return view('packing.sticker-prep', compact('invoice', 'backUrl'));

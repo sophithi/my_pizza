@@ -213,6 +213,21 @@
 
         </div>
 
+        @if($invoice->order->delivery_id && (($invoice->order->small_pack_qty ?? 0) > 0 || ($invoice->order->big_pack_qty ?? 0) > 0))
+            <div class="notes-box">
+                <div class="notes-label">ការដឹកជញ្ជូន — កេសត្រូវរៀបចំ</div>
+                <div class="notes-text" style="font-weight: 700;">
+                    {{ $invoice->order->delivery->delivery_name ?? 'N/A' }}
+                    @if(($invoice->order->small_pack_qty ?? 0) > 0)
+                        — កេសតូច × {{ $invoice->order->small_pack_qty }}
+                    @endif
+                    @if(($invoice->order->big_pack_qty ?? 0) > 0)
+                        — កេសធំ × {{ $invoice->order->big_pack_qty }}
+                    @endif
+                </div>
+            </div>
+        @endif
+
         <table class="items-table">
             <thead>
                 <tr>
