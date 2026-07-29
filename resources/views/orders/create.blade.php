@@ -1088,6 +1088,10 @@
         margin-top: 12px;
     }
 
+    .payment-methods-grid.payment-multi-select .payment-method-btn {
+        position: relative;
+    }
+
     .payment-method-btn {
         display: flex;
         flex-direction: column;
@@ -1132,6 +1136,71 @@
 
     .payment-method-btn.active i {
         color: var(--accent);
+    }
+
+    /* Multi-select Checkmark */
+    .payment-method-btn .method-check {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 28px;
+        height: 28px;
+        background: var(--accent);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(232, 93, 36, 0.3);
+        animation: popIn 0.3s ease;
+    }
+
+    @keyframes popIn {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    /* Selected Method Tags */
+    .method-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, rgba(232, 93, 36, 0.15) 0%, rgba(232, 93, 36, 0.08) 100%);
+        border: 1.5px solid var(--accent);
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent);
+        animation: slideInLeft 0.3s ease;
+    }
+
+    .method-tag i {
+        font-size: 12px;
+    }
+
+    .method-tag-close {
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+    }
+
+    .method-tag-close:hover {
+        opacity: 1;
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
 
     @media (max-width: 992px) {
@@ -1351,24 +1420,42 @@
 
                                 <div class="od-field" id="payment_method_field" style="display:none;">
                                     <label class="od-label"><i class="fas fa-credit-card"></i> វិធីបង់ប្រាក់</label>
+
+                                    <!-- Selected Methods Display -->
+                                    <div id="selected_methods_display" style="margin-bottom: 12px; min-height: 40px;">
+                                        <div id="selected_methods_tags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                                    </div>
+
+                                    <!-- Hidden inputs for payment methods -->
                                     <input type="hidden" name="payment_method" id="payment_method" value="{{ old('payment_method', '') }}">
-                                    <div class="payment-methods-grid">
+                                    <input type="hidden" id="payment_methods_array" value="[]">
+
+                                    <!-- Payment Method Selection Grid -->
+                                    <div class="payment-methods-grid payment-multi-select">
                                         <button type="button" class="payment-method-btn" data-method="Cash" title="ប្រាក់សម្រាប់">
                                             <i class="fas fa-money-bill-wave"></i>
-                                            <span>ប្រាក់សម្រាប់</span>
+                                            <span>លុយក្រៅ</span>
+                                            <span class="method-check" style="display:none;">✓</span>
                                         </button>
                                         <button type="button" class="payment-method-btn" data-method="ABA" title="ធនាគារ ABA">
                                             <i class="fas fa-university"></i>
                                             <span>ABA</span>
+                                            <span class="method-check" style="display:none;">✓</span>
                                         </button>
                                         <button type="button" class="payment-method-btn" data-method="ACLEDA" title="ធនាគារ ACLEDA">
                                             <i class="fas fa-university"></i>
                                             <span>ACLEDA</span>
+                                            <span class="method-check" style="display:none;">✓</span>
                                         </button>
                                         <button type="button" class="payment-method-btn" data-method="Wing" title="Wing Money">
                                             <i class="fas fa-mobile-alt"></i>
                                             <span>Wing</span>
+                                            <span class="method-check" style="display:none;">✓</span>
                                         </button>
+                                    </div>
+
+                                    <div style="font-size: 12px; color: #6b7280; margin-top: 8px; font-style: italic;">
+                                        💡 ជ្រើសរើសវិធីបង់មួយ ឬច្រើន (ឧ. Bank + Cash)
                                     </div>
                                 </div>
 
@@ -2029,12 +2116,74 @@
         });
     }
 
-    // Payment method visibility and selection
+    // Payment method visibility and multi-select
     document.addEventListener('DOMContentLoaded', function() {
         const paymentStatusSelect = document.getElementById('payment_status');
         const paymentMethodField = document.getElementById('payment_method_field');
         const paymentMethodInput = document.getElementById('payment_method');
+        const paymentMethodsArray = document.getElementById('payment_methods_array');
+        const selectedMethodsDisplay = document.getElementById('selected_methods_tags');
         const paymentMethodBtns = document.querySelectorAll('.payment-method-btn');
+
+        const methodIcons = {
+            'Cash': 'fa-money-bill-wave',
+            'ABA': 'fa-university',
+            'ACLEDA': 'fa-university',
+            'Wing': 'fa-mobile-alt'
+        };
+
+        const methodLabels = {
+            'Cash': 'ប្រាក់សម្រាប់',
+            'ABA': 'ABA',
+            'ACLEDA': 'ACLEDA',
+            'Wing': 'Wing'
+        };
+
+        let selectedMethods = [];
+
+        function updatePaymentMethodsDisplay() {
+            selectedMethodsDisplay.innerHTML = '';
+
+            if (selectedMethods.length === 0) {
+                selectedMethodsDisplay.innerHTML = '<div style="color: #9ca3af; font-size: 13px;">វិធីបង់ប្រាក់មិនបានជ្រើសរើស</div>';
+                return;
+            }
+
+            selectedMethods.forEach((method, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'method-tag';
+                tag.innerHTML = `
+                    <i class="fas ${methodIcons[method]}"></i>
+                    <span>${methodLabels[method]}</span>
+                    <span class="method-tag-close" onclick="removePaymentMethod('${method}')" title="ដក">×</span>
+                `;
+                selectedMethodsDisplay.appendChild(tag);
+            });
+        }
+
+        window.removePaymentMethod = function(method) {
+            selectedMethods = selectedMethods.filter(m => m !== method);
+            updatePaymentSelection();
+            updatePaymentMethodsDisplay();
+        };
+
+        function updatePaymentSelection() {
+            const methodString = selectedMethods.join(' + ');
+            paymentMethodInput.value = methodString;
+            paymentMethodsArray.value = JSON.stringify(selectedMethods);
+
+            paymentMethodBtns.forEach(btn => {
+                const method = btn.getAttribute('data-method');
+                const check = btn.querySelector('.method-check');
+                if (selectedMethods.includes(method)) {
+                    btn.classList.add('active');
+                    check.style.display = 'flex';
+                } else {
+                    btn.classList.remove('active');
+                    check.style.display = 'none';
+                }
+            });
+        }
 
         function togglePaymentMethod() {
             if (paymentStatusSelect.value === 'paid') {
@@ -2043,32 +2192,35 @@
             } else {
                 paymentMethodField.style.display = 'none';
                 paymentMethodInput.removeAttribute('required');
-                paymentMethodBtns.forEach(btn => btn.classList.remove('active'));
-                paymentMethodInput.value = '';
+                selectedMethods = [];
+                updatePaymentSelection();
+                updatePaymentMethodsDisplay();
             }
         }
 
-        // Button selection handlers
+        // Button selection handlers - Toggle on click
         paymentMethodBtns.forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const method = this.getAttribute('data-method');
 
-                paymentMethodBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                paymentMethodInput.value = method;
-            });
+                if (selectedMethods.includes(method)) {
+                    selectedMethods = selectedMethods.filter(m => m !== method);
+                } else {
+                    selectedMethods.push(method);
+                }
 
-            // Pre-select if value matches old selection
-            if (paymentMethodInput.value && btn.getAttribute('data-method') === paymentMethodInput.value) {
-                btn.classList.add('active');
-            }
+                updatePaymentSelection();
+                updatePaymentMethodsDisplay();
+            });
         });
 
         if (paymentStatusSelect) {
             paymentStatusSelect.addEventListener('change', togglePaymentMethod);
             togglePaymentMethod();
         }
+
+        updatePaymentMethodsDisplay();
     });
 </script>
 @endpush
