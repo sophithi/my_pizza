@@ -39,10 +39,10 @@ class PaymentsExport
 
         // Data rows with dual currency
         foreach ($this->payments as $p) {
-            $totalKhr = ($p->total_amount ?? 0) * $exchangeRate;
-            $paidKhr = ($p->paid_amount ?? 0) * $exchangeRate;
+            $totalKhr = $p->total_amount_khr ?? ($p->total_amount ?? 0) * $exchangeRate;
+            $paidKhr = $p->paid_amount_khr ?? ($p->paid_amount ?? 0) * $exchangeRate;
             $balance = $p->balance ?? max(0, ($p->total_amount ?? 0) - ($p->paid_amount ?? 0));
-            $balanceKhr = $balance * $exchangeRate;
+            $balanceKhr = $p->balance_khr ?? $balance * $exchangeRate;
 
             fputcsv($handle, [
                 $p->order_id ?? '',

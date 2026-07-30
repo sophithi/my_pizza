@@ -82,7 +82,7 @@ class PaymentController extends Controller
 
         $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
         $totalAmountKhr = $payment?->total_amount_khr ?? $order->totalKhr();
-        $paidAmountKhr = $payment?->paid_amount_khr ?? 0;
+        $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $totalAmountKhr : 0);
 
         return (object) [
             'id' => $payment?->id,
@@ -117,8 +117,10 @@ class PaymentController extends Controller
         $all = (clone $query)->get()->map(fn($order) => $this->mapOrderToPaymentRow($order));
 
         return [
-            'collected'   => $all->sum('paid_amount'),
-            'outstanding' => $all->sum('balance'),
+            'collected'       => $all->sum('paid_amount'),
+            'collected_khr'   => $all->sum('paid_amount_khr'),
+            'outstanding'     => $all->sum('balance'),
+            'outstanding_khr' => $all->sum('balance_khr'),
             'total'       => $all->count(),
             'paid'        => $all->where('status', 'paid')->count(),
             'partial'     => $all->where('status', 'partial')->count(),

@@ -278,7 +278,7 @@
                     <div class="card-body py-3">
                         <div class="text-muted small text-uppercase mb-1">បានប្រមូល</div>
                         <div class="fs-5 fw-bold text-primary">${{ number_format($stats['collected'], 2) }}</div>
-                        <div class="small text-muted">៛{{ number_format($stats['collected'] * $exchangeRate, 0) }}</div>
+                        <div class="small text-muted">៛{{ number_format($stats['collected_khr'], 0) }}</div>
                     </div>
                 </div>
             </div>
@@ -287,7 +287,7 @@
                     <div class="card-body py-3">
                         <div class="text-muted small text-uppercase mb-1">នៅសល់</div>
                         <div class="fs-5 fw-bold text-danger">${{ number_format($stats['outstanding'], 2) }}</div>
-                        <div class="small text-muted">៛{{ number_format($stats['outstanding'] * $exchangeRate, 0) }}</div>
+                        <div class="small text-muted">៛{{ number_format($stats['outstanding_khr'], 0) }}</div>
                     </div>
                 </div>
             </div>
@@ -648,13 +648,18 @@
 
             const paidUsd = paymentLines.reduce((sum, line) => sum + lineAmountUsd(line), 0);
             const totalUsd = parseFloat(document.getElementById('f_total').value) || 0;
+            const totalKhr = parseFloat(document.getElementById('f_total_khr').value) || 0;
             const balanceUsd = Math.max(0, totalUsd - paidUsd);
+            // Anchor to totalKhr (ground truth) instead of re-deriving from the already-rounded
+            // USD figure, otherwise a fully-paid order can show a few riels "still owed".
+            const balanceKhr = Math.max(0, totalKhr - usdToKhr(paidUsd));
+            const paidKhr = totalKhr - balanceKhr;
 
             document.getElementById('f_paid').value = paidUsd.toFixed(2);
             document.getElementById('paidSummaryUsd').textContent = paidUsd.toFixed(2);
-            document.getElementById('paidSummaryKhr').textContent = usdToKhr(paidUsd).toLocaleString();
+            document.getElementById('paidSummaryKhr').textContent = paidKhr.toLocaleString();
             document.getElementById('balanceSummaryUsd').textContent = balanceUsd.toFixed(2);
-            document.getElementById('balanceSummaryKhr').textContent = usdToKhr(balanceUsd).toLocaleString();
+            document.getElementById('balanceSummaryKhr').textContent = balanceKhr.toLocaleString();
             document.getElementById('payment_lines_input').value = JSON.stringify(paymentLines);
             document.getElementById('f_method').value = [...new Set(paymentLines.map(line => line.method))].join(' + ') || 'Cash';
             updateStatusBadge();

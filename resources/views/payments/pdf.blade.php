@@ -177,12 +177,12 @@
         <div class="sm">
             <div class="sl">បានប្រមូលសរុប</div>
             <div class="sv" style="color:#059669">${{ number_format($stats['collected'], 2) }}<span
-                    class="khr">៛{{ number_format($stats['collected'] * $exchangeRate, 0) }}</span></div>
+                    class="khr">៛{{ number_format($stats['collected_khr'], 0) }}</span></div>
         </div>
         <div class="sm">
             <div class="sl">ចំនួននៅសល់</div>
             <div class="sv" style="color:#dc2626">${{ number_format($stats['outstanding'], 2) }}<span
-                    class="khr">៛{{ number_format($stats['outstanding'] * $exchangeRate, 0) }}</span></div>
+                    class="khr">៛{{ number_format($stats['outstanding_khr'], 0) }}</span></div>
         </div>
         <div class="sm">
             <div class="sl">ការបញ្ជាទិញ</div>

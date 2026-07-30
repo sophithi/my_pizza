@@ -57,11 +57,18 @@ class OrderController extends Controller
             ? ($smallPackQty * (float) $delivery->delivery_price_khr) + ($bigPackQty * (float) $delivery->delivery_price_khr_big)
             : 0;
         $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
-        $subtotal = (float) $validated['subtotal'];
-        $discountAmount = (float) ($validated['discount_amount'] ?? 0);
-        $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
+        $orderItems = json_decode($validated['order_items'], true) ?? [];
+        ['gross' => $grossSubtotalKhr, 'discount' => $itemDiscountKhr] = $this->summarizeItemsKhr($orderItems);
+        $netSubtotalKhr = $grossSubtotalKhr - $itemDiscountKhr;
+        $totalKhr = $netSubtotalKhr + $deliveryFeeKhr;
+        // USD figures are derived from the exact KHR totals with a single rounding
+        // step at the end, rather than trusting/summing already-rounded per-item
+        // USD amounts from the client — keeps every page's USD/KHR pair consistent.
+        $subtotal = round($netSubtotalKhr / 4000, 2);
+        $discountAmount = round($itemDiscountKhr / 4000, 2);
+        $totalAmount = round($totalKhr / 4000, 2);
 
-        [$order, $invoiceNumber, $warnings] = DB::transaction(function () use ($validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
+        [$order, $invoiceNumber, $warnings] = DB::transaction(function () use ($validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount, $orderItems) {
             // Create the order
             $order = Order::create([
                 'customer_id' => $validated['customer_id'],
@@ -83,8 +90,7 @@ class OrderController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            // Parse and create order items
-            $orderItems = json_decode($validated['order_items'], true);
+            // Create order items
             foreach ($orderItems as $item) {
                 \App\Models\OrderItem::create([
                     'order_id' => $order->id,
@@ -246,11 +252,15 @@ class OrderController extends Controller
             ? ($smallPackQty * (float) $delivery->delivery_price_khr) + ($bigPackQty * (float) $delivery->delivery_price_khr_big)
             : 0;
         $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
-        $subtotal = (float) $validated['subtotal'];
-        $discountAmount = (float) ($validated['discount_amount'] ?? 0);
-        $totalAmount = round($subtotal + $deliveryFeeUsd, 2);
+        $orderItems = json_decode($validated['order_items'], true) ?? [];
+        ['gross' => $grossSubtotalKhr, 'discount' => $itemDiscountKhr] = $this->summarizeItemsKhr($orderItems);
+        $netSubtotalKhr = $grossSubtotalKhr - $itemDiscountKhr;
+        $totalKhr = $netSubtotalKhr + $deliveryFeeKhr;
+        $subtotal = round($netSubtotalKhr / 4000, 2);
+        $discountAmount = round($itemDiscountKhr / 4000, 2);
+        $totalAmount = round($totalKhr / 4000, 2);
 
-        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount) {
+        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount, $orderItems) {
             $wasStockDeducted = (bool) $order->stock_deducted;
 
             if ($wasStockDeducted) {
@@ -276,7 +286,7 @@ class OrderController extends Controller
 
             $order->items()->delete();
 
-            foreach (json_decode($validated['order_items'], true) as $item) {
+            foreach ($orderItems as $item) {
                 \App\Models\OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
@@ -405,6 +415,31 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'ការបញ្ជាទិញបានបញ្ចប់។');
+    }
+
+    /**
+     * Sum gross KHR value and KHR discount across a decoded order_items
+     * payload, mirroring Order::grossSubtotalKhr()/itemDiscountKhr() so
+     * the total computed at store/update time always agrees with the
+     * canonical figure shown on every other page.
+     */
+    private function summarizeItemsKhr(array $orderItems): array
+    {
+        $gross = 0.0;
+        $discount = 0.0;
+
+        foreach ($orderItems as $item) {
+            $unitKhr = isset($item['unit_price_khr']) && $item['unit_price_khr'] !== null
+                ? (float) $item['unit_price_khr']
+                : (float) ($item['unit_price'] ?? 0) * 4000;
+            $lineGrossKhr = $unitKhr * (float) ($item['quantity'] ?? 0);
+            $discPercent = (float) ($item['discount_percent'] ?? 0);
+
+            $gross += $lineGrossKhr;
+            $discount += $lineGrossKhr * ($discPercent / 100);
+        }
+
+        return ['gross' => $gross, 'discount' => $discount];
     }
 
     private function deductInventoryForOrder(Order $order): array

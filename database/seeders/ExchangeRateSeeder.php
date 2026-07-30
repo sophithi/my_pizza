@@ -25,7 +25,7 @@ class ExchangeRateSeeder extends Seeder
                 'currency_code' => 'KHR',
                 'currency_name' => 'Cambodian Riel',
                 'symbol' => '៛',
-                'rate' => 4050.0000, // 1 USD ≈ 4050 KHR (adjust as needed)
+                'rate' => 4000.0000, // 1 USD = 4000 KHR (fixed project rate)
             ],
         ];
 

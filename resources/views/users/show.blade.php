@@ -301,7 +301,7 @@
                     </td>
                     <td>
                         <div style="font-weight: 700;">${{ number_format($order->total_amount, 2) }}</div>
-                        <div style="font-size: 11px; color: #6c757d;">៛{{ number_format($order->total_amount * 4000, 0) }}</div>
+                        <div style="font-size: 11px; color: #6c757d;">៛{{ number_format($order->totalKhr(), 0) }}</div>
                     </td>
                     <td>
                         <span class="badge-sm badge-{{ $order->status }}">

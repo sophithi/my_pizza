@@ -1444,7 +1444,7 @@
 
                                     <!-- Payment Method Selection Grid -->
                                     <div class="payment-methods-grid payment-multi-select">
-                                        <button type="button" class="payment-method-btn" data-method="Cash" title="ប្រាក់សម្រាប់">
+                                        <button type="button" class="payment-method-btn" data-method="Cash" title="លុយក្រៅ">
                                             <i class="fas fa-money-bill-wave"></i>
                                             <span>លុយក្រៅ</span>
                                             <span class="method-check" style="display:none;">✓</span>
