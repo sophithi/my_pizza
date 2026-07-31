@@ -2057,7 +2057,7 @@
             };
 
             const methodLabels = {
-                'Cash': 'ប្រាក់សម្រាប់',
+                'Cash': 'លុយក្រៅ',
                 'ABA': 'ABA',
                 'ACLEDA': 'ACLEDA',
                 'Wing': 'Wing'
