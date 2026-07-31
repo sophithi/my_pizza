@@ -394,6 +394,22 @@ class InvoiceController extends Controller
         ]);
 
         $invoice->update($validated);
+
+        // Keep the order's payment status in sync — every other page (orders,
+        // payments, dashboard, customer/user views) reads order.payment_status,
+        // not invoice.status, so this edit was previously invisible everywhere else.
+        // Only touch it when the status actually changed, and only downgrade an
+        // existing "paid" order back to "unpaid" — never clobber a genuine
+        // "partial" payment_status set from a real recorded payment.
+        if ($invoice->order && $invoice->wasChanged('status')) {
+            $order = $invoice->order;
+            if ($validated['status'] === 'paid') {
+                $order->update(['payment_status' => 'paid']);
+            } elseif ($order->payment_status === 'paid') {
+                $order->update(['payment_status' => 'unpaid']);
+            }
+        }
+
         return redirect()->route('invoices.show', $invoice)->with('success', 'Invoice updated successfully.');
     }
 

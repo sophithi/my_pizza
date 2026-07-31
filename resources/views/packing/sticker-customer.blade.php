@@ -278,7 +278,6 @@
             margin-bottom: 8px;
         }
 
-        /* ===== Save PDF button — new style (moved OUT of @media print so it's visible) ===== */
         .btn-save {
             display: inline-flex;
             align-items: center;
@@ -712,8 +711,8 @@
                 <p class="footer-meta">
                     @if($invoice->order?->user)
                         <span>អ្នកចេញវិក្ក័យបត្រ: {{ $invoice->order->user->name }}</span>
-                        <span>អ្នករៀបទំនិញ:.............. </span>
-                        <span>អ្នករៀបពិនិត្យ:.............. </span>
+                        <span>អ្នករៀបទំនិញ:..................</span>
+                        <span>អ្នកពិនិត្យ:.................. </span>
                     @endif
                        
                 </p>

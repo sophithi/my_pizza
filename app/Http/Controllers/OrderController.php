@@ -183,10 +183,17 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        $order->load('items.product', 'customer', 'delivery', 'invoice');
+        $order->load('items.product', 'customer', 'delivery', 'invoice', 'payments');
         $customers = \App\Models\Customer::all();
         $products = \App\Models\Product::all();
         $deliveries = \App\Models\Delivery::all();
+
+        // Existing payment method(s), e.g. "Cash + ABA", split back into an array
+        // so the edit form can pre-check the same buttons shown at order creation.
+        $existingPaymentMethod = optional($order->payments->first())->method ?? '';
+        $existingPaymentMethods = $existingPaymentMethod && $existingPaymentMethod !== '—'
+            ? array_values(array_filter(array_map('trim', explode('+', $existingPaymentMethod))))
+            : [];
 
         // Prepare data for JSON encoding
         $existingOrderItems = $order->paidItems->map(fn($item) => [
@@ -232,6 +239,7 @@ class OrderController extends Controller
             'deliveries',
             'existingOrderItems',
             'existingFreeProducts',
+            'existingPaymentMethods',
             'deliveryOptions',
             'allProducts',
             'productsArray'
@@ -261,7 +269,7 @@ class OrderController extends Controller
         $discountAmount = round($itemDiscountKhr / 4000, 2);
         $totalAmount = round($totalKhr / 4000, 2);
 
-        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount, $orderItems) {
+        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount, $totalKhr, $orderItems) {
             $wasStockDeducted = (bool) $order->stock_deducted;
 
             if ($wasStockDeducted) {
@@ -271,6 +279,7 @@ class OrderController extends Controller
             $order->update([
                 'customer_id' => $validated['customer_id'],
                 'delivery_id' => $delivery?->id,
+                'taxi_phone' => $validated['taxi_phone'] ?? null,
                 'box_qty' => $boxQty,
                 'small_pack_qty' => $smallPackQty,
                 'big_pack_qty' => $bigPackQty,
@@ -284,6 +293,29 @@ class OrderController extends Controller
                 'notes' => $validated['notes'] ?? null,
                 'stock_deducted' => false,
             ]);
+
+            // Keep the payment record's method in sync with what was chosen on
+            // this form, mirroring how store() records it when an order is first
+            // marked paid — otherwise an edited Cash/ABA/etc. selection is silently
+            // discarded and the edit form has nothing to show next time. Uses the
+            // $totalKhr computed above (not $order->totalKhr()) because the items
+            // relation may already be cached with the pre-edit items at this point
+            // (loaded by restoreInventoryForOrder() above when stock was deducted).
+            if (($validated['payment_status'] ?? $order->payment_status) === 'paid') {
+                \App\Models\Payment::updateOrCreate(
+                    ['order_id' => $order->id],
+                    [
+                        'customer_name' => $order->customer?->name ?? 'Walk-in Customer',
+                        'order_date' => $order->order_date,
+                        'total_amount' => $totalAmount,
+                        'total_amount_khr' => $totalKhr,
+                        'paid_amount' => $totalAmount,
+                        'paid_amount_khr' => $totalKhr,
+                        'method' => $validated['payment_method'] ?? 'Cash',
+                        'status' => 'paid',
+                    ]
+                );
+            }
 
             $order->items()->delete();
 

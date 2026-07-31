@@ -31,11 +31,27 @@ class UpdateOrderRequest extends FormRequest
             'big_pack_qty' => 'nullable|integer|min:0',
             'order_date' => 'required|date',
             'subtotal' => 'required|numeric|min:0',
+            'taxi_phone' => 'nullable|string|max:20',
             'discount_amount' => 'nullable|numeric|min:0',
             'delivery_fee_khr' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'in:pending,processing,completed,cancelled',
             'payment_status' => 'in:unpaid,partial,paid',
+            'payment_method' => ['nullable', function ($attribute, $value, $fail) {
+                if (!$value) {
+                    return;
+                }
+
+                $allowed = ['Cash', 'ABA', 'ACLEDA', 'Wing'];
+                $methods = array_filter(array_map('trim', explode('+', $value)));
+
+                foreach ($methods as $method) {
+                    if (!in_array($method, $allowed, true)) {
+                        $fail('The selected payment method is invalid.');
+                        return;
+                    }
+                }
+            }],
             'notes' => 'nullable|string',
             'order_items' => 'required|json',
             'free_products' => 'nullable|array',

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Sticker - {{ $invoice->invoice_number }}</title>
+    <title>Sticker - {{ $invoice->invoice_number }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -223,7 +223,7 @@
         }
 
         .footer-contact {
-            font-size: 12pt;
+            font-size: 20pt;
             color: rgb(0, 0, 0);
         }
 
@@ -372,7 +372,7 @@
             </div>
             <div class="brand-container">
                 <div class="brand-name">ភីហ្សាគ្រួសាររីករាយ-Pizza Happy Family</div>
-                <div class="brand-sub-title">ផលិតផលគុណភាពខ្ពស់ ផលិតដោយកូនខ្មែរ រសជាតិឆ្ងាញ់</div>
+                <!-- <div class="brand-sub-title">ផលិតផលគុណភាពខ្ពស់ ផលិតដោយកូនខ្មែរ រសជាតិឆ្ងាញ់</div> -->
             </div>
         </div>
 
@@ -399,45 +399,46 @@
             {{-- Customer name --}}
             <div class="info-row row-name">
                 <div class="row-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    <!-- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
+                   <circle cx="12" cy="7" r="4" />
+                    </svg>      -->
                     អតិថិជន
                 </div>
                 <div class="row-divider"></div>
-                <div class="row-value">{{ $invoice->order->customer->name ?? 'N/A' }}</div>
+                <div class="row-value">{{ $invoice->order->customer->name ?? '#' }}</div>
             </div>
 
             {{-- Address --}}
             <div class="info-row row-addr">
                 <div class="row-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    <!-- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M12 21s-7-6.5-7-11a7 7 0 0114 0c0 4.5-7 11-7 11z" />
                         <circle cx="12" cy="10" r="2" />
-                    </svg>
+                    </svg> -->
                     ទីតាំង
                 </div>
                 <div class="row-divider"></div>
-                <div class="row-value">{{ $invoice->order->customer->address ?? 'N/A' }}</div>
+                <div class="row-value">{{ $invoice->order->customer->address ?? '#' }}</div>
             </div>
 
             {{-- Customer phone --}}
             <div class="info-row row-phone">
                 <div class="row-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    <!-- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path
                             d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 4.18 2 2 0 015.08 2h3a2 2 0 012 1.72c.13 1 .37 1.97.71 2.9a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006.99 7l1.18-1.18a2 2 0 012.11-.45c.93.34 1.9.58 2.9.71A2 2 0 0122 16.92z" />
-                    </svg>
+                    </svg> -->
                     លេខអ្នកទទួល
                 </div>
                 <div class="row-divider"></div>
-                <div class="row-value">{{ $invoice->order->customer->phone ?? 'N/A' }}</div>
+                <div class="row-value">{{ $invoice->order->customer->phone ?? '#' }}</div>
             </div>
-            {{-- Sender phone --}}
+            {{-- Sender taxi phone --}}
+            @if(!empty($invoice->order->taxi_phone))
             <div class="info-row row-sender">
                 <div class="row-label">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
@@ -445,16 +446,29 @@
                         <path
                             d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 4.18 2 2 0 015.08 2h3a2 2 0 012 1.72c.13 1 .37 1.97.71 2.9a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006.99 7l1.18-1.18a2 2 0 012.11-.45c.93.34 1.9.58 2.9.71A2 2 0 0122 16.92z" />
                     </svg>
-                    លេខអ្នកផ្ញើរ
+                    លេខតាក់សុី
                 </div>
                 <div class="row-divider"></div>
+                <div class="row-value">{{ $invoice->order->taxi_phone }}</div>
+            </div>
+            @endif
+            {{-- Sender phone --}}
+            <div class="info-row row-sender">
+                <div class="row-label">
+                    <!-- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                            d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 4.18 2 2 0 015.08 2h3a2 2 0 012 1.72c.13 1 .37 1.97.71 2.9a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006.99 7l1.18-1.18a2 2 0 012.11-.45c.93.34 1.9.58 2.9.71A2 2 0 0122 16.92z" />
+                    </svg> -->
+                    លេខអ្នកផ្ញើរ
+                </div>
                 <div class="row-value">
                     {{ $invoice->order->sender_phone ?? config('app.sender_phone', '097 545 9339 / 096 745 7775') }}
                 </div>
             </div>
-
-        </div>{{-- /body --}}
-
+            
+        </div>
+       
         {{-- Footer --}}
         <div class="footer">
             <div class="footer-contact">
@@ -475,14 +489,14 @@
                 <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
                 <rect x="6" y="14" width="12" height="8" />
             </svg>
-            Print Sticker
+            ព្រីន
         </button>
         <a class="btn btn-back" href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6" />
             </svg>
-            Back
+            ត្រឡប់
         </a>
     </div>
 
