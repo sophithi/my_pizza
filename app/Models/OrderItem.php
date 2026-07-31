@@ -51,6 +51,15 @@ class OrderItem extends Model
     }
 
     /**
+     * This line's USD total, derived from the KHR total (ground truth) rather than
+     * the stored total_price, which may be a rounded per-unit price x quantity.
+     */
+    public function lineTotalUsd(int $rate = 4000): float
+    {
+        return $this->lineTotalKhr() / $rate;
+    }
+
+    /**
      * Get the order associated with this item.
      */
     public function order()

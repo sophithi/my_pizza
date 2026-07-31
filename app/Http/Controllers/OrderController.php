@@ -136,6 +136,7 @@ class OrderController extends Controller
                 'delivery_fee_khr' => $order->delivery_fee_khr,
                 'delivery_fee_usd' => $order->delivery_fee_usd,
                 'total_amount' => $order->total_amount,
+                'status' => $order->payment_status === 'paid' ? 'paid' : 'draft',
                 'notes' => $order->notes ?? null,
             ]);
 
@@ -326,6 +327,9 @@ class OrderController extends Controller
                     'delivery_fee_khr' => $order->delivery_fee_khr,
                     'delivery_fee_usd' => $order->delivery_fee_usd,
                     'total_amount' => $order->total_amount,
+                    'status' => $order->invoice->status === 'cancelled'
+                        ? 'cancelled'
+                        : ($order->payment_status === 'paid' ? 'paid' : 'draft'),
                     'packing_sent_at' => null,
                     'packing_completed_at' => null,
                     'notes' => $order->notes ?? null,
@@ -408,6 +412,7 @@ class OrderController extends Controller
                 'delivery_fee_khr' => $order->delivery_fee_khr,
                 'delivery_fee_usd' => $order->delivery_fee_usd,
                 'total_amount' => $order->total_amount,
+                'status' => $order->payment_status === 'paid' ? 'paid' : 'draft',
                 'notes' => $order->notes ?? null,
             ]);
 

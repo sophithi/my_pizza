@@ -580,7 +580,7 @@
                                             @endif
                                         </td>
                                         <td class="text-end">
-                                            <strong>${{ number_format($row->total_price, 2) }}</strong>
+                                            <strong>${{ number_format($row->lineTotalUsd(), 2) }}</strong>
                                             <div class="text-muted small">៛{{ number_format($rowTotalKhr, 0) }}</div>
                                         </td>
                                     @endif

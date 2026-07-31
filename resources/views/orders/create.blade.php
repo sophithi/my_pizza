@@ -1922,8 +1922,10 @@
                 const disc            = parseFloat(item.discount || 0);
                 const discPrice       = item.price     * (1 - disc / 100);
                 const discPriceKhr    = item.price_khr * (1 - disc / 100);
-                const itemTotal       = discPrice    * item.qty;
                 const itemTotalKhr    = discPriceKhr * item.qty;
+                // USD total is derived from the KHR line total (ground truth), not the
+                // rounded per-unit USD price × qty, to avoid drift at scale — see calculateTotal().
+                const itemTotal       = itemTotalKhr / exchangeRate;
                 const customBadge     = item.is_custom_price
                     ? '<span class="custom-price-badge">-</span>' : '';
 
@@ -2006,20 +2008,24 @@
 
     /* ─── Calculate totals ──────────────────────────────────── */
     function calculateTotal() {
-        let subtotal = 0, subtotalKhr = 0, totalDiscount = 0, totalDiscountKhr = 0;
-        let grossSubtotal = 0, grossSubtotalKhr = 0;
+        let subtotalKhr = 0, totalDiscountKhr = 0, grossSubtotalKhr = 0;
 
         Object.values(cart).forEach(item => {
             const disc          = parseFloat(item.discount || 0);
-            const discPrice     = item.price     * (1 - disc / 100);
             const discPriceKhr  = item.price_khr * (1 - disc / 100);
-            subtotal         += discPrice    * item.qty;
-            subtotalKhr      += discPriceKhr * item.qty;
-            grossSubtotal    += item.price     * item.qty;
-            grossSubtotalKhr += item.price_khr * item.qty;
-            totalDiscount    += (item.price     * item.qty) - (discPrice    * item.qty);
-            totalDiscountKhr += (item.price_khr * item.qty) - (discPriceKhr * item.qty);
+            const lineGrossKhr  = item.price_khr * item.qty;
+            const lineNetKhr    = discPriceKhr    * item.qty;
+            subtotalKhr      += lineNetKhr;
+            grossSubtotalKhr += lineGrossKhr;
+            totalDiscountKhr += lineGrossKhr - lineNetKhr;
         });
+
+        // USD figures are always derived from the KHR totals (KHR is the base currency
+        // here) rather than summing per-item USD prices, which are rounded to 2dp and
+        // drift from the true KHR-derived amount once quantities scale up.
+        const subtotal      = subtotalKhr      / exchangeRate;
+        const grossSubtotal = grossSubtotalKhr / exchangeRate;
+        const totalDiscount = totalDiscountKhr / exchangeRate;
 
         const deliveryFeeKhr = getSelectedDeliveryFeeKhr();
         const deliveryFeeUsd = deliveryFeeKhr / exchangeRate;
@@ -2048,14 +2054,16 @@
         const orderItems = [];
         Object.entries(cart).forEach(([productId, item]) => {
             const disc         = parseFloat(item.discount || 0);
-            const discPrice    = item.price * (1 - disc / 100);
+            // total_price is derived from the KHR line total (ground truth), not the
+            // rounded per-unit USD price × qty, so it matches order.total_amount exactly.
+            const lineTotalKhr = item.price_khr * (1 - disc / 100) * item.qty;
             orderItems.push({
                 product_id:       parseInt(productId),
                 quantity:         item.qty,
                 unit_price:       item.price,
                 unit_price_khr:   item.price_khr,
                 discount_percent: disc,
-                total_price:      discPrice * item.qty,
+                total_price:      lineTotalKhr / exchangeRate,
                 is_custom_price:  item.is_custom_price || false,
                 delivery_id:      deliveryId ? parseInt(deliveryId) : null
             });

@@ -169,13 +169,25 @@ function onUsdInput(val) {
     document.getElementById('price_khr').value = Math.round(usd * currentExchangeRate);
 }
 
+// Ties (e.g. 1500/4000 = 0.375) round DOWN to the cent below, not up —
+// matches the stored decimal(10,2) column, which can't hold a third decimal.
+function roundHalfDown(value, precision) {
+    const factor = Math.pow(10, precision);
+    const scaled = value * factor;
+    const floor = Math.floor(scaled);
+    if (Math.abs(scaled - floor - 0.5) < 1e-6) {
+        return floor / factor;
+    }
+    return Math.round(scaled) / factor;
+}
+
 function onKhrInput(val) {
     const khr = parseFloat(val);
     if (isNaN(khr)) {
         document.getElementById('price_usd').value = '';
         return;
     }
-    document.getElementById('price_usd').value = parseFloat((khr / currentExchangeRate).toFixed(3));
+    document.getElementById('price_usd').value = roundHalfDown(khr / currentExchangeRate, 2);
 }
 
 document.addEventListener('DOMContentLoaded', function () {

@@ -430,25 +430,21 @@
                                         <span class="status-pill status-other">
                                        No invoice
                                         </span>
-                                    @elseif($invoice->status == 'paid')
-                                        <span class="status-pill status-paid">
-                                            <i class="fas fa-check-circle"></i> បានទូទាត់
-                                        </span>
-                                    @elseif($invoice->status == 'sent')
-                                        <span class="status-pill status-sent">
-                                            <i class="fas fa-clock"></i> មិនទាន់ទូទាត់
-                                        </span>
                                     @elseif($invoice->status == 'cancelled')
                                         <span class="status-pill status-cancelled">
                                             <i class="fas fa-times-circle"></i> មិនទូទាត់
                                         </span>
-                                    @elseif($invoice->status == 'draft')
+                                    @elseif($order->payment_status == 'paid')
+                                        <span class="status-pill status-paid">
+                                            <i class="fas fa-check-circle"></i> បានទូទាត់
+                                        </span>
+                                    @elseif($order->payment_status == 'partial')
                                         <span class="status-pill status-draft">
-                                            <i class="fas fa-clock"></i> មិនទាន់ទូទាត់
+                                            <i class="fas fa-adjust"></i> បង់មួយផ្នែក
                                         </span>
                                     @else
-                                        <span class="status-pill status-other">
-                                            {{ ucfirst($invoice->status) }}
+                                        <span class="status-pill status-sent">
+                                            <i class="fas fa-clock"></i> មិនទាន់ទូទាត់
                                         </span>
                                     @endif
                                 </td>

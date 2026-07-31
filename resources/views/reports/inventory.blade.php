@@ -40,7 +40,7 @@
         <div class="report-head">
             <div>
                 <h2 class="report-title">របាយការណ៍ស្តុក</h2>
-                <p class="report-subtitle">ពិនិត្យស្តុកបច្ចុប្បន្ន តម្លៃទំនិញ និងតម្លៃស្តុកសរុប។</p>
+                <p class="report-subtitle">ពិនិត្យស្តុកបច្ចុប្បន្ន តម្លៃទំនិញ និងតម្លៃស្តុកសរុប</p>
             </div>
             <a href="{{ route('reports.dashboard') }}" class="report-btn">Back</a>
         </div>
@@ -109,12 +109,13 @@
                             @php
                                 $unitPriceUsd = (float) ($inv->product?->price_usd ?? 0);
                                 $unitPriceKhr = (float) ($inv->product?->price_khr ?? 0);
-                                $valueUsd = $unitPriceUsd * (float) $inv->quantity;
-                                $valueKhr = $unitPriceKhr * (float) $inv->quantity;
+                                $onHandQty = max((float) $inv->quantity, 0);
+                                $valueUsd = $unitPriceUsd * $onHandQty;
+                                $valueKhr = $unitPriceKhr * $onHandQty;
                             @endphp
                             <tr>
                                 <td class="fw-bold">{{ optional($inv->product)->name ?? 'N/A' }}</td>
-                                <td class="text-end">{{ number_format($inv->quantity) }}</td>
+                                <td class="text-end {{ $inv->quantity < 0 ? 'text-danger fw-bold' : '' }}">{{ number_format($inv->quantity) }}</td>
                                 <td class="text-end">{{ number_format($inv->reorder_level) }}</td>
                                 <td class="text-end">
                                     <strong>${{ number_format($unitPriceUsd, 2) }}</strong>
@@ -125,7 +126,7 @@
                                     <div class="text-muted small">៛{{ number_format($valueKhr, 0) }}</div>
                                 </td>
                                 <td class="text-center">
-                                    @if ($inv->quantity == 0)
+                                    @if ($inv->quantity <= 0)
                                         <span class="status-pill status-out">អស់</span>
                                     @elseif ($inv->quantity <= $inv->reorder_level)
                                         <span class="status-pill status-low">ជិតអស់</span>

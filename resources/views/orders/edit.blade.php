@@ -2004,8 +2004,10 @@
                 const discountPercent = parseFloat(item.discount || 0);
                 const discountedPrice = item.price * (1 - discountPercent / 100);
                 const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
-                const itemTotal = discountedPrice * item.qty;
                 const itemTotalKhr = discountedPriceKhr * item.qty;
+                // USD total is derived from the KHR line total (ground truth), not the
+                // rounded per-unit USD price × qty, to avoid drift at scale — see calculateTotal().
+                const itemTotal = itemTotalKhr / exchangeRate;
                 const customBadge = item.is_custom_price
                     ? '<span class="custom-price-badge"><i class="fas fa-tag"></i> តម្លៃពិសេស</span>' : '';
 
@@ -2087,27 +2089,26 @@
     }
 
     function calculateTotal() {
-        let subtotal = 0;
         let subtotalKhr = 0;
-        let totalDiscount = 0;
         let totalDiscountKhr = 0;
-        let grossSubtotal = 0;
         let grossSubtotalKhr = 0;
 
         Object.values(cart).forEach(item => {
             const discountPercent = parseFloat(item.discount || 0);
-            const discountedPrice = item.price * (1 - discountPercent / 100);
             const discountedPriceKhr = item.price_khr * (1 - discountPercent / 100);
-            const itemDiscount = item.price * item.qty - discountedPrice * item.qty;
             const itemDiscountKhr = item.price_khr * item.qty - discountedPriceKhr * item.qty;
 
-            subtotal += discountedPrice * item.qty;
             subtotalKhr += discountedPriceKhr * item.qty;
-            grossSubtotal += item.price * item.qty;
             grossSubtotalKhr += item.price_khr * item.qty;
-            totalDiscount += itemDiscount;
             totalDiscountKhr += itemDiscountKhr;
         });
+
+        // USD figures are always derived from the KHR totals (KHR is the base currency
+        // here) rather than summing per-item USD prices, which are rounded to 2dp and
+        // drift from the true KHR-derived amount once quantities scale up.
+        const subtotal = subtotalKhr / exchangeRate;
+        const grossSubtotal = grossSubtotalKhr / exchangeRate;
+        const totalDiscount = totalDiscountKhr / exchangeRate;
 
         const deliveryFeeKhr = getSelectedDeliveryFeeKhr();
         const deliveryFeeUsd = deliveryFeeKhr / exchangeRate;
@@ -2136,14 +2137,16 @@
         const orderItems = [];
         Object.entries(cart).forEach(([productId, item]) => {
             const discountPercent = parseFloat(item.discount || 0);
-            const discountedPrice = item.price * (1 - discountPercent / 100);
+            // total_price is derived from the KHR line total (ground truth), not the
+            // rounded per-unit USD price × qty, so it matches order.total_amount exactly.
+            const lineTotalKhr = item.price_khr * (1 - discountPercent / 100) * item.qty;
             orderItems.push({
                 product_id: parseInt(productId),
                 quantity: item.qty,
                 unit_price: item.price,
                 unit_price_khr: item.price_khr,
                 discount_percent: discountPercent,
-                total_price: discountedPrice * item.qty,
+                total_price: lineTotalKhr / exchangeRate,
                 is_custom_price: item.is_custom_price || false,
                 delivery_id: deliveryId ? parseInt(deliveryId) : null
             });

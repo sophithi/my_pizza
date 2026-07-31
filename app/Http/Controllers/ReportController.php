@@ -112,17 +112,19 @@ class ReportController extends Controller
 
         // Overall metrics
         $totalOrders = $query->count();
-        $totalRevenue = $query->sum('total_amount');
+        $totalRevenue = (clone $query)->where('status', '!=', 'cancelled')->sum('total_amount');
         $averageOrderValue = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 0;
         $completedOrders = (clone $query)->where('status', 'completed')->count();
         $pendingOrders = (clone $query)->where('status', 'pending')->count();
 
-        // Revenue by product
+        // Revenue by product (cancelled orders don't count as sold)
         $productRevenue = Product::with(['orderItems' => function ($q) use ($dateRange) {
+            $q->whereHas('order', fn($oq) => $oq->where('status', '!=', 'cancelled'));
             if ($dateRange['start']) $q->whereDate('created_at', '>=', $dateRange['start']);
             if ($dateRange['end']) $q->whereDate('created_at', '<=', $dateRange['end']);
         }])
             ->withCount(['orderItems' => function ($q) use ($dateRange) {
+                $q->whereHas('order', fn($oq) => $oq->where('status', '!=', 'cancelled'));
                 if ($dateRange['start']) $q->whereDate('created_at', '>=', $dateRange['start']);
                 if ($dateRange['end']) $q->whereDate('created_at', '<=', $dateRange['end']);
             }])
@@ -136,8 +138,9 @@ class ReportController extends Controller
             ->selectRaw('status, COUNT(*) as count, SUM(total_amount) as total')
             ->get();
 
-        // Revenue by customer (top 10)
+        // Revenue by customer (top 10, cancelled orders excluded)
         $customerRevenue = Customer::withSum(['orders' => function ($q) use ($dateRange) {
+            $q->where('status', '!=', 'cancelled');
             if ($dateRange['start']) $q->whereDate('order_date', '>=', $dateRange['start']);
             if ($dateRange['end']) $q->whereDate('order_date', '<=', $dateRange['end']);
         }], 'total_amount')
@@ -173,10 +176,10 @@ class ReportController extends Controller
         $lowStockProducts = Inventory::whereRaw('quantity <= reorder_level')
             ->with('product')
             ->get();
-        $outOfStockCount = Inventory::where('quantity', 0)->count();
+        $outOfStockCount = Inventory::where('quantity', '<=', 0)->count();
         $totalInventoryValue = Inventory::query()
             ->join('products', 'products.id', '=', 'inventories.product_id')
-            ->selectRaw('SUM(inventories.quantity * COALESCE(NULLIF(inventories.cost_per_unit, 0), products.price_usd, 0)) as total')
+            ->selectRaw('SUM(GREATEST(inventories.quantity, 0) * COALESCE(NULLIF(inventories.cost_per_unit, 0), products.price_usd, 0)) as total')
             ->value('total') ?? 0;
 
         // All inventory with stock status
@@ -223,6 +226,7 @@ class ReportController extends Controller
             if ($dateRange['end']) $q->whereDate('order_date', '<=', $dateRange['end']);
         }])
             ->withSum(['orders' => function ($q) use ($dateRange) {
+                $q->where('status', '!=', 'cancelled');
                 if ($dateRange['start']) $q->whereDate('order_date', '>=', $dateRange['start']);
                 if ($dateRange['end']) $q->whereDate('order_date', '<=', $dateRange['end']);
             }], 'total_amount')
@@ -261,7 +265,7 @@ class ReportController extends Controller
             $query->whereDate('order_date', '<=', $dateRange['end']);
         }
 
-        $totalRevenue = (clone $query)->sum('total_amount');
+        $totalRevenue = (clone $query)->where('status', '!=', 'cancelled')->sum('total_amount');
         $totalOrders = (clone $query)->count();
         $totalProducts = Product::count();
         $totalCustomers = Customer::count();
@@ -295,6 +299,7 @@ class ReportController extends Controller
     private function getChartData($period, $dateRange)
     {
         $query = Order::selectRaw('DATE(order_date) as date, SUM(total_amount) as total, COUNT(*) as count')
+            ->where('status', '!=', 'cancelled')
             ->groupByRaw('DATE(order_date)');
 
         if ($dateRange['start']) {
@@ -357,7 +362,8 @@ class ReportController extends Controller
     {
         $query = Order::selectRaw(
             'DATE(order_date) as date, SUM(total_amount) as total, COUNT(*) as count'
-        )->groupByRaw('DATE(order_date)');
+        )->where('status', '!=', 'cancelled')
+            ->groupByRaw('DATE(order_date)');
 
         if ($dateRange['start']) {
             $query->whereDate('order_date', '>=', $dateRange['start']);

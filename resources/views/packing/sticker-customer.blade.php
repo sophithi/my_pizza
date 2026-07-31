@@ -204,7 +204,7 @@
 
         .free-product-item {
             margin: 2px 0 2px 12px;
-            color: #059669;
+            color: #e85d24;
             text-align: left;
         }
 
@@ -712,7 +712,8 @@
                 <p class="footer-meta">
                     @if($invoice->order?->user)
                         <span>អ្នកចេញវិក្ក័យបត្រ: {{ $invoice->order->user->name }}</span>
-                         <span>អ្នករៀបទំនិញ: </span>
+                        <span>អ្នករៀបទំនិញ:.............. </span>
+                        <span>អ្នករៀបពិនិត្យ:.............. </span>
                     @endif
                        
                 </p>

@@ -235,12 +235,8 @@ class PaymentController extends Controller
         // Also update linked invoice status (if an invoice exists for this order)
         try {
             $invoice = \App\Models\Invoice::where('order_id', $order->id)->first();
-            if ($invoice) {
-                $invoiceStatus = match ($data['status']) {
-                    'paid' => 'paid',
-                    'partial' => 'pending',
-                    default => 'pending',
-                };
+            if ($invoice && $invoice->status !== 'cancelled') {
+                $invoiceStatus = $data['status'] === 'paid' ? 'paid' : 'draft';
                 $invoice->update(['status' => $invoiceStatus]);
             }
         } catch (\Throwable $e) {
@@ -329,12 +325,8 @@ class PaymentController extends Controller
             // Also update linked invoice status (if an invoice exists for this order)
             try {
                 $invoice = \App\Models\Invoice::where('order_id', $order->id)->first();
-                if ($invoice) {
-                    $invoiceStatus = match ($data['status']) {
-                        'paid' => 'paid',
-                        'partial' => 'pending',
-                        default => 'pending',
-                    };
+                if ($invoice && $invoice->status !== 'cancelled') {
+                    $invoiceStatus = $data['status'] === 'paid' ? 'paid' : 'draft';
                     $invoice->update(['status' => $invoiceStatus]);
                 }
             } catch (\Throwable $e) {
