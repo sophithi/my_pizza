@@ -48,13 +48,17 @@ header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         <thead>
             <tr>
                 <th width="60">លេខរៀង</th>
-                <th width="110">លេខវិក្ក័យបត្រ</th>
+                @if($delivery->show_invoice_info)
+                    <th width="110">លេខវិក្ក័យបត្រ</th>
+                @endif
                 <th width="150">ឈ្មោះអតិថិជន</th>
                 <th width="120">លេខទំនាក់ទំនង</th>
                 <th width="80">កេសតូច</th>
                 <th width="80">កេសធំ</th>
                 <th width="110">ថ្លៃដឹក (៛)</th>
-                <th width="110">តម្លៃសរុប ($)</th>
+                @if($delivery->show_invoice_info)
+                    <th width="110">តម្លៃសរុប ($)</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -73,25 +77,31 @@ header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
                 @endphp
                 <tr>
                     <td class="center">{{ $loop->iteration }}</td>
-                    <td>{{ $invoice?->invoice_number ?? 'N/A' }}</td>
+                    @if($delivery->show_invoice_info)
+                        <td>{{ $invoice?->invoice_number ?? 'N/A' }}</td>
+                    @endif
                     <td>{{ $customer?->name ?? 'N/A' }}</td>
                     <td>{{ $customer?->phone ?? '—' }}</td>
                     <td class="center">{{ $smallQty }}</td>
                     <td class="center">{{ $bigQty }}</td>
                     <td class="currency">{{ number_format($fee, 0) }}</td>
-                    <td class="currency">{{ number_format($totalPrice, 2) }}</td>
+                    @if($delivery->show_invoice_info)
+                        <td class="currency">{{ number_format($totalPrice, 2) }}</td>
+                    @endif
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" style="text-align: center; color: #9ca3af;">មិនមានវិក្ក័យបត្រ</td>
+                    <td colspan="{{ $delivery->show_invoice_info ? 8 : 6 }}" style="text-align: center; color: #9ca3af;">មិនមានវិក្ក័យបត្រ</td>
                 </tr>
             @endforelse
             <tr class="total-row">
-                <td colspan="4"><strong>សរុប</strong></td>
+                <td colspan="{{ $delivery->show_invoice_info ? 4 : 3 }}"><strong>សរុប</strong></td>
                 <td class="center"><strong>{{ $totalSmall }}</strong></td>
                 <td class="center"><strong>{{ $totalBig }}</strong></td>
                 <td class="currency"><strong>{{ number_format($totalFee, 0) }}</strong></td>
-                <td class="currency"><strong>{{ number_format($totalAmount, 2) }}</strong></td>
+                @if($delivery->show_invoice_info)
+                    <td class="currency"><strong>{{ number_format($totalAmount, 2) }}</strong></td>
+                @endif
             </tr>
         </tbody>
     </table>

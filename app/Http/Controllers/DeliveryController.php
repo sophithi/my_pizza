@@ -38,7 +38,8 @@ class DeliveryController extends Controller
             'delivery_desc' => 'nullable|string',
         ]);
 
-        Delivery::create($request->only('delivery_name', 'delivery_price_khr', 'delivery_price_khr_big', 'delivery_desc'));
+        Delivery::create($request->only('delivery_name', 'delivery_price_khr', 'delivery_price_khr_big', 'delivery_desc')
+            + ['show_invoice_info' => $request->boolean('show_invoice_info')]);
 
         return redirect()->route('deliveries.index')
             ->with('success', 'Created successfully!');
@@ -50,7 +51,7 @@ class DeliveryController extends Controller
 
         $delivery->load([
             'orders' => function ($query) use ($startDate, $endDate) {
-                $query->with(['invoice', 'customer'])->latest();
+                $query->with(['invoice', 'customer', 'items'])->latest();
 
                 if ($startDate && $endDate) {
                     $query->whereBetween('created_at', [
@@ -78,7 +79,8 @@ class DeliveryController extends Controller
             'delivery_desc' => 'nullable|string',
         ]);
 
-        $delivery->update($request->only('delivery_name', 'delivery_price_khr', 'delivery_price_khr_big', 'delivery_desc'));
+        $delivery->update($request->only('delivery_name', 'delivery_price_khr', 'delivery_price_khr_big', 'delivery_desc')
+            + ['show_invoice_info' => $request->boolean('show_invoice_info')]);
 
         return redirect()->route('deliveries.index')
             ->with('success', 'Updated successfully!');
@@ -101,6 +103,7 @@ class DeliveryController extends Controller
         $validated = $request->validate([
             'small_pack_qty' => 'required|integer|min:0',
             'big_pack_qty' => 'required|integer|min:0',
+            'address' => 'nullable|string|max:500',
         ]);
 
         $deliveryFeeKhr = ($validated['small_pack_qty'] * (float) $delivery->delivery_price_khr)
@@ -112,10 +115,16 @@ class DeliveryController extends Controller
             'delivery_fee_khr' => $deliveryFeeKhr,
         ]);
 
+        if ($order->customer && $request->has('address')) {
+            $order->customer->update(['address' => $validated['address']]);
+        }
+
         return response()->json([
             'small_pack_qty' => $order->small_pack_qty,
             'big_pack_qty' => $order->big_pack_qty,
             'delivery_fee_khr' => (float) $order->delivery_fee_khr,
+            'address' => $order->customer?->address,
+            'customer_id' => $order->customer_id,
         ]);
     }
 

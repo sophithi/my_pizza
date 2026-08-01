@@ -219,11 +219,21 @@
                             @error('delivery_price_khr_big') <div class="error-msg">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="form-group" style="margin-bottom: 0;">
+                        <div class="form-group">
                             <label>ផ្សេងៗ</label>
                             <textarea name="delivery_desc" class="form-control" rows="4"
                                 placeholder="...">{{ old('delivery_desc') }}</textarea>
                             @error('delivery_desc') <div class="error-msg">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="display:flex; align-items:center; gap:8px; margin-bottom:0;">
+                                <input type="checkbox" name="show_invoice_info" value="1"
+                                    {{ old('show_invoice_info', true) ? 'checked' : '' }}
+                                    style="width:16px; height:16px; margin:0;">
+                                បង្ហាញលេខវិក្ក័យបត្រ និងតម្លៃសរុប
+                            </label>
+                            @error('show_invoice_info') <div class="error-msg">{{ $message }}</div> @enderror
                         </div>
                     </div>
 

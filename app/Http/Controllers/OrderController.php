@@ -381,6 +381,17 @@ class OrderController extends Controller
     {
         DB::transaction(function () use ($order) {
             $this->restoreInventoryForOrder($order);
+
+            // Order and invoice are always trashed/restored as a pair (see
+            // InvoiceController::destroy) — cascade here too so deleting from
+            // the order side never leaves an active invoice pointing at a
+            // trashed order.
+            if ($invoice = $order->invoice) {
+                $invoice->update(['deleted_by' => auth()->id()]);
+                $invoice->delete();
+            }
+
+            $order->update(['deleted_by' => auth()->id()]);
             $order->delete();
         });
 

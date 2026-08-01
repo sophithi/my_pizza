@@ -49,12 +49,14 @@
                                     style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500;">
                                     Cancel
                                 </a>
-                                <button type="button"
-                                    onclick="if(confirm('លុបវិក្កយបត្រនេះ?')) document.getElementById('delete-invoice-form').submit();"
-                                    class="btn"
-                                    style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
+                                @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+                                    <button type="button"
+                                        onclick="if(confirm('លុបវិក្កយបត្រនេះ?')) document.getElementById('delete-invoice-form').submit();"
+                                        class="btn"
+                                        style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                @endif
                             </div>
                         </form>
 

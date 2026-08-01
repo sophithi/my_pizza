@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Delivery;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
@@ -63,6 +64,26 @@ class PaymentController extends Controller
 
                 if (preg_match('/(\d+)/', $search, $matches)) {
                     $q->orWhere('id', (int) $matches[1]);
+                }
+            });
+        }
+
+        // Delivery filter
+        if ($deliveryId = $request->get('delivery_id')) {
+            $query->where('delivery_id', $deliveryId);
+        }
+
+        // Payment method filter — payments.method is a "+"-joined summary
+        // (e.g. "Cash + ABA"), so match by substring rather than exact value.
+        if ($method = $request->get('method')) {
+            $query->whereHas('payments', function ($q) use ($method) {
+                if ($method === 'other') {
+                    $q->where('method', 'not like', '%Cash%')
+                        ->where('method', 'not like', '%ABA%')
+                        ->where('method', 'not like', '%ACLEDA%')
+                        ->where('method', '!=', '—');
+                } else {
+                    $q->where('method', 'like', "%{$method}%");
                 }
             });
         }
@@ -143,14 +164,15 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        $query    = $this->applyFilters($request);
-        $stats    = $this->buildStats($query);
-        $payments = $query->paginate(20);
+        $query      = $this->applyFilters($request);
+        $stats      = $this->buildStats($query);
+        $deliveries = Delivery::orderBy('delivery_name')->get();
+        $payments   = $query->paginate(20);
         $payments->setCollection(
             $payments->getCollection()->map(fn($order) => $this->mapOrderToPaymentRow($order))
         );
 
-        return view('payments.index', compact('payments', 'stats'));
+        return view('payments.index', compact('payments', 'stats', 'deliveries'));
     }
 
     // ─── Store ────────────────────────────────────────────────────────────────

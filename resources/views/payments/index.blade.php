@@ -407,10 +407,27 @@
                     </li>
                 @endforeach
             </ul>
-            <form method="GET" action="{{ route('payments.index') }}" class="d-flex gap-2">
-                @foreach(request()->except('search') as $k => $v)
+            <form method="GET" action="{{ route('payments.index') }}" class="d-flex gap-2 align-items-center">
+                @foreach(request()->except(['search', 'delivery_id', 'method']) as $k => $v)
                     <input type="hidden" name="{{ $k }}" value="{{ $v }}">
                 @endforeach
+                <label class="small text-muted mb-0">Delivery</label>
+                <select name="delivery_id" class="form-select form-select-sm" style="width:200px" onchange="this.form.submit()">
+                    <option value="">All deliveries</option>
+                    @foreach($deliveries as $delivery)
+                        <option value="{{ $delivery->id }}" {{ request('delivery_id') == $delivery->id ? 'selected' : '' }}>
+                            {{ $delivery->delivery_name }}
+                        </option>
+                    @endforeach
+                </select>
+                <label class="small text-muted mb-0">វិធីបង់</label>
+                <select name="method" class="form-select form-select-sm" style="width:170px" onchange="this.form.submit()">
+                    <option value="">គ្រប់វិធីបង់</option>
+                    <option value="Cash" {{ request('method') === 'Cash' ? 'selected' : '' }}>Cash</option>
+                    <option value="ABA" {{ request('method') === 'ABA' ? 'selected' : '' }}>ABA Bank</option>
+                    <option value="ACLEDA" {{ request('method') === 'ACLEDA' ? 'selected' : '' }}>ACLEDA Bank</option>
+                    <option value="other" {{ request('method') === 'other' ? 'selected' : '' }}>ផ្សេងៗ (Other)</option>
+                </select>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="ស្វែងរកអតិថិជន ឬលេខការបញ្ជាទិញ..."
                     class="form-control form-control-sm" style="width:220px">
                 <button class="btn btn-sm btn-outline-secondary">ស្វែងរក</button>

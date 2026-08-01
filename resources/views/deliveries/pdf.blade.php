@@ -170,23 +170,29 @@
             <div class="sl">សរុបថ្លៃដឹក</div>
             <div class="sv" style="color:#D85A30">៛{{ number_format($totalFee, 0) }}</div>
         </div>
-        <div class="sm">
-            <div class="sl">សរុបវិក្ក័យបត្រ</div>
-            <div class="sv" style="color:#059669">${{ number_format($totalAmount, 0) }}</div>
-        </div>
+        @if($delivery->show_invoice_info)
+            <div class="sm">
+                <div class="sl">សរុបវិក្ក័យបត្រ</div>
+                <div class="sv" style="color:#059669">${{ number_format($totalAmount, 0) }}</div>
+            </div>
+        @endif
     </div>
 
     <table>
         <thead>
             <tr>
                 <th>លេខរៀង</th>
-                <th>លេខវិក្ក័យបត្រ</th>
+                @if($delivery->show_invoice_info)
+                    <th>លេខវិក្ក័យបត្រ</th>
+                @endif
                 <th>ឈ្មោះអតិថិជន</th>
                 <th>លេខទំនាក់ទំនង</th>
                 <th style="text-align:center">កេសតូច</th>
                 <th style="text-align:center">កេសធំ</th>
                 <th style="text-align:right">ថ្លៃដឹក</th>
-                <th style="text-align:right">តម្លៃសរុប</th>
+                @if($delivery->show_invoice_info)
+                    <th style="text-align:right">តម្លៃសរុប</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -200,17 +206,21 @@
                 @endphp
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td><span class="badge-inv">{{ $invoice?->invoice_number ?? 'N/A' }}</span></td>
+                    @if($delivery->show_invoice_info)
+                        <td><span class="badge-inv">{{ $invoice?->invoice_number ?? 'N/A' }}</span></td>
+                    @endif
                     <td>{{ $customer?->name ?? 'N/A' }}</td>
                     <td>{{ $customer?->phone ?? '—' }}</td>
                     <td style="text-align:center">{{ number_format($smallQty, 0) }}</td>
                     <td style="text-align:center">{{ number_format($bigQty, 0) }}</td>
                     <td style="text-align:right;color:#D85A30;font-weight:bold">៛{{ number_format((float) $order->delivery_fee_khr, 0) }}</td>
-                    <td style="text-align:right;font-weight:bold">${{ number_format($totalPrice, 0) }}</td>
+                    @if($delivery->show_invoice_info)
+                        <td style="text-align:right;font-weight:bold">${{ number_format($totalPrice, 0) }}</td>
+                    @endif
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" style="text-align:center;padding:20px;color:#999">មិនមានវិក្ក័យបត្រ</td>
+                    <td colspan="{{ $delivery->show_invoice_info ? 8 : 6 }}" style="text-align:center;padding:20px;color:#999">មិនមានវិក្ក័យបត្រ</td>
                 </tr>
             @endforelse
         </tbody>

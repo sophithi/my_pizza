@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'customer_id',
         'delivery_id',
@@ -28,6 +31,7 @@ class Order extends Model
         'payment_status',
         'notes',
         'delivery_date',
+        'deleted_by',
     ];
 
     protected $casts = [
@@ -125,6 +129,14 @@ class Order extends Model
     public function preparer()
     {
         return $this->belongsTo(User::class, 'prepared_by');
+    }
+
+    /**
+     * Get the user who deleted this order.
+     */
+    public function deletedBy()
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
     }
 
     /**

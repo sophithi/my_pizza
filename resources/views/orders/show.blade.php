@@ -574,7 +574,7 @@
                 <div style="margin-top: 8px;">
                     @if($payment->method === 'Cash')
                         <span style="color: #059669; font-size: 1.1rem; font-weight: 700;">
-                            <i class="fas fa-money-bill-wave"></i> ប្រាក់សម្រាប់
+                            <i class="fas fa-money-bill-wave"></i> លុយក្រៅ
                         </span>
                     @elseif($payment->method === 'ABA')
                         <span style="color: #0891b2; font-size: 1.1rem; font-weight: 700;">

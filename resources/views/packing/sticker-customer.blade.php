@@ -155,6 +155,14 @@
             font-weight: 400;
             margin-top: 1px;
         }
+        
+        .khr-subbold {
+            display: block;
+            color: #e85d24;
+            font-size: 18px;
+            font-weight: 400;
+            margin-top: 1px;
+        }
 
         .totals {
             display: flex;
@@ -182,9 +190,9 @@
             display: flex;
             justify-content: space-between;
             padding: 10px;
-            background: #f8f9fa;
+            background: #eee;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 18px;
             border-radius: 6px;
             margin-top: 6px;
         }
@@ -203,14 +211,14 @@
         }
 
         .free-product-item {
-            margin: 2px 0 2px 12px;
+            margin: 2px 0;
             color: #e85d24;
             text-align: left;
         }
 
         .notes-section-title {
             font-weight: 600;
-            margin: 8px 0 4px;
+            margin: 0 0 4px;
             color: #333;
             font-size: 14px;
         }
@@ -220,16 +228,18 @@
             padding: 10px;
             background: #f8f9fa;
             border-radius: 6px;
+             color: #e85d24;
             font-size: 14px;
             text-align: left;
+            display: flex;
+            gap: 16px;
         }
 
-        .notes-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #333;
-            font-size: 14px;
+        .notes-col {
+            flex: 1;
+            min-width: 0;
         }
+
 
         .footer {
             margin-top: 16px;
@@ -492,7 +502,7 @@
             }
 
             .notes-section-title {
-                margin-top: 6px;
+                margin-top: 0;
             }
 
             .footer {
@@ -665,8 +675,8 @@
                 <div class="total-row">
                     <span>Subtotal:</span>
                     <span class="amount-col">
-                        ${{ number_format($invoice->subtotal, 2) }}
-                        <span class="khr-sub">៛{{ number_format($subtotalKhr, 0) }}</span>
+                        ៛{{ number_format($subtotalKhr, 0) }}
+                        <span class="khr-sub">${{ number_format($invoice->subtotal, 2) }}</span>
                     </span>
                 </div>
 
@@ -681,10 +691,10 @@
                 @endif
 
                 <div class="grand-total">
-                    <span>តម្លៃសរុបទាំងអស់:</span>
+                    <span>តម្លៃសរុប:</span>
                     <span class="amount">
-                        ${{ number_format($invoice->total_amount, 2) }}
-                        <span class="khr-sub" style="font-size: 18px;">៛{{ number_format($grandTotalKhr, 0) }}</span>
+                        ៛{{ number_format($grandTotalKhr, 0) }}
+                        <span class="khr-subbold">${{ number_format($invoice->total_amount, 2) }}</span>
                     </span>
                 </div>
             </div>
@@ -692,16 +702,20 @@
         @if(($invoice->order && $invoice->order->freeItems->count() > 0) || $invoice->notes)
             <div class="notes">
                 @if($invoice->order && $invoice->order->freeItems->count() > 0)
-                    <div class="free-products-title">free ជូនអតិថិជន</div>
-                    @foreach($invoice->order->freeItems as $freeItem)
-                        <p class="free-product-item">
-                            {{ $freeItem->product->name ?? 'N/A' }} (x{{ $freeItem->quantity ?? 1 }})
-                        </p>
-                    @endforeach
+                    <div class="notes-col">
+                        <div class="free-products-title">free ជូនអតិថិជន</div>
+                        @foreach($invoice->order->freeItems as $freeItem)
+                            <p class="free-product-item">
+                                {{ $freeItem->product->name ?? 'N/A' }} (x{{ $freeItem->quantity ?? 1 }})
+                            </p>
+                        @endforeach
+                    </div>
                 @endif
                 @if($invoice->notes)
-                    <div class="notes-section-title">ផ្សេងៗ</div>
-                    <div>{{ $invoice->notes }}</div>
+                    <div class="notes-col">
+                        <div class="notes-section-title">ផ្សេងៗ</div>
+                        <div>{{ $invoice->notes }}</div>
+                    </div>
                 @endif
             </div>
         @endif
@@ -714,7 +728,7 @@
                         <span>អ្នករៀបទំនិញ:..................</span>
                         <span>អ្នកពិនិត្យ:.................. </span>
                     @endif
-                       
+
                 </p>
             @endif
             <p>សូមអគុណអតិថិជនសម្រាប់ការកម្មង់</p>

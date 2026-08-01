@@ -353,6 +353,36 @@
             background: #fafafa;
         }
 
+        .address-cell {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            max-width: 220px;
+        }
+
+        .address-cell span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .address-cell i {
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .text-muted {
+            color: var(--muted);
+        }
+
+        .address-input {
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            font-size: 13px;
+            padding: 4px 8px;
+            width: 180px;
+        }
+
         .badge-inv {
             background: #eff6ff;
             border: 1px solid #bfdbfe;
@@ -522,40 +552,7 @@
                 {{-- LEFT --}}
                 <div class="show-left">
 
-                    {{-- Delivery Info --}}
-                    <!-- <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-icon"><i class="fas fa-truck"></i></div>
-                            <p class="card-header-title">Delivery Information</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <label>ឈ្មោះដឹកជញ្ជូន</label>
-                                    <span>{{ $delivery->delivery_name }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <label>Invoice Qty</label>
-                                    <span class="accent">{{ $orderCount }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <label>Created At</label>
-                                    <span>{{ $delivery->created_at->format('d M Y') }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <label>Updated At</label>
-                                    <span>{{ $delivery->updated_at->format('d M Y') }}</span>
-                                </div>
-                                @if($delivery->delivery_desc)
-                                    <div class="info-item" style="grid-column: 1 / -1;">
-                                        <label>ផ្សេងៗ</label>
-                                        <span
-                                            style="font-size: 14px; font-weight: 400; line-height: 1.7; white-space: pre-wrap;">{{ $delivery->delivery_desc }}</span>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div> -->
+                
 
                     {{-- Linked Invoices --}}
                     <div class="card">
@@ -568,13 +565,18 @@
                                 <thead>
                                     <tr>
                                         <th style="text-align:center;">លេខរៀង</th>
-                                        <th>លេខវិក្ក័យបត្រ</th>
+                                        @if($delivery->show_invoice_info)
+                                            <th>លេខវិក្ក័យបត្រ</th>
+                                        @endif
                                         <th>ឈ្មោះអតិថិជន</th>
                                         <th>លេខទំនាក់ទំនង</th>
+                                        <th>ទីតាំង</th>
                                         <th style="text-align:center;">កេសតូច</th>
                                         <th style="text-align:center;">កេសធំ</th>
                                         <th style="text-align:right;">ថ្លៃដឹក</th>
-                                        <th style="text-align:right;">តម្លៃសរុប</th>
+                                        @if($delivery->show_invoice_info)
+                                            <th style="text-align:right;">តម្លៃសរុប</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -587,13 +589,34 @@
                                             $bigQty = (int) ($order->big_pack_qty ?? 0);
                                             $customerName = $customer?->name ?? 'N/A';
                                             $customerPhone = $customer?->phone ?? '—';
-                                            $totalPrice = $invoice?->total_amount ?? $order->total_amount ?? 0;
+                                            $customerAdress = $customer?->address;
+                                            $totalPrice = $order->totalKhr();
                                         @endphp
-                                        <tr data-order-row="{{ $order->id }}">
+                                        <tr data-order-row="{{ $order->id }}" data-customer-id="{{ $customer?->id }}">
                                             <td class="row-no">{{ $loop->iteration }}</td>
-                                            <td><span class="badge-inv">{{ $invoice?->invoice_number ?? 'N/A' }}</span></td>
+                                            @if($delivery->show_invoice_info)
+                                                <td><span class="badge-inv">{{ $invoice?->invoice_number ?? 'N/A' }}</span></td>
+                                            @endif
                                             <td>{{ $customerName }}</td>
                                             <td>{{ $customerPhone }}</td>
+                                            <td>
+                                                @if($customer)
+                                                    <span class="address-view" data-field="address">
+                                                        @if($customerAdress)
+                                                            <span class="address-cell" title="{{ $customerAdress }}">
+                                                                <i class="fas fa-map-marker-alt"></i>
+                                                                <span>{{ $customerAdress }}</span>
+                                                            </span>
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </span>
+                                                    <input type="text" class="address-input" data-field="address"
+                                                        value="{{ $customerAdress }}" placeholder="ទីតាំង" style="display:none;">
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
                                             <td style="text-align:center; font-weight:700;">
                                                 <span class="qty-view" data-field="small">{{ number_format($smallQty, 0) }}</span>
                                                 <input type="number" class="qty-input" data-field="small" min="0" step="1"
@@ -623,13 +646,15 @@
                                                     </button>
                                                 </div>
                                             </td>
-                                            <td style="text-align:right; font-weight:700;">
-                                                ${{ number_format($totalPrice, 0) }}
-                                            </td>
+                                            @if($delivery->show_invoice_info)
+                                                <td style="text-align:right; font-weight:700;">
+                                                    ៛{{ number_format($totalPrice, 0) }}
+                                                </td>
+                                            @endif
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8">
+                                            <td colspan="{{ $delivery->show_invoice_info ? 9 : 7 }}">
                                                 <div class="empty-orders">
                                                     <i class="fas fa-file-invoice"></i>
                                                     មិនមានវិក្ក័យបត្រ.
@@ -671,11 +696,13 @@
                                     <div class="stat-val" style="font-size: 15px;" id="statTotalFee">៛{{ number_format($totalFee, 0) }}</div>
                                     <div class="stat-lbl">សរុបថ្លៃដឹក</div>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-val" style="font-size: 15px;">${{ number_format($totalAmount, 0) }}
+                                @if($delivery->show_invoice_info)
+                                    <div class="stat-card">
+                                        <div class="stat-val" style="font-size: 15px;">${{ number_format($totalAmount, 0) }}
+                                        </div>
+                                        <div class="stat-lbl">សរុបវិក្ក័យបត្រ</div>
                                     </div>
-                                    <div class="stat-lbl">សរុបវិក្ក័យបត្រ</div>
-                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -699,15 +726,27 @@
             const row = document.querySelector(`tr[data-order-row="${orderId}"]`);
             return {
                 row,
+                customerId: row.dataset.customerId || null,
                 smallView: row.querySelector('.qty-view[data-field="small"]'),
                 smallInput: row.querySelector('.qty-input[data-field="small"]'),
                 bigView: row.querySelector('.qty-view[data-field="big"]'),
                 bigInput: row.querySelector('.qty-input[data-field="big"]'),
+                addressView: row.querySelector('.address-view[data-field="address"]'),
+                addressInput: row.querySelector('.address-input[data-field="address"]'),
                 feeView: row.querySelector('.fee-view'),
                 editBtn: row.querySelector('.row-edit-btn'),
                 saveBtn: row.querySelector('.row-save-btn'),
                 cancelBtn: row.querySelector('.row-cancel-btn'),
             };
+        }
+
+        function renderAddressView(el, address) {
+            if (!el.addressView) return;
+            if (address) {
+                el.addressView.innerHTML = `<span class="address-cell" title="${address}"><i class="fas fa-map-marker-alt"></i><span>${address}</span></span>`;
+            } else {
+                el.addressView.innerHTML = '<span class="text-muted">—</span>';
+            }
         }
 
         function startRowEdit(orderId) {
@@ -719,6 +758,12 @@
             el.bigView.style.display = 'none';
             el.smallInput.style.display = 'inline-block';
             el.bigInput.style.display = 'inline-block';
+
+            if (el.addressInput) {
+                el.addressInput.dataset.original = el.addressInput.value;
+                el.addressView.style.display = 'none';
+                el.addressInput.style.display = 'inline-block';
+            }
 
             el.editBtn.style.display = 'none';
             el.saveBtn.style.display = 'inline-flex';
@@ -732,6 +777,11 @@
             el.smallView.style.display = 'inline';
             el.bigView.style.display = 'inline';
 
+            if (el.addressInput) {
+                el.addressInput.style.display = 'none';
+                el.addressView.style.display = 'inline';
+            }
+
             el.editBtn.style.display = 'inline-flex';
             el.saveBtn.style.display = 'none';
             el.cancelBtn.style.display = 'none';
@@ -741,6 +791,9 @@
             const el = rowElements(orderId);
             el.smallInput.value = el.smallInput.dataset.original;
             el.bigInput.value = el.bigInput.dataset.original;
+            if (el.addressInput) {
+                el.addressInput.value = el.addressInput.dataset.original;
+            }
             exitRowEdit(orderId);
         }
 
@@ -764,11 +817,17 @@
             const el = rowElements(orderId);
             const smallQty = Math.max(0, parseInt(el.smallInput.value || '0', 10));
             const bigQty = Math.max(0, parseInt(el.bigInput.value || '0', 10));
+            const address = el.addressInput ? el.addressInput.value.trim() : undefined;
 
             el.saveBtn.disabled = true;
             el.cancelBtn.disabled = true;
 
             try {
+                const payload = { small_pack_qty: smallQty, big_pack_qty: bigQty };
+                if (address !== undefined) {
+                    payload.address = address;
+                }
+
                 const response = await fetch(packingUpdateUrl(orderId), {
                     method: 'PATCH',
                     headers: {
@@ -776,7 +835,7 @@
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': CSRF_TOKEN,
                     },
-                    body: JSON.stringify({ small_pack_qty: smallQty, big_pack_qty: bigQty }),
+                    body: JSON.stringify(payload),
                 });
 
                 if (!response.ok) {
@@ -790,6 +849,25 @@
                 el.feeView.textContent = '៛' + Math.round(data.delivery_fee_khr).toLocaleString();
                 el.smallInput.value = data.small_pack_qty;
                 el.bigInput.value = data.big_pack_qty;
+
+                if (el.addressInput) {
+                    el.addressInput.value = data.address || '';
+                    renderAddressView(el, data.address);
+                }
+
+                if (data.customer_id) {
+                    document.querySelectorAll(`tr[data-customer-id="${data.customer_id}"]`).forEach(row => {
+                        if (row === el.row) return;
+                        const otherAddressView = row.querySelector('.address-view[data-field="address"]');
+                        const otherAddressInput = row.querySelector('.address-input[data-field="address"]');
+                        if (otherAddressView) {
+                            renderAddressView({ addressView: otherAddressView }, data.address);
+                        }
+                        if (otherAddressInput) {
+                            otherAddressInput.value = data.address || '';
+                        }
+                    });
+                }
 
                 exitRowEdit(orderId);
                 recalculateSummary();

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -37,7 +39,11 @@ class InvoiceController extends Controller
             $invoice->total_khr = $this->invoiceTotalKhr($invoice);
         });
 
-        return view('invoices.index', compact('invoices', 'stats'));
+        // Staff filter dropdown — everyone who has ever created an order,
+        // so the list stays accurate as staff are added/removed.
+        $staffUsers = User::whereHas('orders')->orderBy('name')->get(['id', 'name']);
+
+        return view('invoices.index', compact('invoices', 'stats', 'staffUsers'));
     }
 
     public function exportReport(Request $request)
@@ -237,7 +243,7 @@ class InvoiceController extends Controller
 
     private function filteredInvoiceQuery(Request $request)
     {
-        $query = Invoice::with(['order.customer', 'order.items.product']);
+        $query = Invoice::with(['order.customer', 'order.user', 'order.items.product']);
         $period = $request->get('period');
 
         if ($period === 'today') {
@@ -254,6 +260,18 @@ class InvoiceController extends Controller
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('user_id') && $request->user_id !== 'all') {
+            $query->whereHas('order', fn($q) => $q->where('user_id', $request->user_id));
+        }
+
+        if ($request->filled('printed') && $request->printed !== 'all') {
+            if ($request->printed === 'printed') {
+                $query->whereNotNull('printed_at');
+            } else {
+                $query->whereNull('printed_at');
+            }
         }
 
         if ($request->filled('search')) {
@@ -356,6 +374,16 @@ class InvoiceController extends Controller
         return back()->with('success', 'បានរៀបចំរួចរាល់');
     }
 
+    /**
+     * Toggle whether an invoice has been printed (បានព្រីន / មិនទាន់បានព្រីន).
+     */
+    public function togglePrinted(Invoice $invoice)
+    {
+        $invoice->update(['printed_at' => $invoice->printed_at ? null : now()]);
+
+        return back();
+    }
+
 
     public function store(Request $request)
     {
@@ -414,12 +442,82 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Delete the specified invoice.
+     * Delete the specified invoice (soft delete — recoverable from trash).
+     * Its order is soft-deleted alongside it, so the order also disappears
+     * from orders/payments listings until the invoice is restored.
      */
     public function destroy(Invoice $invoice)
     {
-        $invoice->delete();
+        DB::transaction(function () use ($invoice) {
+            $invoice->update(['deleted_by' => auth()->id()]);
+            $invoice->delete();
+
+            if ($order = $invoice->order) {
+                $order->update(['deleted_by' => auth()->id()]);
+                $order->delete();
+            }
+        });
+
         return redirect()->route('invoices.index')->with('success', 'Invoice deleted successfully.');
+    }
+
+    /**
+     * Display soft-deleted invoices (admin & manager only).
+     */
+    public function trashed(Request $request)
+    {
+        $query = Invoice::onlyTrashed()
+            ->with(['order.customer', 'deletedBy']);
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('order.customer', fn($c) => $c->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        $invoices = $query->orderByDesc('deleted_at')->paginate(15)->withQueryString();
+
+        return view('invoices.trashed', compact('invoices'));
+    }
+
+    /**
+     * Restore a soft-deleted invoice (admin & manager only). Its order is
+     * restored alongside it, bringing it back into orders/payments listings.
+     */
+    public function restore($id)
+    {
+        $invoice = Invoice::onlyTrashed()->findOrFail($id);
+
+        DB::transaction(function () use ($invoice) {
+            $invoice->restore();
+            $invoice->update(['deleted_by' => null]);
+
+            if ($order = Order::withTrashed()->find($invoice->order_id)) {
+                $order->restore();
+                $order->update(['deleted_by' => null]);
+            }
+        });
+
+        return redirect()->route('invoices.trash')->with('success', 'Invoice restored successfully.');
+    }
+
+    /**
+     * Permanently delete an invoice (admin only — cannot be undone). Its
+     * trashed order is force-deleted too, since orders have no separate
+     * trash UI — leaving it behind would strand it unrecoverably.
+     */
+    public function forceDelete($id)
+    {
+        $invoice = Invoice::onlyTrashed()->findOrFail($id);
+
+        DB::transaction(function () use ($invoice) {
+            $order = Order::withTrashed()->find($invoice->order_id);
+            $invoice->forceDelete();
+            $order?->forceDelete();
+        });
+
+        return redirect()->route('invoices.trash')->with('success', 'Invoice permanently deleted.');
     }
 
     /**

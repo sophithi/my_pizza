@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'order_id',
         'invoice_number',
@@ -21,7 +24,9 @@ class Invoice extends Model
         'status',
         'packing_sent_at',
         'packing_completed_at',
+        'printed_at',
         'notes',
+        'deleted_by',
     ];
 
     protected $casts = [
@@ -34,14 +39,25 @@ class Invoice extends Model
         'total_amount' => 'decimal:2',
         'packing_sent_at' => 'datetime',
         'packing_completed_at' => 'datetime',
+        'printed_at' => 'datetime',
     ];
 
     /**
-     * Get the order for this invoice.
+     * Get the order for this invoice. Always withTrashed() — an invoice and
+     * its order are soft-deleted/restored together (see InvoiceController),
+     * so a trashed invoice must still be able to show its (also trashed) order.
      */
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(Order::class)->withTrashed();
+    }
+
+    /**
+     * Get the user who deleted this invoice.
+     */
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
     }
    public function items()
 {

@@ -60,6 +60,9 @@ Route::middleware('auth')->group(function () {
     // ============================================
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', UserController::class)->except(['index', 'show']);
+
+        // Permanently delete an invoice from the trash (irreversible — admin only)
+        Route::delete('invoices/{id}/force-delete', [InvoiceController::class, 'forceDelete'])->name('invoices.force-delete');
     });
 
     // Allow admin, manager, office staff and inventory staff to fully manage inventory
@@ -100,6 +103,13 @@ Route::middleware('auth')->group(function () {
 
         // Order delete (only admin/manager)
         Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
+        // Deleted invoices — view & recover (only admin/manager)
+        Route::get('invoices/trash', [InvoiceController::class, 'trashed'])->name('invoices.trash');
+        Route::post('invoices/{id}/restore', [InvoiceController::class, 'restore'])->name('invoices.restore');
+
+        // Invoice delete (only admin/manager — staff/staff_inventory can't recover from trash)
+        Route::delete('invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
     });
 
     // Product management
@@ -147,8 +157,9 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
         Route::get('invoices/export/report', [InvoiceController::class, 'exportReport'])->name('invoices.export');
-        Route::resource('invoices', InvoiceController::class)->only(['edit', 'update', 'destroy']);
+        Route::resource('invoices', InvoiceController::class)->only(['edit', 'update']);
         Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+        Route::post('invoices/{invoice}/toggle-printed', [InvoiceController::class, 'togglePrinted'])->name('invoices.toggle-printed');
     });
 
     // Packing labels

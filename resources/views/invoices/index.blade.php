@@ -152,7 +152,7 @@
             align-items: center;
             display: grid;
             gap: 10px;
-            grid-template-columns: minmax(320px, 1fr) 180px 180px auto auto;
+            grid-template-columns: minmax(240px, 1fr) 160px 160px 160px 160px auto auto;
         }
 
         .filter-card .form-control,
@@ -247,6 +247,31 @@
         .status-other {
             background: #e5e7eb;
             color: #374151;
+        }
+
+        .printed-checkbox {
+            align-items: center;
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 800;
+            gap: 6px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .printed-checkbox input {
+            cursor: pointer;
+            height: 15px;
+            width: 15px;
+        }
+
+        .printed-checkbox .printed-label {
+            color: #92400e;
+        }
+
+        .printed-checkbox input:checked ~ .printed-label {
+            color: #047857;
         }
 
         .action-row {
@@ -349,9 +374,16 @@
                 <h2 class="invoice-title">វិក្ក័យបត្រ</h2>
                 <p class="invoice-subtitle">គ្រប់គ្រងវិក្ក័យបត្រ</p>
             </div>
-            <a href="{{ route('orders.create') }}" class="invoice-btn invoice-btn-primary">
-                <i class="fas fa-plus"></i> បង្កើតបញ្ជាទិញ
-            </a>
+            <div style="display:flex; gap:8px;">
+                @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+                    <a href="{{ route('invoices.trash') }}" class="invoice-btn invoice-btn-soft">
+                        <i class="fas fa-trash"></i> វិក្ក័យប័ត្របានលុប
+                    </a>
+                @endif
+                <a href="{{ route('orders.create') }}" class="invoice-btn invoice-btn-primary">
+                    <i class="fas fa-plus"></i> បង្កើតបញ្ជាទិញ
+                </a>
+            </div>
         </div>
 
         <div class="stats-grid">
@@ -400,6 +432,21 @@
                     <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>មិនទូទាត់</option>
                 </select>
 
+                <select name="user_id" class="form-select">
+                    <option value="all">បុគ្គលិកទាំងអស់</option>
+                    @foreach ($staffUsers as $staffUser)
+                        <option value="{{ $staffUser->id }}" {{ (string) request('user_id') === (string) $staffUser->id ? 'selected' : '' }}>
+                            {{ $staffUser->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <select name="printed" class="form-select">
+                    <option value="all">ព្រីនទាំងអស់</option>
+                    <option value="printed" {{ request('printed') === 'printed' ? 'selected' : '' }}>បានព្រីន</option>
+                    <option value="unprinted" {{ request('printed') === 'unprinted' ? 'selected' : '' }}>មិនទាន់បានព្រីន</option>
+                </select>
+
                 <div class="date-field {{ request('date') ? 'has-value' : '' }}">
                     <input type="date" name="date" value="{{ request('date') }}" class="form-control"
                         title="ជ្រើសរើសកាលបរិច្ឆេទ">
@@ -426,7 +473,9 @@
                             <th>បញ្ជាទិញ</th>
                             <th>ទឹកប្រាក់</th>
                             <th>កាលបរិច្ឆេទ</th>
+                            <th>បង្កើតដោយ</th>
                             <th>ការបង់ប្រាក់</th>
+                            <th class="text-center">ព្រីន</th>
                             <th class="text-center">សកម្មភាព</th>
                         </tr>
                     </thead>
@@ -451,6 +500,7 @@
                                     <div class="text-muted small fw-bold">${{ number_format($invoice->total_amount, 2) }}</div>
                                 </td>
                                 <td class="text-muted">{{ $invoice->invoice_date?->format('d/m/Y') ?? 'N/A' }}</td>
+                                <td class="text-muted">{{ $invoice->order?->user?->name ?? 'N/A' }}</td>
                                 <td>
                                     @if($invoice->order?->payment_status === 'paid')
                                         <span class="status-pill status-paid">
@@ -465,6 +515,16 @@
                                             <i class="fas fa-clock"></i> មិនទាន់ទូទាត់
                                         </span>
                                     @endif
+                                </td>
+                                <td class="text-center">
+                                    <form method="POST" action="{{ route('invoices.toggle-printed', $invoice) }}" class="m-0">
+                                        @csrf
+                                        <label class="printed-checkbox">
+                                            <input type="checkbox" onchange="this.form.submit()"
+                                                {{ $invoice->printed_at ? 'checked' : '' }}>
+                                            <span class="printed-label">{{ $invoice->printed_at ? 'បានព្រីន' : 'មិនទាន់បានព្រីន' }}</span>
+                                        </label>
+                                    </form>
                                 </td>
                                 <td>
                                     <div class="action-row">
@@ -486,7 +546,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7">
+                                <td colspan="9">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">
                                             <i class="fas fa-file-invoice"></i>
@@ -515,7 +575,7 @@
                 if (!form) return;
 
                 const search = form.querySelector('input[name="search"]');
-                const controls = form.querySelectorAll('select[name="status"], input[name="date"]');
+                const controls = form.querySelectorAll('select[name="status"], select[name="user_id"], select[name="printed"], input[name="date"]');
                 const dateField = form.querySelector('.date-field');
                 const dateInput = form.querySelector('input[name="date"]');
                 let timer = null;

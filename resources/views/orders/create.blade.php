@@ -1484,7 +1484,7 @@
                                         <div class="box-inline">
                                             <span>តូច</span>
                                             <input type="number" id="small_pack_qty" name="small_pack_qty" class="form-control" min="0"
-                                            value="{{ old('small_pack_qty', 1) }}">
+                                            value="{{ old('small_pack_qty', 0) }}">
                                         </div>
                                         <div class="box-inline">
                                             <span>ធំ</span>
