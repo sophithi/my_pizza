@@ -19,8 +19,12 @@
         .report-btn:hover { color:#fff; transform:translateY(-1px); }
         .metric-grid { display:grid; gap:14px; grid-template-columns:repeat(3,minmax(0,1fr)); margin-bottom:16px; }
         .metric { border-left:4px solid var(--accent); padding:16px; }
-        .metric-label { color:var(--muted); font-size:15px; font-weight:900; margin:0; }
-        .metric-value { color:var(--text); font-size:28px; font-weight:900; margin-top:6px; }
+        .metric-label { color:var(--muted); font-size:13px; font-weight:900; margin:0; text-transform:uppercase; }
+        .metric-value { color:var(--text); font-size:22px; font-weight:900; margin-top:6px; }
+        .metric-value-usd { color:var(--muted); font-size:13px; font-weight:700; margin-top:1px; }
+        .money-stack { line-height:1.3; }
+        .money-stack .khr { color:var(--text); display:block; font-weight:900; }
+        .money-stack .usd { color:var(--muted); display:block; font-size:12px; font-weight:700; margin-top:1px; }
         .panel { margin-bottom:16px; overflow:hidden; }
         .panel-head { border-bottom:1px solid var(--border); padding:14px 16px; }
         .panel-title { color:var(--text); font-size:18px; font-weight:900; margin:0; }
@@ -58,6 +62,7 @@
 
         $totalPeriodOrders = $customerActivity->sum('orders_count');
         $totalPeriodSpent = $customerActivity->sum('orders_sum_total_amount');
+        $totalPeriodSpentKhr = $customerActivity->sum(fn($c) => $c->orders->sum(fn($o) => $o->totalKhr()));
     @endphp
 
     <div class="container-fluid py-4 report-page">
@@ -97,7 +102,11 @@
         <div class="metric-grid">
             <div class="metric"><p class="metric-label">អតិថិជនសរុប</p><div class="metric-value">{{ number_format($totalCustomers) }}</div></div>
             <div class="metric"><p class="metric-label">អតិថិជនសកម្ម</p><div class="metric-value text-success">{{ number_format($activeCustomers) }}</div></div>
-            <div class="metric"><p class="metric-label">ចំណាយក្នុងទំព័រនេះ</p><div class="metric-value">${{ number_format($totalPeriodSpent, 2) }}</div></div>
+            <div class="metric">
+                <p class="metric-label">ចំណាយក្នុងទំព័រនេះ</p>
+                <div class="metric-value">៛{{ number_format($totalPeriodSpentKhr, 0) }}</div>
+                <div class="metric-value-usd">${{ number_format($totalPeriodSpent, 2) }}</div>
+            </div>
         </div>
 
         <div class="panel">
@@ -110,13 +119,24 @@
                             @php
                                 $ordersCount = $customer->orders_count ?? 0;
                                 $spent = $customer->orders_sum_total_amount ?? 0;
+                                $spentKhr = $customer->orders->sum(fn($o) => $o->totalKhr());
                             @endphp
                             <tr>
                                 <td class="fw-bold">{{ $customer->name }}</td>
                                 <td>{{ $customer->phone ?? 'N/A' }}</td>
                                 <td class="text-end"><span class="badge-count">{{ number_format($ordersCount) }}</span></td>
-                                <td class="text-end fw-bold">${{ number_format($spent, 2) }}</td>
-                                <td class="text-end">${{ number_format($ordersCount > 0 ? $spent / $ordersCount : 0, 2) }}</td>
+                                <td class="text-end">
+                                    <div class="money-stack">
+                                        <span class="khr">៛{{ number_format($spentKhr, 0) }}</span>
+                                        <span class="usd">${{ number_format($spent, 2) }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <div class="money-stack">
+                                        <span class="khr">៛{{ number_format($ordersCount > 0 ? $spentKhr / $ordersCount : 0, 0) }}</span>
+                                        <span class="usd">${{ number_format($ordersCount > 0 ? $spent / $ordersCount : 0, 2) }}</span>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr><td colspan="5" class="empty-note">មិនទាន់មានទិន្នន័យ។</td></tr>

@@ -124,6 +124,7 @@ class PaymentController extends Controller
                 'currency' => $line->currency,
                 'amount_original' => (float) $line->amount_original,
                 'amount_usd' => (float) $line->amount_usd,
+                'exchange_rate' => (float) ($line->exchange_rate ?: self::EXCHANGE_RATE),
             ])->values() ?? [],
             'status' => $status,
             'notes' => $payment?->notes ?? $order->notes,
@@ -146,7 +147,59 @@ class PaymentController extends Controller
             'paid'        => $all->where('status', 'paid')->count(),
             'partial'     => $all->where('status', 'partial')->count(),
             'unpaid'      => $all->where('status', 'pending')->count(),
+            'method_breakdown' => $this->buildMethodBreakdown($all),
         ];
+    }
+
+    private function buildMethodBreakdown($all): array
+    {
+        $methodLabels = [
+            'Cash'   => 'លុយក្រៅ',
+            'ABA'    => 'ABA Bank',
+            'ACLEDA' => 'ACLEDA Bank',
+            'Wing'   => 'Wing',
+        ];
+
+        $breakdown = [];
+        foreach ($methodLabels as $key => $label) {
+            $breakdown[$key] = ['label' => $label, 'usd' => 0.0, 'khr' => 0.0];
+        }
+        $breakdown['Other'] = ['label' => 'ផ្សេងៗ', 'usd' => 0.0, 'khr' => 0.0];
+
+        foreach ($all as $row) {
+            $lines = $row->lines;
+
+            // Legacy payments recorded before the per-line breakdown existed have
+            // no lines — fall back to the payment-level (possibly "+"-joined) method.
+            // NOTE: $lines is sometimes a Collection (loaded relation) and sometimes
+            // a plain array (no payment at all) — count() works for both, whereas
+            // empty() is always false for an object, even an empty Collection.
+            if (count($lines) === 0 && $row->paid_amount > 0) {
+                $matchedKey = 'Other';
+                foreach ($methodLabels as $key => $label) {
+                    if (str_contains($row->method, $key)) {
+                        $matchedKey = $key;
+                        break;
+                    }
+                }
+
+                $breakdown[$matchedKey]['usd'] += $row->paid_amount;
+                $breakdown[$matchedKey]['khr'] += $row->paid_amount_khr;
+                continue;
+            }
+
+            foreach ($lines as $line) {
+                $key = array_key_exists($line['method'], $methodLabels) ? $line['method'] : 'Other';
+                $khr = $line['currency'] === 'KHR'
+                    ? $line['amount_original']
+                    : round($line['amount_usd'] * $line['exchange_rate']);
+
+                $breakdown[$key]['usd'] += $line['amount_usd'];
+                $breakdown[$key]['khr'] += $khr;
+            }
+        }
+
+        return $breakdown;
     }
 
     private function periodLabel(Request $request): string

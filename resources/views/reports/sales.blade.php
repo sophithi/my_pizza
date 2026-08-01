@@ -19,8 +19,12 @@
         .report-btn:hover { color:#fff; transform:translateY(-1px); }
         .metric-grid { display:grid; gap:14px; grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:16px; }
         .metric { border-left:4px solid var(--accent); padding:16px; }
-        .metric-label { color:var(--muted); font-size:15px; font-weight:900; margin:0; }
-        .metric-value { color:var(--text); font-size:28px; font-weight:900; margin-top:6px; }
+        .metric-label { color:var(--muted); font-size:13px; font-weight:900; margin:0; text-transform:uppercase; }
+        .metric-value { color:var(--text); font-size:22px; font-weight:900; margin-top:6px; }
+        .metric-value-usd { color:var(--muted); font-size:13px; font-weight:700; margin-top:1px; }
+        .money-stack { line-height:1.3; }
+        .money-stack .khr { color:var(--text); display:block; font-weight:900; }
+        .money-stack .usd { color:var(--muted); display:block; font-size:12px; font-weight:700; margin-top:1px; }
         .content-grid { display:grid; gap:16px; grid-template-columns:1fr 1fr; }
         .panel { margin-bottom:16px; overflow:hidden; }
         .panel-head { border-bottom:1px solid var(--border); padding:14px 16px; }
@@ -89,10 +93,18 @@
         </form>
 
         <div class="metric-grid">
-            <div class="metric"><p class="metric-label">លក់សរុប</p><div class="metric-value">${{ number_format($totalRevenue, 2) }}</div></div>
+            <div class="metric">
+                <p class="metric-label">លក់សរុប</p>
+                <div class="metric-value">៛{{ number_format($totalRevenueKhr, 0) }}</div>
+                <div class="metric-value-usd">${{ number_format($totalRevenue, 2) }}</div>
+            </div>
             <div class="metric"><p class="metric-label">ចំនួនវិក្ក័យបត្រ</p><div class="metric-value">{{ number_format($totalOrders) }}</div></div>
             <div class="metric"><p class="metric-label">បានបញ្ចប់</p><div class="metric-value text-success">{{ number_format($completedOrders) }}</div></div>
-            <div class="metric"><p class="metric-label">មធ្យម/វិក្ក័យបត្រ</p><div class="metric-value">${{ number_format($averageOrderValue, 2) }}</div></div>
+            <div class="metric">
+                <p class="metric-label">មធ្យម/វិក្ក័យបត្រ</p>
+                <div class="metric-value">៛{{ number_format($averageOrderValueKhr, 0) }}</div>
+                <div class="metric-value-usd">${{ number_format($averageOrderValue, 2) }}</div>
+            </div>
         </div>
 
         <div class="panel">
@@ -118,7 +130,12 @@
                                 <tr>
                                     <td><span class="status-pill {{ $statusClass }}">{{ ucfirst($stat->status) }}</span></td>
                                     <td class="text-end">{{ number_format($stat->count) }}</td>
-                                    <td class="text-end fw-bold">${{ number_format($stat->total ?? 0, 2) }}</td>
+                                    <td class="text-end">
+                                        <div class="money-stack">
+                                            <span class="khr">៛{{ number_format(($stat->total ?? 0) * $exchangeRate, 0) }}</span>
+                                            <span class="usd">${{ number_format($stat->total ?? 0, 2) }}</span>
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr><td colspan="3" class="empty-note">មិនទាន់មានទិន្នន័យ។</td></tr>
@@ -157,7 +174,12 @@
                         @forelse ($customerRevenue as $customer)
                             <tr>
                                 <td>{{ $customer->name }}</td>
-                                <td class="text-end fw-bold">${{ number_format($customer->orders_sum_total_amount ?? 0, 2) }}</td>
+                                <td class="text-end">
+                                    <div class="money-stack">
+                                        <span class="khr">៛{{ number_format(($customer->orders_sum_total_amount ?? 0) * $exchangeRate, 0) }}</span>
+                                        <span class="usd">${{ number_format($customer->orders_sum_total_amount ?? 0, 2) }}</span>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr><td colspan="2" class="empty-note">មិនទាន់មានទិន្នន័យ។</td></tr>
@@ -173,16 +195,39 @@
         <script>
             const salesCanvas = document.getElementById('dailyChart');
             if (salesCanvas) {
+                const EXCHANGE_RATE = {{ $exchangeRate }};
+                const salesUsd = @json($dailyRevenue->pluck('total')->map(fn($value) => (float) $value)->values());
+                const salesKhr = salesUsd.map(v => Math.round(v * EXCHANGE_RATE));
+
                 new Chart(salesCanvas, {
                     type: 'bar',
                     data: {
                         labels: @json($dailyRevenue->map(fn($daily) => \Carbon\Carbon::parse($daily->date)->format('d/m'))->values()),
                         datasets: [
-                            { label: 'លក់សរុប ($)', data: @json($dailyRevenue->pluck('total')->map(fn($value) => (float) $value)->values()), backgroundColor: 'rgba(232, 93, 36, 0.72)', borderColor: '#e85d24', borderWidth: 2, yAxisID: 'sales' },
+                            { label: 'លក់សរុប (៛)', data: salesKhr, backgroundColor: 'rgba(232, 93, 36, 0.72)', borderColor: '#e85d24', borderWidth: 2, yAxisID: 'sales' },
                             { label: 'វិក្ក័យបត្រ', data: @json($dailyRevenue->pluck('count')->map(fn($value) => (int) $value)->values()), backgroundColor: 'rgba(37, 99, 235, 0.46)', borderColor: '#2563eb', borderWidth: 2, yAxisID: 'orders' }
                         ]
                     },
-                    options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index', intersect:false}, scales:{ sales:{type:'linear', position:'left', ticks:{callback:value=>'$'+value}}, orders:{type:'linear', position:'right', grid:{drawOnChartArea:false}, ticks:{precision:0}} } }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    afterLabel: function (context) {
+                                        if (context.dataset.yAxisID === 'sales') {
+                                            return '$' + salesUsd[context.dataIndex].toFixed(2);
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            sales: { type: 'linear', position: 'left', ticks: { callback: value => '៛' + value.toLocaleString() } },
+                            orders: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { precision: 0 } }
+                        }
+                    }
                 });
             }
         </script>

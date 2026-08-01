@@ -4,6 +4,7 @@
 
 @push('styles')
     <style>
+@verbatim
 .payment-side-panel {
     position: fixed;
     right: 0;
@@ -288,83 +289,172 @@
         text-align: center;
     }
 }
+
+.pay-stat {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .04);
+    padding: 14px;
+    transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.pay-stat:hover {
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .08);
+    transform: translateY(-2px);
+}
+
+.pay-stat-label {
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.pay-stat-khr {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-top: 2px;
+}
+
+.pay-stat-usd {
+    color: #6b7280;
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-top: 1px;
+}
+
+.pay-stat-count {
+    color: #111827;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-top: 2px;
+}
+
+.method-breakdown {
+    border-radius: 12px;
+}
+
+.method-name {
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.method-khr {
+    color: #111827;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.method-usd {
+    color: #9ca3af;
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+@media (max-width: 576px) {
+    .pay-stat {
+        padding: 12px;
+    }
+
+    .pay-stat-khr {
+        font-size: 16px;
+    }
+
+    .pay-stat-count {
+        font-size: 19px;
+    }
+}
+@endverbatim
 </style>
 @endpush
 
 @section('content')
-@php($exchangeRate = 4000)
+@php
+    $exchangeRate = 4000;
+@endphp
     <div class="container-fluid py-4">
 
         {{-- Page Header --}}
         <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
             <h4 class="mb-0 fw-semibold">
-                <i class="bi bi-credit-card me-2"></i> ការទូទាត់ពីអតិថិជន
+                <i class="fas fa-credit-card me-2"></i> ការទូទាត់ពីអតិថិជន
             </h4>
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ route('payments.export.excel', request()->query()) }}" class="btn btn-outline-success btn-sm">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>  Excel
+                    <i class="fas fa-file-excel me-1"></i>  Excel
                 </a>
                 <a href="{{ route('payments.export.pdf', request()->query()) }}" class="btn btn-outline-danger btn-sm"
                     target="_blank">
-                    <i class="bi bi-file-earmark-pdf me-1"></i>  PDF
+                    <i class="fas fa-file-pdf me-1"></i>  PDF
                 </a>
                 <button type="button" class="btn btn-sm text-white" style="background:#D85A30" data-bs-toggle="modal"
                     data-bs-target="#paymentModal">
-                    + កត់ត្រាការទូទាត់
+                    <i class="fas fa-plus me-1"></i> កត់ត្រាការទូទាត់
                 </button>
             </div>
         </div>
 
         {{-- Stats Cards --}}
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-3">
             <div class="col-6 col-md-2">
-                <div class="card border-0 bg-light h-100">
-                    <div class="card-body py-3">
-                        <div class="text-muted small text-uppercase mb-1">បានប្រមូល</div>
-                        <div class="fs-5 fw-bold text-primary">${{ number_format($stats['collected'], 2) }}</div>
-                        <div class="small text-muted">៛{{ number_format($stats['collected_khr'], 0) }}</div>
-                    </div>
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">បានប្រមូល</div>
+                    <div class="pay-stat-khr text-primary">៛{{ number_format($stats['collected_khr'], 0) }}</div>
+                    <div class="pay-stat-usd">${{ number_format($stats['collected'], 2) }}</div>
                 </div>
             </div>
             <div class="col-6 col-md-2">
-                <div class="card border-0 bg-light h-100">
-                    <div class="card-body py-3">
-                        <div class="text-muted small text-uppercase mb-1">នៅសល់</div>
-                        <div class="fs-5 fw-bold text-danger">${{ number_format($stats['outstanding'], 2) }}</div>
-                        <div class="small text-muted">៛{{ number_format($stats['outstanding_khr'], 0) }}</div>
-                    </div>
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">នៅសល់</div>
+                    <div class="pay-stat-khr text-danger">៛{{ number_format($stats['outstanding_khr'], 0) }}</div>
+                    <div class="pay-stat-usd">${{ number_format($stats['outstanding'], 2) }}</div>
                 </div>
             </div>
             <div class="col-4 col-md-2">
-                <div class="card border-0 bg-light h-100">
-                    <div class="card-body py-3">
-                        <div class="text-muted small text-uppercase mb-1">ការបញ្ជាទិញ</div>
-                        <div class="fs-5 fw-bold">{{ $stats['total'] }}</div>
-                    </div>
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">ការបញ្ជាទិញ</div>
+                    <div class="pay-stat-count">{{ $stats['total'] }}</div>
                 </div>
             </div>
             <div class="col-4 col-md-2">
-                <div class="card border-0 bg-light h-100">
-                    <div class="card-body py-3">
-                        <div class="text-muted small text-uppercase mb-1">បានបង់គ្រប់</div>
-                        <div class="fs-5 fw-bold text-success">{{ $stats['paid'] }}</div>
-                    </div>
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">បានបង់គ្រប់</div>
+                    <div class="pay-stat-count text-success">{{ $stats['paid'] }}</div>
                 </div>
             </div>
             <div class="col-4 col-md-2">
-                <div class="card border-0 bg-light h-100">
-                    <div class="card-body py-3">
-                        <div class="text-muted small text-uppercase mb-1">បង់ខ្លះ</div>
-                        <div class="fs-5 fw-bold text-warning">{{ $stats['partial'] }}</div>
-                    </div>
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">បង់ខ្លះ</div>
+                    <div class="pay-stat-count text-warning">{{ $stats['partial'] }}</div>
                 </div>
             </div>
             <div class="col-4 col-md-2">
-                <div class="card border-0 bg-light h-100">
-                    <div class="card-body py-3">
-                        <div class="text-muted small text-uppercase mb-1">មិនទាន់បង់</div>
-                        <div class="fs-5 fw-bold text-danger">{{ $stats['unpaid'] }}</div>
-                    </div>
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">មិនទាន់បង់</div>
+                    <div class="pay-stat-count text-danger">{{ $stats['unpaid'] }}</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Payment Method Breakdown --}}
+        <div class="card border-0 shadow-sm method-breakdown mb-4">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small fw-bold mb-3">បែងចែកតាមវិធីបង់ប្រាក់</h6>
+                <div class="row g-3">
+                    @foreach($stats['method_breakdown'] as $key => $method)
+                        <div class="col-6 col-md-4 col-lg">
+                            <div class="method-chip">
+                                <div class="method-name">{{ $method['label'] }}</div>
+                                <div class="method-khr">៛{{ number_format($method['khr'], 0) }}</div>
+                                <div class="method-usd">${{ number_format($method['usd'], 2) }}</div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -514,7 +604,7 @@
                         @empty
                             <tr>
                                 <td colspan="10" class="text-center text-muted py-5">
-                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    <i class="fas fa-inbox fs-3 d-block mb-2"></i>
                                     មិនមានទិន្នន័យការទូទាត់
                                 </td>
                             </tr>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Inventory')
+@section('title', 'កែប្រែស្តុកទំនិញ')
 
 @push('styles')
 <style>
@@ -122,6 +122,12 @@
         margin: 4px 0;
     }
 
+    .form-help {
+        color: #6b7280;
+        font-size: 12px;
+        margin-top: 6px;
+    }
+
     @media (max-width: 768px) {
         .form-row { grid-template-columns: 1fr; }
         .form-actions { flex-direction: column; }
@@ -134,7 +140,7 @@
 
 <div class="container mt-4 mb-4" style="max-width: 600px;">
     <div class="form-card">
-        <h3 class="form-card__title">ស្តុកទំនិញ</h3>
+        <h3 class="form-card__title">កែប្រែស្តុកទំនិញ</h3>
 
         @if ($errors->any())
         <div class="alert-error">
@@ -152,7 +158,7 @@
 
             <div class="form-group">
                 <label class="form-label">ទំនិញ</label>
-                <input type="text" class="form-input" value="{{ $inventory->product->name ?? 'Product Not Found' }}" disabled>
+                <input type="text" class="form-input" value="{{ $inventory->product->name ?? 'រកមិនឃើញទំនិញ' }}" disabled>
             </div>
 
             <div class="form-row">
@@ -161,7 +167,7 @@
                     <input type="number" name="quantity" class="form-input" value="{{ old('quantity', $inventory->quantity) }}" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">កម្រិតស្តុក *</label>
+                    <label class="form-label">កម្រិតត្រូវបំពេញ *</label>
                     <input type="number" name="reorder_level" class="form-input" value="{{ old('reorder_level', $inventory->reorder_level) }}" required>
                 </div>
             </div>
@@ -170,12 +176,22 @@
                 <label class="form-label">ទីតាំងស្តុក</label>
                 <input type="text" name="warehouse_location" class="form-input" value="{{ old('warehouse_location', $inventory->warehouse_location) }}" placeholder="......">
             </div>
+
+            <div class="form-group">
+                <label class="form-label">តម្លៃដើមក្នុងមួយឯកតា (មិនចាំបាច់)</label>
+                <input type="number" step="0.01" min="0" name="cost_per_unit" class="form-input" value="{{ old('cost_per_unit', $inventory->cost_per_unit) }}" placeholder="ទុកទទេ ដើម្បីប្រើតម្លៃលក់របស់ទំនិញ">
+                <p class="form-help">ប្រើសម្រាប់គណនាតម្លៃស្តុក បើតម្លៃដើមខុសពីតម្លៃលក់ធម្មតា។</p>
+            </div>
+
             <div class="form-actions">
                 <button type="submit" class="btn-primary">
-                    <i class="fas fa-save"></i> Update
+                    <i class="fas fa-save"></i> រក្សាទុក
                 </button>
+                <a href="{{ route('inventory.show', $inventory) }}" class="btn-secondary">
+                    <i class="fas fa-eye"></i> មើលលម្អិត
+                </a>
                 <a href="{{ route('inventory.index') }}" class="btn-secondary">
-                    <i class="fas fa-times"></i> Cancel
+                    <i class="fas fa-times"></i> បោះបង់
                 </a>
             </div>
         </form>

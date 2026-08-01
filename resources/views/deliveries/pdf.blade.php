@@ -187,6 +187,7 @@
                 @endif
                 <th>ឈ្មោះអតិថិជន</th>
                 <th>លេខទំនាក់ទំនង</th>
+                <th>ទីតាំង</th>
                 <th style="text-align:center">កេសតូច</th>
                 <th style="text-align:center">កេសធំ</th>
                 <th style="text-align:right">ថ្លៃដឹក</th>
@@ -211,6 +212,7 @@
                     @endif
                     <td>{{ $customer?->name ?? 'N/A' }}</td>
                     <td>{{ $customer?->phone ?? '—' }}</td>
+                    <td>{{ $customer?->address ?? '—' }}</td>
                     <td style="text-align:center">{{ number_format($smallQty, 0) }}</td>
                     <td style="text-align:center">{{ number_format($bigQty, 0) }}</td>
                     <td style="text-align:right;color:#D85A30;font-weight:bold">៛{{ number_format((float) $order->delivery_fee_khr, 0) }}</td>
@@ -220,7 +222,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="{{ $delivery->show_invoice_info ? 8 : 6 }}" style="text-align:center;padding:20px;color:#999">មិនមានវិក្ក័យបត្រ</td>
+                    <td colspan="{{ $delivery->show_invoice_info ? 9 : 7 }}" style="text-align:center;padding:20px;color:#999">មិនមានវិក្ក័យបត្រ</td>
                 </tr>
             @endforelse
         </tbody>

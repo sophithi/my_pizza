@@ -53,6 +53,7 @@ header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
                 @endif
                 <th width="150">ឈ្មោះអតិថិជន</th>
                 <th width="120">លេខទំនាក់ទំនង</th>
+                <th width="140">ទីតាំង</th>
                 <th width="80">កេសតូច</th>
                 <th width="80">កេសធំ</th>
                 <th width="110">ថ្លៃដឹក (៛)</th>
@@ -82,6 +83,7 @@ header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
                     @endif
                     <td>{{ $customer?->name ?? 'N/A' }}</td>
                     <td>{{ $customer?->phone ?? '—' }}</td>
+                    <td>{{ $customer?->address ?? '—' }}</td>
                     <td class="center">{{ $smallQty }}</td>
                     <td class="center">{{ $bigQty }}</td>
                     <td class="currency">{{ number_format($fee, 0) }}</td>
@@ -91,11 +93,11 @@ header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
                 </tr>
             @empty
                 <tr>
-                    <td colspan="{{ $delivery->show_invoice_info ? 8 : 6 }}" style="text-align: center; color: #9ca3af;">មិនមានវិក្ក័យបត្រ</td>
+                    <td colspan="{{ $delivery->show_invoice_info ? 9 : 7 }}" style="text-align: center; color: #9ca3af;">មិនមានវិក្ក័យបត្រ</td>
                 </tr>
             @endforelse
             <tr class="total-row">
-                <td colspan="{{ $delivery->show_invoice_info ? 4 : 3 }}"><strong>សរុប</strong></td>
+                <td colspan="{{ $delivery->show_invoice_info ? 5 : 4 }}"><strong>សរុប</strong></td>
                 <td class="center"><strong>{{ $totalSmall }}</strong></td>
                 <td class="center"><strong>{{ $totalBig }}</strong></td>
                 <td class="currency"><strong>{{ number_format($totalFee, 0) }}</strong></td>

@@ -573,15 +573,15 @@
         <div class="show-container">
             <div class="show-header" style="border-left-color:#dc2626; background:#fee2e2;">
                 <div>
-                    <h1 style="color:#dc2626;">⚠️ Product Not Found</h1>
-                    <p>The product associated with this inventory record no longer exists.</p>
+                    <h1 style="color:#dc2626;">⚠️ រកមិនឃើញទំនិញ</h1>
+                    <p>ទំនិញដែលភ្ជាប់ជាមួយកំណត់ត្រាស្តុកនេះលែងមានទៀតហើយ។</p>
                 </div>
             </div>
             <div style="text-align:center;padding:40px;background:white;border-radius:12px;">
-                <p style="color:#666;margin-bottom:20px;">This inventory record has been orphaned.</p>
+                <p style="color:#666;margin-bottom:20px;">កំណត់ត្រាស្តុកនេះឥឡូវនេះគ្មានទំនិញភ្ជាប់ជាមួយទេ។</p>
                 <a href="{{ route('inventory.index') }}"
                     style="display:inline-block;padding:10px 24px;background:#e85d24;color:white;text-decoration:none;border-radius:8px;font-weight:700;">
-                    Back to Inventory
+                    ត្រឡប់ទៅស្តុកទំនិញ
                 </a>
             </div>
         </div>
@@ -610,15 +610,21 @@
             $pct = min(100, round(($inventory->quantity / $maxDisplay) * 100));
             $barClass = $isOut ? '' : ($isLow ? 'low' : 'good');
 
-            // Latest transactions (requires StockTransaction model / relation)
-            // Adjust relation name/model to match your actual setup
-            $transactions = method_exists($inventory, 'transactions')
-                ? $inventory->transactions()->latest()->take(10)->get()
-                : collect();
+            // Movement history (stock in/out/adjustments), newest first
+            $movements = $inventory->movements()->with('user')->latest()->take(10)->get();
+            $totalIn = $inventory->movements()->where('quantity_change', '>', 0)->sum('quantity_change');
+            $totalOut = abs($inventory->movements()->where('quantity_change', '<', 0)->sum('quantity_change'));
 
-            // Totals from transactions
-            $totalIn = $transactions->where('type', 'in')->sum('quantity');
-            $totalOut = $transactions->where('type', 'out')->sum('quantity');
+            $movementTypeLabels = [
+                'stock_create' => 'បង្កើតដំបូង',
+                'manual_adjust' => 'កែសម្រួល',
+                'quick_adjust' => 'កែសម្រួលរហ័ស',
+                'stock_restock' => 'បន្ថែមស្តុក',
+                'stock_reduce' => 'កាត់ស្តុក',
+                'order_deduct' => 'កាត់ដោយការបញ្ជាទិញ',
+                'order_restore' => 'ត្រឡប់ដោយការបញ្ជាទិញ',
+            ];
+            $movementLabel = fn($m) => $movementTypeLabels[$m->type] ?? $m->type;
         @endphp
 
         <div class="show-container">
@@ -626,8 +632,8 @@
             {{-- ── Header ── --}}
             <div class="show-header">
                 <div>
-                    <h1>{{ $inventory->product->name ?? 'Unknown Product' }}</h1>
-                    <p>Inventory ID #{{ $inventory->id }} &nbsp;·&nbsp; Last updated
+                    <h1>{{ $inventory->product->name ?? 'មិនស្គាល់ទំនិញ' }}</h1>
+                    <p>លេខស្តុក #{{ $inventory->id }} &nbsp;·&nbsp; កែប្រែចុងក្រោយ
                         {{ $inventory->updated_at ? $inventory->updated_at->diffForHumans() : '—' }}</p>
                 </div>
                 <div class="header-meta">
@@ -643,7 +649,7 @@
 
                 {{-- Image --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> Product Image</div>
+                    <div class="card-header"><span class="dot"></span> រូបភាពទំនិញ</div>
                     <div class="card-body">
                         <div class="prod-img {{ !($inventory->product->image ?? null) ? 'no-img' : '' }}">
                             @if($inventory->product->imageUrl())
@@ -659,15 +665,15 @@
 
                 {{-- Details --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> Inventory Details</div>
+                    <div class="card-header"><span class="dot"></span> ព័ត៌មានលម្អិតស្តុក</div>
                     <div class="card-body">
                         <h2 class="product-title">{{ $inventory->product->name ?? '—' }}</h2>
                         <p class="product-cat">{{ $inventory->product->category ?? '—' }}</p>
 
                         <span class="badge {{ $isOut ? 'badge-bad' : ($isLow ? 'badge-warn' : 'badge-good') }}">
-                            @if($isOut) ✕ Out of Stock
-                            @elseif($isLow) ⚠ Low Stock
-                            @else ✓ In Stock
+                            @if($isOut) ✕ អស់ស្តុក
+                            @elseif($isLow) ⚠ ជិតអស់ស្តុក
+                            @else ✓ មានស្តុក
                             @endif
                         </span>
 
@@ -676,7 +682,7 @@
                             <span class="stat-value" style="color:#e85d24;">{{ $inventory->quantity }} {{ $unit }}</span>
                         </div>
                         <div class="stat-row">
-                            <span class="stat-label">កម្រិតចំនួន (Reorder)</span>
+                            <span class="stat-label">កម្រិតត្រូវបំពេញ</span>
                             <span class="stat-value">{{ $inventory->reorder_level }} {{ $unit }}</span>
                         </div>
                         <div class="stat-row">
@@ -692,23 +698,29 @@
                             <span
                                 class="stat-value">{{ $inventory->product->sku ?? $inventory->product->barcode ?? '—' }}</span>
                         </div>
-
-                        {{-- Pricing --}}
-                        <div class="prices">
-                            <div class="price-card">
-                                <div class="amount">${{ number_format($inventory->product->price_usd ?? 0, 2) }}</div>
-                                <div class="currency">USD</div>
+                        @if($inventory->cost_per_unit)
+                            <div class="stat-row">
+                                <span class="stat-label">តម្លៃដើម (កំណត់ដោយដៃ)</span>
+                                <span class="stat-value">${{ number_format($inventory->cost_per_unit, 2) }}</span>
                             </div>
+                        @endif
+
+                        {{-- Pricing (KHR is the base price; USD is derived from it) --}}
+                        <div class="prices">
                             <div class="price-card">
                                 <div class="amount">៛{{ number_format($inventory->product->price_khr ?? 0, 0) }}</div>
                                 <div class="currency">KHR</div>
+                            </div>
+                            <div class="price-card">
+                                <div class="amount">${{ number_format($inventory->product->price_usd ?? 0, 2) }}</div>
+                                <div class="currency">USD</div>
                             </div>
                         </div>
 
                         {{-- Stock level bar --}}
                         <div class="stock-bar-wrap">
                             <div class="stock-bar-label">
-                                <span>Stock Level</span>
+                                <span>កម្រិតស្តុក</span>
                                 <span>{{ $pct }}%</span>
                             </div>
                             <div class="stock-bar-bg">
@@ -719,10 +731,10 @@
                         {{-- Action buttons --}}
                         <div class="btns">
                             <a href="{{ route('inventory.edit', $inventory) }}" class="btn-edit">
-                                <i class="fas fa-edit"></i> Edit
+                                <i class="fas fa-edit"></i> កែប្រែ
                             </a>
                             <a href="{{ route('inventory.index') }}" class="btn-back">
-                                <i class="fas fa-arrow-left"></i> Back
+                                <i class="fas fa-arrow-left"></i> ត្រឡប់
                             </a>
                         </div>
                     </div>
@@ -734,46 +746,46 @@
 
                 {{-- KPIs + Dates --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> Quick Stats</div>
+                    <div class="card-header"><span class="dot"></span> សង្ខេបរហ័ស</div>
                     <div class="card-body">
                         <div class="kpi-grid">
                             <div class="kpi highlight">
                                 <div class="kpi-val">{{ $inventory->quantity }}</div>
-                                <div class="kpi-label">Current Stock</div>
+                                <div class="kpi-label">ស្តុកបច្ចុប្បន្ន</div>
                             </div>
                             <div class="kpi">
                                 <div class="kpi-val">{{ $inventory->reorder_level }}</div>
-                                <div class="kpi-label">Reorder Level</div>
+                                <div class="kpi-label">កម្រិតត្រូវបំពេញ</div>
                             </div>
                             <div class="kpi">
                                 <div class="kpi-val" style="color:#2e7d32;">+{{ $totalIn }}</div>
-                                <div class="kpi-label">Total Stock In</div>
+                                <div class="kpi-label">ស្តុកចូលសរុប</div>
                             </div>
                             <div class="kpi">
                                 <div class="kpi-val" style="color:#c62828;">-{{ $totalOut }}</div>
-                                <div class="kpi-label">Total Stock Out</div>
+                                <div class="kpi-label">ស្តុកចេញសរុប</div>
                             </div>
                         </div>
 
                         <div class="date-info">
                             <div class="date-row">
-                                <span class="dlabel"> Created At</span>
+                                <span class="dlabel">បង្កើតនៅ</span>
                                 <span
                                     class="dval">{{ $inventory->created_at ? $inventory->created_at->format('d M Y, H:i') : '—' }}</span>
                             </div>
                             <div class="date-row">
-                                <span class="dlabel"> Updated At</span>
+                                <span class="dlabel">កែប្រែនៅ</span>
                                 <span
                                     class="dval">{{ $inventory->updated_at ? $inventory->updated_at->format('d M Y, H:i') : '—' }}</span>
                             </div>
                             <div class="date-row">
-                                <span class="dlabel"> Time</span>
+                                <span class="dlabel">រយៈពេល</span>
                                 <span
                                     class="dval">{{ $inventory->created_at ? $inventory->created_at->diffForHumans() : '—' }}</span>
                             </div>
                             @if($inventory->product->created_at ?? null)
                                 <div class="date-row">
-                                    <span class="dlabel"> Product Since</span>
+                                    <span class="dlabel">ទំនិញមានតាំងពី</span>
                                     <span class="dval">{{ $inventory->product->created_at->format('d M Y') }}</span>
                                 </div>
                             @endif
@@ -781,42 +793,48 @@
                     </div>
                 </div>
 
-                {{-- Recent Transactions --}}
+                {{-- Recent Movements --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> Recent Transactions</div>
+                    <div class="card-header"><span class="dot"></span> ចលនាស្តុកថ្មីៗ</div>
                     <div class="card-body" style="padding:0;">
-                        @if($transactions->isEmpty())
+                        @if($movements->isEmpty())
                             <div class="empty-state">
                                 <i class="fas fa-exchange-alt"></i>
-                                No transactions recorded yet
+                                មិនទាន់មានចលនាស្តុកទេ
                             </div>
                         @else
                             <table class="tx-table">
                                 <thead>
                                     <tr>
-                                        <th>Type</th>
-                                        <th>Qty</th>
-                                        <th>Note</th>
-                                        <th>Date</th>
+                                        <th>ប្រភេទ</th>
+                                        <th>ចំនួន</th>
+                                        <th>មូលហេតុ</th>
+                                        <th>អ្នកធ្វើ</th>
+                                        <th>កាលបរិច្ឆេទ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($transactions as $tx)
+                                    @foreach($movements as $m)
+                                        @php $isIn = $m->quantity_change > 0; @endphp
                                         <tr>
                                             <td>
-                                                <span class="tx-type {{ $tx->type }}">
-                                                    {{ strtoupper($tx->type) }}
+                                                <span class="tx-type {{ $isIn ? 'in' : 'out' }}">
+                                                    {{ $movementLabel($m) }}
                                                 </span>
                                             </td>
-                                            <td class="tx-{{ $tx->type }}">
-                                                {{ $tx->type === 'in' ? '+' : ($tx->type === 'out' ? '-' : '±') }}{{ $tx->quantity }}
+                                            <td class="{{ $isIn ? 'tx-in' : 'tx-out' }}">
+                                                {{ $isIn ? '+' : '' }}{{ number_format($m->quantity_change) }}
                                             </td>
                                             <td
-                                                style="color:#888; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                                {{ $tx->note ?? $tx->reason ?? '—' }}
+                                                style="color:#888; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                                                title="{{ $m->note }}">
+                                                {{ $m->note ?? '—' }}
+                                            </td>
+                                            <td style="color:#888; white-space:nowrap;">
+                                                {{ $m->user?->name ?? '—' }}
                                             </td>
                                             <td style="color:#bbb; white-space:nowrap;">
-                                                {{ $tx->created_at ? $tx->created_at->format('d/m H:i') : '—' }}
+                                                {{ $m->created_at ? $m->created_at->format('d/m H:i') : '—' }}
                                             </td>
                                         </tr>
                                     @endforeach
@@ -828,12 +846,12 @@
 
                 {{-- Activity Timeline --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> Activity Timeline</div>
+                    <div class="card-header"><span class="dot"></span> ប្រវត្តិសកម្មភាព</div>
                     <div class="card-body">
-                        @if($transactions->isEmpty() && !$inventory->created_at)
+                        @if($movements->isEmpty() && !$inventory->created_at)
                             <div class="empty-state">
                                 <i class="fas fa-history"></i>
-                                No activity recorded
+                                មិនទាន់មានប្រវត្តិសកម្មភាពទេ
                             </div>
                         @else
                             <ul class="timeline">
@@ -842,32 +860,30 @@
                                 <li class="tl-item">
                                     <div class="tl-dot gray"></div>
                                     <div class="tl-body">
-                                        <p class="tl-title">Inventory Record Created</p>
+                                        <p class="tl-title">បង្កើតកំណត់ត្រាស្តុក</p>
                                         <p class="tl-time">
                                             {{ $inventory->created_at ? $inventory->created_at->format('d M Y, H:i') : '—' }}</p>
                                     </div>
                                 </li>
 
-                                {{-- Transactions as timeline events --}}
-                                @foreach($transactions->take(7) as $tx)
+                                {{-- Movements as timeline events --}}
+                                @foreach($movements->take(7) as $m)
+                                    @php $isIn = $m->quantity_change > 0; @endphp
                                     <li class="tl-item">
-                                        <div
-                                            class="tl-dot {{ $tx->type === 'in' ? 'green' : ($tx->type === 'out' ? 'red' : 'orange') }}">
-                                        </div>
+                                        <div class="tl-dot {{ $isIn ? 'green' : 'red' }}"></div>
                                         <div class="tl-body">
                                             <p class="tl-title">
-                                                @if($tx->type === 'in') Stock In
-                                                @elseif($tx->type === 'out') Stock Out
-                                                @else Adjustment
-                                                @endif
+                                                {{ $movementLabel($m) }}
                                                 <span style="color:#e85d24;">
-                                                    {{ $tx->type === 'in' ? '+' : ($tx->type === 'out' ? '-' : '±') }}{{ $tx->quantity }}
+                                                    {{ $isIn ? '+' : '' }}{{ number_format($m->quantity_change) }}
                                                     {{ $unit }}
                                                 </span>
                                             </p>
-                                            <p class="tl-time">{{ $tx->created_at ? $tx->created_at->format('d M Y, H:i') : '—' }}</p>
-                                            @if($tx->note ?? $tx->reason ?? null)
-                                                <p class="tl-note">{{ $tx->note ?? $tx->reason }}</p>
+                                            <p class="tl-time">{{ $m->created_at ? $m->created_at->format('d M Y, H:i') : '—' }}
+                                                @if($m->user)&nbsp;·&nbsp;{{ $m->user->name }}@endif
+                                            </p>
+                                            @if($m->note)
+                                                <p class="tl-note">{{ $m->note }}</p>
                                             @endif
                                         </div>
                                     </li>
@@ -878,7 +894,7 @@
                                     <li class="tl-item">
                                         <div class="tl-dot"></div>
                                         <div class="tl-body">
-                                            <p class="tl-title">Record Last Updated</p>
+                                            <p class="tl-title">កែប្រែចុងក្រោយ</p>
                                             <p class="tl-time">{{ $inventory->updated_at->format('d M Y, H:i') }}</p>
                                         </div>
                                     </li>

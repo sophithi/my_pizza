@@ -442,7 +442,7 @@
                 </select>
 
                 <select name="printed" class="form-select">
-                    <option value="all">ព្រីនទាំងអស់</option>
+                    <option value="all">ទាំងអស់</option>
                     <option value="printed" {{ request('printed') === 'printed' ? 'selected' : '' }}>បានព្រីន</option>
                     <option value="unprinted" {{ request('printed') === 'unprinted' ? 'selected' : '' }}>មិនទាន់បានព្រីន</option>
                 </select>

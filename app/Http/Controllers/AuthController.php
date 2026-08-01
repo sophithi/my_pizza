@@ -92,6 +92,12 @@ class AuthController extends Controller
             $user->update([
                 'last_logout_at' => now(),
             ]);
+
+            TelegramNotifier::send(
+                "🔓 Logout: {$user->name} ({$user->email})\n"
+                . "IP: {$request->ip()}\n"
+                . 'Time: ' . now()->setTimezone('Asia/Phnom_Penh')->format('Y-m-d h:i A')
+            );
         }
 
         Auth::logout();

@@ -37,6 +37,31 @@ class InventoryController extends Controller
         $movementDate = $this->movementDateFromRequest($request);
         $query = Inventory::with('product');
 
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('warehouse_location', 'like', "%{$search}%")
+                    ->orWhereHas('product', function ($pq) use ($search) {
+                        $pq->where('name', 'like', "%{$search}%")
+                            ->orWhere('category', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('status')) {
+            if ($request->get('status') === 'out') {
+                $query->where('quantity', '<=', 0);
+            } elseif ($request->get('status') === 'low') {
+                $query->whereRaw('quantity > 0 AND quantity <= reorder_level');
+            } elseif ($request->get('status') === 'in') {
+                $query->whereRaw('quantity > reorder_level');
+            }
+        }
+
+        if ($request->filled('warehouse')) {
+            $query->whereRaw('LOWER(warehouse_location) = ?', [strtolower($request->get('warehouse'))]);
+        }
+
         if ($movementDate) {
             $query->whereHas('movements', function ($movementQuery) use ($movementDate) {
                 $movementQuery->whereDate('created_at', $movementDate);
@@ -63,7 +88,15 @@ class InventoryController extends Controller
         $movementSummary = $this->movementSummary($request);
         $movementsByInventory = $this->movementsByInventory($request);
 
-        return view('inventory.index', compact('inventories', 'stats', 'movementDate', 'movementSummary', 'movementsByInventory'));
+        // Distinct warehouse locations across ALL inventory (not just the current
+        // filtered/paginated page), so the filter dropdown always shows every option.
+        $warehouses = Inventory::whereNotNull('warehouse_location')
+            ->where('warehouse_location', '!=', '')
+            ->distinct()
+            ->orderBy('warehouse_location')
+            ->pluck('warehouse_location');
+
+        return view('inventory.index', compact('inventories', 'stats', 'movementDate', 'movementSummary', 'movementsByInventory', 'warehouses'));
     }
 
     /**
@@ -141,15 +174,20 @@ class InventoryController extends Controller
     public function quickUpdate($id)
     {
         $inventory = Inventory::findOrFail($id);
-        $quantity = request()->validate(['quantity' => 'required|numeric|min:0'])['quantity'];
+        $validated = request()->validate([
+            'quantity' => 'required|numeric|min:0',
+            'note' => 'nullable|string|max:255',
+        ]);
+        $quantity = $validated['quantity'];
+        $note = trim($validated['note'] ?? '') ?: 'Quick stock update';
 
-        DB::transaction(function () use ($inventory, $quantity) {
+        DB::transaction(function () use ($inventory, $quantity, $note) {
             $before = (int) $inventory->quantity;
             $after = (int) $quantity;
             $inventory->update(['quantity' => $after]);
 
             if ($before !== $after) {
-                $this->recordManualMovement($inventory, 'quick_adjust', $after - $before, $before, $after, 'Quick stock update');
+                $this->recordManualMovement($inventory, 'quick_adjust', $after - $before, $before, $after, $note);
             }
         });
 
@@ -175,6 +213,29 @@ class InventoryController extends Controller
         return redirect()
             ->route('inventory.index', ['period' => 'today'])
             ->with('success', 'បានបន្ថែមចំនួនទំនិញចូលស្តុកដោយជោគជ័យ។');
+    }
+
+    public function reduce(Inventory $inventory)
+    {
+        $validated = request()->validate([
+            'quantity' => 'required|integer|min:1',
+            'reason' => 'required|string|max:255',
+        ]);
+
+        $removedQuantity = (int) $validated['quantity'];
+        $reason = trim($validated['reason']);
+
+        DB::transaction(function () use ($inventory, $removedQuantity, $reason) {
+            $before = (int) $inventory->quantity;
+            $inventory->decrement('quantity', $removedQuantity);
+            $after = (int) $inventory->fresh()->quantity;
+
+            $this->recordManualMovement($inventory, 'stock_reduce', -$removedQuantity, $before, $after, $reason);
+        });
+
+        return redirect()
+            ->route('inventory.index', ['period' => 'today'])
+            ->with('success', 'បានកាត់ចំនួនទំនិញចេញពីស្តុកដោយជោគជ័យ។');
     }
 
     private function movementDateFromRequest(Request $request): ?string
@@ -318,7 +379,10 @@ class InventoryController extends Controller
         return Inventory::with('product')
             ->when($request->filled('search'), function($q) use ($request) {
                 $q->where('warehouse_location', 'like', "%{$request->search}%")
-                  ->orWhereHas('product', fn($q) => $q->where('name', 'like', "%{$request->search}%"));
+                  ->orWhereHas('product', function ($pq) use ($request) {
+                      $pq->where('name', 'like', "%{$request->search}%")
+                          ->orWhere('category', 'like', "%{$request->search}%");
+                  });
             })
             ->when($request->filled('status'), function($q) use ($request) {
                 if ($request->status === 'out') {
@@ -328,6 +392,9 @@ class InventoryController extends Controller
                 } elseif ($request->status === 'in') {
                     $q->whereRaw('quantity > reorder_level');
                 }
+            })
+            ->when($request->filled('warehouse'), function ($q) use ($request) {
+                $q->whereRaw('LOWER(warehouse_location) = ?', [strtolower($request->warehouse)]);
             })
             ->latest()
             ->get();

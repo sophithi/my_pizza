@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('inventory', InventoryController::class);
         Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
         Route::post('inventory/{inventory}/restock', [InventoryController::class, 'restock'])->name('inventory.restock');
+        Route::post('inventory/{inventory}/reduce', [InventoryController::class, 'reduce'])->name('inventory.reduce');
         Route::get('inventory/export/excel', [InventoryController::class, 'exportExcel'])->name('inventory.export.excel');
         Route::get('inventory/export/pdf', [InventoryController::class, 'exportPdf'])->name('inventory.export.pdf');
     });

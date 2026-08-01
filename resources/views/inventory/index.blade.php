@@ -418,6 +418,17 @@
             color: #065f46;
         }
 
+        .icon-reduce {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #c2410c;
+        }
+
+        .icon-reduce:hover {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
         .restock-overlay {
             --accent: #e85d24;
             --accent-dark: #d94a10;
@@ -590,6 +601,34 @@
             display: block;
         }
 
+        .reason-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .reason-chip {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: #475569;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 6px 12px;
+        }
+
+        .reason-chip:hover {
+            background: #f1f5f9;
+        }
+
+        .reason-chip.active {
+            background: #ffedd5;
+            border-color: #fdba74;
+            color: #9a3412;
+        }
+
         .empty-state {
             padding: 64px 20px;
             text-align: center;
@@ -663,7 +702,6 @@
 
 @section('content')
     @php
-        $items = $inventories->getCollection();
         $movementActive = $movementDate || in_array(request('period'), ['month', 'year'], true);
     @endphp
 
@@ -755,22 +793,24 @@
                 <div class="filter-form">
                     <input type="search" name="search" id="inventorySearch" value="{{ request('search') }}" class="form-control" placeholder="ស្វែងរកទំនិញ ឬប្រភេទ..." autocomplete="off">
 
-                    <select id="statusFilter" name="status" class="form-select">
+                    <select id="statusFilter" name="status" class="form-select" onchange="this.form.submit()">
                         <option value="">គ្រប់ស្ថានភាព</option>
                         <option value="in" {{ request('status') === 'in' ? 'selected' : '' }}>មានក្នុងស្តុក</option>
                         <option value="low" {{ request('status') === 'low' ? 'selected' : '' }}>ជិតអស់</option>
                         <option value="out" {{ request('status') === 'out' ? 'selected' : '' }}>អស់ស្តុក</option>
                     </select>
 
-                    <select id="warehouseFilter" name="warehouse" class="form-select">
+                    <select id="warehouseFilter" name="warehouse" class="form-select" onchange="this.form.submit()">
                         <option value="">គ្រប់ទីតាំង</option>
-                        @foreach($items->pluck('warehouse_location')->unique()->reject(fn($x) => !$x) as $warehouse)
+                        @foreach($warehouses as $warehouse)
                             <option value="{{ strtolower($warehouse) }}" {{ request('warehouse') === strtolower($warehouse) ? 'selected' : '' }}>{{ $warehouse }}</option>
                         @endforeach
                     </select>
 
                     <div class="filter-actions">
-
+                        <button type="submit" class="inventory-btn inventory-btn-primary">
+                            <i class="fas fa-search"></i> ស្វែងរក
+                        </button>
                         <button type="button" class="inventory-btn inventory-btn-soft" onclick="exportInventoryCsv()">
                             <i class="fas fa-download"></i> ទាញយក
                         </button>
@@ -882,6 +922,11 @@
                                                 title="បន្ថែមចំនួនចូលស្តុក">
                                                 <i class="fas fa-plus"></i>
                                             </button>
+                                            <button type="button" class="icon-action icon-reduce"
+                                                onclick="openReduce({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'), {{ $inv->quantity }})"
+                                                title="កាត់ចេញពីស្តុក">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
                                             <a href="{{ route('inventory.show', $inv) }}" class="icon-action" title="មើល">
                                                 <i class="fas fa-eye"></i>
                                             </a>
@@ -952,6 +997,115 @@
                         <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeRestockModal()">Cancel</button>
                         <button type="submit" class="inventory-btn inventory-btn-primary">
                             <i class="fas fa-check"></i> Confirm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="restock-overlay" id="quickUpdateOverlay" aria-hidden="true">
+        <div class="restock-modal" role="dialog" aria-modal="true" aria-labelledby="quickUpdateTitle">
+            <div class="restock-header">
+                <h3 class="restock-title" id="quickUpdateTitle">កែសម្រួលចំនួនស្តុក</h3>
+            </div>
+            <form method="POST" id="quickUpdateForm">
+                @csrf
+                <div class="restock-body">
+                    <div class="restock-product">
+                        <div class="restock-product-name" id="quickUpdateProductName">ទំនិញ</div>
+                        <div class="restock-product-meta">ចំនួនបច្ចុប្បន្ន: <span id="quickUpdateCurrentText">0</span></div>
+                    </div>
+
+                    <div class="restock-field">
+                        <label for="quickUpdateQuantity">ចំនួនស្តុកថ្មី</label>
+                        <input type="number" min="0" step="1" name="quantity" id="quickUpdateQuantity" class="restock-input" autocomplete="off" required>
+                        <div class="restock-error" id="quickUpdateError">សូមបញ្ចូលចំនួនត្រឹមត្រូវ (មិនអវិជ្ជមាន)</div>
+                    </div>
+
+                    <div class="restock-preview">
+                        <div class="restock-preview-card">
+                            <div class="restock-preview-label">បច្ចុប្បន្ន</div>
+                            <div class="restock-preview-value" id="quickUpdateCurrentValue">0</div>
+                        </div>
+                        <div class="restock-preview-plus">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="restock-preview-card">
+                            <div class="restock-preview-label">ថ្មី</div>
+                            <div class="restock-preview-value" id="quickUpdateNewValue">0</div>
+                        </div>
+                    </div>
+
+                    <div class="text-center" style="margin-top: 10px;">
+                        <span class="movement-pill" id="quickUpdateDeltaBadge" style="display:none;"></span>
+                    </div>
+
+                    <div class="restock-field" style="margin-top: 14px;">
+                        <label for="quickUpdateNote">មូលហេតុ (មិនចាំបាច់)</label>
+                        <input type="text" name="note" id="quickUpdateNote" class="form-control" placeholder="ឧ. រាប់ស្តុកឡើងវិញ, ខូច, បាត់...">
+                    </div>
+
+                    <div class="restock-actions">
+                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeQuickUpdateModal()">Cancel</button>
+                        <button type="submit" class="inventory-btn inventory-btn-primary">
+                            <i class="fas fa-check"></i> រក្សាទុក
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="restock-overlay" id="reduceOverlay" aria-hidden="true">
+        <div class="restock-modal" role="dialog" aria-modal="true" aria-labelledby="reduceTitle">
+            <div class="restock-header">
+                <h3 class="restock-title" id="reduceTitle">កាត់ចេញពីស្តុក</h3>
+            </div>
+            <form method="POST" id="reduceForm">
+                @csrf
+                <div class="restock-body">
+                    <div class="restock-product">
+                        <div class="restock-product-name" id="reduceProductName">ទំនិញ</div>
+                        <div class="restock-product-meta">ចំនួនបច្ចុប្បន្ន: <span id="reduceCurrentText">0</span></div>
+                    </div>
+
+                    <div class="restock-field">
+                        <label for="reduceQuantity">ចំនួនដែលត្រូវកាត់ចេញ</label>
+                        <input type="number" min="1" step="1" name="quantity" id="reduceQuantity" class="restock-input" autocomplete="off" required>
+                        <div class="restock-error" id="reduceQuantityError">សូមបញ្ចូលចំនួនធំជាង 0</div>
+                    </div>
+
+                    <div class="restock-preview">
+                        <div class="restock-preview-card">
+                            <div class="restock-preview-label">បច្ចុប្បន្ន</div>
+                            <div class="restock-preview-value" id="reduceCurrentValue">0</div>
+                        </div>
+                        <div class="restock-preview-plus" style="color: #c2410c;">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="restock-preview-card">
+                            <div class="restock-preview-label">នៅសល់</div>
+                            <div class="restock-preview-value" id="reduceNewValue">0</div>
+                        </div>
+                    </div>
+
+                    <div class="restock-field" style="margin-top: 14px;">
+                        <label>មូលហេតុ</label>
+                        <div class="reason-chips" id="reduceReasonChips">
+                            <span class="reason-chip" data-reason="ខូច">ខូច (Damaged)</span>
+                            <span class="reason-chip" data-reason="បាត់">បាត់ (Lost)</span>
+                            <span class="reason-chip" data-reason="ការកែតម្រូវស្តុក">ការកែតម្រូវស្តុក (Recount)</span>
+                            <span class="reason-chip" data-reason="">ផ្សេងៗ (Other)</span>
+                        </div>
+                        <input type="text" name="reason" id="reduceReason" class="form-control" placeholder="ឧ. ខូច, បាត់, ការកែតម្រូវស្តុក..." required>
+                        <div class="restock-error" id="reduceReasonError">សូមបញ្ជាក់មូលហេតុ</div>
+                    </div>
+
+                    <div class="restock-actions">
+                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeReduceModal()">Cancel</button>
+                        <button type="submit" class="inventory-btn inventory-btn-primary">
+                            <i class="fas fa-check"></i> រក្សាទុក
                         </button>
                     </div>
                 </div>
@@ -1040,15 +1194,90 @@
         }
 
         function openQuickUpdate(id, currentQty) {
-            const newQty = prompt(`បញ្ចូលចំនួនស្តុកថ្មី\n\nចំនួនបច្ចុប្បន្ន: ${currentQty}`, currentQty);
-            if (newQty === null || newQty === '' || newQty == currentQty) return;
+            const overlay = document.getElementById('quickUpdateOverlay');
+            const form = document.getElementById('quickUpdateForm');
+            const currentText = document.getElementById('quickUpdateCurrentText');
+            const currentValue = document.getElementById('quickUpdateCurrentValue');
+            const quantityInput = document.getElementById('quickUpdateQuantity');
+            const noteInput = document.getElementById('quickUpdateNote');
+            const error = document.getElementById('quickUpdateError');
 
-            const form = document.createElement('form');
-            form.method = 'POST';
             form.action = '/inventory/' + id + '/quick-update';
-            form.innerHTML = '<input type="hidden" name="_token" value="' + document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') + '"><input type="hidden" name="quantity" value="' + newQty + '">';
-            document.body.appendChild(form);
-            form.submit();
+            form.dataset.currentQty = currentQty;
+            currentText.textContent = currentQty.toLocaleString();
+            currentValue.textContent = currentQty.toLocaleString();
+            quantityInput.value = currentQty;
+            noteInput.value = '';
+            error.classList.remove('show');
+            updateQuickUpdatePreview();
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => { quantityInput.focus(); quantityInput.select(); }, 50);
+        }
+
+        function closeQuickUpdateModal() {
+            const overlay = document.getElementById('quickUpdateOverlay');
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        function updateQuickUpdatePreview() {
+            const form = document.getElementById('quickUpdateForm');
+            const quantityInput = document.getElementById('quickUpdateQuantity');
+            const newValue = document.getElementById('quickUpdateNewValue');
+            const badge = document.getElementById('quickUpdateDeltaBadge');
+
+            const currentQty = parseInt(form.dataset.currentQty || '0', 10);
+            const newQty = parseInt(quantityInput.value, 10);
+            const safeNewQty = Number.isFinite(newQty) ? newQty : 0;
+            newValue.textContent = safeNewQty.toLocaleString();
+
+            const delta = safeNewQty - currentQty;
+            if (!quantityInput.value || delta === 0) {
+                badge.style.display = 'none';
+            } else {
+                badge.style.display = 'inline-flex';
+                badge.className = 'movement-pill ' + (delta > 0 ? 'movement-in' : 'movement-out');
+                badge.innerHTML = '<i class="fas fa-' + (delta > 0 ? 'plus' : 'minus') + '"></i> ' + Math.abs(delta).toLocaleString();
+            }
+        }
+
+        function openReduce(id, name, currentQty) {
+            const overlay = document.getElementById('reduceOverlay');
+            const form = document.getElementById('reduceForm');
+            const productName = document.getElementById('reduceProductName');
+            const currentText = document.getElementById('reduceCurrentText');
+            const currentValue = document.getElementById('reduceCurrentValue');
+            const newValue = document.getElementById('reduceNewValue');
+            const quantityInput = document.getElementById('reduceQuantity');
+            const reasonInput = document.getElementById('reduceReason');
+            const quantityError = document.getElementById('reduceQuantityError');
+            const reasonError = document.getElementById('reduceReasonError');
+
+            form.action = '/inventory/' + id + '/reduce';
+            form.dataset.currentQty = currentQty;
+            productName.textContent = name;
+            currentText.textContent = currentQty.toLocaleString();
+            currentValue.textContent = currentQty.toLocaleString();
+            newValue.textContent = currentQty.toLocaleString();
+            quantityInput.value = '';
+            reasonInput.value = '';
+            quantityError.classList.remove('show');
+            reasonError.classList.remove('show');
+            document.querySelectorAll('#reduceReasonChips .reason-chip').forEach(chip => chip.classList.remove('active'));
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => quantityInput.focus(), 50);
+        }
+
+        function closeReduceModal() {
+            const overlay = document.getElementById('reduceOverlay');
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
         }
 
         function openRestock(id, name, currentQty) {
@@ -1111,10 +1340,93 @@
                 if (event.target === overlay) closeRestockModal();
             });
 
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape' && overlay?.classList.contains('show')) {
-                    closeRestockModal();
+            const quickOverlay = document.getElementById('quickUpdateOverlay');
+            const quickForm = document.getElementById('quickUpdateForm');
+            const quickQuantityInput = document.getElementById('quickUpdateQuantity');
+            const quickError = document.getElementById('quickUpdateError');
+
+            quickQuantityInput?.addEventListener('input', updateQuickUpdatePreview);
+
+            quickForm?.addEventListener('submit', function (event) {
+                const newQty = parseInt(quickQuantityInput.value, 10);
+                if (!Number.isInteger(newQty) || newQty < 0) {
+                    event.preventDefault();
+                    quickError.classList.add('show');
+                    quickQuantityInput.focus();
                 }
+            });
+
+            quickOverlay?.addEventListener('click', function (event) {
+                if (event.target === quickOverlay) closeQuickUpdateModal();
+            });
+
+            const reduceOverlay = document.getElementById('reduceOverlay');
+            const reduceForm = document.getElementById('reduceForm');
+            const reduceQuantityInput = document.getElementById('reduceQuantity');
+            const reduceReasonInput = document.getElementById('reduceReason');
+            const reduceNewValue = document.getElementById('reduceNewValue');
+            const reduceQuantityError = document.getElementById('reduceQuantityError');
+            const reduceReasonError = document.getElementById('reduceReasonError');
+
+            function updateReducePreview() {
+                const currentQty = parseInt(reduceForm.dataset.currentQty || '0', 10);
+                const removeQty = parseInt(reduceQuantityInput.value || '0', 10);
+                reduceNewValue.textContent = (currentQty - Math.max(removeQty || 0, 0)).toLocaleString();
+                reduceQuantityError.classList.remove('show');
+            }
+
+            reduceQuantityInput?.addEventListener('input', updateReducePreview);
+
+            document.querySelectorAll('#reduceReasonChips .reason-chip').forEach(chip => {
+                chip.addEventListener('click', function () {
+                    document.querySelectorAll('#reduceReasonChips .reason-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    reduceReasonInput.value = chip.dataset.reason;
+                    reduceReasonError.classList.remove('show');
+                    if (!chip.dataset.reason) reduceReasonInput.focus();
+                });
+            });
+
+            reduceReasonInput?.addEventListener('input', function () {
+                document.querySelectorAll('#reduceReasonChips .reason-chip').forEach(chip => {
+                    chip.classList.toggle('active', chip.dataset.reason !== '' && chip.dataset.reason === reduceReasonInput.value);
+                });
+                reduceReasonError.classList.remove('show');
+            });
+
+            reduceForm?.addEventListener('submit', function (event) {
+                const removeQty = parseInt(reduceQuantityInput.value, 10);
+                let hasError = false;
+
+                if (!Number.isInteger(removeQty) || removeQty <= 0) {
+                    reduceQuantityError.classList.add('show');
+                    hasError = true;
+                }
+
+                if (!reduceReasonInput.value.trim()) {
+                    reduceReasonError.classList.add('show');
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    event.preventDefault();
+                    if (!Number.isInteger(removeQty) || removeQty <= 0) {
+                        reduceQuantityInput.focus();
+                    } else {
+                        reduceReasonInput.focus();
+                    }
+                }
+            });
+
+            reduceOverlay?.addEventListener('click', function (event) {
+                if (event.target === reduceOverlay) closeReduceModal();
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Escape') return;
+                if (overlay?.classList.contains('show')) closeRestockModal();
+                if (quickOverlay?.classList.contains('show')) closeQuickUpdateModal();
+                if (reduceOverlay?.classList.contains('show')) closeReduceModal();
             });
         });
     </script>

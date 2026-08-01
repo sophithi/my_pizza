@@ -15,8 +15,9 @@
         .report-btn:hover { color:#fff; transform:translateY(-1px); }
         .metric-grid { display:grid; gap:14px; grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:16px; }
         .metric { border-left:4px solid var(--accent); padding:16px; }
-        .metric-label { color:var(--muted); font-size:15px; font-weight:900; margin:0; }
-        .metric-value { color:var(--text); font-size:28px; font-weight:900; margin-top:6px; }
+        .metric-label { color:var(--muted); font-size:13px; font-weight:900; margin:0; text-transform:uppercase; }
+        .metric-value { color:var(--text); font-size:22px; font-weight:900; margin-top:6px; }
+        .metric-value-usd { color:var(--muted); font-size:13px; font-weight:700; margin-top:1px; }
         .panel { margin-bottom:16px; overflow:hidden; }
         .panel-head { border-bottom:1px solid var(--border); padding:14px 16px; }
         .panel-title { color:var(--text); font-size:18px; font-weight:900; margin:0; }
@@ -27,6 +28,9 @@
         .status-ok { background:#dcfce7; color:#166534; }
         .status-low { background:#fef3c7; color:#92400e; }
         .status-out { background:#fee2e2; color:#991b1b; }
+        .pill { border-radius:999px; display:inline-flex; font-size:12.5px; font-weight:800; padding:3px 10px; white-space:nowrap; }
+        .pill-in { background:#dcfce7; color:#166534; }
+        .pill-out { background:#fee2e2; color:#991b1b; }
         .alert-soft { background:#fff7ed; border-color:#fed7aa; color:#9a3412; margin-bottom:16px; padding:14px 16px; }
         .pager-wrap { margin-top:16px; }
         .empty-note { color:var(--muted); padding:22px 16px; text-align:center; }
@@ -62,7 +66,11 @@
             <div class="metric"><p class="metric-label">ទំនិញសរុប</p><div class="metric-value">{{ number_format($totalProducts) }}</div></div>
             <div class="metric"><p class="metric-label">ជិតអស់</p><div class="metric-value text-warning">{{ number_format($lowStockProducts->count()) }}</div></div>
             <div class="metric"><p class="metric-label">អស់ស្តុក</p><div class="metric-value text-danger">{{ number_format($outOfStockCount) }}</div></div>
-            <div class="metric"><p class="metric-label">តម្លៃស្តុក</p><div class="metric-value">${{ number_format($totalInventoryValue, 2) }}</div></div>
+            <div class="metric">
+                <p class="metric-label">តម្លៃស្តុក</p>
+                <div class="metric-value">៛{{ number_format($totalInventoryValueKhr, 0) }}</div>
+                <div class="metric-value-usd">${{ number_format($totalInventoryValue, 2) }}</div>
+            </div>
         </div>
 
         @if ($lowStockProducts->count() > 0)
@@ -89,6 +97,48 @@
                 </div>
             </div>
         @endif
+
+        <div class="panel">
+            <div class="panel-head"><h3 class="panel-title">ចលនាស្តុក</h3></div>
+            @if ($stockMovement->count() > 0)
+                <div class="table-responsive">
+                    <table class="table report-table">
+                        <thead>
+                            <tr>
+                                <th>ទំនិញ</th>
+                                <th class="text-center">ចូលក្នុងស្តុក</th>
+                                <th class="text-center">កាត់ចេញពីស្តុក</th>
+                                <th class="text-center">នៅសល់ក្នុងស្តុក</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($stockMovement as $stock)
+                                <tr>
+                                    <td class="fw-bold">{{ $stock->name ?? 'មិនមានឈ្មោះ' }}</td>
+                                    <td class="text-center">
+                                        @if ($stock->stock_in > 0)
+                                            <span class="pill pill-in">+{{ number_format($stock->stock_in) }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @if ($stock->stock_out > 0)
+                                            <span class="pill pill-out">-{{ number_format($stock->stock_out) }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center fw-bold">{{ number_format($stock->current_quantity) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="empty-note">មិនមានចលនាស្តុកសម្រាប់រយៈពេលនេះទេ។</div>
+            @endif
+        </div>
 
         <div class="panel">
             <div class="panel-head"><h3 class="panel-title">ស្ថានភាពស្តុក</h3></div>
@@ -118,12 +168,12 @@
                                 <td class="text-end {{ $inv->quantity < 0 ? 'text-danger fw-bold' : '' }}">{{ number_format($inv->quantity) }}</td>
                                 <td class="text-end">{{ number_format($inv->reorder_level) }}</td>
                                 <td class="text-end">
-                                    <strong>${{ number_format($unitPriceUsd, 2) }}</strong>
-                                    <div class="text-muted small">៛{{ number_format($unitPriceKhr, 0) }}</div>
+                                    <strong>៛{{ number_format($unitPriceKhr, 0) }}</strong>
+                                    <div class="text-muted small">${{ number_format($unitPriceUsd, 2) }}</div>
                                 </td>
                                 <td class="text-end">
-                                    <strong>${{ number_format($valueUsd, 2) }}</strong>
-                                    <div class="text-muted small">៛{{ number_format($valueKhr, 0) }}</div>
+                                    <strong>៛{{ number_format($valueKhr, 0) }}</strong>
+                                    <div class="text-muted small">${{ number_format($valueUsd, 2) }}</div>
                                 </td>
                                 <td class="text-center">
                                     @if ($inv->quantity <= 0)

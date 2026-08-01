@@ -7,11 +7,18 @@
         .reports-home {
             --accent: #e85d24;
             --accent-dark: #cf4b15;
+            --accent-soft: rgba(232, 93, 36, .12);
             --border: #e5e7eb;
             --muted: #64748b;
             --soft: #f8fafc;
             --surface: #fff;
             --text: #0f172a;
+            --success: #16a34a;
+            --success-soft: #dcfce7;
+            --info: #2563eb;
+            --info-soft: #dbeafe;
+            --danger: #dc2626;
+            --danger-soft: #fee2e2;
         }
 
         .reports-head {
@@ -134,6 +141,18 @@
             transform: translateY(-2px);
         }
 
+        .report-link-icon {
+            align-items: center;
+            background: var(--accent-soft);
+            border-radius: 10px;
+            color: var(--accent);
+            display: flex;
+            font-size: 17px;
+            height: 40px;
+            justify-content: center;
+            width: 40px;
+        }
+
         .report-link-kicker {
             color: var(--accent);
             font-size: 12px;
@@ -155,22 +174,62 @@
         }
 
         .metric-card {
-            border-left: 4px solid var(--accent);
+            align-items: center;
+            display: flex;
+            gap: 14px;
             padding: 16px;
+            transition: box-shadow .15s ease, transform .15s ease;
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 14px 34px rgba(15, 23, 42, .1);
+            transform: translateY(-2px);
+        }
+
+        .metric-icon {
+            align-items: center;
+            background: var(--accent-soft);
+            border-radius: 10px;
+            color: var(--accent);
+            display: flex;
+            flex-shrink: 0;
+            font-size: 19px;
+            height: 46px;
+            justify-content: center;
+            width: 46px;
+        }
+
+        .metric-card.is-revenue .metric-icon {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .metric-card.is-orders .metric-icon {
+            background: var(--info-soft);
+            color: var(--info);
         }
 
         .metric-label {
             color: var(--muted);
-            font-size: 15px;
+            font-size: 12.5px;
             font-weight: 900;
             margin: 0;
+            text-transform: uppercase;
         }
 
         .metric-value {
             color: var(--text);
-            font-size: 28px;
+            font-size: 22px;
             font-weight: 900;
-            margin-top: 6px;
+            line-height: 1.25;
+            margin-top: 2px;
+        }
+
+        .metric-value-usd {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 1px;
         }
 
         .content-grid {
@@ -193,10 +252,19 @@
         }
 
         .panel-title {
+            align-items: center;
             color: var(--text);
-            font-size: 18px;
+            display: flex;
+            font-size: 16px;
             font-weight: 900;
+            gap: 9px;
             margin: 0;
+        }
+
+        .panel-title i {
+            color: var(--accent);
+            font-size: 14px;
+            width: 18px;
         }
 
         .panel-body {
@@ -226,10 +294,55 @@
             vertical-align: middle;
         }
 
-        .empty-note {
+        .report-table tbody tr:hover {
+            background: var(--soft);
+        }
+
+        .money-stack {
+            line-height: 1.3;
+        }
+
+        .money-stack .khr {
+            color: var(--text);
+            display: block;
+            font-weight: 900;
+        }
+
+        .money-stack .usd {
             color: var(--muted);
-            padding: 22px 16px;
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .pill {
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 12.5px;
+            font-weight: 800;
+            padding: 3px 10px;
+            white-space: nowrap;
+        }
+
+        .pill-low {
+            background: var(--danger-soft);
+            color: #991b1b;
+        }
+
+        .empty-note {
+            align-items: center;
+            color: var(--muted);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 30px 16px;
             text-align: center;
+        }
+
+        .empty-note i {
+            color: #cbd5e1;
+            font-size: 22px;
         }
 
         @media (max-width: 1200px) {
@@ -279,8 +392,8 @@
     <div class="container-fluid py-4 reports-home">
         <div class="reports-head">
             <div>
-                <h2 class="reports-title">របាយការណ៍</h2>
-               
+                <h2 class="reports-title"><i class="fas fa-chart-pie me-2" style="color:var(--accent)"></i>របាយការណ៍</h2>
+                <p class="reports-subtitle">{{ $rangeText }}</p>
             </div>
             <form method="GET" action="{{ route('reports.dashboard') }}" class="reports-filter">
                 <div class="filter-row {{ $selectedPeriod === 'custom' ? 'has-dates' : '' }}">
@@ -302,7 +415,7 @@
                             <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
                         </label>
                     @endif
-                    <button type="submit" class="report-btn">Apply</button>
+                    <button type="submit" class="report-btn"><i class="fas fa-filter"></i>&nbsp; Apply</button>
                 </div>
             </form>
         </div>
@@ -310,6 +423,7 @@
         <div class="report-link-grid">
             @if(auth()->user()->isAdmin() || auth()->user()->isManager())
                 <a href="{{ route('reports.daily') }}" class="report-link-card">
+                    <div class="report-link-icon"><i class="fas fa-calendar-day"></i></div>
                     <span class="report-link-kicker">Daily</span>
                     <h3 class="report-link-title">ប្រចាំថ្ងៃ</h3>
                     <p class="report-link-text">សរុបលក់ ចំណូល ចំណាយ និងស្តុកក្នុងមួយថ្ងៃ។</p>
@@ -317,6 +431,7 @@
             @endif
 
             <a href="{{ route('reports.sales', $adminReportQuery) }}" class="report-link-card">
+                <div class="report-link-icon"><i class="fas fa-chart-line"></i></div>
                 <span class="report-link-kicker">Sales</span>
                 <h3 class="report-link-title">ការលក់</h3>
                 <p class="report-link-text">មើលចំណូល ចំនួនវិក្ក័យបត្រ និងទំនិញលក់បានច្រើន។</p>
@@ -324,12 +439,14 @@
 
             @if(auth()->user()->isAdmin() || auth()->user()->isManager())
                 <a href="{{ route('reports.inventory', $adminReportQuery) }}" class="report-link-card">
+                    <div class="report-link-icon"><i class="fas fa-warehouse"></i></div>
                     <span class="report-link-kicker">Stock</span>
                     <h3 class="report-link-title">ស្តុកទំនិញ</h3>
                     <p class="report-link-text">ពិនិត្យចំនួនស្តុក ទំនិញជិតអស់ និងតម្លៃស្តុក។</p>
                 </a>
 
                 <a href="{{ route('reports.customers', $adminReportQuery) }}" class="report-link-card">
+                    <div class="report-link-icon"><i class="fas fa-users"></i></div>
                     <span class="report-link-kicker">Customers</span>
                     <h3 class="report-link-title">អតិថិជន</h3>
                     <p class="report-link-text">មើលអតិថិជនសកម្ម ចំនួនកម្មង់ និងតម្លៃសរុប។</p>
@@ -338,21 +455,34 @@
         </div>
 
         <div class="metric-grid">
-            <div class="metric-card">
-                <p class="metric-label">លក់សរុប</p>
-                <div class="metric-value">${{ number_format($totalRevenue, 2) }}</div>
+            <div class="metric-card is-revenue">
+                <div class="metric-icon"><i class="fas fa-sack-dollar"></i></div>
+                <div>
+                    <p class="metric-label">លក់សរុប</p>
+                    <div class="metric-value">៛{{ number_format($totalRevenueKhr, 0) }}</div>
+                    <div class="metric-value-usd">${{ number_format($totalRevenue, 2) }}</div>
+                </div>
+            </div>
+            <div class="metric-card is-orders">
+                <div class="metric-icon"><i class="fas fa-receipt"></i></div>
+                <div>
+                    <p class="metric-label">ចំនួនវិក្ក័យបត្រ</p>
+                    <div class="metric-value">{{ number_format($totalOrders) }}</div>
+                </div>
             </div>
             <div class="metric-card">
-                <p class="metric-label">ចំនួនវិក្ក័យបត្រ</p>
-                <div class="metric-value">{{ number_format($totalOrders) }}</div>
+                <div class="metric-icon"><i class="fas fa-box"></i></div>
+                <div>
+                    <p class="metric-label">ទំនិញ</p>
+                    <div class="metric-value">{{ number_format($totalProducts) }}</div>
+                </div>
             </div>
             <div class="metric-card">
-                <p class="metric-label">ទំនិញ</p>
-                <div class="metric-value">{{ number_format($totalProducts) }}</div>
-            </div>
-            <div class="metric-card">
-                <p class="metric-label">អតិថិជន</p>
-                <div class="metric-value">{{ number_format($totalCustomers) }}</div>
+                <div class="metric-icon"><i class="fas fa-users"></i></div>
+                <div>
+                    <p class="metric-label">អតិថិជន</p>
+                    <div class="metric-value">{{ number_format($totalCustomers) }}</div>
+                </div>
             </div>
         </div>
 
@@ -360,7 +490,7 @@
             <div>
                 <div class="report-panel">
                     <div class="panel-head">
-                        <h3 class="panel-title">ចំណូល និងចំនួនកម្មង់</h3>
+                        <h3 class="panel-title"><i class="fas fa-chart-line"></i> ចំណូល និងចំនួនកម្មង់</h3>
                     </div>
                     <div class="panel-body">
                         @if($chartData && count($chartData) > 0)
@@ -368,7 +498,7 @@
                                 <canvas id="trendChart"></canvas>
                             </div>
                         @else
-                            <div class="empty-note">មិនទាន់មានទិន្នន័យសម្រាប់រយៈពេលនេះ។</div>
+                            <div class="empty-note"><i class="fas fa-chart-line"></i>មិនទាន់មានទិន្នន័យសម្រាប់រយៈពេលនេះ។</div>
                         @endif
                     </div>
                 </div>
@@ -377,7 +507,7 @@
             <div>
                 <div class="report-panel">
                     <div class="panel-head">
-                        <h3 class="panel-title">វិក្ក័យបត្រថ្មីៗ</h3>
+                        <h3 class="panel-title"><i class="fas fa-file-invoice"></i> វិក្ក័យបត្រថ្មីៗ</h3>
                     </div>
                     @if ($recentOrders->count() > 0)
                         <div class="table-responsive">
@@ -394,20 +524,25 @@
                                         <tr>
                                             <td>{{ $order->invoice_number ?? ('#' . $order->id) }}</td>
                                             <td>{{ optional($order->customer)->name ?? 'N/A' }}</td>
-                                            <td class="text-end fw-bold">${{ number_format($order->total_amount, 2) }}</td>
+                                            <td class="text-end">
+                                                <div class="money-stack">
+                                                    <span class="khr">៛{{ number_format($order->totalKhr(), 0) }}</span>
+                                                    <span class="usd">${{ number_format($order->total_amount, 2) }}</span>
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                     @else
-                        <div class="empty-note">មិនទាន់មានវិក្ក័យបត្រថ្មីៗ។</div>
+                        <div class="empty-note"><i class="fas fa-file-invoice"></i>មិនទាន់មានវិក្ក័យបត្រថ្មីៗ។</div>
                     @endif
                 </div>
 
                 <div class="report-panel">
                     <div class="panel-head">
-                        <h3 class="panel-title">ស្តុកជិតអស់</h3>
+                        <h3 class="panel-title"><i class="fas fa-triangle-exclamation"></i> ស្តុកជិតអស់</h3>
                     </div>
                     @if ($lowStockAlerts->count() > 0)
                         <div class="table-responsive">
@@ -422,14 +557,14 @@
                                     @foreach ($lowStockAlerts as $alert)
                                         <tr>
                                             <td>{{ optional($alert->product)->name ?? 'N/A' }}</td>
-                                            <td class="text-end fw-bold text-danger">{{ number_format($alert->quantity) }}</td>
+                                            <td class="text-end"><span class="pill pill-low">{{ number_format($alert->quantity) }}</span></td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                     @else
-                        <div class="empty-note">ស្តុកទំនិញនៅល្អ។</div>
+                        <div class="empty-note"><i class="fas fa-circle-check"></i>ស្តុកទំនិញនៅល្អ។</div>
                     @endif
                 </div>
             </div>
@@ -442,14 +577,18 @@
             const trendCanvas = document.getElementById('trendChart');
 
             if (trendCanvas) {
+                const EXCHANGE_RATE = {{ $exchangeRate }};
+                const salesUsd = @json($chartData->pluck('total')->map(fn($value) => (float) $value)->values());
+                const salesKhr = salesUsd.map(v => Math.round(v * EXCHANGE_RATE));
+
                 new Chart(trendCanvas, {
                     type: 'line',
                     data: {
                         labels: @json($chartData->map(fn($data) => \Carbon\Carbon::parse($data->date)->format('d/m'))->values()),
                         datasets: [
                             {
-                                label: 'លក់សរុប ($)',
-                                data: @json($chartData->pluck('total')->map(fn($value) => (float) $value)->values()),
+                                label: 'លក់សរុប (៛)',
+                                data: salesKhr,
                                 borderColor: '#e85d24',
                                 backgroundColor: 'rgba(232, 93, 36, 0.08)',
                                 borderWidth: 3,
@@ -485,6 +624,15 @@
                                         weight: '700'
                                     }
                                 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    afterLabel: function (context) {
+                                        if (context.dataset.yAxisID === 'sales') {
+                                            return '$' + salesUsd[context.dataIndex].toFixed(2);
+                                        }
+                                    }
+                                }
                             }
                         },
                         scales: {
@@ -492,7 +640,7 @@
                                 type: 'linear',
                                 position: 'left',
                                 ticks: {
-                                    callback: value => '$' + value
+                                    callback: value => '៛' + value.toLocaleString()
                                 }
                             },
                             orders: {
