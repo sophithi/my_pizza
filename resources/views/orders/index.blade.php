@@ -421,6 +421,54 @@
                 align-items: flex-start;
             }
         }
+
+        .pager-wrap {
+            margin-top: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pager-wrap .pagination {
+            margin-bottom: 0;
+            flex-wrap: wrap;
+            row-gap: 6px;
+            column-gap: 4px;
+        }
+
+        .pager-wrap .page-link {
+            border-radius: 8px;
+            border: 1px solid #dde1e6;
+            color: #e85d24;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .pager-wrap .page-link:hover,
+        .pager-wrap .page-link:focus {
+            background: #fef1eb;
+            border-color: #e85d24;
+            color: #e85d24;
+            box-shadow: none;
+        }
+
+        .pager-wrap .page-item.active .page-link {
+            background: #e85d24;
+            border-color: #e85d24;
+            color: #fff;
+        }
+
+        .pager-wrap .page-item.disabled .page-link {
+            color: #adb5bd;
+            background: #fafbfc;
+            border-color: #eceef1;
+        }
+
+        @media (max-width: 576px) {
+            .pager-wrap .page-link {
+                padding: 5px 9px;
+                font-size: 12px;
+            }
+        }
     </style>
 @endpush
 

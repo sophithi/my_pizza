@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Delivery;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -89,6 +90,71 @@ class DeliveryController extends Controller
 
         return redirect()->route('deliveries.index')
             ->with('success', 'Deleted successfully!');
+    }
+
+    // ─── Inline packing qty update (delivery show page) ────────────────────────
+
+    public function updateOrderPacking(Request $request, Delivery $delivery, Order $order)
+    {
+        abort_unless($order->delivery_id === $delivery->id, 404);
+
+        $validated = $request->validate([
+            'small_pack_qty' => 'required|integer|min:0',
+            'big_pack_qty' => 'required|integer|min:0',
+        ]);
+
+        $deliveryFeeKhr = ($validated['small_pack_qty'] * (float) $delivery->delivery_price_khr)
+            + ($validated['big_pack_qty'] * (float) $delivery->delivery_price_khr_big);
+
+        $order->update([
+            'small_pack_qty' => $validated['small_pack_qty'],
+            'big_pack_qty' => $validated['big_pack_qty'],
+            'delivery_fee_khr' => $deliveryFeeKhr,
+        ]);
+
+        return response()->json([
+            'small_pack_qty' => $order->small_pack_qty,
+            'big_pack_qty' => $order->big_pack_qty,
+            'delivery_fee_khr' => (float) $order->delivery_fee_khr,
+        ]);
+    }
+
+    // ─── Export ─────────────────────────────────────────────────────────────────
+
+    public function exportExcel(Request $request, Delivery $delivery)
+    {
+        [, $startDate, $endDate] = $this->resolveDateFilter($request);
+
+        $delivery->load(['orders' => function ($query) use ($startDate, $endDate) {
+            $query->with(['invoice', 'customer'])->latest();
+
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay(),
+                ]);
+            }
+        }]);
+
+        return view('deliveries.export', compact('delivery', 'startDate', 'endDate'));
+    }
+
+    public function exportPdf(Request $request, Delivery $delivery)
+    {
+        [, $startDate, $endDate] = $this->resolveDateFilter($request);
+
+        $delivery->load(['orders' => function ($query) use ($startDate, $endDate) {
+            $query->with(['invoice', 'customer'])->latest();
+
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay(),
+                ]);
+            }
+        }]);
+
+        return view('deliveries.pdf', compact('delivery', 'startDate', 'endDate'));
     }
 
     private function resolveDateFilter(Request $request): array

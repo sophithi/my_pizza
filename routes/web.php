@@ -115,6 +115,9 @@ Route::middleware('auth')->group(function () {
     // Delivery management
     Route::middleware('role:admin,manager,staff')->group(function () {
         Route::resource('deliveries', DeliveryController::class);
+        Route::patch('deliveries/{delivery}/orders/{order}', [DeliveryController::class, 'updateOrderPacking'])->name('deliveries.orders.update-packing');
+        Route::get('deliveries/{delivery}/export/excel', [DeliveryController::class, 'exportExcel'])->name('deliveries.export.excel');
+        Route::get('deliveries/{delivery}/export/pdf', [DeliveryController::class, 'exportPdf'])->name('deliveries.export.pdf');
     });
 
     // ============================================

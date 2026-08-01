@@ -441,11 +441,11 @@
             @if(!empty($invoice->order->taxi_phone))
             <div class="info-row row-sender">
                 <div class="row-label">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    <!-- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path
                             d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 4.18 2 2 0 015.08 2h3a2 2 0 012 1.72c.13 1 .37 1.97.71 2.9a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006.99 7l1.18-1.18a2 2 0 012.11-.45c.93.34 1.9.58 2.9.71A2 2 0 0122 16.92z" />
-                    </svg>
+                    </svg> -->
                     លេខតាក់សុី
                 </div>
                 <div class="row-divider"></div>
@@ -455,11 +455,7 @@
             {{-- Sender phone --}}
             <div class="info-row row-sender">
                 <div class="row-label">
-                    <!-- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path
-                            d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.09 4.18 2 2 0 015.08 2h3a2 2 0 012 1.72c.13 1 .37 1.97.71 2.9a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006.99 7l1.18-1.18a2 2 0 012.11-.45c.93.34 1.9.58 2.9.71A2 2 0 0122 16.92z" />
-                    </svg> -->
+              
                     លេខអ្នកផ្ញើរ
                 </div>
                 <div class="row-value">

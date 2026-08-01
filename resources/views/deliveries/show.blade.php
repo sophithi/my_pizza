@@ -101,6 +101,34 @@
             color: #fff;
         }
 
+        .header-actions .btn-sm {
+            min-height: 36px;
+            padding: 7px 14px;
+            font-size: 13px;
+        }
+
+        .header-actions .btn-outline-success {
+            background: #fff;
+            border: 1px solid #22c55e;
+            color: #16a34a;
+        }
+
+        .header-actions .btn-outline-success:hover {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .header-actions .btn-outline-danger {
+            background: #fff;
+            border: 1px solid #ef4444;
+            color: #dc2626;
+        }
+
+        .header-actions .btn-outline-danger:hover {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
         /* ── Two-column layout ── */
         .show-grid {
             display: grid;
@@ -349,6 +377,73 @@
             margin-bottom: 10px;
         }
 
+        /* ── Inline packing qty edit ── */
+        .row-no {
+            color: var(--muted);
+            font-weight: 700;
+            text-align: center;
+            width: 1%;
+        }
+
+        .qty-input {
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 2px;
+            text-align: center;
+            width: 52px;
+        }
+
+        .fee-cell {
+            align-items: center;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .row-icon-btn {
+            align-items: center;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 12px;
+            height: 26px;
+            justify-content: center;
+            padding: 0;
+            width: 26px;
+        }
+
+        .row-icon-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .row-save-btn {
+            border-color: #86efac;
+            color: #16a34a;
+        }
+
+        .row-save-btn:hover {
+            background: #f0fdf4;
+            border-color: #22c55e;
+            color: #15803d;
+        }
+
+        .row-cancel-btn {
+            border-color: #fca5a5;
+            color: #dc2626;
+        }
+
+        .row-cancel-btn:hover {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #b91c1c;
+        }
+
         @media (max-width: 800px) {
             .show-grid {
                 grid-template-columns: 1fr;
@@ -393,6 +488,14 @@
                     @endif
                 </div>
                 <div class="header-actions">
+                    <a href="{{ route('deliveries.export.excel', array_filter(['delivery' => $delivery->id, 'start_date' => $startDate, 'end_date' => $endDate])) }}"
+                        class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </a>
+                    <a href="{{ route('deliveries.export.pdf', array_filter(['delivery' => $delivery->id, 'start_date' => $startDate, 'end_date' => $endDate])) }}"
+                        class="btn btn-outline-danger btn-sm" target="_blank">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
                     <a href="{{ route('deliveries.edit', $delivery) }}" class="btn btn-primary">
                         <i class="fas fa-edit"></i> កែប្រែ
                     </a>
@@ -461,14 +564,15 @@
                             <p class="card-header-title">វិក្ក័យបត្រ</p>
                         </div>
                         <div class="table-responsive">
-                            <table class="orders-table">
+                            <table class="orders-table" id="deliveryOrdersTable">
                                 <thead>
                                     <tr>
-                                        <th>Invoice #</th>
+                                        <th style="text-align:center;">លេខរៀង</th>
+                                        <th>លេខវិក្ក័យបត្រ</th>
                                         <th>ឈ្មោះអតិថិជន</th>
-                                        <th>ទំនាក់ទំនង</th>
-                                        <th style="text-align:center;">តូច</th>
-                                        <th style="text-align:center;">ធំ</th>
+                                        <th>លេខទំនាក់ទំនង</th>
+                                        <th style="text-align:center;">កេសតូច</th>
+                                        <th style="text-align:center;">កេសធំ</th>
                                         <th style="text-align:right;">ថ្លៃដឹក</th>
                                         <th style="text-align:right;">តម្លៃសរុប</th>
                                     </tr>
@@ -485,14 +589,39 @@
                                             $customerPhone = $customer?->phone ?? '—';
                                             $totalPrice = $invoice?->total_amount ?? $order->total_amount ?? 0;
                                         @endphp
-                                        <tr>
+                                        <tr data-order-row="{{ $order->id }}">
+                                            <td class="row-no">{{ $loop->iteration }}</td>
                                             <td><span class="badge-inv">{{ $invoice?->invoice_number ?? 'N/A' }}</span></td>
                                             <td>{{ $customerName }}</td>
                                             <td>{{ $customerPhone }}</td>
-                                            <td style="text-align:center; font-weight:700;">{{ number_format($smallQty, 0) }}</td>
-                                            <td style="text-align:center; font-weight:700;">{{ number_format($bigQty, 0) }}</td>
-                                            <td style="text-align:right; font-weight:700; color:var(--accent);">
-                                                ៛{{ number_format($deliveryFee, 0) }}
+                                            <td style="text-align:center; font-weight:700;">
+                                                <span class="qty-view" data-field="small">{{ number_format($smallQty, 0) }}</span>
+                                                <input type="number" class="qty-input" data-field="small" min="0" step="1"
+                                                    value="{{ $smallQty }}" style="display:none;">
+                                            </td>
+                                            <td style="text-align:center; font-weight:700;">
+                                                <span class="qty-view" data-field="big">{{ number_format($bigQty, 0) }}</span>
+                                                <input type="number" class="qty-input" data-field="big" min="0" step="1"
+                                                    value="{{ $bigQty }}" style="display:none;">
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <div class="fee-cell">
+                                                    <span class="fee-view" style="font-weight:700; color:var(--accent);">
+                                                        ៛{{ number_format($deliveryFee, 0) }}
+                                                    </span>
+                                                    <button type="button" class="row-icon-btn row-edit-btn" title="កែប្រែ"
+                                                        onclick="startRowEdit({{ $order->id }})">
+                                                        <i class="fas fa-pen"></i>
+                                                    </button>
+                                                    <button type="button" class="row-icon-btn row-save-btn" title="រក្សាទុក"
+                                                        onclick="saveRowEdit({{ $order->id }})" style="display:none;">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button type="button" class="row-icon-btn row-cancel-btn" title="បោះបង់"
+                                                        onclick="cancelRowEdit({{ $order->id }})" style="display:none;">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                             <td style="text-align:right; font-weight:700;">
                                                 ${{ number_format($totalPrice, 0) }}
@@ -500,7 +629,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7">
+                                            <td colspan="8">
                                                 <div class="empty-orders">
                                                     <i class="fas fa-file-invoice"></i>
                                                     មិនមានវិក្ក័យបត្រ.
@@ -531,7 +660,7 @@
                                     <div class="stat-lbl">ចំនួនវិក្ក័យបត្រ</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-val">{{ number_format($totalBoxes, 0) }}</div>
+                                    <div class="stat-val" id="statTotalBoxes">{{ number_format($totalBoxes, 0) }}</div>
                                     <div class="stat-lbl">សរុបកេស</div>
                                 </div>
                                 <div class="stat-card">
@@ -539,7 +668,7 @@
                                     <div class="stat-lbl">តម្លៃបច្ចុប្បន្ន/កេស</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-val" style="font-size: 15px;">៛{{ number_format($totalFee, 0) }}</div>
+                                    <div class="stat-val" style="font-size: 15px;" id="statTotalFee">៛{{ number_format($totalFee, 0) }}</div>
                                     <div class="stat-lbl">សរុបថ្លៃដឹក</div>
                                 </div>
                                 <div class="stat-card">
@@ -556,3 +685,120 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
+
+        function packingUpdateUrl(orderId) {
+            return @json(route('deliveries.orders.update-packing', ['delivery' => $delivery->id, 'order' => '__ORDER__']))
+                .replace('__ORDER__', orderId);
+        }
+
+        function rowElements(orderId) {
+            const row = document.querySelector(`tr[data-order-row="${orderId}"]`);
+            return {
+                row,
+                smallView: row.querySelector('.qty-view[data-field="small"]'),
+                smallInput: row.querySelector('.qty-input[data-field="small"]'),
+                bigView: row.querySelector('.qty-view[data-field="big"]'),
+                bigInput: row.querySelector('.qty-input[data-field="big"]'),
+                feeView: row.querySelector('.fee-view'),
+                editBtn: row.querySelector('.row-edit-btn'),
+                saveBtn: row.querySelector('.row-save-btn'),
+                cancelBtn: row.querySelector('.row-cancel-btn'),
+            };
+        }
+
+        function startRowEdit(orderId) {
+            const el = rowElements(orderId);
+            el.smallInput.dataset.original = el.smallInput.value;
+            el.bigInput.dataset.original = el.bigInput.value;
+
+            el.smallView.style.display = 'none';
+            el.bigView.style.display = 'none';
+            el.smallInput.style.display = 'inline-block';
+            el.bigInput.style.display = 'inline-block';
+
+            el.editBtn.style.display = 'none';
+            el.saveBtn.style.display = 'inline-flex';
+            el.cancelBtn.style.display = 'inline-flex';
+        }
+
+        function exitRowEdit(orderId) {
+            const el = rowElements(orderId);
+            el.smallInput.style.display = 'none';
+            el.bigInput.style.display = 'none';
+            el.smallView.style.display = 'inline';
+            el.bigView.style.display = 'inline';
+
+            el.editBtn.style.display = 'inline-flex';
+            el.saveBtn.style.display = 'none';
+            el.cancelBtn.style.display = 'none';
+        }
+
+        function cancelRowEdit(orderId) {
+            const el = rowElements(orderId);
+            el.smallInput.value = el.smallInput.dataset.original;
+            el.bigInput.value = el.bigInput.dataset.original;
+            exitRowEdit(orderId);
+        }
+
+        function recalculateSummary() {
+            let totalBoxes = 0;
+            let totalFee = 0;
+
+            document.querySelectorAll('#deliveryOrdersTable tbody tr[data-order-row]').forEach(row => {
+                const small = parseInt(row.querySelector('.qty-view[data-field="small"]').textContent.replace(/,/g, ''), 10) || 0;
+                const big = parseInt(row.querySelector('.qty-view[data-field="big"]').textContent.replace(/,/g, ''), 10) || 0;
+                const fee = parseFloat(row.querySelector('.fee-view').textContent.replace(/[^\d.]/g, '')) || 0;
+                totalBoxes += small + big;
+                totalFee += fee;
+            });
+
+            document.getElementById('statTotalBoxes').textContent = totalBoxes.toLocaleString();
+            document.getElementById('statTotalFee').textContent = '៛' + totalFee.toLocaleString();
+        }
+
+        async function saveRowEdit(orderId) {
+            const el = rowElements(orderId);
+            const smallQty = Math.max(0, parseInt(el.smallInput.value || '0', 10));
+            const bigQty = Math.max(0, parseInt(el.bigInput.value || '0', 10));
+
+            el.saveBtn.disabled = true;
+            el.cancelBtn.disabled = true;
+
+            try {
+                const response = await fetch(packingUpdateUrl(orderId), {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                    },
+                    body: JSON.stringify({ small_pack_qty: smallQty, big_pack_qty: bigQty }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Save failed');
+                }
+
+                const data = await response.json();
+
+                el.smallView.textContent = data.small_pack_qty.toLocaleString();
+                el.bigView.textContent = data.big_pack_qty.toLocaleString();
+                el.feeView.textContent = '៛' + Math.round(data.delivery_fee_khr).toLocaleString();
+                el.smallInput.value = data.small_pack_qty;
+                el.bigInput.value = data.big_pack_qty;
+
+                exitRowEdit(orderId);
+                recalculateSummary();
+            } catch (error) {
+                alert('មិនអាចរក្សាទុកបានទេ សូមព្យាយាមម្តងទៀត។');
+            } finally {
+                el.saveBtn.disabled = false;
+                el.cancelBtn.disabled = false;
+            }
+        }
+    </script>
+@endpush

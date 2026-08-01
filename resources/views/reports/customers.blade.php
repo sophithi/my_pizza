@@ -32,6 +32,14 @@
         .empty-note { color:var(--muted); padding:22px 16px; text-align:center; }
         @media (max-width:1100px){ .metric-grid{grid-template-columns:1fr 1fr;} }
         @media (max-width:760px){ .report-head{align-items:stretch; flex-direction:column;} .filter-row,.metric-grid{grid-template-columns:1fr;} }
+
+        .pager-wrap { display:flex; justify-content:center; margin-top:16px; }
+        .pager-wrap .pagination { column-gap:4px; margin-bottom:0; row-gap:6px; flex-wrap:wrap; }
+        .pager-wrap .page-link { border:1px solid var(--border); border-radius:8px; color:var(--accent); font-size:13px; padding:6px 12px; }
+        .pager-wrap .page-link:hover, .pager-wrap .page-link:focus { background:#fef1eb; border-color:var(--accent); box-shadow:none; color:var(--accent); }
+        .pager-wrap .page-item.active .page-link { background:var(--accent); border-color:var(--accent); color:#fff; }
+        .pager-wrap .page-item.disabled .page-link { background:var(--soft); border-color:var(--border); color:#cbd5e1; }
+        @media (max-width:576px){ .pager-wrap .page-link{ font-size:12px; padding:5px 9px; } }
     </style>
 @endpush
 

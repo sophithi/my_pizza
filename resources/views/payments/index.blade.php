@@ -150,6 +150,50 @@
 
 .pager-wrap {
     margin-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.pager-wrap .pagination {
+    margin-bottom: 0;
+    flex-wrap: wrap;
+    row-gap: 6px;
+    column-gap: 4px;
+}
+
+.pager-wrap .page-link {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    color: #D85A30;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.pager-wrap .page-link:hover,
+.pager-wrap .page-link:focus {
+    background: #fff1ec;
+    border-color: #D85A30;
+    color: #D85A30;
+    box-shadow: none;
+}
+
+.pager-wrap .page-item.active .page-link {
+    background: #D85A30;
+    border-color: #D85A30;
+    color: #fff;
+}
+
+.pager-wrap .page-item.disabled .page-link {
+    color: #cbd5e1;
+    background: #f8fafc;
+    border-color: #e5e7eb;
+}
+
+@media (max-width: 576px) {
+    .pager-wrap .page-link {
+        padding: 5px 9px;
+        font-size: 12px;
+    }
 }
 
 /* Responsive Improvements */
@@ -465,9 +509,8 @@
 
         {{-- Pagination --}}
         <div class="pager-wrap">
-            {{ $payments->withQueryString()->links() }}
+            {{ $payments->withQueryString()->links('pagination::bootstrap-5') }}
         </div>
-
     </div>
 
     {{-- Record / Edit Payment Modal --}}
@@ -555,9 +598,6 @@
         </div>
         
     </div>
-     <div class="pager-wrap">{{ $payments->links() }}
-        </div>
-   
 @endsection
 
 @push('scripts')

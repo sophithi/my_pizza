@@ -483,7 +483,7 @@
             }
 
             .grand-total .amount {
-                font-size: 16px;
+                font-size: 18px;
             }
 
             .notes {
@@ -684,7 +684,7 @@
                     <span>តម្លៃសរុបទាំងអស់:</span>
                     <span class="amount">
                         ${{ number_format($invoice->total_amount, 2) }}
-                        <span class="khr-sub" style="font-size: 14px;">៛{{ number_format($grandTotalKhr, 0) }}</span>
+                        <span class="khr-sub" style="font-size: 18px;">៛{{ number_format($grandTotalKhr, 0) }}</span>
                     </span>
                 </div>
             </div>
