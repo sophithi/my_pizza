@@ -34,6 +34,7 @@ class PurchaseController extends Controller
         $stats = [
             'total' => (clone $statsQuery)->count(),
             'amount' => (clone $statsQuery)->sum('total_amount'),
+            'amount_khr' => (clone $statsQuery)->sum('total_amount_khr'),
             'pending' => (clone $statsQuery)->where('status', 'pending')->count(),
             'paid' => (clone $statsQuery)->where('status', 'received')->count(),
         ];
@@ -61,7 +62,7 @@ class PurchaseController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $data['total_amount'] = $this->normalizeAmountToUsd($data['total_amount'], $data['amount_currency'] ?? 'USD');
+        [$data['total_amount'], $data['total_amount_khr']] = $this->normalizeAmount($data['total_amount'], $data['amount_currency'] ?? 'USD');
         unset($data['amount_currency']);
 
         Purchase::create($data);
@@ -92,7 +93,7 @@ class PurchaseController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $data['total_amount'] = $this->normalizeAmountToUsd($data['total_amount'], $data['amount_currency'] ?? 'USD');
+        [$data['total_amount'], $data['total_amount_khr']] = $this->normalizeAmount($data['total_amount'], $data['amount_currency'] ?? 'USD');
         unset($data['amount_currency']);
 
         $purchase->update($data);
@@ -109,12 +110,24 @@ class PurchaseController extends Controller
             ->with('success', 'Daily expense deleted successfully.');
     }
 
-    private function normalizeAmountToUsd(float $amount, string $currency): float
+    /**
+     * Normalize the entered amount to both USD and KHR, rounding once from
+     * whichever currency the user actually entered (the ground truth).
+     *
+     * @return array{0: float, 1: int} [usd, khr]
+     */
+    private function normalizeAmount(float $amount, string $currency): array
     {
         if ($currency === 'KHR') {
-            return round($amount / self::EXCHANGE_RATE_KHR, 2);
+            $khr = (int) round($amount);
+            $usd = round($khr / self::EXCHANGE_RATE_KHR, 2);
+
+            return [$usd, $khr];
         }
 
-        return round($amount, 2);
+        $usd = round($amount, 2);
+        $khr = (int) round($usd * self::EXCHANGE_RATE_KHR);
+
+        return [$usd, $khr];
     }
 }

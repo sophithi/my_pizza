@@ -14,6 +14,7 @@ class Purchase extends Model
         'supplier_name',
         'purchase_date',
         'total_amount',
+        'total_amount_khr',
         'status',
         'notes',
     ];
@@ -21,6 +22,7 @@ class Purchase extends Model
     protected $casts = [
         'purchase_date' => 'date',
         'total_amount' => 'decimal:2',
+        'total_amount_khr' => 'integer',
     ];
 
     public function items()

@@ -119,7 +119,7 @@
         <div class="expense-card mb-3">
             <div class="expense-grid">
                 <div>
-                    <div class="expense-label">លេខយោង</div>
+                    <div class="expense-label">លេខកូដចំណាយ</div>
                     <div class="expense-value">{{ $reference }}</div>
                 </div>
                 <div>
@@ -140,8 +140,8 @@
                 </div>
                 <div>
                     <div class="expense-label">ចំនួនទឹកប្រាក់</div>
-                    <div class="expense-money">${{ number_format($purchase->total_amount, 2) }}</div>
-                    <div class="text-muted">៛{{ number_format($purchase->total_amount * $exchangeRate) }}</div>
+                    <div class="expense-money">៛{{ number_format($purchase->total_amount_khr) }}</div>
+                    <div class="text-muted">${{ number_format($purchase->total_amount, 2) }}</div>
                 </div>
                 <div>
                     <div class="expense-label">Created</div>

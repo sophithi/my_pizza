@@ -78,7 +78,7 @@
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">លេខយោង</label>
+                        <label class="form-label fw-semibold">លេខកូដចំណាយ</label>
                         <input type="text" name="reference_number" class="form-control"
                             value="{{ old('reference_number', $purchase->reference_number) }}" placeholder="EXP-001"
                             autocomplete="off" spellcheck="false">

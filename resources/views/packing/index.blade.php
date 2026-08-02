@@ -366,9 +366,24 @@
                                                     <a href="{{ route('packing.prep', $invoice) }}" target="_blank" class="packing-action-btn dark">
                                                         រៀបចំទំនិញ
                                                     </a>
-                                                    <a href="{{ route('packing.customer', $invoice) }}" target="_blank" class="packing-action-btn primary">
-                                                        វិក្ក័យបត្រភ្ញៀវ
-                                                    </a>
+                                                    <div class="dropdown d-inline-block">
+                                                        <button type="button" class="packing-action-btn primary dropdown-toggle"
+                                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                                            វិក្ក័យបត្រភ្ញៀវ
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                            <li>
+                                                                <a class="dropdown-item" href="{{ route('packing.customer', $invoice) }}" target="_blank">
+                                                                    ភីហ្សា គ្រួសាររីករាយ
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="{{ route('packing.customer_mayo', $invoice) }}" target="_blank">
+                                                                    ម៉ាយូនេស បន្ទាយឆ្មា
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach

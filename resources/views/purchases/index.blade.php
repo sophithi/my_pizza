@@ -237,8 +237,8 @@
             </div>
             <div class="expense-card expense-stat">
                 <div class="expense-stat-label">ចំណាយសរុប</div>
-                <div class="expense-stat-value">${{ number_format($stats['amount'], 2) }}</div>
-                <div class="expense-stat-help">៛{{ number_format($stats['amount'] * $exchangeRate) }}</div>
+                <div class="expense-stat-value">៛{{ number_format($stats['amount_khr']) }}</div>
+                <div class="expense-stat-help">${{ number_format($stats['amount'], 2) }}</div>
             </div>
             <div class="expense-card expense-stat">
                 <div class="expense-stat-label">មិនទាន់ទូទាត់</div>
@@ -271,7 +271,7 @@
                     <table class="expense-table">
                         <thead>
                             <tr>
-                                <th>លេខយោង</th>
+                                <th>លេខកូដចំណាយ</th>
                                 <th>ប្រភេទ / អ្នកទទួល</th>
                                 <th>កាលបរិច្ឆេទ</th>
                                 <th>ចំនួនទឹកប្រាក់</th>
@@ -291,8 +291,8 @@
                                     <td>{{ $purchase->supplier_name }}</td>
                                     <td>{{ $purchase->purchase_date->translatedFormat('d M Y') }}</td>
                                     <td>
-                                        <span class="expense-money">${{ number_format($purchase->total_amount, 2) }}</span>
-                                        <span class="expense-khr">៛{{ number_format($purchase->total_amount * $exchangeRate) }}</span>
+                                        <span class="expense-money">៛{{ number_format($purchase->total_amount_khr) }}</span>
+                                        <span class="expense-khr">${{ number_format($purchase->total_amount, 2) }}</span>
                                     </td>
                                     <td>
                                         <span class="text_description">

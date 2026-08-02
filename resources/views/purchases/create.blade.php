@@ -77,7 +77,7 @@
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">លេខយោង</label>
+                        <label class="form-label fw-semibold">លេខកូដចំណាយ</label>
                         <input type="text" name="reference_number" class="form-control" value="{{ old('reference_number') }}"
                             placeholder="EXP-001" autocomplete="off" spellcheck="false">
                     </div>
@@ -97,8 +97,8 @@
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">រូបិយប័ណ្ណ</label>
                         <select name="amount_currency" class="form-select" autocomplete="off">
-                            <option value="USD" {{ old('amount_currency', 'USD') === 'USD' ? 'selected' : '' }}>USD ($)</option>
-                            <option value="KHR" {{ old('amount_currency') === 'KHR' ? 'selected' : '' }}>KHR (៛)</option>
+                             <option value="KHR" {{ old('amount_currency', 'KHR') === 'KHR' ? 'selected' : '' }}>KHR (៛)</option>
+                            <option value="USD" {{ old('amount_currency') === 'USD' ? 'selected' : '' }}>USD ($)</option>
                         </select>
                     </div>
 
