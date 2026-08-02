@@ -24,7 +24,7 @@
         body {
             font-family: 'Noto Sans Khmer', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
-            background: white;
+            background: #eef0f3;
             padding: 20px;
             font-size: 14px;
         }
@@ -35,6 +35,8 @@
             background: white;
             padding: 20px;
             border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
         }
 
         .header {
@@ -295,7 +297,7 @@
             margin-bottom: 8px;
         }
 
-        .btn-save {
+        .btn-print {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -309,7 +311,7 @@
             border-radius: 10px;
             text-decoration: none;
 
-            background: linear-gradient(135deg, #ff7a45, #e85d24);
+            background: linear-gradient(135deg, #5b3ff5, #3516e8);
             color: #fff;
 
             font-size: 15px;
@@ -320,24 +322,60 @@
             transition: all .25s ease;
 
             box-shadow:
-                0 6px 16px rgba(232, 93, 36, .35),
+                0 6px 16px rgba(53, 22, 232, .35),
                 inset 0 1px 0 rgba(255, 255, 255, .25);
         }
 
-        .btn-save:hover {
+        .btn-print:hover {
             transform: translateY(-2px);
-            background: linear-gradient(135deg, #ff8c5c, #f2691f);
+            background: linear-gradient(135deg, #6f56ff, #2a1cc4);
             box-shadow:
-                0 10px 24px rgba(232, 93, 36, .45),
+                0 10px 24px rgba(53, 22, 232, .45),
                 inset 0 1px 0 rgba(255, 255, 255, .3);
+        }
+
+        .btn-print:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(53, 22, 232, .35);
+        }
+
+        .btn-print .icon {
+            font-size: 18px;
+            display: inline-block;
+        }
+
+        .btn-save {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            padding: 12px 26px;
+            min-width: 150px;
+            height: 48px;
+
+            border-radius: 10px;
+
+            background: #ffffff;
+            color: #3516e8;
+            border: 2px solid #3516e8;
+
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: .3px;
+
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        .btn-save:hover {
+            background: #eef0ff;
+            transform: translateY(-2px);
         }
 
         .btn-save:active {
             transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(232, 93, 36, .35);
         }
-
-
 
         .btn-save .icon {
             font-size: 18px;
@@ -363,40 +401,6 @@
             opacity: 0.8;
         }
 
-        .btn-print {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-
-            padding: 12px 26px;
-            min-width: 150px;
-            height: 48px;
-
-            border: none;
-            border-radius: 10px;
-
-            background: #ffffff;
-            color: #e85d24;
-            border: 2px solid #e85d24;
-
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: .3px;
-
-            cursor: pointer;
-            transition: all .2s ease;
-        }
-
-        .btn-print:hover {
-            background: #fff4ee;
-            transform: translateY(-2px);
-        }
-
-        .btn-print:active {
-            transform: translateY(0);
-        }
-
         .btn-back {
             display: inline-flex;
             align-items: center;
@@ -411,6 +415,82 @@
             cursor: pointer;
             font-weight: 500;
             text-decoration: none;
+            transition: all .2s ease;
+        }
+
+        .btn-back:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            padding: 14px;
+            position: sticky;
+            bottom: 0;
+            background: rgba(238, 240, 243, .92);
+            backdrop-filter: blur(6px);
+        }
+
+        @media (max-width: 480px) {
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .action-bar .btn-print,
+            .action-bar .btn-save,
+            .action-bar .btn-back {
+                width: 100%;
+            }
+        }
+
+        .brand-switch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .brand-switch-label {
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 13px;
+            margin-right: 2px;
+        }
+
+        .brand-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1.5px solid #d1d5db;
+            color: #4b5563;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            background: #fff;
+            transition: all .2s ease;
+        }
+
+        .brand-chip:hover {
+            border-color: #3516e8;
+            color: #3516e8;
+            transform: translateY(-1px);
+        }
+
+        .brand-chip.active {
+            background: #3516e8;
+            border-color: #3516e8;
+            color: #fff;
+            cursor: default;
+            pointer-events: none;
         }
 
         @media print {
@@ -429,6 +509,8 @@
 
             .sticker {
                 border: none;
+                border-radius: 0;
+                box-shadow: none;
                 padding: 0 1mm;
                 max-width: 100%;
                 page-break-inside: avoid;
@@ -743,21 +825,32 @@
         </div>
     </div>
 
-    <div class="no-print"
-        style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 12px;">
+    @php
+        $currentRoute = request()->route()?->getName();
+    @endphp
+    <div class="no-print brand-switch">
+        <span class="brand-switch-label">ជ្រើសរើស:</span>
+        <a href="{{ route('packing.customer', $invoice) }}" target="_blank"
+            class="brand-chip @if($currentRoute === 'packing.customer') active @endif">ភីហ្សា គ្រួសាររីករាយ</a>
+        <a href="{{ route('packing.customer_mayo', $invoice) }}" target="_blank"
+            class="brand-chip @if($currentRoute === 'packing.customer_mayo') active @endif">ម៉ាយូនេស បន្ទាយឆ្មារ</a>
+        <a href="{{ route('packing.customer_tamon', $invoice) }}" target="_blank"
+            class="brand-chip @if($currentRoute === 'packing.customer_tamon') active @endif">តាម៉ាន់មានជ័យ</a>
+    </div>
 
+    <div class="no-print action-bar">
         <button class="btn-print" onclick="window.print()">
-            <span class="icon"></span>
-            <span>Print</span>
+            <span class="icon">🖨️</span>
+            <span>Print Invoice</span>
         </button>
 
         <button class="btn-save" id="copyBtn" onclick="handleCopyInvoice()">
-            <span class="icon" id="copyIcon"></span>
-            <span id="copyText">Copy </span>
+            <span class="icon" id="copyIcon">📋</span>
+            <span id="copyText">Copy Invoice</span>
         </button>
 
         <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}" class="btn-back">
-            ← Back
+            <span class="icon">←</span> Back
         </a>
     </div>
 

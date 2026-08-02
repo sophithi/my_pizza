@@ -621,9 +621,32 @@
     <div class="actions-bar">
         {{-- 1) Print invoice for customer view --}}
         @if($order->invoice)
-            <button id="printCustomerBtn" class="btn btn-primary" style="background: #6c757d;" data-url="{{ route('packing.customer', $order->invoice) }}" title="វិក្ក័យបត្រ / ស្លាកភ្ញៀវ">
-                <i class="fas fa-print"></i> ព្រីនវិក្ក័យបត្រ
-            </button>
+            <div class="dropdown d-inline-block">
+                <button type="button" class="btn btn-primary dropdown-toggle" style="background: #6c757d;"
+                    data-bs-toggle="dropdown" aria-expanded="false" title="វិក្ក័យបត្រ / ស្លាកភ្ញៀវ">
+                    <i class="fas fa-print"></i> ព្រីនវិក្ក័យបត្រ
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item print-customer-option" href="#"
+                            data-url="{{ route('packing.customer', $order->invoice) }}">
+                            ភីហ្សា គ្រួសាររីករាយ
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item print-customer-option" href="#"
+                            data-url="{{ route('packing.customer_mayo', $order->invoice) }}">
+                            ម៉ាយូនេស បន្ទាយឆ្មារ
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item print-customer-option" href="#"
+                            data-url="{{ route('packing.customer_tamon', $order->invoice) }}">
+                            តាម៉ាន់មានជ័យ
+                        </a>
+                    </li>
+                </ul>
+            </div>
         @else
             <button class="btn btn-primary" style="background: #6c757d;" disabled>
                 <i class="fas fa-print"></i> ព្រីនវិក្ក័យបត្រ
@@ -650,9 +673,8 @@
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 // Print customer invoice: open print in a new tab then redirect current page to create order
-                const printCustomerBtn = document.getElementById('printCustomerBtn');
-                if (printCustomerBtn) {
-                    printCustomerBtn.addEventListener('click', function (e) {
+                document.querySelectorAll('.print-customer-option').forEach(function (option) {
+                    option.addEventListener('click', function (e) {
                         e.preventDefault();
                         const url = this.dataset.url;
                         if (!url) return;
@@ -661,7 +683,7 @@
                         // Redirect current tab to create order page
                         window.location.href = '{{ route('orders.create') }}';
                     });
-                }
+                });
             });
         </script>
     @endpush

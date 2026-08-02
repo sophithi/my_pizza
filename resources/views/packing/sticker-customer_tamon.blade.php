@@ -22,7 +22,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Noto Sans Khmer', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
             background: #eef0f3;
             padding: 20px;
@@ -45,13 +45,7 @@
             align-items: flex-start;
             margin-bottom: 16px;
             padding-bottom: 12px;
-            border-bottom: 2px solid #e85d24;
-        }
-
-        .logo-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            border-bottom: 2px solid #3424e8;
         }
 
         .logo {
@@ -59,18 +53,12 @@
             font-size: 26px;
             font-weight: normal;
             letter-spacing: 0.3px;
-            line-height: 1.3;
-            color: #d20011;
-            text-shadow: 2px 3px 3px rgba(178, 178, 178, 0.35);
+            line-height: 1.4;
+            color: #ffc61a;
+            -webkit-text-stroke: 1.1px #8b0000;
+            paint-order: stroke fill;
+            text-shadow: 0 3px 4px rgba(0, 0, 0, .35);
         }
-/* 
-        .logo-sub {
-            font-size: 13px;
-            font-weight: 700;
-            color: #999;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-        } */
 
         .invoice-details {
             text-align: right;
@@ -325,7 +313,7 @@
             border-radius: 10px;
             text-decoration: none;
 
-            background: linear-gradient(135deg, #ff7a45, #e85d24);
+            background: linear-gradient(135deg, #5b3ff5, #3516e8);
             color: #fff;
 
             font-size: 15px;
@@ -336,21 +324,21 @@
             transition: all .25s ease;
 
             box-shadow:
-                0 6px 16px rgba(232, 93, 36, .35),
+                0 6px 16px rgba(53, 22, 232, .35),
                 inset 0 1px 0 rgba(255, 255, 255, .25);
         }
 
         .btn-print:hover {
             transform: translateY(-2px);
-            background: linear-gradient(135deg, #ff8c5c, #f2691f);
+            background: linear-gradient(135deg, #6f56ff, #2a1cc4);
             box-shadow:
-                0 10px 24px rgba(232, 93, 36, .45),
+                0 10px 24px rgba(53, 22, 232, .45),
                 inset 0 1px 0 rgba(255, 255, 255, .3);
         }
 
         .btn-print:active {
             transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(232, 93, 36, .35);
+            box-shadow: 0 4px 10px rgba(53, 22, 232, .35);
         }
 
         .btn-print .icon {
@@ -371,8 +359,8 @@
             border-radius: 10px;
 
             background: #ffffff;
-            color: #e85d24;
-            border: 2px solid #e85d24;
+            color: #3516e8;
+            border: 2px solid #3516e8;
 
             font-size: 15px;
             font-weight: 600;
@@ -383,7 +371,7 @@
         }
 
         .btn-save:hover {
-            background: #fff4ee;
+            background: #eef0ff;
             transform: translateY(-2px);
         }
 
@@ -494,14 +482,14 @@
         }
 
         .brand-chip:hover {
-            border-color: #e85d24;
-            color: #e85d24;
+            border-color: #3516e8;
+            color: #3516e8;
             transform: translateY(-1px);
         }
 
         .brand-chip.active {
-            background: #e85d24;
-            border-color: #e85d24;
+            background: #3516e8;
+            border-color: #3516e8;
             color: #fff;
             cursor: default;
             pointer-events: none;
@@ -541,11 +529,8 @@
             }
 
             .logo {
-                font-size: 21px;
-            }
-
-            .logo-sub {
-                font-size: 11px;
+                font-size: 22px;
+                -webkit-text-stroke-width: 1.6px;
             }
 
             .invoice-number {
@@ -635,17 +620,16 @@
         }
     </style>
 </head>
+
 <body>
     <div class="sticker" id="invoice-content">
 
         <div class="header">
-            <div class="logo-wrap">
-                <div>
-                    <div class="logo">ភីហ្សា គ្រួសាររីករាយ</div>
-                    <!-- <div class="logo-sub">Pizza Happy Family</div> -->
-                </div>
+            <div>
+                <div class="logo">ម៉ាយូនេស តាម៉ាន់មានជ័យ</div>
             </div>
             <div class="invoice-details">
+
                 <div class="invoice-number">{{ $invoice->invoice_number }}</div>
                 <p>កាលបរិច្ឆេទ: {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</p>
             </div>
@@ -672,6 +656,7 @@
                             <span class="label">លេខ:</span>
                             <span class="value">{{ $customer->phone ?? '-' }}</span>
                         </div>
+
                     </div>
                     <div class="invoice-info">
                         <div class="section-title">Invoice Info</div>
@@ -719,10 +704,12 @@
                     @else
                         មិនទាន់ទូទាត់
                     @endif
+
                 </p>
 
             </div>
         </div>
+
         @php
             $orderItems = $invoice->order?->items ?? collect();
             $paidItems = $orderItems->filter(function ($item) {

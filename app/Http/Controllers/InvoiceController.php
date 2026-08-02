@@ -598,6 +598,19 @@ class InvoiceController extends Controller
         return view('packing.sticker-customer_mayo', compact('invoice', 'backUrl'));
     }
 
+    /**
+     * Show the customer label branded for the Tamon shop.
+     */
+    public function stickerCustomerTamon(Invoice $invoice)
+    {
+        $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
+        $backUrl = auth()->user()?->isStaffInventory()
+            ? route('packing.index')
+            : route('invoices.show', $invoice);
+
+        return view('packing.sticker-customer_tamon', compact('invoice', 'backUrl'));
+    }
+
     public function downloadSticker(Invoice $invoice)
     {
         try {

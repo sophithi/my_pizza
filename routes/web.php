@@ -174,6 +174,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('packing/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('packing.customer');
         Route::get('packing/{invoice}/customer-mayo', [InvoiceController::class, 'stickerCustomerMayo'])->name('packing.customer_mayo');
+        Route::get('packing/{invoice}/customer-tamon', [InvoiceController::class, 'stickerCustomerTamon'])->name('packing.customer_tamon');
         // routes/web.php
         Route::get('/packing/sticker/{invoice}/download', [InvoiceController::class, 'downloadSticker'])
             ->name('packing.sticker.download');

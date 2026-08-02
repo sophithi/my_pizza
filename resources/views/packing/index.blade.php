@@ -382,6 +382,11 @@
                                                                     ម៉ាយូនេស បន្ទាយឆ្មា
                                                                 </a>
                                                             </li>
+                                                               <li>
+                                                                <a class="dropdown-item" href="{{ route('packing.customer_tamon', $invoice) }}" target="_blank">
+                                                                    តាម៉ាន់មានជ័យ
+                                                                </a>
+                                                            </li>
                                                         </ul>
                                                     </div>
                                                 </td>
