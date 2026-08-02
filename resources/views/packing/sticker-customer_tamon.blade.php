@@ -54,6 +54,7 @@
             font-weight: normal;
             letter-spacing: 0.3px;
             line-height: 1.4;
+            margin-top: 8px;
             color: #ffc61a;
             -webkit-text-stroke: 1.1px #8b0000;
             paint-order: stroke fill;
@@ -513,7 +514,7 @@
                 border: none;
                 border-radius: 0;
                 box-shadow: none;
-                padding: 0 1mm;
+                padding: 10px 1mm 0;
                 max-width: 100%;
                 page-break-inside: avoid;
                 break-inside: avoid;

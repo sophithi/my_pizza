@@ -59,6 +59,7 @@
             font-size: 26px;
             font-weight: normal;
             letter-spacing: 0.3px;
+            margin-top: 8px;
             line-height: 1.3;
             color: #d20011;
             text-shadow: 2px 3px 3px rgba(178, 178, 178, 0.35);

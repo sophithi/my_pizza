@@ -53,9 +53,11 @@
             font-size: 26px;
             font-weight: normal;
             letter-spacing: 0.3px;
+            margin-top: 8px;
             line-height: 1.3;
             color: #3516e8;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+            /* text-shadow: 0 1px 0 rgba(0, 0, 0, 0.08); */
+             text-shadow: 2px 3px 3px rgba(178, 178, 178, 0.35);
         }
 
         .invoice-details {
