@@ -357,13 +357,55 @@
         .pager-wrap {
             margin-top: 16px;
         }
+
+        .bulk-print-bar {
+            align-items: center;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+        }
+
+        .bulk-print-info {
+            color: #9a3412;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .bulk-print-info strong {
+            color: #e85d24;
+        }
+
+        .invoice-btn:disabled {
+            cursor: not-allowed;
+            opacity: .5;
+        }
+
+        .invoice-btn:disabled:hover {
+            box-shadow: none;
+            transform: none;
+        }
+
+        .invoice-select-cell {
+            text-align: center;
+            width: 36px;
+        }
+
+        .invoice-select,
+        .invoice-select-all {
+            cursor: pointer;
+            height: 16px;
+            width: 16px;
+        }
     </style>
 @endpush
 
 @section('content')
     @php
-        // Canonical total — see Order::totalKhr(), so this always matches
-        // the order/invoice show pages instead of re-deriving its own formula.
         $calcTotalKhr = function ($invoice) {
             return $invoice->order?->totalKhr() ?? 0;
         };
@@ -377,7 +419,7 @@
             <div style="display:flex; gap:8px;">
                 @if(auth()->user()->isAdmin() || auth()->user()->isManager())
                     <a href="{{ route('invoices.trash') }}" class="invoice-btn invoice-btn-soft">
-                        <i class="fas fa-trash"></i> វិក្ក័យប័ត្របានលុប
+                        <i class="fas fa-trash"></i> វិក្ក័យបត្របានលុប
                     </a>
                 @endif
                 <a href="{{ route('orders.create') }}" class="invoice-btn invoice-btn-primary">
@@ -385,7 +427,6 @@
                 </a>
             </div>
         </div>
-
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">វិក្ក័យបត្រសរុប</div>
@@ -424,14 +465,12 @@
 
             <div class="filter-row">
                 <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="...">
-
                 <select name="status" class="form-select">
                     <option value="all">គ្រប់ស្ថានភាព</option>
                     <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>
                     <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>បានទូទាត់</option>
                     <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>មិនទូទាត់</option>
                 </select>
-
                 <select name="user_id" class="form-select">
                     <option value="all">បុគ្គលិកទាំងអស់</option>
                     @foreach ($staffUsers as $staffUser)
@@ -440,7 +479,6 @@
                         </option>
                     @endforeach
                 </select>
-
                 <select name="printed" class="form-select">
                     <option value="all">ទាំងអស់</option>
                     <option value="printed" {{ request('printed') === 'printed' ? 'selected' : '' }}>បានព្រីន</option>
@@ -463,11 +501,24 @@
             </div>
         </form>
 
+        <div class="bulk-print-bar">
+            <span class="bulk-print-info">
+                
+                បានជ្រើសរើស <strong id="selectedCount">0</strong> វិក្ក័យបត្រ
+            </span>
+            <button type="button" id="printSelectedBtn" class="invoice-btn invoice-btn-primary" disabled>
+                <i class="fas fa-print"></i> ព្រីនដែលបានជ្រើសរើស
+            </button>
+        </div>
+
         <div class="invoice-table-card">
             <div class="table-responsive">
                 <table class="table invoice-table mb-0">
                     <thead>
                         <tr>
+                            <th class="invoice-select-cell">
+                                <input type="checkbox" id="selectAllInvoices" class="invoice-select-all" title="ជ្រើសរើសទាំងអស់">
+                            </th>
                             <th>លេខវិក្ក័យបត្រ</th>
                             <th>អតិថិជន</th>
                             <th>បញ្ជាទិញ</th>
@@ -480,11 +531,15 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php $returnParam = 'return=' . urlencode(request()->fullUrl()); @endphp
                         @forelse ($invoices as $invoice)
                             @php $rowTotalKhr = $calcTotalKhr($invoice); @endphp
                             <tr>
+                                <td class="invoice-select-cell">
+                                    <input type="checkbox" class="invoice-select" value="{{ $invoice->id }}">
+                                </td>
                                 <td>
-                                    <a href="{{ route('invoices.show', $invoice) }}" class="invoice-number">
+                                    <a href="{{ route('invoices.show', $invoice) }}?{{ $returnParam }}" class="invoice-number">
                                         {{ $invoice->invoice_number }}
                                     </a>
                                 </td>
@@ -528,10 +583,10 @@
                                 </td>
                                 <td>
                                     <div class="action-row">
-                                        <a href="{{ route('invoices.show', $invoice) }}" class="icon-action" title="មើល">
+                                        <a href="{{ route('invoices.show', $invoice) }}?{{ $returnParam }}" class="icon-action" title="មើល">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('invoices.print', $invoice) }}" class="icon-action icon-print"
+                                        <a href="{{ route('invoices.print', $invoice) }}?{{ $returnParam }}" class="icon-action icon-print"
                                             title="ព្រីន ">
                                             <i class="fas fa-print"></i>
                                         </a>
@@ -546,7 +601,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9">
+                                <td colspan="10">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">
                                             <i class="fas fa-file-invoice"></i>
@@ -565,7 +620,6 @@
             </div>
         </div>
     </div>
-
     <div class="pager-wrap">{{ $invoices->links('pagination::bootstrap-5') }}
     </div>
     @push('scripts')
@@ -610,6 +664,48 @@
                     syncDatePlaceholder();
                 }
 
+            })();
+
+            (function () {
+                const selectAll = document.getElementById('selectAllInvoices');
+                const printBtn = document.getElementById('printSelectedBtn');
+                const countLabel = document.getElementById('selectedCount');
+                const getCheckboxes = () => Array.from(document.querySelectorAll('.invoice-select'));
+
+                function refreshState() {
+                    const checkboxes = getCheckboxes();
+                    const checked = checkboxes.filter((cb) => cb.checked);
+
+                    countLabel.textContent = checked.length;
+                    printBtn.disabled = checked.length === 0;
+
+                    if (selectAll) {
+                        selectAll.checked = checkboxes.length > 0 && checked.length === checkboxes.length;
+                        selectAll.indeterminate = checked.length > 0 && checked.length < checkboxes.length;
+                    }
+                }
+
+                if (selectAll) {
+                    selectAll.addEventListener('change', function () {
+                        getCheckboxes().forEach((cb) => { cb.checked = selectAll.checked; });
+                        refreshState();
+                    });
+                }
+
+                getCheckboxes().forEach((cb) => cb.addEventListener('change', refreshState));
+
+                printBtn.addEventListener('click', function () {
+                    const ids = getCheckboxes().filter((cb) => cb.checked).map((cb) => cb.value);
+                    if (!ids.length) return;
+
+                    const params = new URLSearchParams();
+                    ids.forEach((id) => params.append('ids[]', id));
+                    params.append('return', window.location.href);
+
+                    window.location.href = '{{ route('invoices.print-bulk') }}?' + params.toString();
+                });
+
+                refreshState();
             })();
 
         </script>

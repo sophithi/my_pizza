@@ -398,8 +398,26 @@ class InvoiceController extends Controller
         $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'items.product');
 
         $allSameDelivery = false;
+        $backUrl = $this->resolveReturnUrl(route('invoices.index'));
 
-        return view('invoices.show', compact('invoice', 'allSameDelivery'));
+        return view('invoices.show', compact('invoice', 'allSameDelivery', 'backUrl'));
+    }
+
+    /**
+     * Resolve the "return" URL passed through the query string, falling back
+     * to $default. Only same-origin URLs are honored to avoid open redirects.
+     */
+    private function resolveReturnUrl(string $default): string
+    {
+        $return = request('return');
+
+        if (!$return) {
+            return $default;
+        }
+
+        $decoded = urldecode($return);
+
+        return str_starts_with($decoded, url('/')) ? $decoded : $default;
     }
 
     /**
@@ -526,9 +544,33 @@ class InvoiceController extends Controller
     public function print(Invoice $invoice)
     {
         $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
-        // When printing from the invoices area, return back to the invoice view
-        $backUrl = route('invoices.show', $invoice);
+        // Return to the filtered invoice list the user came from, if provided
+        $backUrl = $this->resolveReturnUrl(route('invoices.index'));
         return view('packing.sticker-customer', compact('invoice', 'backUrl'));
+    }
+
+    /**
+     * Print multiple invoices at once, one sticker per printed page.
+     */
+    public function printBulk(Request $request)
+    {
+        $ids = collect($request->query('ids', []))
+            ->map(fn($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        abort_if($ids->isEmpty(), 404);
+
+        $invoices = Invoice::with('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery')
+            ->whereIn('id', $ids)
+            ->get()
+            ->sortBy(fn($invoice) => $ids->search($invoice->id))
+            ->values();
+
+        $backUrl = $this->resolveReturnUrl(route('invoices.index'));
+
+        return view('packing.sticker-customer-bulk', compact('invoices', 'backUrl'));
     }
 
     /**

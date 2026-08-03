@@ -52,7 +52,7 @@
             font-family: 'Moul', 'Noto Sans Khmer', 'Segoe UI', sans-serif;
             font-size: 26px;
             font-weight: normal;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.8px;
             line-height: 1.4;
             margin-top: 8px;
             color: #ffc61a;
@@ -852,9 +852,14 @@
             <span class="icon" id="copyIcon">📋</span>
             <span id="copyText">Copy Invoice</span>
         </button>
+        @unless(auth()->user()->isStaffInventory())
+        <a href="{{ route('invoices.index', $invoice) }}" class="btn-back">
+            <span class="icon">←</span> ទំព័រវិក្ក័យបត្រ
+        </a>
+        @endunless
 
-        <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}" class="btn-back">
-            <span class="icon">←</span> Back
+        <a href="{{ route('packing.index') }}" class="btn-back">
+            <span class="icon">←</span> ទំព័ររៀបចំ
         </a>
     </div>
 

@@ -851,8 +851,14 @@
             <span id="copyText">Copy Invoice</span>
         </button>
 
-        <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}" class="btn-back">
-            <span class="icon">←</span> Back
+        @unless(auth()->user()->isStaffInventory())
+        <a href="{{ route('invoices.index', $invoice) }}" class="btn-back">
+            <span class="icon">←</span> ទំព័រវិក្ក័យបត្រ
+        </a>
+        @endunless
+
+        <a href="{{ route('packing.index') }}" class="btn-back">
+            <span class="icon">←</span> ទំព័ររៀបចំ
         </a>
     </div>
 

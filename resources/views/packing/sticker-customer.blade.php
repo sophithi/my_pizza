@@ -419,23 +419,44 @@
         .btn-back {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
 
-            background: #f0f2f5;
-            color: #1a1d29;
-            border: 1px solid #e5e7eb;
-            padding: 10px 20px;
+            padding: 12px 24px;
+            min-width: 150px;
             height: 48px;
+
+            background: #ffffff;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
             border-radius: 10px;
-            cursor: pointer;
-            font-weight: 500;
+
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: .3px;
             text-decoration: none;
+
+            cursor: pointer;
             transition: all .2s ease;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .06);
         }
 
         .btn-back:hover {
-            background: #e5e7eb;
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            color: #111827;
             transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, .12);
+        }
+
+        .btn-back:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .08);
+        }
+
+        .btn-back .icon {
+            font-size: 16px;
+            display: inline-block;
         }
 
         .action-bar {
@@ -865,9 +886,14 @@
             <span class="icon" id="copyIcon">📋</span>
             <span id="copyText">Copy Invoice</span>
         </button>
+        @unless(auth()->user()->isStaffInventory())
+        <a href="{{ $backUrl ?? route('invoices.index') }}" class="btn-back">
+            <span class="icon">←</span> ទំព័រវិក្ក័យបត្រ
+        </a>
+        @endunless
 
-        <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}" class="btn-back">
-            <span class="icon">←</span> Back
+        <a href="{{ route('packing.index') }}" class="btn-back">
+            <span class="icon">←</span> ទំព័ររៀបចំ
         </a>
     </div>
 

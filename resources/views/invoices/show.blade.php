@@ -428,10 +428,10 @@
             </div>
 
             <div class="invoice-actions">
-                <a href="{{ route('invoices.index') }}" class="invoice-btn invoice-btn-soft">
+                <a href="{{ $backUrl ?? route('invoices.index') }}" class="invoice-btn invoice-btn-soft">
                     <i class="fas fa-arrow-left"></i> ត្រឡប់ក្រោយ
                 </a>
-                <a href="{{ route('invoices.print', $invoice) }}" class="invoice-btn invoice-btn-primary">
+                <a href="{{ route('invoices.print', $invoice) }}?return={{ urlencode($backUrl ?? route('invoices.index')) }}" class="invoice-btn invoice-btn-primary">
                     <i class="fas fa-print"></i> Print
                 </a>
                 @if(!auth()->user()->isStaffInventory())

@@ -624,7 +624,7 @@
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn btn-primary dropdown-toggle" style="background: #6c757d;"
                     data-bs-toggle="dropdown" aria-expanded="false" title="វិក្ក័យបត្រ / ស្លាកភ្ញៀវ">
-                    <i class="fas fa-print"></i> ព្រីនវិក្ក័យបត្រ
+                    <i class="fas fa-print"></i> ព្រីន
                 </button>
                 <ul class="dropdown-menu">
                     <li>

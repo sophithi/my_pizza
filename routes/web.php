@@ -159,6 +159,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
         Route::get('invoices/export/report', [InvoiceController::class, 'exportReport'])->name('invoices.export');
         Route::resource('invoices', InvoiceController::class)->only(['edit', 'update']);
+        Route::get('invoices/print-bulk', [InvoiceController::class, 'printBulk'])->name('invoices.print-bulk');
         Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
         Route::post('invoices/{invoice}/toggle-printed', [InvoiceController::class, 'togglePrinted'])->name('invoices.toggle-printed');
     });
