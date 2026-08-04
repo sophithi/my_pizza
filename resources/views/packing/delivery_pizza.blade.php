@@ -149,6 +149,16 @@
             word-break: break-word;
         }
 
+        .row-taxi .row-value,
+        .row-phone .row-value,
+        .row-addr .row-value {
+            background: #fff;
+            color: var(--red);
+            padding: 2px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
         /* ── FOOTER ── */
         .footer {
             background: #fff;
@@ -164,7 +174,7 @@
         .footer-contact {
             font-size: 12.5pt;
             font-weight: 700;
-            color: var(--red);
+            color: black;
             display: flex;
             align-items: center;
             gap: 8px;

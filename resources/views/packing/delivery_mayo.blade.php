@@ -59,13 +59,13 @@
 
         .brand-name {
             font-family: 'Moul', 'Noto Sans Khmer', 'Segoe UI', sans-serif;
-            font-size: 50px;
+            font-size: 40px;
             font-weight: normal;
             letter-spacing: 0.8px;
             line-height: 1.4;
-            margin-top: 8px;
-            color: #1a3cff;
-            -webkit-text-stroke: 1.1px #070303;
+            margin-top: 6px;
+            color: #0627e8;
+            -webkit-text-stroke: 10px #ffffff;
             paint-order: stroke fill;
             text-shadow: 0 3px 4px rgba(0, 0, 0, .35);
         }
@@ -87,18 +87,13 @@
             flex-shrink: 0;
         }
 
-        .warning-band svg {
-            width: 20px;
-            height: 20px;
-            color: var(--red);
-            flex-shrink: 0;
-        }
+      
 
         .warning-text {
             font-family: 'Hanuman', 'Noto Sans Khmer', sans-serif;
-            font-size: 20pt;
+            font-size: 28pt;
             font-weight: 900;
-            color: var(--red);
+            color: black;
             letter-spacing: 0.3px;
             text-align: center;
         }
@@ -150,6 +145,28 @@
             word-break: break-word;
         }
 
+        .row-taxi .row-value {
+            background: #ffffff;
+            color: #0627e8;
+            padding: 2px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+         .row-phone .row-value {
+            background: #fff;
+            color: #0627e8;
+            padding: 2px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .row-addr .row-value {
+            background: #fff;
+            color: #0627e8;
+            padding: 2px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
         /* ── FOOTER ── */
         .footer {
             background: #fff;
@@ -165,7 +182,7 @@
         .footer-contact {
             font-size: 12.5pt;
             font-weight: 700;
-            color: var(--red);
+            color: black;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -174,7 +191,7 @@
         .footer-thanks {
             font-family: 'Pacifico', cursive;
             font-size: 18pt;
-            color: var(--red);
+            color: black;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -349,19 +366,7 @@
 
         {{-- Warning banner --}}
         <div class="warning-band">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
             <span class="warning-text">បញ្ជាក់៖ កំុដាក់របស់ធ្ងន់ពីលើប្រយ័ត្នខូច</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
         </div>
 
         {{-- Body rows --}}
