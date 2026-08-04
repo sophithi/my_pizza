@@ -627,7 +627,7 @@
 
         <div class="header">
             <div>
-                <div class="logo">ម៉ាយូនេស តាម៉ាន់មានជ័យ</div>
+                <div class="logo">ម៉ាយូនេស តាមាន់មានជ័យ</div>
             </div>
             <div class="invoice-details">
 
@@ -839,7 +839,7 @@
         <a href="{{ route('packing.customer_mayo', $invoice) }}" target="_blank"
             class="brand-chip @if($currentRoute === 'packing.customer_mayo') active @endif">ម៉ាយូនេស បន្ទាយឆ្មារ</a>
         <a href="{{ route('packing.customer_tamon', $invoice) }}" target="_blank"
-            class="brand-chip @if($currentRoute === 'packing.customer_tamon') active @endif">តាម៉ាន់មានជ័យ</a>
+            class="brand-chip @if($currentRoute === 'packing.customer_tamon') active @endif">តាមាន់មានជ័យ</a>
     </div>
 
     <div class="no-print action-bar">

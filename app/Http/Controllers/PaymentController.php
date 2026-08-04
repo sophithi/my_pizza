@@ -25,20 +25,42 @@ class PaymentController extends Controller
         $period = $request->get('period', 'all');
         $today  = Carbon::today();
 
-        match ($period) {
-            'today'  => $query->whereDate('order_date', $today),
-            'week'   => $query->whereBetween('order_date', [
-                            $today->copy()->startOfWeek(),
-                            $today->copy()->endOfWeek(),
-                        ]),
-            'month'  => $query->whereMonth('order_date', $today->month)
-                               ->whereYear('order_date', $today->year),
-            'custom' => $query->when($request->date_from, fn($q) =>
-                                $q->whereDate('order_date', '>=', $request->date_from))
-                               ->when($request->date_to, fn($q) =>
-                                $q->whereDate('order_date', '<=', $request->date_to)),
-            default  => null,   // 'all' — no filter
-        };
+        // Apply period filter to either the order date or the payment creation date
+        if ($period === 'today') {
+            $query->where(function ($q) use ($today) {
+                $q->whereDate('order_date', $today)
+                  ->orWhereHas('payments', fn($p) => $p->whereDate('created_at', $today));
+            });
+        } elseif ($period === 'week') {
+            $start = $today->copy()->startOfWeek();
+            $end = $today->copy()->endOfWeek();
+
+            $query->where(function ($q) use ($start, $end) {
+                $q->whereBetween('order_date', [$start, $end])
+                  ->orWhereHas('payments', fn($p) => $p->whereBetween('created_at', [$start, $end]));
+            });
+        } elseif ($period === 'month') {
+            $query->where(function ($q) use ($today) {
+                $q->whereMonth('order_date', $today->month)
+                  ->whereYear('order_date', $today->year)
+                  ->orWhereHas('payments', fn($p) => $p->whereMonth('created_at', $today->month)
+                                                           ->whereYear('created_at', $today->year));
+            });
+        } elseif ($period === 'custom') {
+            if ($request->date_from) {
+                $query->where(function ($q) use ($request) {
+                    $q->whereDate('order_date', '>=', $request->date_from)
+                      ->orWhereHas('payments', fn($p) => $p->whereDate('created_at', '>=', $request->date_from));
+                });
+            }
+
+            if ($request->date_to) {
+                $query->where(function ($q) use ($request) {
+                    $q->whereDate('order_date', '<=', $request->date_to)
+                      ->orWhereHas('payments', fn($p) => $p->whereDate('created_at', '<=', $request->date_to));
+                });
+            }
+        }
 
         // Status filter
         $status = $request->get('status', 'all');
@@ -88,7 +110,10 @@ class PaymentController extends Controller
             });
         }
 
-        return $query->latest('order_date');
+        // Order by latest payment date when present, otherwise fall back to order_date
+        return $query->orderByRaw(
+            "COALESCE((select max(created_at) from payments where payments.order_id = orders.id), orders.order_date) desc"
+        );
     }
 
     private function mapOrderToPaymentRow(Order $order): object
@@ -111,7 +136,8 @@ class PaymentController extends Controller
             'source_order_id' => $order->id,
             'customer_name' => $payment?->customer_name ?? $order->customer?->name ?? 'Walk-in Customer',
             'order_id' => 'ORD-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
-            'order_date' => $order->order_date,
+            'order_date' => $payment?->created_at ?? $order->order_date,
+            'payment_date' => $payment?->created_at,
             'total_amount' => (float) $order->total_amount,
             'total_amount_khr' => (float) $totalAmountKhr,
             'paid_amount' => min((float) $order->total_amount, (float) $paidAmount),
@@ -243,6 +269,7 @@ class PaymentController extends Controller
             'payment_lines' => 'nullable|string',
             'method'        => 'nullable|string|max:50',
             'notes'         => 'nullable|string|max:500',
+            'payment_date' => 'nullable|date',
             'source_order_id' => 'nullable|integer',
         ]);
 
@@ -251,7 +278,6 @@ class PaymentController extends Controller
         $data['paid_amount'] = $paidUsd;
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
-        $data['order_date'] = $order->order_date;
         $data['total_amount'] = $order->total_amount;
         $data['total_amount_khr'] = $order->totalKhr();
         $data['paid_amount_khr'] = round($paidUsd * self::EXCHANGE_RATE, 2);
@@ -265,13 +291,13 @@ class PaymentController extends Controller
         if ($paymentNotes) {
             $data['notes'] = $paymentNotes;
         }
-        
+
         // Check for overpayment with exchange rate tolerance
         $overage = (float) $data['paid_amount'] - (float) $data['total_amount'];
         if ($overage > 0) {
             // Check if payment includes multiple currencies (more lenient tolerance)
             $hasMultipleCurrencies = count(collect($lines)->pluck('currency')->unique()) > 1;
-            
+
             // Allow generous overage tolerance for exchange rate fluctuations
             if ($hasMultipleCurrencies) {
                 // For multi-currency: 15% or $100 USD (whichever is smaller)
@@ -280,7 +306,7 @@ class PaymentController extends Controller
                 // For single currency: 10% or $50 USD
                 $tolerance = min((float) $data['total_amount'] * 0.10, 50);
             }
-            
+
             if ($overage > $tolerance) {
                 abort(422, "Paid amount cannot exceed order total by more than \${$tolerance}. Overage: \${$overage}");
             } else {
@@ -299,6 +325,16 @@ class PaymentController extends Controller
             $data
         );
         $this->syncPaymentLines($payment, $lines);
+
+        // If a payment date was provided, set the created_at timestamp accordingly
+        if ($request->filled('payment_date')) {
+            try {
+                $payment->created_at = Carbon::parse($request->payment_date);
+                $payment->save();
+            } catch (\Throwable $e) {
+                logger()->warning('Failed to set payment created_at: ' . $e->getMessage());
+            }
+        }
 
         $order->update([
             'payment_status' => match ($data['status']) {
@@ -337,6 +373,7 @@ class PaymentController extends Controller
             'payment_lines' => 'nullable|string',
             'method'        => 'nullable|string|max:50',
             'notes'         => 'nullable|string|max:500',
+            'payment_date'  => 'nullable|date',
             'source_order_id' => 'nullable|integer',
         ]);
 
@@ -345,7 +382,6 @@ class PaymentController extends Controller
         $data['paid_amount'] = $paidUsd;
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
-        $data['order_date'] = $order->order_date;
         $data['total_amount'] = $order->total_amount;
         $data['total_amount_khr'] = $order->totalKhr();
         $data['paid_amount_khr'] = round($paidUsd * self::EXCHANGE_RATE, 2);
@@ -359,13 +395,13 @@ class PaymentController extends Controller
         if ($paymentNotes) {
             $data['notes'] = $paymentNotes;
         }
-        
+
         // Check for overpayment with exchange rate tolerance
         $overage = (float) $data['paid_amount'] - (float) $data['total_amount'];
         if ($overage > 0) {
             // Check if payment includes multiple currencies (more lenient tolerance)
             $hasMultipleCurrencies = count(collect($lines)->pluck('currency')->unique()) > 1;
-            
+
             // Allow generous overage tolerance for exchange rate fluctuations
             if ($hasMultipleCurrencies) {
                 // For multi-currency: 15% or $100 USD (whichever is smaller)
@@ -374,7 +410,7 @@ class PaymentController extends Controller
                 // For single currency: 10% or $50 USD
                 $tolerance = min((float) $data['total_amount'] * 0.10, 50);
             }
-            
+
             if ($overage > $tolerance) {
                 abort(422, "Paid amount cannot exceed order total by more than \${$tolerance}. Overage: \${$overage}");
             } else {
@@ -382,13 +418,23 @@ class PaymentController extends Controller
                 $data['exchange_rate_notes'] = "Overpaid: +\${$overage} (within tolerance)";
             }
         }
-        
+
         $data['status']      = $this->resolveStatus($data['total_amount'], $data['paid_amount']);
         $data['method'] = $this->summarizeMethods($lines);
         unset($data['payment_lines']);
 
         $payment->update($data);
         $this->syncPaymentLines($payment, $lines);
+
+        // If a payment date was provided, set the created_at timestamp accordingly
+        if ($request->filled('payment_date')) {
+            try {
+                $payment->created_at = Carbon::parse($request->payment_date);
+                $payment->save();
+            } catch (\Throwable $e) {
+                logger()->warning('Failed to set payment created_at after update: ' . $e->getMessage());
+            }
+        }
 
         $order->update([
             'payment_status' => match ($data['status']) {

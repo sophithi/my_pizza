@@ -358,7 +358,7 @@
                                                             </li>
                                                             <li>
                                                                 <a class="dropdown-item" href="{{ route('packing.delivery_tamon', $invoice) }}" target="_blank">
-                                                                    ម៉ាយូនេស តាម៉ាន់មានជ័យ
+                                                                    ម៉ាយូនេស តាមាន់មានជ័យ
                                                                 </a>
                                                             </li>
                                                         </ul>
@@ -384,7 +384,7 @@
                                                             </li>
                                                                <li>
                                                                 <a class="dropdown-item" href="{{ route('packing.customer_tamon', $invoice) }}" target="_blank">
-                                                                    តាម៉ាន់មានជ័យ
+                                                                    តាមាន់មានជ័យ
                                                                 </a>
                                                             </li>
                                                         </ul>

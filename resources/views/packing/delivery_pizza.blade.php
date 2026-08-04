@@ -59,17 +59,17 @@
 
         .brand-name {
             font-family: 'Moul', 'Noto Sans Khmer', 'Segoe UI', sans-serif;
-            font-size: 50px;
+            font-size: 35px;
             font-weight: normal;
             letter-spacing: 0.8px;
             line-height: 1.4;
             margin-top: 8px;
-            color: #dc0909;
-            -webkit-text-stroke: 1.1px #070705;
+            color: #fff5f5;
+            -webkit-text-stroke: 6px #d10303;
             paint-order: stroke fill;
             text-shadow: 0 3px 4px rgba(0, 0, 0, .35);
         }
-
+/* 
         .brand-sub-title {
             font-size: 12pt;
             font-weight: 700;
@@ -77,31 +77,27 @@
             letter-spacing: 2.5px;
             text-transform: uppercase;
             margin-top: 3px;
-        }
+        } */
 
         /* ── WARNING TITLE BANNER ── */
         .warning-band {
-            background: var(--red);
+            background: white;
             padding: 10px 24px;
-            display: flex;
+           
+            display: flex;  
             align-items: center;
             justify-content: center;
             gap: 10px;
             flex-shrink: 0;
         }
 
-        .warning-band svg {
-            width: 20px;
-            height: 20px;
-            color: #fff;
-            flex-shrink: 0;
-        }
+      
 
         .warning-text {
-            font-family: 'Hanuman', sans-serif;
-            font-size: 20pt;
+            font-family: 'Hanuman', 'Noto Sans Khmer', sans-serif;
+            font-size: 24pt;
             font-weight: 900;
-            color: #fff;
+            color: #0a0a0a;
             letter-spacing: 0.3px;
             text-align: center;
         }
@@ -155,18 +151,20 @@
 
         /* ── FOOTER ── */
         .footer {
-            background: var(--red);
+            background: #fff;
+            border-top: 3px solid var(--red);
             padding: 12px 26px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
+            border-radius: 0 0 16px 16px;
         }
 
         .footer-contact {
             font-size: 12.5pt;
             font-weight: 700;
-            color: #fff;
+            color: var(--red);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -175,7 +173,7 @@
         .footer-thanks {
             font-family: 'Pacifico', cursive;
             font-size: 18pt;
-            color: #fff;
+            color: var(--red);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -255,7 +253,7 @@
         }
 
         .brand-switch-label {
-            color: #6b7280;
+            color: #757b86;
             font-weight: 600;
             font-size: 13px;
             margin-right: 2px;
@@ -326,6 +324,10 @@
                 page-break-inside: avoid;
             }
 
+            .footer {
+                border-radius: 0;
+            }
+
             .no-print {
                 display: none !important;
             }
@@ -347,19 +349,9 @@
 
         {{-- Warning banner --}}
         <div class="warning-band">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
+          
             <span class="warning-text">សូមដាក់កេសបញ្ឈរ កំុដាក់របស់ធ្ងន់ពីលើប្រយ័ត្នបែក</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
+     
         </div>
 
         {{-- Body rows --}}

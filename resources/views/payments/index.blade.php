@@ -524,6 +524,11 @@
             </form>
         </div>
 
+        {{-- Results Count --}}
+        <div class="text-muted small mb-2">
+            សរុប {{ number_format($payments->total()) }} ការទូទាត់
+        </div>
+
         {{-- Payments Table --}}
         <div class="card border shadow-sm">
             <div class="table-responsive">
@@ -535,8 +540,8 @@
                             <th>សរុបការបញ្ជាទិញ</th>
                             <th>បានបង់</th>
                             <th>នៅសល់</th>
-                            <th>វិធីបង់</th>      
-                            <th>note</th>
+                            <th>វិធីបង់</th>
+                            <th>ចំណាំ</th>
                             <th>ស្ថានភាព</th>
                             <th class="text-center">សកម្មភាព</th>
                         </tr>
@@ -594,18 +599,30 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-secondary"
-                                        onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
-                                        data-bs-target="#paymentModal">
-                                        {{ $payment->payment_id ? 'ពិនិត្យការទូទាត់' : 'ពិនិត្យការទូទាត់' }}
-                                    </button>
+                                    @if($payment->payment_id)
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
+                                            data-bs-target="#paymentModal">
+                                            <i class="fas fa-pen me-1"></i> កែសម្រួល
+                                        </button>
+                                    @else
+                                        <button class="btn btn-sm text-white" style="background:#D85A30"
+                                            onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
+                                            data-bs-target="#paymentModal">
+                                            <i class="fas fa-plus me-1"></i> កត់ត្រាការទូទាត់
+                                        </button>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center text-muted py-5">
+                                <td colspan="9" class="text-center text-muted py-5">
                                     <i class="fas fa-inbox fs-3 d-block mb-2"></i>
-                                    មិនមានទិន្នន័យការទូទាត់
+                                    @if(request('search') || request('status', 'all') !== 'all' || request('method') || request('delivery_id'))
+                                        មិនមានលទ្ធផលត្រូវនឹងលក្ខខណ្ឌស្វែងរក
+                                    @else
+                                        មិនមានទិន្នន័យការទូទាត់
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse
@@ -647,6 +664,10 @@
                         <div class="mb-3">
                             <label class="form-label small text-muted">កាលបរិច្ឆេទបញ្ជាទិញ</label>
                             <input type="date" name="order_date" id="f_order_date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">កាលបរិច្ឆេទទូទាត់</label>
+                            <input type="date" name="payment_date" id="f_payment_date" class="form-control">
                         </div>
                         <div class="mb-3">
                             <label class="form-label small text-muted">សរុប</label>
@@ -794,13 +815,13 @@
             }
 
             const paidUsd = paymentLines.reduce((sum, line) => sum + lineAmountUsd(line), 0);
-            const totalUsd = parseFloat(document.getElementById('f_total').value) || 0;
             const totalKhr = parseFloat(document.getElementById('f_total_khr').value) || 0;
-            const balanceUsd = Math.max(0, totalUsd - paidUsd);
-            // Anchor to totalKhr (ground truth) instead of re-deriving from the already-rounded
-            // USD figure, otherwise a fully-paid order can show a few riels "still owed".
+            // Anchor both balances to totalKhr (ground truth) instead of letting the USD side
+            // do its own totalUsd - paidUsd subtraction, otherwise a payment that exactly
+            // clears the KHR total can still show a few leftover cents owed in USD.
             const balanceKhr = Math.max(0, totalKhr - usdToKhr(paidUsd));
             const paidKhr = totalKhr - balanceKhr;
+            const balanceUsd = balanceKhr / EXCHANGE_RATE;
 
             document.getElementById('f_paid').value = paidUsd.toFixed(2);
             document.getElementById('paidSummaryUsd').textContent = paidUsd.toFixed(2);
@@ -821,6 +842,7 @@
             document.getElementById('f_customer_name').value = '';
             document.getElementById('f_order_id').value = '';
             document.getElementById('f_order_date').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('f_payment_date').value = new Date().toISOString().slice(0, 10);
             document.getElementById('f_total').value = '';
             document.getElementById('f_total_khr').value = '';
             document.getElementById('f_paid').value = '0';
@@ -843,6 +865,7 @@
             document.getElementById('f_customer_name').value = payment.customer_name;
             document.getElementById('f_order_id').value = payment.order_id;
             document.getElementById('f_order_date').value = String(payment.order_date).slice(0, 10);
+            document.getElementById('f_payment_date').value = payment.payment_date ? String(payment.payment_date).slice(0,10) : new Date().toISOString().slice(0,10);
             document.getElementById('f_total').value = payment.total_amount;
             document.getElementById('f_total_khr').value = payment.total_amount_khr || usdToKhr(payment.total_amount);
             document.getElementById('f_notes').value = payment.notes || '';
@@ -870,35 +893,11 @@
             document.body.style.removeProperty('padding-right');
         });
 
-        /**
-         * Update exchange rate for payment processing
-         * Handles different exchange rates when rates fluctuate
-         */
-        function updateExchangeRate(rate) {
-            const currentRate = parseFloat(document.getElementById('f_exchange_rate').value);
-            const totalKhr = parseFloat(document.getElementById('f_total_khr').value) || 0;
-            
-            // Update the hidden exchange rate field
-            document.getElementById('f_exchange_rate').value = rate;
-            
-            // Update KHR value if coming from USD
-            const totalUsd = parseFloat(document.getElementById('f_total').value) || 0;
-            if (totalUsd > 0) {
-                const newKhr = Math.round(totalUsd * rate);
-                document.getElementById('f_total_khr').value = newKhr;
-            }
-            
-            // Update payment lines with new exchange rate
-            paymentLines.forEach(line => {
-                if (line.currency === 'KHR') {
-                    // Recalculate USD amount with new rate
-                    line.originalKhr = line.amount;
-                }
-            });
-            
-            // Show notification
-            const rateLabel = rate === 3800 ? '📉 Low (3800)' : (rate === 4200 ? '📈 High (4200)' : 'Standard (4000)');
-            console.log(`Exchange rate updated to: ${rateLabel}`);
-        }
+        document.getElementById('paymentForm')?.addEventListener('submit', function () {
+            const btn = this.querySelector('button[type="submit"]');
+            if (!btn) return;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> កំពុងរក្សាទុក...';
+        });
     </script>
 @endpush

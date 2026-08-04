@@ -259,9 +259,10 @@
                 <option value="received" {{ request('status') === 'received' ? 'selected' : '' }}>បានទូទាត់</option>
                 <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>បានលុប</option>
             </select>
-            <input type="date" name="date" class="form-control" value="{{ request('date') }}" autocomplete="off">
+            <input type="date" name="date" class="form-control" value="{{ request('date') }}"
+                placeholder="ជ្រើសរើសកាលបរិច្ឆេទ" aria-label="ជ្រើសរើសកាលបរិច្ឆេទ" autocomplete="off">
             <button class="expense-btn expense-btn-primary" type="submit">
-                <i class="fas fa-search"></i> Search
+                <i class="fas fa-search"></i> ស្វែងរក
             </button>
         </form>
 
@@ -276,7 +277,7 @@
                                 <th>កាលបរិច្ឆេទ</th>
                                 <th>ចំនួនទឹកប្រាក់</th>
                                 <th>ស្ថានភាព</th>
-                                <th>Actions</th>
+                                <th>សកម្មភាព</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -295,28 +296,23 @@
                                         <span class="expense-khr">${{ number_format($purchase->total_amount, 2) }}</span>
                                     </td>
                                     <td>
-                                        <span class="text_description">
-
-                                        </span>
-                                    </td>
-                                    <td>
                                         <span class="expense-status {{ $purchase->status }}">
                                             {{ $statusLabels[$purchase->status] ?? ucfirst($purchase->status) }}
                                         </span>
                                     </td>
                                     <td>
                                         <div class="expense-actions">
-                                            <a href="{{ route('purchases.show', $purchase) }}" class="expense-action" title="View">
+                                            <a href="{{ route('purchases.show', $purchase) }}" class="expense-action" title="មើលលម្អិត">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('purchases.edit', $purchase) }}" class="expense-action" title="Edit">
+                                            <a href="{{ route('purchases.edit', $purchase) }}" class="expense-action" title="កែសម្រួល">
                                                 <i class="fas fa-pen"></i>
                                             </a>
                                             <form action="{{ route('purchases.destroy', $purchase) }}" method="POST"
-                                                onsubmit="return confirm('Delete this daily expense?');">
+                                                onsubmit="return confirm('លុបចំណាយនេះឬ?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="expense-action expense-action-danger" title="Delete">
+                                                <button type="submit" class="expense-action expense-action-danger" title="លុប">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -327,9 +323,10 @@
                         </tbody>
                     </table>
                 </div>
-
-                <div class="pager-wrap">
-                    {{ $purchases->links() }}
+            @elseif(request('search') || (request('status') && request('status') !== 'all') || request('date'))
+                <div class="expense-empty">
+                    <h5 class="mb-2">មិនមានលទ្ធផលត្រូវនឹងលក្ខខណ្ឌស្វែងរក</h5>
+                    <p class="text-muted mb-0">សាកល្បងផ្លាស់ប្តូរលក្ខខណ្ឌស្វែងរក ឬសម្អាតតម្រង។</p>
                 </div>
             @else
                 <div class="expense-empty">
@@ -340,6 +337,9 @@
                     </a>
                 </div>
             @endif
+        </div>
+        <div class="pager-wrap">
+            {{ $purchases->withQueryString()->links('pagination::bootstrap-5') }}
         </div>
     </div>
 @endsection

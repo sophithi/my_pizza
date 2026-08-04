@@ -78,7 +78,7 @@
 
         /* ── WARNING TITLE BANNER ── */
         .warning-band {
-            background: var(--red);
+            background: transparent;
             padding: 10px 24px;
             display: flex;
             align-items: center;
@@ -90,15 +90,15 @@
         .warning-band svg {
             width: 20px;
             height: 20px;
-            color: #fff;
+            color: var(--red);
             flex-shrink: 0;
         }
 
         .warning-text {
-            font-family: 'Hanuman', sans-serif;
+            font-family: 'Hanuman', 'Noto Sans Khmer', sans-serif;
             font-size: 20pt;
             font-weight: 900;
-            color: #fff;
+            color: var(--red);
             letter-spacing: 0.3px;
             text-align: center;
         }
@@ -152,18 +152,20 @@
 
         /* ── FOOTER ── */
         .footer {
-            background: var(--red);
+            background: #fff;
+            border-top: 3px solid var(--red);
             padding: 12px 26px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
+            border-radius: 0 0 16px 16px;
         }
 
         .footer-contact {
             font-size: 12.5pt;
             font-weight: 700;
-            color: #fff;
+            color: var(--red);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -172,7 +174,7 @@
         .footer-thanks {
             font-family: 'Pacifico', cursive;
             font-size: 18pt;
-            color: #fff;
+            color: var(--red);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -323,6 +325,10 @@
                 page-break-inside: avoid;
             }
 
+            .footer {
+                border-radius: 0;
+            }
+
             .no-print {
                 display: none !important;
             }
@@ -336,7 +342,7 @@
         {{-- Header --}}
         <div class="header">
             <div class="brand-container">
-                <div class="brand-name">ម៉ាយូនេស តាម៉ាន់មានជ័យ</div>
+                <div class="brand-name">ម៉ាយូនេស តាមាន់មានជ័យ</div>
             </div>
         </div>
 
@@ -427,7 +433,7 @@
         <a href="{{ route('packing.delivery_mayo', $invoice) }}" target="_blank"
             class="brand-chip @if($currentRoute === 'packing.delivery_mayo') active @endif">ម៉ាយូនេស បន្ទាយឆ្មារ</a>
         <a href="{{ route('packing.delivery_tamon', $invoice) }}" target="_blank"
-            class="brand-chip @if($currentRoute === 'packing.delivery_tamon') active @endif">តាម៉ាន់មានជ័យ</a>
+            class="brand-chip @if($currentRoute === 'packing.delivery_tamon') active @endif">តាមាន់មានជ័យ</a>
         </div>
     {{-- Screen buttons --}}
     <div class="no-print">
