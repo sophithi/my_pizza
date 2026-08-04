@@ -123,13 +123,8 @@ class OrderController extends Controller
             $warnings = $this->deductInventoryForOrder($order);
 
             // Auto-create invoice
-            $lastInvoice = \App\Models\Invoice::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
-            $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
-            $invoiceNumber = 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-
-            \App\Models\Invoice::create([
+            $invoice = \App\Models\Invoice::createUnique([
                 'order_id' => $order->id,
-                'invoice_number' => $invoiceNumber,
                 'invoice_date' => now()->toDateString(),
                 'subtotal' => $order->subtotal,
                 'discount_amount' => $order->discount_amount,
@@ -139,6 +134,7 @@ class OrderController extends Controller
                 'status' => $order->payment_status === 'paid' ? 'paid' : 'draft',
                 'notes' => $order->notes ?? null,
             ]);
+            $invoiceNumber = $invoice->invoice_number;
 
             // Create payment record if order is marked as paid
             if ($validated['payment_status'] === 'paid') {
@@ -442,13 +438,8 @@ class OrderController extends Controller
 
         // Auto-create invoice if not already created
         if (!$order->invoice) {
-            $lastInvoice = \App\Models\Invoice::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
-            $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
-            $invoiceNumber = 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-
-            \App\Models\Invoice::create([
+            $invoice = \App\Models\Invoice::createUnique([
                 'order_id' => $order->id,
-                'invoice_number' => $invoiceNumber,
                 'invoice_date' => now()->toDateString(),
                 'subtotal' => $order->subtotal,
                 'discount_amount' => $order->discount_amount,
@@ -458,6 +449,7 @@ class OrderController extends Controller
                 'status' => $order->payment_status === 'paid' ? 'paid' : 'draft',
                 'notes' => $order->notes ?? null,
             ]);
+            $invoiceNumber = $invoice->invoice_number;
 
             return back()->with('success', 'ការបញ្ជាទិញបានបញ្ចប់ និងវិក្ក័យបត្រ ' . $invoiceNumber . ' បានបង្កើត។');
         }

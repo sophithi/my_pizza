@@ -92,9 +92,28 @@ class Invoice extends Model
      */
     public static function generateInvoiceNumber(): string
     {
-        $lastInvoice = self::orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
+        $lastInvoice = self::withTrashed()->orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
         $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
         return 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Create an invoice with a guaranteed-unique invoice_number. Two requests
+     * can still read the same "next number" before either commits; if the
+     * insert collides on the unique constraint, regenerate and retry rather
+     * than surface a 500.
+     */
+    public static function createUnique(array $attributes): self
+    {
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
+            try {
+                return self::create(['invoice_number' => self::generateInvoiceNumber()] + $attributes);
+            } catch (\Illuminate\Database\QueryException $e) {
+                if ($attempt === 5 || $e->getCode() !== '23000') {
+                    throw $e;
+                }
+            }
+        }
     }
 
     /**
@@ -102,9 +121,8 @@ class Invoice extends Model
      */
     public static function createFromOrder(Order $order): self
     {
-        return self::create([
+        return self::createUnique([
             'order_id' => $order->id,
-            'invoice_number' => self::generateInvoiceNumber(),
             'invoice_date' => now()->toDateString(),
             'subtotal' => $order->subtotal,
             'discount_amount' => $order->discount_amount,
