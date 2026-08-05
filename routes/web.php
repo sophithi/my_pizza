@@ -203,6 +203,8 @@ Route::middleware('auth')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/', [ReportController::class, 'dashboard'])->name('dashboard');
             Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
+            Route::get('/sales/export/excel', [ReportController::class, 'exportSalesExcel'])->name('sales.export.excel');
+            Route::get('/sales/export/pdf', [ReportController::class, 'exportSalesPdf'])->name('sales.export.pdf');
         });
     });
 

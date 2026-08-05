@@ -265,8 +265,11 @@ class OrderController extends Controller
         $discountAmount = round($itemDiscountKhr / 4000, 2);
         $totalAmount = round($totalKhr / 4000, 2);
 
-        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount, $totalKhr, $orderItems) {
+        $packingRelevantChanged = false;
+
+        DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount, $totalKhr, $orderItems, &$packingRelevantChanged) {
             $wasStockDeducted = (bool) $order->stock_deducted;
+            $originalItemsSignature = $this->itemsSignature($order->items()->get(['product_id', 'quantity', 'unit_price', 'discount_percent']));
 
             if ($wasStockDeducted) {
                 $this->restoreInventoryForOrder($order);
@@ -348,8 +351,12 @@ class OrderController extends Controller
                 $this->deductInventoryForOrder($order->fresh('items.product'));
             }
 
+            $newItemsSignature = $this->itemsSignature($order->items()->get(['product_id', 'quantity', 'unit_price', 'discount_percent']));
+            $packingRelevantChanged = $order->wasChanged(['customer_id', 'delivery_id', 'taxi_phone', 'small_pack_qty', 'big_pack_qty', 'notes'])
+                || $originalItemsSignature !== $newItemsSignature;
+
             if ($order->invoice) {
-                $order->invoice->update([
+                $invoiceUpdate = [
                     'subtotal' => $order->subtotal,
                     'discount_amount' => $order->discount_amount,
                     'delivery_fee_khr' => $order->delivery_fee_khr,
@@ -358,16 +365,43 @@ class OrderController extends Controller
                     'status' => $order->invoice->status === 'cancelled'
                         ? 'cancelled'
                         : ($order->payment_status === 'paid' ? 'paid' : 'draft'),
-                    'packing_sent_at' => null,
-                    'packing_completed_at' => null,
                     'notes' => $order->notes ?? null,
-                ]);
+                ];
+
+                // Only pull the invoice out of the packing queue when something a
+                // packer would actually see (items, delivery, pack qty, notes...)
+                // changed — a payment-status or order-date-only edit shouldn't
+                // silently drop an already-packed invoice off packing/index.
+                if ($packingRelevantChanged) {
+                    $invoiceUpdate['packing_sent_at'] = null;
+                    $invoiceUpdate['packing_completed_at'] = null;
+                }
+
+                $order->invoice->update($invoiceUpdate);
             }
         });
 
+        $message = 'Order updated successfully.';
+        if ($order->invoice && $packingRelevantChanged) {
+            $message .= ' Please send it to packing again.';
+        }
+
         return redirect()
             ->route('orders.show', $order)
-            ->with('success', 'Order updated successfully. Please send it to packing again.');
+            ->with('success', $message);
+    }
+
+    /**
+     * Build an order-independent signature for a set of order items so we can
+     * detect whether the packable contents of an order actually changed.
+     */
+    private function itemsSignature(\Illuminate\Support\Collection $items): string
+    {
+        return $items
+            ->map(fn($item) => "{$item->product_id}:{$item->quantity}:{$item->unit_price}:{$item->discount_percent}")
+            ->sort()
+            ->values()
+            ->implode('|');
     }
 
     /**

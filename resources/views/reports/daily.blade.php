@@ -389,6 +389,215 @@
             font-size: 24px;
         }
 
+        /* ── ranked bar chart (products sold) ── */
+        .rank-row {
+            align-items: center;
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 130px 1fr 110px;
+            margin-bottom: 14px;
+            padding: 0 16px;
+        }
+
+        .rank-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .rank-row:first-child {
+            margin-top: 16px;
+        }
+
+        .rank-name {
+            color: var(--text);
+            font-size: 12.5px;
+            font-weight: 700;
+        }
+
+        .rank-qty {
+            color: var(--muted);
+            font-size: 10.5px;
+            font-weight: 600;
+        }
+
+        .rank-track {
+            background: var(--soft);
+            border-radius: 6px;
+            height: 22px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .rank-fill {
+            background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+            border-radius: 6px;
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            top: 0;
+        }
+
+        .rank-value {
+            font-size: 12.5px;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .rank-value .u {
+            color: var(--muted);
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* ── diverging in/out bars (stock movement) ── */
+        .div-legend {
+            color: var(--muted);
+            display: flex;
+            font-size: 10.5px;
+            font-weight: 700;
+            gap: 14px;
+            margin: 16px 0 12px;
+            padding: 0 16px;
+        }
+
+        .div-legend span {
+            align-items: center;
+            display: inline-flex;
+            gap: 5px;
+        }
+
+        .div-legend i {
+            border-radius: 2px;
+            display: inline-block;
+            height: 8px;
+            width: 8px;
+        }
+
+        .div-row {
+            align-items: center;
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 140px 1fr 150px;
+            margin-bottom: 16px;
+            padding: 0 16px;
+        }
+
+        .div-row:last-child {
+            margin-bottom: 16px;
+        }
+
+        .div-name {
+            color: var(--text);
+            font-size: 12.5px;
+            font-weight: 700;
+        }
+
+        .div-track {
+            height: 22px;
+            position: relative;
+        }
+
+        .div-axis {
+            background: var(--border);
+            bottom: -3px;
+            left: 50%;
+            position: absolute;
+            top: -3px;
+            width: 1px;
+        }
+
+        .div-bar {
+            border-radius: 4px;
+            height: 16px;
+            position: absolute;
+            top: 3px;
+        }
+
+        .div-bar.in {
+            background: var(--success);
+            right: 50%;
+        }
+
+        .div-bar.out {
+            background: var(--danger);
+            left: 50%;
+        }
+
+        .div-remain {
+            font-size: 12px;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .div-remain.is-critical {
+            color: var(--danger);
+        }
+
+        .div-remain .u {
+            color: var(--muted);
+            display: block;
+            font-size: 9.5px;
+            font-weight: 700;
+        }
+
+        /* ── low-stock severity bars ── */
+        .thresh-caption {
+            color: var(--muted);
+            font-size: 11px;
+            margin: 16px 16px 4px;
+        }
+
+        .thresh-row {
+            border-bottom: 1px solid var(--border);
+            padding: 10px 16px;
+        }
+
+        .thresh-row:last-child {
+            border-bottom: 0;
+        }
+
+        .thresh-head {
+            align-items: baseline;
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            margin-bottom: 7px;
+        }
+
+        .thresh-name {
+            color: var(--text);
+            font-size: 12.5px;
+            font-weight: 700;
+        }
+
+        .thresh-figs {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .thresh-figs strong {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .thresh-track {
+            background: var(--soft);
+            border-radius: 4px;
+            height: 8px;
+            position: relative;
+        }
+
+        .thresh-fill {
+            background: var(--danger);
+            border-radius: 4px;
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            top: 0;
+        }
+
         @media (max-width: 1200px) {
             .metric-grid {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -583,36 +792,25 @@
                 <div class="report-card">
                     <div class="report-card-head">
                         <h3 class="report-card-title"><i class="fas fa-pizza-slice"></i> ទំនិញលក់បាន</h3>
-                        <span class="report-card-badge">{{ number_format($soldItems->sum('quantity')) }}</span>
+                       
                     </div>
                     @if($soldItems->count())
-                        <div class="table-responsive">
-                            <table class="table daily-table">
-                                <thead>
-                                    <tr>
-                                        <th>ទំនិញ</th>
-                                        <th class="text-center">ចំនួន</th>
-                                        <th class="text-end">សរុប</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($soldItems as $item)
-                                        <tr>
-                                            <td class="item-name">{{ $item->name }}</td>
-                                            <td class="text-center">{{ number_format($item->quantity) }}
-                                                {{ $unitLabel($item->unit) }}
-                                            </td>
-                                            <td class="text-end">
-                                                <div class="money-stack">
-                                                    <span class="khr">៛{{ number_format($item->total_khr, 0) }}</span>
-                                                    <span class="usd">${{ number_format($item->total, 2) }}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                        @php $maxSoldKhr = $soldItems->max('total_khr') ?: 1; @endphp
+                        @foreach($soldItems as $item)
+                            <div class="rank-row">
+                                <div>
+                                    <div class="rank-name">{{ $item->name }}</div>
+                                    <div class="rank-qty">{{ number_format($item->quantity) }} {{ $unitLabel($item->unit) }}</div>
+                                </div>
+                                <div class="rank-track">
+                                    <div class="rank-fill" style="width: {{ max(2, round($item->total_khr / $maxSoldKhr * 100, 1)) }}%"></div>
+                                </div>
+                                <div class="rank-value">
+                                    ៛{{ number_format($item->total_khr, 0) }}
+                                    <span class="u">${{ number_format($item->total, 2) }}</span>
+                                </div>
+                            </div>
+                        @endforeach
                     @else
                         <div class="empty-note"><i class="fas fa-box-open"></i>មិនមានទំនិញលក់សម្រាប់ថ្ងៃនេះទេ។</div>
                     @endif
@@ -623,42 +821,29 @@
                         <h3 class="report-card-title"><i class="fas fa-boxes-stacked"></i> ចលនាស្តុក</h3>
                     </div>
                     @if($stockMovement->count())
-                        <div class="table-responsive">
-                            <table class="table daily-table">
-                                <thead>
-                                    <tr>
-                                        <th>ទំនិញ</th>
-                                        <th class="text-center">ចូលក្នុងស្តុក</th>
-                                        <th class="text-center">កាត់ចេញពីស្តុក</th>
-                                        <th class="text-center">នៅសល់ក្នុងស្តុក</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($stockMovement as $stock)
-                                        <tr>
-                                            <td class="item-name">{{ $stock->name ?? 'មិនមានឈ្មោះ' }}</td>
-                                            <td class="text-center">
-                                                @if($stock->stock_in > 0)
-                                                    <span class="pill pill-in">+{{ number_format($stock->stock_in) }}</span>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                @if($stock->stock_out > 0)
-                                                    <span class="pill pill-out">-{{ number_format($stock->stock_out) }}</span>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center fw-bold">{{ number_format($stock->current_quantity) }}
-                                                {{ $unitLabel($stock->unit) }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        @php $maxMove = $stockMovement->max(fn($s) => max($s->stock_in, $s->stock_out)) ?: 1; @endphp
+                        <div class="div-legend">
+                            <span><i style="background:var(--success)"></i>ចូលក្នុងស្តុក</span>
+                            <span><i style="background:var(--danger)"></i>កាត់ចេញពីស្តុក</span>
                         </div>
+                        @foreach($stockMovement as $stock)
+                            <div class="div-row">
+                                <div class="div-name">{{ $stock->name ?? 'មិនមានឈ្មោះ' }}</div>
+                                <div class="div-track">
+                                    <div class="div-axis"></div>
+                                    @if($stock->stock_in > 0)
+                                        <div class="div-bar in" style="width: {{ max(3, round($stock->stock_in / $maxMove * 50, 1)) }}%"></div>
+                                    @endif
+                                    @if($stock->stock_out > 0)
+                                        <div class="div-bar out" style="width: {{ max(3, round($stock->stock_out / $maxMove * 50, 1)) }}%"></div>
+                                    @endif
+                                </div>
+                                <div class="div-remain {{ $stock->current_quantity < 0 ? 'is-critical' : '' }}">
+                                    {{ number_format($stock->current_quantity) }} {{ $unitLabel($stock->unit) }}
+                                    <span class="u">នៅសល់ក្នុងស្តុក</span>
+                                </div>
+                            </div>
+                        @endforeach
                     @else
                         <div class="empty-note"><i class="fas fa-boxes-stacked"></i>មិនមានចលនាស្តុកសម្រាប់ថ្ងៃនេះទេ។</div>
                     @endif
@@ -666,7 +851,7 @@
             </div>
 
             <div>
-                <div class="report-card">
+                <!-- <div class="report-card">
                     <div class="report-card-head">
                         <h3 class="report-card-title"><i class="fas fa-hand-holding-dollar"></i> ចំណូលបានទទួល</h3>
                         <span class="report-card-badge text-success">៛{{ number_format($incomeKhr, 0) }}</span>
@@ -692,7 +877,7 @@
                     @else
                         <div class="empty-note"><i class="fas fa-hand-holding-dollar"></i>មិនមានការទូទាត់ទេ។</div>
                     @endif
-                </div>
+                </div> -->
 
                 <div class="report-card">
                     <div class="report-card-head">
@@ -728,26 +913,31 @@
                 <div class="report-card">
                     <div class="report-card-head">
                         <h3 class="report-card-title"><i class="fas fa-triangle-exclamation"></i> ស្តុកជិតអស់</h3>
-                        @if($lowStock->count())
-                            <span class="report-card-badge text-danger">{{ $lowStock->count() }}</span>
+                        @if($lowStockCount)
+                            <span class="report-card-badge text-danger">{{ $lowStockCount }}</span>
                         @endif
                     </div>
                     @if($lowStock->count())
-                        <div class="table-responsive">
-                            <table class="table daily-table">
-                                <tbody>
-                                    @foreach($lowStock as $stock)
-                                        <tr>
-                                            <td class="item-name">{{ $stock->product?->name ?? 'មិនមានឈ្មោះ' }}</td>
-                                            <td class="text-end">
-                                                <span class="pill pill-low">{{ number_format($stock->quantity) }} /
-                                                    {{ number_format($stock->reorder_level) }}</span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                        <p class="thresh-caption">កម្រិត</p>
+                        @php $maxLowAbs = $lowStock->max(fn($s) => abs($s->quantity)) ?: 1; @endphp
+                        @foreach($lowStock as $stock)
+                            <div class="thresh-row">
+                                <div class="thresh-head">
+                                    <div class="thresh-name">{{ $stock->product?->name ?? 'មិនមានឈ្មោះ' }}</div>
+                                    <div class="thresh-figs">ស្តុក <strong>{{ number_format($stock->quantity) }}</strong> · កម្រិតបញ្ជាទិញ {{ number_format($stock->reorder_level) }}</div>
+                                </div>
+                                <div class="thresh-track">
+                                    <div class="thresh-fill" style="width: {{ max(2, round(abs($stock->quantity) / $maxLowAbs * 100, 1)) }}%"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                        @if($lowStockCount > $lowStock->count())
+                            <p style="text-align:center;margin:14px 0 0;">
+                                <a href="{{ route('inventory.index') }}" style="color:var(--accent);font-size:12px;font-weight:700;text-decoration:none;">
+                                    +{{ $lowStockCount - $lowStock->count() }} ផលិតផលទៀត — មើលទាំងអស់
+                                </a>
+                            </p>
+                        @endif
                     @else
                         <div class="empty-note"><i class="fas fa-circle-check"></i>ស្តុកគ្រប់គ្រាន់។</div>
                     @endif

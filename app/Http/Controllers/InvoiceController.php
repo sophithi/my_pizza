@@ -355,7 +355,13 @@ class InvoiceController extends Controller
     public function sendToPacking(Invoice $invoice)
     {
         if (!$invoice->packing_sent_at) {
-            $invoice->update(['packing_sent_at' => now()]);
+            $sentAt = now();
+            $invoice->update([
+                'packing_sent_at' => $sentAt,
+                // Never overwritten again — lets packing/index tell a brand-new
+                // send apart from a resend that followed an order edit.
+                'packing_first_sent_at' => $invoice->packing_first_sent_at ?? $sentAt,
+            ]);
             $invoice->loadMissing('order.customer', 'order.invoice');
         }
 

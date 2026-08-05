@@ -275,12 +275,13 @@ class PaymentController extends Controller
 
         $lines = $this->parsePaymentLines($request);
         $paidUsd = collect($lines)->sum('amount_usd');
+        $paidKhr = $this->sumLinesKhr($lines);
         $data['paid_amount'] = $paidUsd;
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
         $data['total_amount'] = $order->total_amount;
         $data['total_amount_khr'] = $order->totalKhr();
-        $data['paid_amount_khr'] = round($paidUsd * self::EXCHANGE_RATE, 2);
+        $data['paid_amount_khr'] = $paidKhr;
 
         // Calculate average exchange rate from payment lines
         $avgExchangeRate = collect($lines)->avg('exchange_rate') ?? self::EXCHANGE_RATE;
@@ -315,8 +316,10 @@ class PaymentController extends Controller
             }
         }
 
-        // Auto-set status
-        $data['status'] = $this->resolveStatus($data['total_amount'], $data['paid_amount']);
+        // Auto-set status — compare in KHR (ground truth) so per-line USD rounding
+        // dust (e.g. 15.00 + 30.38 landing a float epsilon under 45.38) can't leave
+        // an exactly-paid order stuck at "partial".
+        $data['status'] = $this->resolveStatus($data['total_amount_khr'], $paidKhr);
         $data['method'] = $this->summarizeMethods($lines);
         unset($data['payment_lines']);
 
@@ -379,12 +382,13 @@ class PaymentController extends Controller
 
         $lines = $this->parsePaymentLines($request);
         $paidUsd = collect($lines)->sum('amount_usd');
+        $paidKhr = $this->sumLinesKhr($lines);
         $data['paid_amount'] = $paidUsd;
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
         $data['total_amount'] = $order->total_amount;
         $data['total_amount_khr'] = $order->totalKhr();
-        $data['paid_amount_khr'] = round($paidUsd * self::EXCHANGE_RATE, 2);
+        $data['paid_amount_khr'] = $paidKhr;
 
         // Calculate average exchange rate from payment lines
         $avgExchangeRate = collect($lines)->avg('exchange_rate') ?? self::EXCHANGE_RATE;
@@ -419,7 +423,8 @@ class PaymentController extends Controller
             }
         }
 
-        $data['status']      = $this->resolveStatus($data['total_amount'], $data['paid_amount']);
+        // Auto-set status — compare in KHR (ground truth), see store() for why.
+        $data['status']      = $this->resolveStatus($data['total_amount_khr'], $paidKhr);
         $data['method'] = $this->summarizeMethods($lines);
         unset($data['payment_lines']);
 
@@ -493,6 +498,19 @@ class PaymentController extends Controller
         if ($paid <= 0)       return 'pending';
         if ($paid >= $total)  return 'paid';
         return 'partial';
+    }
+
+    // Sums the real KHR amount of each line (KHR lines as-is, USD lines converted),
+    // instead of round-tripping the already-rounded USD total back through the
+    // exchange rate — that round trip invents/loses a few KHR and can misfire the
+    // paid/partial status on an exactly-paid order.
+    private function sumLinesKhr(array $lines): float
+    {
+        return round(collect($lines)->sum(function ($line) {
+            return $line['currency'] === 'KHR'
+                ? $line['amount_original']
+                : round($line['amount_original'] * $line['exchange_rate']);
+        }), 2);
     }
 
     private function resolveOrder(Request $request, ?int $fallbackOrderId = null): Order

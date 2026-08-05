@@ -386,25 +386,46 @@
     /* ─── Actions ─── */
     .actions-bar {
         display: flex;
-        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
         flex-wrap: wrap;
         margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+    }
+
+    .actions-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
     .btn {
-        padding: 12px 24px;
+        padding: 12px 22px;
         border-radius: var(--radius-sm);
         border: none;
         cursor: pointer;
-        font-weight: 600;
-        font-size: 13px;
+        font-weight: 700;
+        font-size: 13.5px;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.2s ease;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
         font-family: inherit;
         letter-spacing: 0.1px;
+        white-space: nowrap;
+    }
+
+    .btn:active {
+        transform: scale(0.97);
+    }
+
+    .btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
     }
 
     .btn-primary {
@@ -420,6 +441,45 @@
         text-decoration: none;
     }
 
+    .btn-info {
+        background: linear-gradient(135deg, var(--info) 0%, #1d4ed8 100%);
+        color: white;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-info:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: #1f2937;
+        color: white;
+        box-shadow: 0 4px 14px rgba(31, 41, 55, 0.25);
+    }
+
+    .btn-secondary:hover {
+        background: #111827;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(17, 24, 39, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary:disabled {
+        background: #e5e7eb;
+        color: #9ca3af;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary:disabled:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
     .btn-outline {
         background: var(--surface);
         color: var(--text-secondary);
@@ -433,6 +493,19 @@
         text-decoration: none;
     }
 
+    .btn-ghost {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1.5px solid transparent;
+    }
+
+    .btn-ghost:hover {
+        background: var(--surface);
+        border-color: var(--border);
+        color: var(--text);
+        text-decoration: none;
+    }
+
     .btn-danger-outline {
         background: var(--surface);
         color: var(--danger);
@@ -443,6 +516,29 @@
         background: var(--danger-bg);
         border-color: var(--danger);
         text-decoration: none;
+    }
+
+    .actions-bar .dropdown-menu {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-lg);
+        padding: 6px;
+        margin-top: 8px !important;
+    }
+
+    .actions-bar .dropdown-item {
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .actions-bar .dropdown-item:hover,
+    .actions-bar .dropdown-item:focus {
+        background: rgba(232, 93, 36, 0.08);
+        color: var(--accent-dark);
     }
 
     /* ─── Animations ─── */
@@ -463,8 +559,15 @@
         .customer-grid { grid-template-columns: 1fr; }
         .summary-footer { justify-content: stretch; }
         .summary-table { width: 100%; }
-        .actions-bar { flex-direction: column; }
+        .actions-bar { flex-direction: column; align-items: stretch; }
+        .actions-group { justify-content: center; }
         .btn { justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+        .actions-group { flex-direction: column; align-items: stretch; }
+        .actions-group > * { width: 100%; }
+        .actions-group .btn { width: 100%; }
     }
 </style>
 @endpush
@@ -619,51 +722,62 @@
 
     <!-- Actions -->
     <div class="actions-bar">
-        {{-- 1) Print invoice for customer view --}}
-        @if($order->invoice)
-            <div class="dropdown d-inline-block">
-                <button type="button" class="btn btn-primary dropdown-toggle" style="background: #6c757d;"
-                    data-bs-toggle="dropdown" aria-expanded="false" title="វិក្ក័យបត្រ / ស្លាកភ្ញៀវ">
-                    <i class="fas fa-print"></i> ព្រីន
+        <div class="actions-group">
+            {{-- 1) Print invoice for customer view --}}
+            @if($order->invoice)
+                <div class="dropdown d-inline-block">
+                    <button type="button" class="btn btn-secondary dropdown-toggle"
+                        data-bs-toggle="dropdown" aria-expanded="false" title="វិក្ក័យបត្រ / ស្លាកភ្ញៀវ">
+                        <i class="fas fa-print"></i> ព្រីន
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item print-customer-option" href="#"
+                                data-url="{{ route('packing.customer', $order->invoice) }}">
+                                ភីហ្សា គ្រួសាររីករាយ
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item print-customer-option" href="#"
+                                data-url="{{ route('packing.customer_mayo', $order->invoice) }}">
+                                ម៉ាយូនេស បន្ទាយឆ្មារ
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item print-customer-option" href="#"
+                                data-url="{{ route('packing.customer_tamon', $order->invoice) }}">
+                                តាម៉ាន់មានជ័យ
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            @else
+                <button class="btn btn-secondary" disabled title="មិនទាន់មានវិក្ក័យបត្រ">
+                    <i class="fas fa-print"></i> ព្រីនវិក្ក័យបត្រ
                 </button>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a class="dropdown-item print-customer-option" href="#"
-                            data-url="{{ route('packing.customer', $order->invoice) }}">
-                            ភីហ្សា គ្រួសាររីករាយ
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item print-customer-option" href="#"
-                            data-url="{{ route('packing.customer_mayo', $order->invoice) }}">
-                            ម៉ាយូនេស បន្ទាយឆ្មារ
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item print-customer-option" href="#"
-                            data-url="{{ route('packing.customer_tamon', $order->invoice) }}">
-                            តាម៉ាន់មានជ័យ
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        @else
-            <button class="btn btn-primary" style="background: #6c757d;" disabled>
-                <i class="fas fa-print"></i> ព្រីនវិក្ក័យបត្រ
-            </button>
-        @endif
+            @endif
 
-        {{-- 2) Edit button --}}
-        @if($order->status === 'pending')
-            <a href="{{ route('orders.edit', $order) }}" class="btn btn-primary" style="background: #2563eb;">
-                <i class="fas fa-edit"></i> កែប្រែ
+            {{-- 2) Edit button --}}
+            @if($order->status === 'pending')
+                <a href="{{ route('orders.edit', $order) }}" class="btn btn-info">
+                    <i class="fas fa-edit"></i> កែប្រែ
+                </a>
+            @endif
+        </div>
+
+        <div class="actions-group">
+            {{-- 3) View invoice --}}
+            @if($order->invoice)
+                <a href="{{ route('invoices.show', $order->invoice) }}" class="btn btn-outline">
+                    បន្ទាប់ <i class="fas fa-arrow-right"></i>
+                </a>
+            @endif
+
+            {{-- 4) Back button --}}
+            <a href="{{ route('orders.index') }}" class="btn btn-ghost">
+                ចេញវិក្ក័យបត្រថ្មី
             </a>
-        @endif
-
-        {{-- 3) Back button --}}
-        <a href="{{ route('orders.index') }}" class="btn btn-outline">
-            ← ត្រឡប់ក្រោយ
-        </a>
+        </div>
     </div>
 
 </div>

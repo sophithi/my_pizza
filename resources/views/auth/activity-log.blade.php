@@ -301,10 +301,6 @@
                     @endforeach
                 </tbody>
             </table>
-         <div class="pager-wrap">
-                    {{ $purchases->links() }}
-                </div>
-
         @else
             <div class="empty-state">
                 <div class="empty-icon"></div>
@@ -313,7 +309,10 @@
             </div>
         @endif
 
-    </div>
+         <div class="pager-wrap">
+            {{ $purchases->links('pagination::bootstrap-5') }}
+         </div>
 
+    </div>
 
 @endsection

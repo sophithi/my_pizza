@@ -19,6 +19,21 @@
             vertical-align: middle;
         }
 
+        .packing-edited-badge {
+            align-items: center;
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 999px;
+            color: #b45309;
+            display: inline-flex;
+            font-size: 11px;
+            font-weight: 800;
+            gap: 5px;
+            margin-left: 8px;
+            padding: 3px 8px;
+            vertical-align: middle;
+        }
+
         .packing-sent-time {
             color: #6b7280;
             display: block;
@@ -308,7 +323,20 @@
                                             <tr class="{{ $invoice->packing_completed_at ? 'packing-row-completed' : '' }}">
                                                 <td>
                                                     {{ $invoice->invoice_number }}
-                                                    @if(!$invoice->packing_completed_at && $invoice->packing_sent_at && $invoice->packing_sent_at->gt(now()->subMinutes(30)))
+                                                    @php
+                                                        // A resend after an order edit: packing_first_sent_at is set once
+                                                        // and never touched again, so once it stops matching the current
+                                                        // packing_sent_at we know this row isn't the invoice's first trip
+                                                        // through packing.
+                                                        $isEditedResend = $invoice->packing_first_sent_at
+                                                            && $invoice->packing_sent_at
+                                                            && !$invoice->packing_first_sent_at->equalTo($invoice->packing_sent_at);
+                                                    @endphp
+                                                    @if(!$invoice->packing_completed_at && $isEditedResend)
+                                                        <span class="packing-edited-badge">
+                                                            <i class="fas fa-pen"></i> បានកែវិក្ក័យបត្រ
+                                                        </span>
+                                                    @elseif(!$invoice->packing_completed_at && $invoice->packing_sent_at && $invoice->packing_sent_at->gt(now()->subMinutes(30)))
                                                         <span class="packing-new-badge">
                                                             <i class="fas fa-circle"></i> ថ្មី
                                                         </span>

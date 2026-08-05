@@ -23,6 +23,7 @@ class Invoice extends Model
         'total_amount',
         'status',
         'packing_sent_at',
+        'packing_first_sent_at',
         'packing_completed_at',
         'printed_at',
         'notes',
@@ -38,6 +39,7 @@ class Invoice extends Model
         'delivery_fee_usd' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'packing_sent_at' => 'datetime',
+        'packing_first_sent_at' => 'datetime',
         'packing_completed_at' => 'datetime',
         'printed_at' => 'datetime',
     ];

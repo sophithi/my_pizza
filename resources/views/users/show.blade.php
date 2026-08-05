@@ -157,7 +157,7 @@
 
     <div class="btn-back-bar">
         <a href="{{ route('users.index') }}" class="btn-back">
-            <i class="fas fa-arrow-left"></i> បញ្ជីអ្នកប្រើប្រាស់
+            <i class="fas fa-arrow-left"></i> ត្រឡប់
         </a>
         @if(auth()->user()->isAdmin())
         <a href="{{ route('users.edit', $user) }}" class="btn-back">
@@ -322,18 +322,19 @@
                 @endforeach
             </tbody>
         </table>
-
-        <div style="padding: 16px 24px; border-top: 1px solid #f0f0f0;">
-            {{ $orders->appends(request()->query())->links() }}
-        </div>
         @else
         <div class="empty-orders">
             <i class="fas fa-inbox"></i>
             <p>មិនមានការបញ្ជាទិញក្នុងរយៈពេលនេះទេ</p>
         </div>
         @endif
-    </div>
 
+        @if($orders->hasPages())
+        <div style="padding: 16px 24px; border-top: 1px solid #f0f0f0;">
+            {{ $orders->appends(request()->query())->links('pagination::bootstrap-5') }}
+        </div>
+        @endif
+    </div>
 </div>
 
 @endsection

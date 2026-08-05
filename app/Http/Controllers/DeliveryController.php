@@ -6,6 +6,7 @@ use App\Models\Delivery;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DeliveryController extends Controller
 {
@@ -108,21 +109,45 @@ class DeliveryController extends Controller
 
         $deliveryFeeKhr = ($validated['small_pack_qty'] * (float) $delivery->delivery_price_khr)
             + ($validated['big_pack_qty'] * (float) $delivery->delivery_price_khr_big);
+        $deliveryFeeUsd = round($deliveryFeeKhr / 4000, 2);
 
-        $order->update([
-            'small_pack_qty' => $validated['small_pack_qty'],
-            'big_pack_qty' => $validated['big_pack_qty'],
-            'delivery_fee_khr' => $deliveryFeeKhr,
-        ]);
+        DB::transaction(function () use ($order, $request, $validated, $deliveryFeeKhr, $deliveryFeeUsd) {
+            $order->loadMissing('items');
+            // KHR is the ground truth: total_amount must be derived the same way
+            // store()/update() derive it (totalKhr() = gross - item discount +
+            // delivery fee), otherwise this row's total silently drifts from what
+            // the invoice/orders pages show.
+            $totalKhr = $order->grossSubtotalKhr() - $order->itemDiscountKhr() + $deliveryFeeKhr;
+            $totalAmount = round($totalKhr / 4000, 2);
 
-        if ($order->customer && $request->has('address')) {
-            $order->customer->update(['address' => $validated['address']]);
-        }
+            $order->update([
+                'small_pack_qty' => $validated['small_pack_qty'],
+                'big_pack_qty' => $validated['big_pack_qty'],
+                'box_qty' => max($validated['small_pack_qty'] + $validated['big_pack_qty'], 1),
+                'delivery_fee_khr' => $deliveryFeeKhr,
+                'delivery_fee_usd' => $deliveryFeeUsd,
+                'total_amount' => $totalAmount,
+            ]);
+
+            if ($order->customer && $request->has('address')) {
+                $order->customer->update(['address' => $validated['address']]);
+            }
+
+            if ($order->invoice) {
+                $order->invoice->update([
+                    'delivery_fee_khr' => $deliveryFeeKhr,
+                    'delivery_fee_usd' => $deliveryFeeUsd,
+                    'total_amount' => $totalAmount,
+                ]);
+            }
+        });
 
         return response()->json([
             'small_pack_qty' => $order->small_pack_qty,
             'big_pack_qty' => $order->big_pack_qty,
             'delivery_fee_khr' => (float) $order->delivery_fee_khr,
+            'delivery_fee_usd' => (float) $order->delivery_fee_usd,
+            'total_amount' => (float) $order->total_amount,
             'address' => $order->customer?->address,
             'customer_id' => $order->customer_id,
         ]);

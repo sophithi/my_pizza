@@ -235,7 +235,7 @@
         .content-grid {
             display: grid;
             gap: 16px;
-            grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+            grid-template-columns: 1fr;
         }
 
         .report-panel {
@@ -274,6 +274,18 @@
         .chart-wrap {
             height: 300px;
             position: relative;
+        }
+
+        @media (min-width: 1200px) {
+            .chart-wrap {
+                height: 380px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chart-wrap {
+                height: 240px;
+            }
         }
 
         .report-table {
@@ -350,10 +362,6 @@
             .metric-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
-
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         @media (max-width: 760px) {
@@ -415,7 +423,7 @@
                             <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
                         </label>
                     @endif
-                    <button type="submit" class="report-btn"><i class="fas fa-filter"></i>&nbsp; Apply</button>
+                    <button type="submit" class="report-btn">&nbsp; Apply</button>
                 </div>
             </form>
         </div>
@@ -503,76 +511,11 @@
                     </div>
                 </div>
             </div>
-
-            <div>
-                <div class="report-panel">
-                    <div class="panel-head">
-                        <h3 class="panel-title"><i class="fas fa-file-invoice"></i> វិក្ក័យបត្រថ្មីៗ</h3>
-                    </div>
-                    @if ($recentOrders->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table report-table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>អតិថិជន</th>
-                                        <th class="text-end">តម្លៃ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($recentOrders as $order)
-                                        <tr>
-                                            <td>{{ $order->invoice_number ?? ('#' . $order->id) }}</td>
-                                            <td>{{ optional($order->customer)->name ?? 'N/A' }}</td>
-                                            <td class="text-end">
-                                                <div class="money-stack">
-                                                    <span class="khr">៛{{ number_format($order->totalKhr(), 0) }}</span>
-                                                    <span class="usd">${{ number_format($order->total_amount, 2) }}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="empty-note"><i class="fas fa-file-invoice"></i>មិនទាន់មានវិក្ក័យបត្រថ្មីៗ។</div>
-                    @endif
-                </div>
-
-                <div class="report-panel">
-                    <div class="panel-head">
-                        <h3 class="panel-title"><i class="fas fa-triangle-exclamation"></i> ស្តុកជិតអស់</h3>
-                    </div>
-                    @if ($lowStockAlerts->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table report-table">
-                                <thead>
-                                    <tr>
-                                        <th>ទំនិញ</th>
-                                        <th class="text-end">នៅសល់</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($lowStockAlerts as $alert)
-                                        <tr>
-                                            <td>{{ optional($alert->product)->name ?? 'N/A' }}</td>
-                                            <td class="text-end"><span class="pill pill-low">{{ number_format($alert->quantity) }}</span></td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="empty-note"><i class="fas fa-circle-check"></i>ស្តុកទំនិញនៅល្អ។</div>
-                    @endif
-                </div>
-            </div>
         </div>
     </div>
 
     @if($chartData && count($chartData) > 0)
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
         <script>
             const trendCanvas = document.getElementById('trendChart');
 
