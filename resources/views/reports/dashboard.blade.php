@@ -520,9 +520,8 @@
             const trendCanvas = document.getElementById('trendChart');
 
             if (trendCanvas) {
-                const EXCHANGE_RATE = {{ $exchangeRate }};
                 const salesUsd = @json($chartData->pluck('total')->map(fn($value) => (float) $value)->values());
-                const salesKhr = salesUsd.map(v => Math.round(v * EXCHANGE_RATE));
+                const salesKhr = @json($chartData->pluck('total_khr')->map(fn($value) => (int) round($value))->values());
 
                 new Chart(trendCanvas, {
                     type: 'line',
