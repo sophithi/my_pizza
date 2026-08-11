@@ -657,8 +657,6 @@ class ReportController extends Controller
         // Revenue data based on period
         $chartData = $this->getChartData($period, $dateRange);
 
-        $exchangeRate = self::EXCHANGE_RATE;
-
         return view('reports.dashboard', compact(
             'totalRevenue',
             'totalRevenueKhr',
@@ -670,19 +668,21 @@ class ReportController extends Controller
             'chartData',
             'period',
             'startDate',
-            'endDate',
-            'exchangeRate'
+            'endDate'
         ));
     }
 
     /**
      * Get chart data based on period selection.
+     *
+     * KHR totals are summed from each order's real item-level KHR (totalKhr()),
+     * not derived by converting the USD total_amount back through the exchange
+     * rate — that round-trip amplifies per-order cent rounding into a visible
+     * KHR drift against the ground-truth metric card above the chart.
      */
     private function getChartData($period, $dateRange)
     {
-        $query = Order::selectRaw('DATE(order_date) as date, SUM(total_amount) as total, COUNT(*) as count')
-            ->where('status', '!=', 'cancelled')
-            ->groupByRaw('DATE(order_date)');
+        $query = Order::where('status', '!=', 'cancelled')->with('items');
 
         if ($dateRange['start']) {
             $query->whereDate('order_date', '>=', $dateRange['start']);
@@ -691,7 +691,16 @@ class ReportController extends Controller
             $query->whereDate('order_date', '<=', $dateRange['end']);
         }
 
-        return $query->orderBy('date', 'asc')->get();
+        return $query->get()
+            ->groupBy(fn ($order) => $order->order_date->format('Y-m-d'))
+            ->map(fn ($orders, $date) => (object) [
+                'date' => $date,
+                'total' => $orders->sum('total_amount'),
+                'total_khr' => $orders->sum(fn ($order) => $order->totalKhr()),
+                'count' => $orders->count(),
+            ])
+            ->sortKeys()
+            ->values();
     }
 
     /**
