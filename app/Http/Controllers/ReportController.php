@@ -202,6 +202,8 @@ class ReportController extends Controller
         $period = $request->input('period', 'all'); // all, today, month, year, custom
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $customerSort = $request->input('customer_sort', 'paid');
+        if (! in_array($customerSort, ['paid', 'orders'], true)) $customerSort = 'paid';
 
         // Build date range query
         $query = Order::query();
@@ -307,13 +309,21 @@ class ReportController extends Controller
             ->selectRaw('status, COUNT(*) as count, SUM(total_amount) as total')
             ->get();
 
-        // Revenue by customer (top 10, cancelled orders excluded)
+        // Revenue by customer (top 10, cancelled orders excluded) — sortable by
+        // total paid or by order count, same "top paid / top orders" toggle as
+        // the customers report page.
         $customerRevenue = Customer::withSum(['orders' => function ($q) use ($dateRange) {
             $q->where('status', '!=', 'cancelled');
             if ($dateRange['start']) $q->whereDate('order_date', '>=', $dateRange['start']);
             if ($dateRange['end']) $q->whereDate('order_date', '<=', $dateRange['end']);
         }], 'total_amount')
-            ->orderByDesc('orders_sum_total_amount')
+            ->withCount(['orders' => function ($q) use ($dateRange) {
+                $q->where('status', '!=', 'cancelled');
+                if ($dateRange['start']) $q->whereDate('order_date', '>=', $dateRange['start']);
+                if ($dateRange['end']) $q->whereDate('order_date', '<=', $dateRange['end']);
+            }])
+            ->when($customerSort === 'orders', fn ($q) => $q->orderByDesc('orders_count'))
+            ->when($customerSort !== 'orders', fn ($q) => $q->orderByDesc('orders_sum_total_amount'))
             ->limit(10)
             ->get();
 
@@ -366,6 +376,7 @@ class ReportController extends Controller
             'productRevenue',
             'ordersByStatus',
             'customerRevenue',
+            'customerSort',
             'dailyRevenue',
             'period',
             'startDate',
@@ -579,6 +590,9 @@ class ReportController extends Controller
         $period = $request->input('period', 'all');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $search = trim((string) $request->input('search', ''));
+        $sort = $request->input('sort', 'orders');
+        if (! in_array($sort, ['orders', 'paid'], true)) $sort = 'orders';
 
         // Build date range query
         $dateRange = $this->getDateRange($period, $startDate, $endDate);
@@ -604,8 +618,18 @@ class ReportController extends Controller
                 if ($dateRange['start']) $q->whereDate('order_date', '>=', $dateRange['start']);
                 if ($dateRange['end']) $q->whereDate('order_date', '<=', $dateRange['end']);
             }])
-            ->orderByDesc('orders_count')
-            ->paginate(20);
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                });
+            })
+            // orders_sum_total_amount (USD) is used to rank "top paid" since KHR totals are
+            // computed per-item in PHP, not a DB column; USD is derived from KHR so rank order matches.
+            ->when($sort === 'paid', fn ($q) => $q->orderByDesc('orders_sum_total_amount'))
+            ->when($sort !== 'paid', fn ($q) => $q->orderByDesc('orders_count'))
+            ->paginate(20)
+            ->withQueryString();
 
         return view('reports.customers', compact(
             'totalCustomers',
@@ -613,7 +637,9 @@ class ReportController extends Controller
             'customerActivity',
             'period',
             'startDate',
-            'endDate'
+            'endDate',
+            'search',
+            'sort'
         ));
     }
 

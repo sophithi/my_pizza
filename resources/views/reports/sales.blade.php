@@ -270,7 +270,7 @@
                                 <th>លេខកម្មង់</th>
                                 <th>អតិថិជន</th>
                                 <th>កាលបរិច្ឆេទ</th>
-                                <th>ស្ថានភាព</th>
+                               
                                 <th class="text-end">តម្លៃ</th>
                             </tr>
                         </thead>
@@ -281,7 +281,7 @@
                                     <td>#{{ $order->id }}</td>
                                     <td>{{ $order->customer?->name ?? '—' }}</td>
                                     <td>{{ optional($order->order_date)->format('d/m/Y H:i') }}</td>
-                                    <td><span class="status-pill {{ $statusClass }}">{{ ucfirst($order->status) }}</span></td>
+                                
                                     <td class="text-end">
                                         <div class="money-stack">
                                             <span class="khr">៛{{ number_format($order->totalKhr(), 0) }}</span>
@@ -300,22 +300,50 @@
 
 
         <div class="panel">
-            <div class="panel-head"><i class="fas fa-users"></i><h3 class="panel-title">អតិថិជនចំណាយច្រើន</h3></div>
+            <div class="panel-head" style="justify-content:space-between;">
+                <div style="align-items:center; display:flex; gap:9px;"><i class="fas fa-users"></i><h3 class="panel-title">អតិថិជនកំពូល</h3></div>
+                <form method="GET" action="{{ route('reports.sales') }}" style="margin:0;">
+                    <input type="hidden" name="period" value="{{ $selectedPeriod }}">
+                    @if($selectedPeriod === 'custom')
+                        <input type="hidden" name="start_date" value="{{ $startDate ?? '' }}">
+                        <input type="hidden" name="end_date" value="{{ $endDate ?? '' }}">
+                    @endif
+                    <select name="customer_sort" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+                        <option value="paid" {{ ($customerSort ?? 'paid') === 'paid' ? 'selected' : '' }}>ចំណាយច្រើនបំផុត</option>
+                        <option value="orders" {{ ($customerSort ?? 'paid') === 'orders' ? 'selected' : '' }}>កម្មង់ច្រើនបំផុត</option>
+                    </select>
+                </form>
+            </div>
             <div class="panel-body">
                 @if($customerRevenue->count())
-                    @php $maxCustomerSpend = $customerRevenue->max('orders_sum_total_amount') ?: 1; @endphp
+                    @php
+                        $customerSort = $customerSort ?? 'paid';
+                        $maxCustomerSpend = $customerRevenue->max('orders_sum_total_amount') ?: 1;
+                        $maxCustomerOrders = $customerRevenue->max('orders_count') ?: 1;
+                    @endphp
                     @foreach($customerRevenue as $customer)
-                        @php $spend = $customer->orders_sum_total_amount ?? 0; @endphp
+                        @php
+                            $spend = $customer->orders_sum_total_amount ?? 0;
+                            $ordersCount = $customer->orders_count ?? 0;
+                            $barPct = $customerSort === 'orders'
+                                ? round($ordersCount / $maxCustomerOrders * 100, 1)
+                                : round($spend / $maxCustomerSpend * 100, 1);
+                        @endphp
                         <div class="rank-row">
                             <div>
                                 <div class="rank-name">{{ $customer->name }}</div>
                                 <div class="rank-track">
-                                    <div class="rank-fill" style="width: {{ max(2, round($spend / $maxCustomerSpend * 100, 1)) }}%"></div>
+                                    <div class="rank-fill" style="width: {{ max(2, $barPct) }}%"></div>
                                 </div>
                             </div>
                             <div class="rank-value">
-                                ៛{{ number_format($spend * $exchangeRate, 0) }}
-                                <span class="u">${{ number_format($spend, 2) }}</span>
+                                @if($customerSort === 'orders')
+                                    {{ number_format($ordersCount) }} កម្មង់
+                                    <span class="u">៛{{ number_format($spend * $exchangeRate, 0) }}</span>
+                                @else
+                                    ៛{{ number_format($spend * $exchangeRate, 0) }}
+                                    <span class="u">${{ number_format($spend, 2) }}</span>
+                                @endif
                             </div>
                         </div>
                     @endforeach

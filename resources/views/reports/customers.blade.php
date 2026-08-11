@@ -10,8 +10,9 @@
         .report-subtitle { color:var(--muted); margin:6px 0 0; }
         .report-filter,.metric,.panel { background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:0 12px 32px rgba(15,23,42,.06); }
         .report-filter { margin-bottom:16px; padding:14px; }
-        .filter-row { align-items:center; display:grid; gap:10px; grid-template-columns:minmax(180px,240px) auto; justify-content:end; }
-        .filter-row.has-dates { grid-template-columns:minmax(180px,240px) minmax(170px,220px) minmax(170px,220px) auto; }
+        .filter-row { align-items:center; display:grid; gap:10px; grid-template-columns:minmax(160px,200px) minmax(160px,200px) minmax(180px,240px) auto; justify-content:end; }
+        .filter-row.has-dates { grid-template-columns:minmax(160px,200px) minmax(160px,200px) minmax(180px,240px) minmax(170px,220px) minmax(170px,220px) auto; }
+        .search-field { min-width:160px; }
         .date-field { position:relative; }
         .date-field-label { color:var(--muted); font-size:11px; font-weight:900; left:12px; position:absolute; top:3px; text-transform:uppercase; }
         .date-field input { padding-top:18px; }
@@ -76,6 +77,11 @@
 
         <form method="GET" action="{{ route('reports.customers') }}" class="report-filter">
             <div class="filter-row {{ $selectedPeriod === 'custom' ? 'has-dates' : '' }}">
+                <input type="text" name="search" class="form-control search-field" placeholder="ស្វែងរកឈ្មោះ/ទូរស័ព្ទ..." value="{{ $search ?? '' }}">
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="orders" {{ ($sort ?? 'orders') === 'orders' ? 'selected' : '' }}>កម្មង់ច្រើនបំផុត</option>
+                    <option value="paid" {{ ($sort ?? 'orders') === 'paid' ? 'selected' : '' }}>ចំណាយច្រើនបំផុត</option>
+                </select>
                 <select name="period" class="form-select" onchange="this.form.submit()">
                     <option value="all" {{ $selectedPeriod === 'all' ? 'selected' : '' }}>ទាំងអស់</option>
                     <option value="today" {{ $selectedPeriod === 'today' ? 'selected' : '' }}>ថ្ងៃនេះ</option>
