@@ -85,7 +85,6 @@ class InventoryController extends Controller
         }
 
         $inventories = $query->paginate(15)->withQueryString();
-        $movementSummary = $this->movementSummary($request);
         $movementsByInventory = $this->movementsByInventory($request);
 
         // Distinct warehouse locations across ALL inventory (not just the current
@@ -96,7 +95,7 @@ class InventoryController extends Controller
             ->orderBy('warehouse_location')
             ->pluck('warehouse_location');
 
-        return view('inventory.index', compact('inventories', 'stats', 'movementDate', 'movementSummary', 'movementsByInventory', 'warehouses'));
+        return view('inventory.index', compact('inventories', 'stats', 'movementDate', 'movementsByInventory', 'warehouses'));
     }
 
     /**
@@ -253,17 +252,6 @@ class InventoryController extends Controller
         }
 
         return null;
-    }
-
-    private function movementSummary(Request $request): array
-    {
-        $query = $this->visibleMovementGroups($request);
-
-        return [
-            'cut_out' => (int) (clone $query)->sum(DB::raw('CASE WHEN net_change < 0 THEN ABS(net_change) ELSE 0 END')),
-            'added_back' => (int) (clone $query)->sum(DB::raw('CASE WHEN net_change > 0 THEN net_change ELSE 0 END')),
-            'products' => (clone $query)->distinct('inventory_id')->count('inventory_id'),
-        ];
     }
 
     private function movementsByInventory(Request $request)

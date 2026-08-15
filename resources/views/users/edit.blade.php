@@ -62,9 +62,12 @@
                                     Administrator (Full Access)</option>
                                 <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager
                                 </option>
+                                <option value="boss" {{ old('role', $user->role) == 'boss' ? 'selected' : '' }}>Boss
+                                </option>
                                 <option value="staff" {{ old('role', $user->role) == 'staff' ? 'selected' : '' }}>Staff
                                     (Office)</option>
                                 <option value="staff_inventory" {{ old('role', $user->role) == 'staff_inventory' ? 'selected' : '' }}>Staff (Inventory)</option>
+                                <option value="auditor" {{ old('role', $user->role) == 'auditor' ? 'selected' : '' }}>Auditor (View-only: Stock, Invoices, Expenses, Payments, Reports)</option>
                             </select>
                         </div>
 

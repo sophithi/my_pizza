@@ -510,24 +510,6 @@
                         @endforeach
                     </div>
 
-                    <!-- <div class="status-grid">
-                        <div class="status-tile">
-                            <strong>{{ $order_status['pending'] }}</strong>
-                            <span>Pending Orders</span>
-                        </div>
-                        <div class="status-tile">
-                            <strong>{{ $order_status['processing'] }}</strong>
-                            <span>Preparing</span>
-                        </div>
-                        <div class="status-tile">
-                            <strong>{{ $order_status['completed'] }}</strong>
-                            <span>Completed</span>
-                        </div>
-                        <div class="status-tile">
-                            <strong>{{ $stats['recovery_rate'] }}%</strong>
-                            <span>Completion Rate</span>
-                        </div>
-                    </div> -->
                 </div>
             </div>
 

@@ -59,8 +59,10 @@
                                 <option value="">Select Role</option>
                                 <option value="admin">Administrator (Full Access)</option>
                                 <option value="manager">Manager</option>
+                                <option value="boss">Boss</option>
                                 <option value="staff">Staff (Office)</option>
                                 <option value="staff_inventory">Staff (Inventory)</option>
+                                <option value="auditor">Auditor (View-only: Stock, Invoices, Expenses, Payments, Reports)</option>
                             </select>
                         </div>
 

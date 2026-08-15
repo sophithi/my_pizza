@@ -165,7 +165,6 @@
         }
 
         .pagination {
-            margin-top: 32px;
             display: flex;
             justify-content: center;
             gap: 8px;
@@ -186,6 +185,10 @@
             font-size: 16px;
             font-weight: 600;
             color: var(--text);
+        }
+
+        .pager-wrap {
+            margin-top: 16px;
         }
     </style>
 @endpush
@@ -309,9 +312,9 @@
             </div>
         @endif
 
-         <div class="pager-wrap">
-            {{ $purchases->links('pagination::bootstrap-5') }}
-         </div>
+        <div class="pager-wrap">
+            {{ $activities->links('pagination::bootstrap-5') }}
+        </div>
 
     </div>
 

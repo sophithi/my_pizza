@@ -23,9 +23,26 @@
             --danger-soft: #fee2e2;
         }
 
-        .report-head { align-items:flex-end; display:flex; flex-wrap:wrap; gap:16px; justify-content:space-between; margin-bottom:18px; }
-        .report-title { color:var(--text); font-size:28px; font-weight:900; margin:0; }
-        .report-subtitle { color:var(--muted); margin:6px 0 0; }
+        .report-head {
+            align-items: flex-end;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .report-title {
+            color: var(--text);
+            font-size: 28px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .report-subtitle {
+            color: var(--muted);
+            margin: 6px 0 0;
+        }
 
         .back-btn {
             align-items: center;
@@ -42,66 +59,382 @@
             transition: border-color .15s ease, color .15s ease, background .15s ease;
             white-space: nowrap;
         }
-        .back-btn:hover { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft); }
 
-        .report-filter,.metric,.panel { background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:0 10px 28px rgba(15,23,42,.05); }
-        .report-filter { margin-bottom:16px; padding:12px; }
-        .filter-row { align-items:center; display:grid; gap:10px; grid-template-columns:minmax(180px,240px) auto; justify-content:end; }
-        .filter-row.has-dates { grid-template-columns:minmax(180px,240px) minmax(170px,220px) minmax(170px,220px) auto; }
-        .date-field { position:relative; }
-        .date-field-label { color:var(--muted); font-size:11px; font-weight:900; left:12px; position:absolute; top:3px; text-transform:uppercase; }
-        .date-field input { padding-top:18px; }
-        .report-btn { align-items:center; background:linear-gradient(135deg,var(--accent),var(--accent-dark)); border:0; border-radius:8px; box-shadow:0 4px 14px rgba(232,93,36,.28); color:#fff; display:inline-flex; font-weight:900; justify-content:center; min-height:40px; padding:9px 16px; text-decoration:none; transition:transform .15s ease, box-shadow .15s ease; white-space:nowrap; }
-        .report-btn:hover { color:#fff; transform:translateY(-1px); box-shadow:0 8px 20px rgba(232,93,36,.32); }
+        .back-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent-dark);
+            background: var(--accent-soft);
+        }
 
-        .metric-grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); margin-bottom:16px; }
-        .metric { align-items:center; display:flex; gap:13px; padding:16px; transition:box-shadow .15s ease, transform .15s ease; }
-        .metric:hover { box-shadow:0 14px 32px rgba(15,23,42,.09); transform:translateY(-2px); }
-        .metric-icon { align-items:center; background:var(--accent-soft); border-radius:10px; color:var(--accent); display:flex; flex-shrink:0; font-size:17px; height:42px; justify-content:center; width:42px; }
-        .metric.is-success .metric-icon { background:var(--success-soft); color:var(--success); }
-        .metric.is-info .metric-icon { background:var(--info-soft); color:var(--info); }
-        .metric-label { color:var(--muted); font-size:11.5px; font-weight:800; margin:0; text-transform:uppercase; letter-spacing:.02em; }
-        .metric-value { color:var(--text); font-size:21px; font-weight:900; line-height:1.2; margin-top:3px; }
-        .metric-value-usd { color:var(--muted); font-size:12.5px; font-weight:700; margin-top:1px; }
+        .report-filter,
+        .metric,
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+        }
 
-        .kpi-trend { align-items:center; border-radius:999px; display:inline-flex; font-size:11px; font-weight:800; gap:3px; margin-top:6px; padding:2px 7px; width:fit-content; }
-        .kpi-trend.is-up { background:var(--success-soft); color:var(--success); }
-        .kpi-trend.is-down { background:var(--danger-soft); color:var(--danger); }
-        .kpi-trend svg { height:9px; width:9px; }
-        .kpi-caption { color:var(--muted); font-size:10.5px; font-weight:600; margin-top:4px; }
+        .report-filter {
+            margin-bottom: 16px;
+            padding: 12px;
+        }
 
-        .rank-row { align-items:center; display:grid; gap:12px; grid-template-columns:1fr 100px; margin-bottom:12px; }
-        .rank-row:last-child { margin-bottom:0; }
-        .rank-name { color:var(--text); font-size:12.5px; font-weight:700; margin-bottom:4px; }
-        .rank-track { background:var(--soft); border-radius:6px; height:20px; overflow:hidden; position:relative; }
-        .rank-fill { background:linear-gradient(90deg,var(--accent),var(--accent-dark)); border-radius:6px; bottom:0; left:0; position:absolute; top:0; }
-        .rank-value { font-size:12.5px; font-weight:800; text-align:right; }
-        .rank-value .u { color:var(--muted); display:block; font-size:10px; font-weight:600; }
+        .filter-row {
+            align-items: center;
+            display: grid;
+            gap: 10px;
+            grid-template-columns: minmax(180px, 240px) auto;
+            justify-content: end;
+        }
 
-        .money-stack { line-height:1.3; }
-        .money-stack .khr { color:var(--text); display:block; font-weight:900; }
-        .money-stack .usd { color:var(--muted); display:block; font-size:12px; font-weight:700; margin-top:1px; }
-        .content-grid { display:grid; gap:16px; grid-template-columns:1fr 1fr; }
-        .panel { margin-bottom:16px; overflow:hidden; }
-        .panel-head { align-items:center; border-bottom:1px solid var(--border); display:flex; gap:9px; padding:14px 18px; }
-        .panel-head i { color:var(--accent); font-size:14px; width:16px; }
-        .panel-title { color:var(--text); font-size:15.5px; font-weight:900; margin:0; }
-        .panel-body { padding:18px; }
-        .chart-wrap { height:300px; position:relative; }
-        @media (min-width:1200px) { .chart-wrap { height:340px; } }
-        @media (max-width:480px) { .chart-wrap { height:240px; } }
-        .report-table { margin:0; }
-        .report-table th { background:var(--soft); color:var(--muted); font-size:12px; font-weight:800; letter-spacing:.03em; padding:11px 12px; text-transform:uppercase; }
-        .report-table td { padding:11px 12px; vertical-align:middle; }
-        .report-table tbody tr:hover { background:var(--soft); }
-        .status-pill { border-radius:999px; display:inline-flex; font-size:12px; font-weight:800; padding:4px 10px; }
-        .status-completed { background:var(--success-soft); color:#166534; }
-        .status-pending { background:var(--warning-soft); color:#92400e; }
-        .status-cancelled { background:var(--danger-soft); color:#991b1b; }
-        .empty-note { color:var(--muted); padding:26px 16px; text-align:center; font-size:13px; }
-        .role-badge { background:var(--soft); border-radius:6px; color:var(--muted); font-size:10px; font-weight:700; margin-left:6px; padding:1px 6px; text-transform:uppercase; }
-        @media (max-width:1100px){ .content-grid{grid-template-columns:1fr 1fr;} }
-        @media (max-width:760px){ .report-head{align-items:stretch; flex-direction:column;} .filter-row,.content-grid{grid-template-columns:1fr;} }
+        .filter-row.has-dates {
+            grid-template-columns: minmax(180px, 240px) minmax(170px, 220px) minmax(170px, 220px) auto;
+        }
+
+        .date-field {
+            position: relative;
+        }
+
+        .date-field-label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 900;
+            left: 12px;
+            position: absolute;
+            top: 3px;
+            text-transform: uppercase;
+        }
+
+        .date-field input {
+            padding-top: 18px;
+        }
+
+        .report-btn {
+            align-items: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            border: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 14px rgba(232, 93, 36, .28);
+            color: #fff;
+            display: inline-flex;
+            font-weight: 900;
+            justify-content: center;
+            min-height: 40px;
+            padding: 9px 16px;
+            text-decoration: none;
+            transition: transform .15s ease, box-shadow .15s ease;
+            white-space: nowrap;
+        }
+
+        .report-btn:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(232, 93, 36, .32);
+        }
+
+        .metric-grid {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            margin-bottom: 16px;
+        }
+
+        .metric {
+            align-items: center;
+            display: flex;
+            gap: 13px;
+            padding: 16px;
+            transition: box-shadow .15s ease, transform .15s ease;
+        }
+
+        .metric:hover {
+            box-shadow: 0 14px 32px rgba(15, 23, 42, .09);
+            transform: translateY(-2px);
+        }
+
+        .metric-icon {
+            align-items: center;
+            background: var(--accent-soft);
+            border-radius: 10px;
+            color: var(--accent);
+            display: flex;
+            flex-shrink: 0;
+            font-size: 17px;
+            height: 42px;
+            justify-content: center;
+            width: 42px;
+        }
+
+        .metric.is-success .metric-icon {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .metric.is-info .metric-icon {
+            background: var(--info-soft);
+            color: var(--info);
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 11.5px;
+            font-weight: 800;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: .02em;
+        }
+
+        .metric-value {
+            color: var(--text);
+            font-size: 21px;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-top: 3px;
+        }
+
+        .metric-value-usd {
+            color: var(--muted);
+            font-size: 12.5px;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .kpi-trend {
+            align-items: center;
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 11px;
+            font-weight: 800;
+            gap: 3px;
+            margin-top: 6px;
+            padding: 2px 7px;
+            width: fit-content;
+        }
+
+        .kpi-trend.is-up {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .kpi-trend.is-down {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .kpi-trend svg {
+            height: 9px;
+            width: 9px;
+        }
+
+        .kpi-caption {
+            color: var(--muted);
+            font-size: 10.5px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .rank-row {
+            align-items: center;
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 1fr 100px;
+            margin-bottom: 12px;
+        }
+
+        .rank-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .rank-name {
+            color: var(--text);
+            font-size: 12.5px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .rank-track {
+            background: var(--soft);
+            border-radius: 6px;
+            height: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .rank-fill {
+            background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+            border-radius: 6px;
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            top: 0;
+        }
+
+        .rank-value {
+            font-size: 12.5px;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .rank-value .u {
+            color: var(--muted);
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .money-stack {
+            line-height: 1.3;
+        }
+
+        .money-stack .khr {
+            color: var(--text);
+            display: block;
+            font-weight: 900;
+        }
+
+        .money-stack .usd {
+            color: var(--muted);
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .content-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .panel {
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .panel-head {
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 9px;
+            padding: 14px 18px;
+        }
+
+        .panel-head i {
+            color: var(--accent);
+            font-size: 14px;
+            width: 16px;
+        }
+
+        .panel-title {
+            color: var(--text);
+            font-size: 15.5px;
+            font-weight: 900;
+            margin: 0;
+        }
+
+        .panel-body {
+            padding: 18px;
+        }
+
+        .chart-wrap {
+            height: 300px;
+            position: relative;
+        }
+
+        @media (min-width:1200px) {
+            .chart-wrap {
+                height: 340px;
+            }
+        }
+
+        @media (max-width:480px) {
+            .chart-wrap {
+                height: 240px;
+            }
+        }
+
+        .report-table {
+            margin: 0;
+        }
+
+        .report-table th {
+            background: var(--soft);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .03em;
+            padding: 11px 12px;
+            text-transform: uppercase;
+        }
+
+        .report-table td {
+            padding: 11px 12px;
+            vertical-align: middle;
+        }
+
+        .report-table tbody tr:hover {
+            background: var(--soft);
+        }
+
+        .status-pill {
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 10px;
+        }
+
+        .status-completed {
+            background: var(--success-soft);
+            color: #166534;
+        }
+
+        .status-pending {
+            background: var(--warning-soft);
+            color: #92400e;
+        }
+
+        .status-cancelled {
+            background: var(--danger-soft);
+            color: #991b1b;
+        }
+
+        .empty-note {
+            color: var(--muted);
+            padding: 26px 16px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .role-badge {
+            background: var(--soft);
+            border-radius: 6px;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            margin-left: 6px;
+            padding: 1px 6px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width:1100px) {
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width:760px) {
+            .report-head {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .filter-row,
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 @endpush
 
@@ -126,9 +459,11 @@
                 <p class="report-subtitle">ចំណូល ចំនួនវិក្ក័យបត្រ និងទំនិញលក់បាន។ កំពុងមើល: {{ $rangeText }}</p>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <a href="{{ route('reports.sales.export.pdf', request()->query()) }}" target="_blank" class="back-btn"><i class="fas fa-file-pdf"></i> Export PDF</a>
-                <a href="{{ route('reports.sales.export.excel', request()->query()) }}" class="back-btn"><i class="fas fa-file-excel"></i> Export Excel</a>
-                <a href="{{ route('reports.dashboard') }}" class="back-btn"><i class="fas fa-arrow-left"></i> ត្រឡប់ក្រោយ</a>
+                <a href="{{ route('reports.sales.export.pdf', request()->query()) }}" target="_blank" class="back-btn"><i
+                        class="fas fa-file-pdf"></i> Export PDF</a>
+
+                <a href="{{ route('reports.dashboard') }}" class="back-btn"><i class="fas fa-arrow-left"></i>
+                    ត្រឡប់ក្រោយ</a>
             </div>
         </div>
 
@@ -159,11 +494,12 @@
 
         @php
             $trendBadge = function ($pct) {
-                if ($pct === null) return '';
+                if ($pct === null)
+                    return '';
                 $dir = $pct >= 0 ? 'is-up' : 'is-down';
                 $path = $pct >= 0 ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7';
                 $sign = $pct >= 0 ? '+' : '';
-                return '<span class="kpi-trend '.$dir.'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="'.$path.'"/></svg>'.$sign.$pct.'%</span>';
+                return '<span class="kpi-trend ' . $dir . '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="' . $path . '"/></svg>' . $sign . $pct . '%</span>';
             };
             $trendCaption = $comparisonLabel ? 'ធៀបនឹង' . $comparisonLabel . ($isPacedComparison ? ' (ត្រឹមម៉ោងនេះ)' : '') : null;
         @endphp
@@ -175,7 +511,8 @@
                     <div class="metric-value">៛{{ number_format($totalRevenueKhr, 0) }}</div>
                     <div class="metric-value-usd">${{ number_format($totalRevenue, 2) }}</div>
                     {!! $trendBadge($revenueDeltaPct) !!}
-                    @if($revenueDeltaPct !== null)<div class="kpi-caption">{{ $trendCaption }}</div>@endif
+                    @if($revenueDeltaPct !== null)
+                    <div class="kpi-caption">{{ $trendCaption }}</div>@endif
                 </div>
             </div>
             <div class="metric is-info">
@@ -184,7 +521,8 @@
                     <p class="metric-label">ចំនួនវិក្ក័យបត្រ</p>
                     <div class="metric-value">{{ number_format($totalOrders) }}</div>
                     {!! $trendBadge($ordersDeltaPct) !!}
-                    @if($ordersDeltaPct !== null)<div class="kpi-caption">{{ $trendCaption }}</div>@endif
+                    @if($ordersDeltaPct !== null)
+                    <div class="kpi-caption">{{ $trendCaption }}</div>@endif
                 </div>
             </div>
             <div class="metric is-success">
@@ -205,7 +543,9 @@
         </div>
 
         <div class="panel">
-            <div class="panel-head"><i class="fas fa-chart-column"></i><h3 class="panel-title">ចំណូលប្រចាំថ្ងៃ</h3></div>
+            <div class="panel-head"><i class="fas fa-chart-column"></i>
+                <h3 class="panel-title">ចំណូលប្រចាំថ្ងៃ</h3>
+            </div>
             <div class="panel-body">
                 @if($dailyRevenue && count($dailyRevenue) > 0)
                     <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
@@ -217,7 +557,9 @@
 
         <div class="content-grid">
             <div class="panel">
-                <div class="panel-head"><i class="fas fa-pizza-slice"></i><h3 class="panel-title">ទំនិញលក់បានច្រើន</h3></div>
+                <div class="panel-head"><i class="fas fa-pizza-slice"></i>
+                    <h3 class="panel-title">ទំនិញលក់បានច្រើន</h3>
+                </div>
                 <div class="panel-body">
                     @if($productRevenue->count())
                         @php $maxProductCount = $productRevenue->max('order_items_count') ?: 1; @endphp
@@ -226,10 +568,13 @@
                                 <div>
                                     <div class="rank-name">{{ $product->name }}</div>
                                     <div class="rank-track">
-                                        <div class="rank-fill" style="width: {{ max(2, round($product->order_items_count / $maxProductCount * 100, 1)) }}%"></div>
+                                        <div class="rank-fill"
+                                            style="width: {{ max(2, round($product->order_items_count / $maxProductCount * 100, 1)) }}%">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="rank-value">{{ number_format($product->order_items_count) }}<span class="u">កម្មង់</span></div>
+                                <div class="rank-value">{{ number_format($product->order_items_count) }}<span
+                                        class="u">កម្មង់</span></div>
                             </div>
                         @endforeach
                     @else
@@ -239,7 +584,9 @@
             </div>
 
             <div class="panel">
-                <div class="panel-head"><i class="fas fa-money-check-dollar"></i><h3 class="panel-title">វិធីបង់ប្រាក់</h3></div>
+                <div class="panel-head"><i class="fas fa-money-check-dollar"></i>
+                    <h3 class="panel-title">វិធីបង់ប្រាក់</h3>
+                </div>
                 <div class="panel-body">
                     @php $maxMethodKhr = collect($paymentMethodBreakdown)->max('khr') ?: 1; @endphp
                     @foreach($paymentMethodBreakdown as $method)
@@ -247,7 +594,8 @@
                             <div>
                                 <div class="rank-name">{{ $method['label'] }}</div>
                                 <div class="rank-track">
-                                    <div class="rank-fill" style="width: {{ max(2, round($method['khr'] / $maxMethodKhr * 100, 1)) }}%"></div>
+                                    <div class="rank-fill"
+                                        style="width: {{ max(2, round($method['khr'] / $maxMethodKhr * 100, 1)) }}%"></div>
                                 </div>
                             </div>
                             <div class="rank-value">
@@ -261,7 +609,9 @@
         </div>
 
         <div class="panel">
-            <div class="panel-head"><i class="fas fa-clock-rotate-left"></i><h3 class="panel-title">កម្មង់ថ្មីៗ</h3></div>
+            <div class="panel-head"><i class="fas fa-clock-rotate-left"></i>
+                <h3 class="panel-title">កម្មង់ថ្មីៗ</h3>
+            </div>
             @if($recentOrders->count())
                 <div class="table-responsive">
                     <table class="table report-table">
@@ -270,7 +620,7 @@
                                 <th>លេខកម្មង់</th>
                                 <th>អតិថិជន</th>
                                 <th>កាលបរិច្ឆេទ</th>
-                               
+
                                 <th class="text-end">តម្លៃ</th>
                             </tr>
                         </thead>
@@ -281,7 +631,7 @@
                                     <td>#{{ $order->id }}</td>
                                     <td>{{ $order->customer?->name ?? '—' }}</td>
                                     <td>{{ optional($order->order_date)->format('d/m/Y H:i') }}</td>
-                                
+
                                     <td class="text-end">
                                         <div class="money-stack">
                                             <span class="khr">៛{{ number_format($order->totalKhr(), 0) }}</span>
@@ -301,16 +651,21 @@
 
         <div class="panel">
             <div class="panel-head" style="justify-content:space-between;">
-                <div style="align-items:center; display:flex; gap:9px;"><i class="fas fa-users"></i><h3 class="panel-title">អតិថិជនកំពូល</h3></div>
+                <div style="align-items:center; display:flex; gap:9px;"><i class="fas fa-users"></i>
+                    <h3 class="panel-title">អតិថិជនកំពូល</h3>
+                </div>
                 <form method="GET" action="{{ route('reports.sales') }}" style="margin:0;">
                     <input type="hidden" name="period" value="{{ $selectedPeriod }}">
                     @if($selectedPeriod === 'custom')
                         <input type="hidden" name="start_date" value="{{ $startDate ?? '' }}">
                         <input type="hidden" name="end_date" value="{{ $endDate ?? '' }}">
                     @endif
-                    <select name="customer_sort" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
-                        <option value="paid" {{ ($customerSort ?? 'paid') === 'paid' ? 'selected' : '' }}>ចំណាយច្រើនបំផុត</option>
-                        <option value="orders" {{ ($customerSort ?? 'paid') === 'orders' ? 'selected' : '' }}>កម្មង់ច្រើនបំផុត</option>
+                    <select name="customer_sort" class="form-select form-select-sm" style="width:auto;"
+                        onchange="this.form.submit()">
+                        <option value="paid" {{ ($customerSort ?? 'paid') === 'paid' ? 'selected' : '' }}>ចំណាយច្រើនបំផុត
+                        </option>
+                        <option value="orders" {{ ($customerSort ?? 'paid') === 'orders' ? 'selected' : '' }}>កម្មង់ច្រើនបំផុត
+                        </option>
                     </select>
                 </form>
             </div>

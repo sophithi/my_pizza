@@ -434,7 +434,7 @@
         <a href="{{ route('packing.delivery_mayo', $invoice) }}" target="_blank"
             class="brand-chip @if($currentRoute === 'packing.delivery_mayo') active @endif">ម៉ាយូនេស បន្ទាយឆ្មារ</a>
         <a href="{{ route('packing.delivery_tamon', $invoice) }}" target="_blank"
-            class="brand-chip @if($currentRoute === 'packing.delivery_tamon') active @endif">តាម៉ាន់មានជ័យ</a>
+            class="brand-chip @if($currentRoute === 'packing.delivery_tamon') active @endif">តាមាន់មានជ័យ</a>
         </div>
     {{-- Screen buttons --}}
     <div class="no-print">
@@ -445,7 +445,7 @@
                 <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
                 <rect x="6" y="14" width="12" height="8" />
             </svg>
-            ព្រីន
+            Print Sticker
         </button>
         <a class="btn btn-back" href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -456,6 +456,27 @@
         </a>
     </div>
 
+    <script>
+        // When opened inside the packing/index sticker popup (an iframe),
+        // brand-switch chips and the back link shouldn't navigate the iframe
+        // itself — that would either open a stray new tab or load the full
+        // app layout squeezed into the small frame. Talk to the parent
+        // instead. Standalone/new-tab views are unaffected.
+        if (window.self !== window.top) {
+            document.querySelectorAll('.brand-chip').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'navigate', url: link.href, title: document.title }, '*');
+                });
+            });
+            document.querySelectorAll('.btn-back').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'close' }, '*');
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>

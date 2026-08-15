@@ -581,10 +581,6 @@
                 return (float) $item->unit_price > 0;
             });
 
-            // Canonical totals — see Order::grossSubtotalKhr()/itemDiscountKhr()/
-            // totalKhr(), so this always matches the order/invoice pages instead
-            // of re-deriving its own formula. Free items contribute 0 either way,
-            // so summing over all items here gives the same result as $paidItems.
             $subtotalKhr = ($invoice->order?->grossSubtotalKhr() ?? 0) - ($invoice->order?->itemDiscountKhr() ?? 0);
             $grandTotalKhr = $invoice->order?->totalKhr() ?? 0;
         @endphp
@@ -779,6 +775,18 @@
             <span class="bulk-banner-text">មិនមានវិក្ក័យបត្រដែលបានជ្រើសរើសទេ</span>
         </div>
     @endforelse
+    @php
+        $currentRoute = request()->route()?->getName();
+    @endphp
+    <div class="no-print brand-switch">
+        <span class="brand-switch-label">ជ្រើសរើស:</span>
+        <a href="{{ route('packing.customer', $invoice) }}" target="_blank"
+            class="brand-chip @if($currentRoute === 'packing.customer') active @endif">ភីហ្សា គ្រួសាររីករាយ</a>
+        <a href="{{ route('packing.customer_mayo', $invoice) }}" target="_blank"
+            class="brand-chip @if($currentRoute === 'packing.customer_mayo') active @endif">ម៉ាយូនេស បន្ទាយឆ្មារ</a>
+        <a href="{{ route('packing.customer_tamon', $invoice) }}" target="_blank"
+            class="brand-chip @if($currentRoute === 'packing.customer_tamon') active @endif">តាមាន់មានជ័យ</a>
+    </div>
 
     <div class="no-print action-bar">
         <button class="btn-print" onclick="window.print()">

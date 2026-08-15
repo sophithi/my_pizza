@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'បង្កើតការស្តុកទំនិញ')
+@section('title', 'បង្កើតស្តុកទំនិញ')
 
 @push('styles')
 <style>
     .form-card {
         background: #fff;
         border: none;
-        border-radius: 12px;
+        border-radius: 28px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         padding: 28px;
     }
@@ -20,7 +20,7 @@
     }
 
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
     }
 
     .form-label {
@@ -36,7 +36,7 @@
         padding: 10px 12px;
         border: 1px solid #e9ecef;
         border-radius: 6px;
-        font-size: 14px;
+        font-size: 16px;
         font-family: inherit;
         transition: border-color 0.2s, box-shadow 0.2s;
     }
@@ -118,7 +118,7 @@
 
     .form-help {
         color: #6b7280;
-        font-size: 12px;
+        font-size: 18px;
         margin-top: 6px;
     }
 
@@ -144,7 +144,7 @@
 
 <div class="container mt-4 mb-4" style="max-width: 600px;">
     <div class="form-card">
-        <h3 class="form-card__title">បង្កើតការស្តុកទំនិញ</h3>
+        <h3 class="form-card__title">បង្កើតស្តុកទំនិញ</h3>
 
         @if ($errors->any())
         <div class="alert-error">
@@ -185,7 +185,7 @@
                         <input type="number" name="quantity" class="form-input" value="{{ old('quantity', '0') }}" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">កម្រិតត្រូវបំពេញ *</label>
+                        <label class="form-label">កម្រិតកំណត់ចំនួនទំនិញចាប់ផ្តើមខ្វះក្នុងស្តុក *</label>
                         <input type="number" name="reorder_level" class="form-input" value="{{ old('reorder_level', '10') }}" required>
                     </div>
                 </div>
@@ -196,7 +196,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">តម្លៃដើមក្នុងមួយឯកតា (មិនចាំបាច់)</label>
+                    <label class="form-label">តម្លៃដើមក្នុងមួយខ្នាត (មិនចាំបាច់)</label>
                     <input type="number" step="0.01" min="0" name="cost_per_unit" class="form-input" value="{{ old('cost_per_unit') }}" placeholder="ទុកទទេ ដើម្បីប្រើតម្លៃលក់របស់ទំនិញ">
                     <p class="form-help">ប្រើសម្រាប់គណនាតម្លៃស្តុក បើតម្លៃដើមខុសពីតម្លៃលក់ធម្មតា។</p>
                 </div>

@@ -12,9 +12,9 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Staff, Managers, and Admins can create orders
+        // Staff, Managers, Bosses, and Admins can create orders
         $user = auth()->user();
-        return $user && in_array($user->role, ['staff', 'manager', 'admin']);
+        return $user && in_array($user->role, ['staff', 'manager', 'boss', 'admin']);
     }
 
     /**

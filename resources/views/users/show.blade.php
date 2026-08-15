@@ -42,8 +42,10 @@
     }
     .role-admin { background: rgba(220,38,38,0.2); color: #fca5a5; }
     .role-manager { background: rgba(59,130,246,0.2); color: #93c5fd; }
+    .role-boss { background: rgba(139,92,246,0.2); color: #c4b5fd; }
     .role-staff { background: rgba(168,85,247,0.2); color: #d8b4fe; }
     .role-staff_inventory { background: rgba(234,88,12,0.2); color: #fdba74; }
+    .role-auditor { background: rgba(13,148,136,0.2); color: #5eead4; }
 
     .user-hero-right { position: relative; z-index: 1; text-align: right; }
     .hero-stat-label { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -181,7 +183,9 @@
                 <span class="user-hero-role role-{{ $user->role }}">
                     @if($user->role === 'admin') <i class="fas fa-crown"></i> Administrator
                     @elseif($user->role === 'manager') <i class="fas fa-chart-line"></i> Manager
+                    @elseif($user->role === 'boss') <i class="fas fa-user-tie"></i> Boss
                     @elseif($user->role === 'staff_inventory') <i class="fas fa-boxes"></i> Staff (Inventory)
+                    @elseif($user->role === 'auditor') <i class="fas fa-magnifying-glass-chart"></i> Auditor
                     @else <i class="fas fa-user"></i> Staff (Office)
                     @endif
                 </span>

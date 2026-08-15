@@ -77,21 +77,53 @@
             color: #111827;
         }
 
+        .export-group {
+            align-items: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: inline-flex;
+            overflow: hidden;
+        }
+
+        .export-btn {
+            align-items: center;
+            color: #374151;
+            display: inline-flex;
+            font-weight: 900;
+            gap: 8px;
+            min-height: 40px;
+            padding: 9px 14px;
+            text-decoration: none;
+            transition: background .15s ease, color .15s ease;
+        }
+
+        .export-btn:hover {
+            background: #f3f4f6;
+            color: #111827;
+        }
+
         .inventory-stats {
             display: grid;
-            gap: 14px;
+            gap: 16px;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: var(--shadow);
             overflow: hidden;
-            padding: 16px;
+            padding: 20px 18px;
             position: relative;
+            transition: box-shadow .15s ease, transform .15s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 16px 36px rgba(15, 23, 42, .1);
+            transform: translateY(-1px);
         }
 
         .stat-card::before {
@@ -102,78 +134,24 @@
             width: 4px;
         }
 
-        .stat-top {
-            align-items: center;
-            display: flex;
-            justify-content: space-between;
-        }
+        .stat-card.stat-success::before { background: var(--success); }
+        .stat-card.stat-warning::before { background: var(--warning); }
+        .stat-card.stat-danger::before { background: var(--danger); }
 
         .stat-label {
             color: var(--muted);
-            font-size: 12px;
+            font-size: 18px;
             font-weight: 900;
+            letter-spacing: .3px;
             text-transform: uppercase;
-        }
-
-        .stat-icon {
-            align-items: center;
-            background: var(--accent-soft);
-            border-radius: 8px;
-            color: var(--accent);
-            display: inline-flex;
-            height: 34px;
-            justify-content: center;
-            width: 34px;
         }
 
         .stat-value {
             color: var(--text);
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 900;
-            margin-top: 8px;
-        }
-
-        .movement-summary {
-            display: grid;
-            gap: 10px;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            margin-bottom: 16px;
-        }
-
-        .movement-card {
-            align-items: center;
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            display: flex;
-            gap: 12px;
-            padding: 14px;
-        }
-
-        .movement-card i {
-            align-items: center;
-            background: var(--accent-soft);
-            border-radius: 8px;
-            color: var(--accent);
-            display: inline-flex;
-            height: 36px;
-            justify-content: center;
-            width: 36px;
-        }
-
-        .movement-label {
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
-        .movement-value {
-            color: var(--text);
-            font-size: 22px;
-            font-weight: 900;
-            line-height: 1.1;
+            line-height: 1.2;
+            margin-top: 12px;
         }
 
         .filter-card,
@@ -187,61 +165,84 @@
 
         .filter-card {
             margin-bottom: 16px;
-            padding: 14px;
+            overflow: hidden;
+            padding: 0;
         }
 
-        .filter-form {
-            align-items: center;
-            display: grid;
-            gap: 10px;
-            grid-template-columns: minmax(280px, 1fr) 170px 170px auto;
-        }
-
-        .filter-form .form-control,
-        .filter-form .form-select {
-            border-color: #d9dee7;
-            border-radius: 8px;
-            min-height: 42px;
-        }
-
-        .filter-actions {
+        .toolbar-row {
+            align-items: stretch;
             display: flex;
-            gap: 8px;
-            justify-content: flex-end;
         }
 
-        .quick-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .quick-filter {
+        .toolbar-field {
             align-items: center;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: #475569;
-            display: inline-flex;
+            display: flex;
+            flex-shrink: 0;
+            gap: 9px;
+            padding: 0 16px;
+        }
+
+        .toolbar-search {
+            flex: 1 1 auto;
+            min-width: 200px;
+        }
+
+        .toolbar-field > i {
+            color: var(--muted);
+            flex-shrink: 0;
             font-size: 13px;
-            font-weight: 800;
-            gap: 7px;
-            min-height: 36px;
-            padding: 7px 11px;
-            text-decoration: none;
         }
 
-        .quick-filter.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #fff;
+        .toolbar-field input,
+        .toolbar-field select {
+            background: transparent;
+            border: 0;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 700;
+            min-height: 46px;
+            outline: none;
+            padding: 0;
+            width: 100%;
         }
 
-        .date-filter {
+        .toolbar-field select {
+            cursor: pointer;
+        }
+
+        .toolbar-date {
+            display: none;
+        }
+
+        .toolbar-date.show {
             display: flex;
+        }
+
+        .toolbar-divider {
+            align-self: center;
+            background: var(--border);
+            flex-shrink: 0;
+            height: 26px;
+            width: 1px;
+        }
+
+        .toolbar-search-btn {
+            align-items: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            border: 0;
+            border-radius: 0 7px 7px 0;
+            color: #fff;
+            display: inline-flex;
+            flex-shrink: 0;
+            font-weight: 900;
             gap: 8px;
-            margin-left: auto;
+            justify-content: center;
+            padding: 0 22px;
+            white-space: nowrap;
+        }
+
+        .toolbar-search-btn:hover {
+            background: linear-gradient(135deg, var(--accent-dark), var(--accent-dark));
         }
 
         .inventory-table-card {
@@ -268,6 +269,21 @@
 
         .inventory-table tr:hover td {
             background: #fbfdff;
+        }
+
+        .inventory-table tr[data-status="out"] td:first-child {
+            border-left: 4px solid var(--danger);
+        }
+
+        .inventory-table tr[data-status="low"] td:first-child {
+            border-left: 4px solid var(--warning);
+        }
+
+        .stock-unit {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 3px;
         }
 
         .product-name {
@@ -657,16 +673,24 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .movement-summary {
-                grid-template-columns: 1fr;
+            .toolbar-row {
+                flex-wrap: wrap;
             }
 
-            .filter-form {
-                grid-template-columns: 1fr 1fr;
+            .toolbar-field {
+                border-bottom: 1px solid var(--border);
+                flex: 1 1 50%;
             }
 
-            .filter-actions {
-                justify-content: flex-start;
+            .toolbar-divider {
+                display: none;
+            }
+
+            .toolbar-search-btn {
+                border-radius: 0;
+                flex: 1 1 100%;
+                justify-content: center;
+                padding: 12px;
             }
         }
 
@@ -676,19 +700,14 @@
                 flex-direction: column;
             }
 
-            .inventory-stats,
-            .filter-form {
+            .inventory-stats {
                 grid-template-columns: 1fr;
             }
 
-            .quick-filters,
-            .date-filter,
-            .filter-actions {
-                flex-direction: column;
-                width: 100%;
+            .toolbar-field {
+                flex: 1 1 100%;
             }
 
-            .quick-filter,
             .inventory-btn {
                 width: 100%;
             }
@@ -703,6 +722,17 @@
 @section('content')
     @php
         $movementActive = $movementDate || in_array(request('period'), ['month', 'year'], true);
+        $unitLabels = [
+            'kg' => 'គីឡូក្រាម',
+            'g' => 'ក្រាម',
+            'L' => 'លីត្រ',
+            'ml' => 'កំប៉ុង',
+            'pcs' => 'បន្ទះ',
+            'bag' => 'ដើម',
+            'box1' => 'កេស',
+            'box2' => 'ប្រអប់',
+            'pack' => 'កញ្ចប់',
+        ];
     @endphp
 
     <div class="container-fluid py-4 inventory-page">
@@ -712,15 +742,20 @@
                 <p class="inventory-subtitle">តាមដានចំនួនទំនិញ កម្រិតស្តុក និងទីតាំងស្តុកសម្រាប់ការរៀបចំទំនិញ</p>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <a href="{{ route('inventory.export.excel', request()->query()) }}" class="inventory-btn inventory-btn-soft" title="នាំចេញ Excel">
-                    <i class="fas fa-file-excel"></i> Excel
-                </a>
-                <a href="{{ route('inventory.export.pdf', request()->query()) }}" class="inventory-btn inventory-btn-soft" target="_blank" title="នាំចេញ PDF">
-                    <i class="fas fa-file-pdf"></i> PDF
-                </a>
-                <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
-                    <i class="fas fa-plus"></i> បន្ថែមស្តុក
-                </a>
+                <div class="export-group">
+                    <a href="{{ route('inventory.export.excel', request()->query()) }}" class="export-btn" title="នាំចេញ Excel">
+                        <i class="fas fa-file-excel" style="color:#059669;"></i> Excel
+                    </a>
+                    <span class="toolbar-divider"></span>
+                    <a href="{{ route('inventory.export.pdf', request()->query()) }}" class="export-btn" target="_blank" title="នាំចេញ PDF">
+                        <i class="fas fa-file-pdf" style="color:#dc2626;"></i> PDF
+                    </a>
+                </div>
+                @unless(auth()->user()->isAuditor())
+                    <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
+                        <i class="fas fa-plus"></i> បន្ថែមស្តុក
+                    </a>
+                @endunless
             </div>
         </div>
 
@@ -733,109 +768,82 @@
 
         <div class="inventory-stats">
             <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-label">មុខទំនិញសរុប</div>
-                    <div class="stat-icon"><i class="fas fa-boxes"></i></div>
-                </div>
+                <div class="stat-label">មុខទំនិញសរុប</div>
                 <div class="stat-value">{{ number_format($stats['total']) }}</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-label">មានក្នុងស្តុក</div>
-                    <div class="stat-icon" style="background:#ecfdf5;color:#059669;"><i class="fas fa-check"></i></div>
-                </div>
+            <div class="stat-card stat-success">
+                <div class="stat-label">មានក្នុងស្តុក</div>
                 <div class="stat-value text-success">{{ number_format($stats['in_stock']) }}</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-label">ជិតអស់</div>
-                    <div class="stat-icon" style="background:#fffbeb;color:#d97706;"><i class="fas fa-triangle-exclamation"></i></div>
-                </div>
-                <div class="stat-value" style="color:#d97706;">{{ number_format($stats['low_stock']) }}</div>
+            <div class="stat-card stat-warning">
+                <div class="stat-label">ជិតអស់</div>
+                <div class="stat-value" style="color:var(--warning);">{{ number_format($stats['low_stock']) }}</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-label">អស់ស្តុក</div>
-                    <div class="stat-icon" style="background:#fef2f2;color:#dc2626;"><i class="fas fa-circle-xmark"></i></div>
-                </div>
+            <div class="stat-card stat-danger">
+                <div class="stat-label">អស់ស្តុក</div>
                 <div class="stat-value text-danger">{{ number_format($stats['out_stock']) }}</div>
             </div>
         </div>
 
-        @if($movementActive)
-            <div class="movement-summary">
-                <div class="movement-card">
-                    <i class="fas fa-arrow-down"></i>
-                    <div>
-                        <div class="movement-label">កាត់ចេញតាមការបញ្ជាទិញ</div>
-                        <div class="movement-value">{{ number_format($movementSummary['cut_out'] ?? 0) }}</div>
-                    </div>
-                </div>
-                <div class="movement-card">
-                    <i class="fas fa-arrow-up"></i>
-                    <div>
-                        <div class="movement-label">បានបន្ថែម/ត្រឡប់ចូល</div>
-                        <div class="movement-value">{{ number_format($movementSummary['added_back'] ?? 0) }}</div>
-                    </div>
-                </div>
-                <div class="movement-card">
-                    <i class="fas fa-layer-group"></i>
-                    <div>
-                        <div class="movement-label">មុខទំនិញមានចលនា</div>
-                        <div class="movement-value">{{ number_format($movementSummary['products'] ?? 0) }}</div>
-                    </div>
-                </div>
-            </div>
-        @endif
+        @php
+            $toolbarPeriod = request('period', 'today');
+            $toolbarCustomDate = !in_array($toolbarPeriod, ['today', 'yesterday', 'all'], true);
+        @endphp
 
         <div class="filter-card">
             <form id="inventoryFilters" method="GET" action="{{ route('inventory.index') }}">
-                <div class="filter-form">
-                    <input type="search" name="search" id="inventorySearch" value="{{ request('search') }}" class="form-control" placeholder="ស្វែងរកទំនិញ ឬប្រភេទ..." autocomplete="off">
-
-                    <select id="statusFilter" name="status" class="form-select" onchange="this.form.submit()">
-                        <option value="">គ្រប់ស្ថានភាព</option>
-                        <option value="in" {{ request('status') === 'in' ? 'selected' : '' }}>មានក្នុងស្តុក</option>
-                        <option value="low" {{ request('status') === 'low' ? 'selected' : '' }}>ជិតអស់</option>
-                        <option value="out" {{ request('status') === 'out' ? 'selected' : '' }}>អស់ស្តុក</option>
-                    </select>
-
-                    <select id="warehouseFilter" name="warehouse" class="form-select" onchange="this.form.submit()">
-                        <option value="">គ្រប់ទីតាំង</option>
-                        @foreach($warehouses as $warehouse)
-                            <option value="{{ strtolower($warehouse) }}" {{ request('warehouse') === strtolower($warehouse) ? 'selected' : '' }}>{{ $warehouse }}</option>
-                        @endforeach
-                    </select>
-
-                    <div class="filter-actions">
-                        <button type="submit" class="inventory-btn inventory-btn-primary">
-                            <i class="fas fa-search"></i> ស្វែងរក
-                        </button>
-                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="exportInventoryCsv()">
-                            <i class="fas fa-download"></i> ទាញយក
-                        </button>
+                <div class="toolbar-row">
+                    <div class="toolbar-field toolbar-search">
+                        <i class="fas fa-search"></i>
+                        <input type="search" name="search" id="inventorySearch" value="{{ request('search') }}" placeholder="ស្វែងរកទំនិញ ឬប្រភេទ..." autocomplete="off">
                     </div>
-                </div>
 
-                <div class="quick-filters">
-                    <a href="{{ route('inventory.index', array_merge(request()->except('page'), ['period' => 'today'])) }}"
-                        class="quick-filter {{ request('period') === 'today' ? 'active' : '' }}">
-                        <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
-                    </a>
-                    <a href="{{ route('inventory.index', array_merge(request()->except('page'), ['period' => 'yesterday'])) }}"
-                        class="quick-filter {{ request('period') === 'yesterday' ? 'active' : '' }}">
-                        <i class="fas fa-calendar-minus"></i> ម្សិលមិញ
-                    </a>
-                    <a href="{{ route('inventory.index', ['period' => 'all']) }}" class="quick-filter">
-                        <i class="fas fa-rotate-left"></i> សម្អាត
-                    </a>
+                    <div class="toolbar-divider"></div>
 
-                    <div class="date-filter">
-                        <input type="date" name="date" value="{{ request('date') }}" class="form-control">
-                        <button type="submit" class="inventory-btn inventory-btn-soft">
-                            <i class="fas fa-search"></i>
-                        </button>
+                    <div class="toolbar-field">
+                      
+                        <select id="statusFilter" name="status" onchange="this.form.submit()">
+                            <option value="">គ្រប់ស្ថានភាព</option>
+                            <option value="in" {{ request('status') === 'in' ? 'selected' : '' }}>មានក្នុងស្តុក</option>
+                            <option value="low" {{ request('status') === 'low' ? 'selected' : '' }}>ជិតអស់</option>
+                            <option value="out" {{ request('status') === 'out' ? 'selected' : '' }}>អស់ស្តុក</option>
+                        </select>
                     </div>
+
+                    <div class="toolbar-divider"></div>
+
+                    <div class="toolbar-field">
+                        <i class="fas fa-warehouse"></i>
+                        <select id="warehouseFilter" name="warehouse" onchange="this.form.submit()">
+                            <option value="">គ្រប់ទីតាំង</option>
+                            @foreach($warehouses as $warehouse)
+                                <option value="{{ strtolower($warehouse) }}" {{ request('warehouse') === strtolower($warehouse) ? 'selected' : '' }}>{{ $warehouse }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="toolbar-divider"></div>
+
+                    <div class="toolbar-field">
+                        <i class="fas fa-calendar-day"></i>
+                        <select id="periodSelect" name="period" onchange="handlePeriodChange(this)">
+                            <option value="today" {{ $toolbarPeriod === 'today' ? 'selected' : '' }}>ថ្ងៃនេះ</option>
+                            <option value="yesterday" {{ $toolbarPeriod === 'yesterday' ? 'selected' : '' }}>ម្សិលមិញ</option>
+                            <option value="everyday" {{ $toolbarPeriod === 'everyday' ? 'selected' : '' }}>រៀងរាល់ថ្ងៃ</option>
+                            <option value="" {{ $toolbarCustomDate ? 'selected' : '' }}>ជ្រើសកាលបរិច្ឆេទ...</option>
+                        </select>
+                    </div>
+
+                    <div class="toolbar-divider toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}" id="toolbarDateDivider"></div>
+
+                    <div class="toolbar-field toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}" id="toolbarDateField">
+                        <i class="fas fa-calendar"></i>
+                        <input type="date" name="date" id="toolbarDate" value="{{ request('date') }}" title="ត្រងតាមកាលបរិច្ឆេទចលនាស្តុក">
+                    </div>
+
+                    <button type="submit" class="toolbar-search-btn">
+                        <i class="fas fa-search"></i> ស្វែងរក
+                    </button>
                 </div>
             </form>
         </div>
@@ -853,7 +861,7 @@
                                 @if($movementActive)
                                     <th class="text-center">ចលនាស្តុក</th>
                                 @endif
-                                <th class="text-center">កម្រិតត្រូវបំពេញ</th>
+                                <th class="text-center" title="ស្តុកគួរបន្ថែម នៅពេលចំនួនធ្លាក់ចុះដល់កម្រិតនេះ">កម្រិតកណត់ថាជិតអស់ <i class="fas fa-circle-info" style="font-size:11px;opacity:.6;"></i></th>
                                 <th class="text-center">ស្ថានភាព</th>
                                 <th class="text-end">សកម្មភាព</th>
                             </tr>
@@ -878,14 +886,17 @@
                                     data-warehouse="{{ strtolower($inv->warehouse_location ?? '') }}">
                                     <td>
                                         <div class="product-name">{{ $inv->product?->name ?? 'មិនមានឈ្មោះ' }}</div>
-                                        <div class="product-meta">{{ $inv->product?->sku ?? 'SKU មិនមាន' }}</div>
+                                        <div class="product-meta">{{ $inv->product?->sku ?? 'SKU មិនមាន' }}@if($inv->product?->unit) &bull; ខ្នាត: {{ $unitLabels[$inv->product->unit] ?? $inv->product->unit }} @endif</div>
                                     </td>
                                     <td>{{ $inv->product?->category ?? 'មិនមាន' }}</td>
                                     <td>{{ $inv->warehouse_location ?? 'មិនមាន' }}</td>
                                     <td class="text-center stock-cell">
-                                        <span class="stock-number" onclick="openQuickUpdate({{ $inv->id }}, {{ $inv->quantity }})">
+                                        <span class="stock-number" @unless(auth()->user()->isAuditor()) onclick="openQuickUpdate({{ $inv->id }}, {{ $inv->quantity }})" @endunless>
                                             {{ number_format($inv->quantity) }}
                                         </span>
+                                        @if($inv->product?->unit)
+                                            <span class="stock-unit">{{ $unitLabels[$inv->product->unit] ?? $inv->product->unit }}</span>
+                                        @endif
                                         <div class="stock-progress {{ $progressClass }}">
                                             <span style="width: {{ $progress }}%;"></span>
                                         </div>
@@ -909,7 +920,7 @@
                                             @endif
                                         </td>
                                     @endif
-                                    <td class="text-center">{{ number_format($inv->reorder_level) }}</td>
+                                    <td class="text-center">{{ number_format($inv->reorder_level) }}<span class="stock-unit">{{ $inv->product?->unit ? ($unitLabels[$inv->product->unit] ?? $inv->product->unit) : '' }}</span></td>
                                     <td class="text-center">
                                         <span class="status-pill {{ $statusClass }}">
                                             <i class="fas fa-circle" style="font-size:7px;"></i> {{ $statusLabel }}
@@ -917,27 +928,31 @@
                                     </td>
                                     <td>
                                         <div class="action-row">
-                                            <button type="button" class="icon-action icon-restock"
-                                                onclick="openRestock({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'), {{ $inv->quantity }})"
-                                                title="បន្ថែមចំនួនចូលស្តុក">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                            <button type="button" class="icon-action icon-reduce"
-                                                onclick="openReduce({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'), {{ $inv->quantity }})"
-                                                title="កាត់ចេញពីស្តុក">
-                                                <i class="fas fa-minus"></i>
-                                            </button>
+                                            @unless(auth()->user()->isAuditor())
+                                                <button type="button" class="icon-action icon-restock"
+                                                    onclick="openRestock({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'), {{ $inv->quantity }})"
+                                                    title="បន្ថែមចំនួនចូលស្តុក">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                                <button type="button" class="icon-action icon-reduce"
+                                                    onclick="openReduce({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'), {{ $inv->quantity }})"
+                                                    title="កាត់ចេញពីស្តុក">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            @endunless
                                             <a href="{{ route('inventory.show', $inv) }}" class="icon-action" title="មើល">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('inventory.edit', $inv) }}" class="icon-action" title="កែប្រែ">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button" class="icon-action icon-danger"
-                                                onclick="deleteInventory({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'))"
-                                                title="លុប">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            @unless(auth()->user()->isAuditor())
+                                                <a href="{{ route('inventory.edit', $inv) }}" class="icon-action" title="កែប្រែ">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="icon-action icon-danger"
+                                                    onclick="deleteInventory({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'))"
+                                                    title="លុប">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endunless
                                         </div>
                                     </td>
                                 </tr>
@@ -949,12 +964,14 @@
 
         @else
             <div class="empty-state">
-                <i class="fas fa-box-open"></i>
-                <h3>{{ $movementActive ? 'មិនមានចលនាស្តុកសម្រាប់ថ្ងៃនេះ' : 'មិនទាន់មានស្តុកទំនិញ' }}</h3>
+               
+                <h3>{{ $movementActive ? 'មិនទាន់មានចលនាស្តុកសម្រាប់ថ្ងៃនេះ' : 'មិនទាន់មានស្តុកទំនិញ' }}</h3>
                 <p>{{ $movementActive ? 'ពេលបង្កើត ឬកែការបញ្ជាទិញ ប្រព័ន្ធនឹងបង្ហាញទំនិញដែលត្រូវបានកាត់ចេញនៅទីនេះ' : 'ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញ' }}</p>
-                <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
-                    បន្ថែមស្តុកដំបូង
-                </a>
+                <!-- @unless(auth()->user()->isAuditor())
+                    <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
+                        បន្ថែមស្តុក
+                    </a>
+                @endunless -->
             </div>
         @endif
     </div>
@@ -1151,36 +1168,27 @@
             filterTable();
         });
 
-        function exportInventoryCsv() {
-            const tableBody = document.getElementById('inventoryTableBody');
-            if (!tableBody) return;
+        function handlePeriodChange(select) {
+            const dateDivider = document.getElementById('toolbarDateDivider');
+            const dateField = document.getElementById('toolbarDateField');
+            const dateInput = document.getElementById('toolbarDate');
 
-            let csv = 'ទំនិញ,ប្រភេទ,ទីតាំង,ចំនួន,កម្រិតត្រូវបំពេញ,ស្ថានភាព\n';
-
-            tableBody.querySelectorAll('tr').forEach(row => {
-                if (row.style.display === 'none') return;
-                const cells = row.querySelectorAll('td');
-                const values = [
-                    cells[0]?.innerText.trim() || '',
-                    cells[1]?.innerText.trim() || '',
-                    cells[2]?.innerText.trim() || '',
-                    cells[3]?.innerText.trim() || '',
-                    cells[4]?.innerText.trim() || '',
-                    cells[5]?.innerText.trim() || '',
-                ];
-                csv += values.map(value => `"${value.replaceAll('"', '""')}"`).join(',') + '\n';
-            });
-
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'stock.csv';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            if (select.value === '') {
+                dateDivider.classList.add('show');
+                dateField.classList.add('show');
+                dateInput.focus();
+            } else {
+                dateInput.value = '';
+                select.form.submit();
+            }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const toolbarDate = document.getElementById('toolbarDate');
+            toolbarDate?.addEventListener('change', function () {
+                if (this.value) this.form.submit();
+            });
+        });
 
         function deleteInventory(id, name) {
             if (!confirm(`តើអ្នកពិតជាចង់លុបស្តុក "${name}" មែនទេ?`)) return;

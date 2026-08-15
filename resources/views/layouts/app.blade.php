@@ -444,10 +444,9 @@
             }
         }
 
-        /* Khmer helper class */
+
         .kh {
             font-family: 'Noto Sans Khmer', 'Hanuman', 'Battambang', 'Khmer OS', sans-serif;
-            /* slightly larger for Khmer readability */
             font-size: 14px;
             line-height: 1.6;
         }
@@ -483,6 +482,7 @@
             $isManager = $user->isManager();
             $isStaff = $user->isStaff();
             $isInventory = $user->isStaffInventory();
+            $isAuditor = $user->isAuditor();
 
             $isAdminOrManager = $isAdmin || $isManager;
             $isOfficeStaff = $isStaff && !$isInventory;
@@ -498,7 +498,7 @@
             @endif
 
             {{-- Customers & Orders (admin, manager, staff office) --}}
-            @if(!$isInventory)
+            @if(!$isInventory && !$isAuditor)
 
                 <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}">
                     <i class="fas fa-shopping-cart"></i><span>ចេញវិក្ក័យបត្រ</span>
@@ -507,8 +507,8 @@
                     <i class="fas fa-users"></i><span>អតិថិជន</span>
                 </a>
             @endif
-            {{-- Invoices (admin, manager, staff office) --}}
-            @if($isAdminOrManager || $isOfficeStaff)
+            {{-- Invoices (admin, manager, staff office, auditor) --}}
+            @if($isAdminOrManager || $isOfficeStaff || $isAuditor)
                 <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
                     <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
 
@@ -516,14 +516,14 @@
 
             @endif
 
-            {{-- Payments (admin & manager only) --}}
-            @if($isAdminOrManager)
+            {{-- Payments (admin, manager, auditor) --}}
+            @if($isAdminOrManager || $isAuditor)
                 <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}">
                     <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
                 </a>
             @endif
-            {{-- Purchasing (admin & manager only) --}}
-            @if($isAdminOrManager)
+            {{-- Purchasing / Reports (admin, manager, auditor) --}}
+            @if($isAdminOrManager || $isAuditor)
                 <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}">
                     <i class="fas fa-file-invoice"></i><span>ការចំណាយ</span>
                 </a>
@@ -531,8 +531,6 @@
                     <i class="fas fa-chart-line"></i><span>របាយការណ៍</span>
                 </a>
             @endif
-
-
 
             {{-- Products (admin, manager, staff office) --}}
             @if($isAdminOrManager || $isOfficeStaff)
@@ -542,15 +540,12 @@
             @endif
 
             {{-- Inventory (everyone except none) --}}
-            @if($isAdmin || $isManager || $isStaff || $isInventory)
+            @if($isAdmin || $isManager || $isStaff || $isInventory || $isAuditor)
                 <a href="{{ route('inventory.index', ['period' => 'today']) }}"
                     class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
                     <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
                 </a>
             @endif
-
-
-
 
 
             {{-- Packing labels (admin + staff inventory + staff office + manager) --}}
@@ -633,6 +628,8 @@
     <div class="main-content" id="mainContent">
         @yield('content')
     </div>
+
+    @stack('modals')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -765,6 +762,30 @@
                         cancelButtonText: 'Cancel',
                         reverseButtons: true
                     });
+                    if (result.isConfirmed) form.submit();
+                });
+            });
+
+          
+            document.querySelectorAll('form[data-confirm]').forEach(form => {
+                form.addEventListener('submit', async e => {
+                    e.preventDefault();
+                    const options = {
+                        title: form.dataset.confirmTitle || 'តើអ្នកប្រាកដទេ?',
+                        icon: form.dataset.confirmIcon || 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: form.dataset.confirmColor || '#e85d24',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'យល់ព្រម',
+                        cancelButtonText: 'បោះបង់',
+                        reverseButtons: true
+                    };
+                    if (form.dataset.confirmHtml) {
+                        options.html = form.dataset.confirm;
+                    } else {
+                        options.text = form.dataset.confirm;
+                    }
+                    const result = await Swal.fire(options);
                     if (result.isConfirmed) form.submit();
                 });
             });

@@ -696,17 +696,6 @@
                 @else
                     <p class="customer-name">N/A</p>
                 @endif
-                <p>
-                    <strong>ការបង់ប្រាក់:</strong>
-                    @if($invoice->order?->payment_status === 'paid')
-                        បានទូទាត់
-                    @elseif($invoice->order?->payment_status === 'partial')
-                        បង់មួយផ្នែក
-                    @else
-                        មិនទាន់ទូទាត់
-                    @endif
-
-                </p>
 
             </div>
         </div>
@@ -717,10 +706,7 @@
                 return (float) $item->unit_price > 0;
             });
 
-            // Canonical totals — see Order::grossSubtotalKhr()/itemDiscountKhr()/
-            // totalKhr(), so this always matches the order/invoice pages instead
-            // of re-deriving its own formula. Free items contribute 0 either way,
-            // so summing over all items here gives the same result as $paidItems.
+
             $subtotalKhr = ($invoice->order?->grossSubtotalKhr() ?? 0) - ($invoice->order?->itemDiscountKhr() ?? 0);
             $grandTotalKhr = $invoice->order?->totalKhr() ?? 0;
         @endphp
@@ -931,6 +917,27 @@
                     icon.textContent = '📋';
                     text.textContent = 'Copy Invoice';
                 }, 2000);
+            });
+        }
+    </script>
+    <script>
+        // When opened inside the packing/index sticker popup (an iframe),
+        // brand-switch chips and the back links shouldn't navigate the
+        // iframe itself — that would either open a stray new tab or load the
+        // full app layout squeezed into the small frame. Talk to the parent
+        // instead. Standalone/new-tab views are unaffected.
+        if (window.self !== window.top) {
+            document.querySelectorAll('.brand-chip').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'navigate', url: link.href, title: document.title }, '*');
+                });
+            });
+            document.querySelectorAll('.btn-back').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'close' }, '*');
+                });
             });
         }
     </script>

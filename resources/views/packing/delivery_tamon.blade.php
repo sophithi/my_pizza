@@ -450,6 +450,27 @@
         </a>
     </div>
 
+    <script>
+        // When opened inside the packing/index sticker popup (an iframe),
+        // brand-switch chips and the back link shouldn't navigate the iframe
+        // itself — that would either open a stray new tab or load the full
+        // app layout squeezed into the small frame. Talk to the parent
+        // instead. Standalone/new-tab views are unaffected.
+        if (window.self !== window.top) {
+            document.querySelectorAll('.brand-chip').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'navigate', url: link.href, title: document.title }, '*');
+                });
+            });
+            document.querySelectorAll('.btn-back').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'close' }, '*');
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>

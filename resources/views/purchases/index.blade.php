@@ -221,9 +221,11 @@
                 <h1 class="expense-title">ការចំណាយប្រចាំថ្ងៃ</h1>
                 <p class="expense-subtitle">កត់ត្រាថ្លៃចំណាយប្រចាំថ្ងៃ ដូចជា ទិញសម្ភារៈ ប្រេង សេវា និងចំណាយផ្សេងៗ។</p>
             </div>
-            <a href="{{ route('purchases.create') }}" class="expense-btn expense-btn-primary">
-                <i class="fas fa-plus"></i> បញ្ចូលចំណាយ
-            </a>
+            @unless(auth()->user()->isAuditor())
+                <a href="{{ route('purchases.create') }}" class="expense-btn expense-btn-primary">
+                    <i class="fas fa-plus"></i> បញ្ចូលចំណាយ
+                </a>
+            @endunless
         </div>
 
         @if(session('success'))
@@ -305,17 +307,19 @@
                                             <a href="{{ route('purchases.show', $purchase) }}" class="expense-action" title="មើលលម្អិត">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('purchases.edit', $purchase) }}" class="expense-action" title="កែសម្រួល">
-                                                <i class="fas fa-pen"></i>
-                                            </a>
-                                            <form action="{{ route('purchases.destroy', $purchase) }}" method="POST"
-                                                onsubmit="return confirm('លុបចំណាយនេះឬ?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="expense-action expense-action-danger" title="លុប">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            @unless(auth()->user()->isAuditor())
+                                                <a href="{{ route('purchases.edit', $purchase) }}" class="expense-action" title="កែសម្រួល">
+                                                    <i class="fas fa-pen"></i>
+                                                </a>
+                                                <form action="{{ route('purchases.destroy', $purchase) }}" method="POST"
+                                                    onsubmit="return confirm('លុបចំណាយនេះឬ?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="expense-action expense-action-danger" title="លុប">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endunless
                                         </div>
                                     </td>
                                 </tr>
@@ -332,9 +336,11 @@
                 <div class="expense-empty">
                     <h5 class="mb-2">មិនទាន់មានការចំណាយទេ</h5>
                     <p class="text-muted mb-3">ចាប់ផ្តើមកត់ត្រាចំណាយប្រចាំថ្ងៃរបស់ហាង។</p>
-                    <a href="{{ route('purchases.create') }}" class="expense-btn expense-btn-primary">
-                        <i class="fas fa-plus"></i> បញ្ចូលចំណាយដំបូង
-                    </a>
+                    @unless(auth()->user()->isAuditor())
+                        <a href="{{ route('purchases.create') }}" class="expense-btn expense-btn-primary">
+                            <i class="fas fa-plus"></i> បញ្ចូលចំណាយដំបូង
+                        </a>
+                    @endunless
                 </div>
             @endif
         </div>

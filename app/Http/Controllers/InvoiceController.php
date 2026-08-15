@@ -43,7 +43,15 @@ class InvoiceController extends Controller
         // so the list stays accurate as staff are added/removed.
         $staffUsers = User::whereHas('orders')->orderBy('name')->get(['id', 'name']);
 
-        return view('invoices.index', compact('invoices', 'stats', 'staffUsers'));
+        // Only admin/manager see the close/undo/merge-back buttons, so skip
+        // the extra queries entirely for other roles.
+        $isAdminOrManager = auth()->user()->isAdmin() || auth()->user()->isManager();
+        $canUndoClosePeriod = $isAdminOrManager && \App\Models\InvoicePeriod::canUndoLastClose();
+        $mergeBackPreview = $isAdminOrManager && !$canUndoClosePeriod
+            ? \App\Models\InvoicePeriod::previewMergeBackIntoPrevious()
+            : [];
+
+        return view('invoices.index', compact('invoices', 'stats', 'staffUsers', 'canUndoClosePeriod', 'mergeBackPreview'));
     }
 
     public function exportReport(Request $request)
@@ -291,9 +299,12 @@ class InvoiceController extends Controller
 
     private function orderInvoices($query)
     {
+        // Tiebreaker is row id (true creation order), not the invoice
+        // number's numeric part — that no longer tracks creation order once
+        // a period close resets it mid-day (see invoice_periods).
         return $query
             ->orderByDesc('invoice_date')
-            ->orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC");
+            ->orderByDesc('invoices.id');
     }
 
     private function invoiceTotalKhr(Invoice $invoice): float
@@ -486,6 +497,56 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Close the active invoice numbering period and start a new one, so the
+     * next invoice restarts from INV-000001 (admin & manager only). Past
+     * invoice numbers are untouched and stay unique because they belong to
+     * the now-closed period.
+     */
+    public function closePeriod()
+    {
+        \App\Models\InvoicePeriod::closeCurrentAndStartNew(auth()->id());
+
+        return redirect()->route('invoices.index')
+            ->with('success', 'បិទបញ្ជីវិក្ក័យបត្រខែនេះបានជោគជ័យ។ វិក្ក័យបត្របន្ទាប់នឹងចាប់ផ្តើមពី INV-000001 ។');
+    }
+
+    /**
+     * Undo an accidental close (admin & manager only). Only possible while
+     * no invoice has been created yet under the new period — see
+     * InvoicePeriod::canUndoLastClose().
+     */
+    public function undoClosePeriod()
+    {
+        if (!\App\Models\InvoicePeriod::undoLastClose()) {
+            return redirect()->route('invoices.index')
+                ->with('error', 'មិនអាចមិនធ្វើវិញបានទេ — មានវិក្ក័យបត្រត្រូវបានបង្កើតរួចហើយក្នុងខែថ្មី។');
+        }
+
+        return redirect()->route('invoices.index')
+            ->with('success', 'បានលុបចោលការបិទបញ្ជីវិក្ក័យបត្រ។ លេខវិក្ក័យបត្របន្តដូចមុន។');
+    }
+
+    /**
+     * Force-merge the active period back into the last closed one, even
+     * after invoices already exist there (admin & manager only) — for when
+     * the safe undoClosePeriod() window has passed. Every invoice currently
+     * in the active period is renumbered to continue the previous period's
+     * sequence, so the accidental extra period collapses away entirely.
+     */
+    public function mergeBackPeriod()
+    {
+        $merged = \App\Models\InvoicePeriod::mergeActiveIntoPrevious();
+
+        if (empty($merged)) {
+            return redirect()->route('invoices.index')
+                ->with('error', 'មិនមានអ្វីត្រូវបញ្ចូលមកវិញទេ។');
+        }
+
+        return redirect()->route('invoices.index')
+            ->with('success', 'បានបញ្ចូលវិក្ក័យបត្រ ' . count($merged) . ' ត្រឡប់ទៅខែមុន ហើយបន្តលេខរៀងតាមដដែល។');
+    }
+
+    /**
      * Display soft-deleted invoices (admin & manager only).
      */
     public function trashed(Request $request)
@@ -669,7 +730,9 @@ class InvoiceController extends Controller
                 'backUrl' => null,
             ])->setPaper('a5', 'portrait');
 
-            $filename = $invoice->invoice_number . '.pdf';
+            // invoice_number alone can repeat across closed periods, so
+            // append the row id to keep downloaded filenames collision-free.
+            $filename = $invoice->invoice_number . '-' . $invoice->id . '.pdf';
             
             return $pdf->download($filename);
         } catch (\Exception $e) {

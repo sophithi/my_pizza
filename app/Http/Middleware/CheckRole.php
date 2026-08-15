@@ -29,8 +29,12 @@ class CheckRole
         }
 
         // Check if user has one of the required roles
+        // (Boss inherits Manager's access wherever "manager" is listed)
         foreach ($roles as $role) {
             if ($user->role === $role) {
+                return $next($request);
+            }
+            if ($user->role === 'boss' && $role === 'manager') {
                 return $next($request);
             }
         }

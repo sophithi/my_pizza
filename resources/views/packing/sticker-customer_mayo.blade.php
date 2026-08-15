@@ -694,7 +694,7 @@
                 @else
                     <p class="customer-name">N/A</p>
                 @endif
-                <p>
+                <!-- <p>
                     <strong>ការបង់ប្រាក់:</strong>
                     @if($invoice->order?->payment_status === 'paid')
                         បានទូទាត់
@@ -704,7 +704,7 @@
                         មិនទាន់ទូទាត់
                     @endif
 
-                </p>
+                </p> -->
 
             </div>
         </div>
@@ -837,7 +837,7 @@
         <a href="{{ route('packing.customer_mayo', $invoice) }}" target="_blank"
             class="brand-chip @if($currentRoute === 'packing.customer_mayo') active @endif">ម៉ាយូនេស បន្ទាយឆ្មារ</a>
         <a href="{{ route('packing.customer_tamon', $invoice) }}" target="_blank"
-            class="brand-chip @if($currentRoute === 'packing.customer_tamon') active @endif">តាម៉ាន់មានជ័យ</a>
+            class="brand-chip @if($currentRoute === 'packing.customer_tamon') active @endif">តាមាន់មានជ័យ</a>
     </div>
 
     <div class="no-print action-bar">
@@ -930,6 +930,27 @@
                     icon.textContent = '📋';
                     text.textContent = 'Copy Invoice';
                 }, 2000);
+            });
+        }
+    </script>
+    <script>
+        // When opened inside the packing/index sticker popup (an iframe),
+        // brand-switch chips and the back links shouldn't navigate the
+        // iframe itself — that would either open a stray new tab or load the
+        // full app layout squeezed into the small frame. Talk to the parent
+        // instead. Standalone/new-tab views are unaffected.
+        if (window.self !== window.top) {
+            document.querySelectorAll('.brand-chip').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'navigate', url: link.href, title: document.title }, '*');
+                });
+            });
+            document.querySelectorAll('.btn-back').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'close' }, '*');
+                });
             });
         }
     </script>

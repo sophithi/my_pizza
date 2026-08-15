@@ -289,11 +289,22 @@
             Print
         </button>
        
-        <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}"
+        <a href="{{ $backUrl ?? url()->previous() ?? route('packing.index') }}" class="btn-back"
             style="background: #f0f2f5; color: #1a1d29; border: 1px solid #e5e7eb; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
             ← Back
         </a>
     </div>
+    <script>
+       
+        if (window.self !== window.top) {
+            document.querySelectorAll('.btn-back').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'close' }, '*');
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>

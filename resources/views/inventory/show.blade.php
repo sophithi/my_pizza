@@ -4,10 +4,9 @@
 
 @push('styles')
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-
         * {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Poppins', 'Noto Sans Khmer', 'Hanuman', 'Battambang', 'Khmer OS', sans-serif;
+            line-height: 1.6;
         }
 
         .show-container {
@@ -16,17 +15,59 @@
             padding: 24px;
         }
 
+        /* ── Breadcrumb ── */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #aaa;
+            margin-bottom: 14px;
+        }
+
+        .breadcrumb a {
+            color: #888;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color .15s;
+        }
+
+        .breadcrumb a:hover {
+            color: #e85d24;
+        }
+
+        .breadcrumb .crumb-sep {
+            color: #ddd;
+        }
+
+        .breadcrumb .crumb-current {
+            color: #1a1d29;
+            font-weight: 700;
+        }
+
         /* ── Header ── */
         .show-header {
             background: white;
             padding: 20px 28px;
             border-radius: 12px;
             border-left: 4px solid #e85d24;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
             box-shadow: 0 1px 6px rgba(0, 0, 0, .06);
+        }
+
+        .header-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .show-header h1 {
@@ -37,118 +78,38 @@
         }
 
         .show-header p {
-            font-size: 12px;
+            font-size: 13px;
             color: #aaa;
-            margin: 3px 0 0;
+            margin: 4px 0 0;
         }
 
         .header-meta {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .meta-pill {
-            font-size: 11px;
+            font-size: 12.5px;
             font-weight: 700;
             padding: 5px 12px;
             border-radius: 20px;
             background: #f5f6fa;
             color: #666;
+            white-space: nowrap;
         }
 
-        /* ── Top Grid (image + info) ── */
-        .top-grid {
-            display: grid;
-            grid-template-columns: 420px 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #ebebeb;
-            box-shadow: 0 1px 6px rgba(0, 0, 0, .05);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 14px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 13px;
-            font-weight: 800;
-            color: #1a1d29;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-header .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #e85d24;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        /* ── Image ── */
-        .prod-img {
-            width: 100%;
-            height: 340px;
-            background: #f8f8f8;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
-
-        .prod-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .prod-img.no-img {
-            color: #ddd;
-            font-size: 56px;
-        }
-
-        .img-caption {
-            font-size: 11px;
-            color: #bbb;
-            text-align: center;
-            margin: 0;
-        }
-
-        /* ── Info rows ── */
-        .product-title {
-            font-size: 22px;
-            font-weight: 900;
-            color: #1a1d29;
-            margin: 0 0 2px;
-        }
-
-        .product-cat {
-            font-size: 12px;
-            color: #aaa;
-            margin: 0 0 14px;
-        }
-
+        /* ── Status badge ── */
         .badge {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 5px 11px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 12.5px;
             font-weight: 700;
-            margin-bottom: 16px;
+            white-space: nowrap;
         }
 
         .badge-good {
@@ -166,22 +127,193 @@
             color: #c62828;
         }
 
-        .stat-row {
-            padding: 11px 0;
-            border-bottom: 1px solid #f5f5f5;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* ── Top Grid (image + info) ── */
+        .top-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: start;
         }
 
-        .stat-row:last-child {
-            border-bottom: none;
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #ebebeb;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, .05);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #1a1d29;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header i {
+            color: #e85d24;
+            font-size: 12px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* ── Image ── */
+        .prod-img {
+            width: 100%;
+            height: 260px;
+            background: #f8f9fc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .prod-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .prod-img.no-img {
+            flex-direction: column;
+            gap: 8px;
+            color: #d8d8e0;
+        }
+
+        .prod-img.no-img i {
+            font-size: 44px;
+        }
+
+        .prod-img.no-img span {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #c5c5d0;
+        }
+
+        .img-caption {
+            font-size: 12.5px;
+            color: #bbb;
+            text-align: center;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* ── Hero stock figure ── */
+        .hero-stock {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .hero-stock-num {
+            font-size: 38px;
+            font-weight: 900;
+            color: #1a1d29;
+            line-height: 1;
+        }
+
+        .hero-stock-num .unit {
+            font-size: 14px;
+            font-weight: 700;
+            color: #aaa;
+            margin-left: 6px;
+        }
+
+        .hero-stock-label {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #aaa;
+            letter-spacing: .2px;
+            margin: 0 0 6px;
+        }
+
+        .hero-reorder {
+            text-align: right;
+            font-size: 12.5px;
+            color: #aaa;
+            font-weight: 600;
+        }
+
+        .hero-reorder b {
+            display: block;
+            font-size: 16px;
+            color: #1a1d29;
+            font-weight: 800;
+        }
+
+        /* Stock level bar */
+        .stock-bar-wrap {
+            margin-bottom: 18px;
+        }
+
+        .stock-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12.5px;
+            color: #aaa;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .stock-bar-bg {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .stock-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: #e85d24;
+            transition: width .6s ease;
+        }
+
+        .stock-bar-fill.low {
+            background: #ff9800;
+        }
+
+        .stock-bar-fill.good {
+            background: #4caf50;
+        }
+
+        /* ── Key/value stat grid ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 20px;
+            margin-bottom: 6px;
+        }
+
+        .stat-cell {
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .stat-cell.full {
+            grid-column: 1 / -1;
         }
 
         .stat-label {
-            font-size: 12px;
+            display: block;
+            font-size: 11.5px;
             color: #aaa;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: .2px;
+            margin-bottom: 3px;
         }
 
         .stat-value {
@@ -194,7 +326,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin: 14px 0;
+            margin: 16px 0 4px;
         }
 
         .price-card {
@@ -222,7 +354,7 @@
         .btns {
             display: flex;
             gap: 8px;
-            margin-top: 16px;
+            margin-top: 18px;
         }
 
         .btn-edit {
@@ -263,131 +395,89 @@
             background: #ebebeb;
         }
 
-        /* ── Bottom Grid (stats + transactions + timeline) ── */
-        .bottom-grid {
+        /* ── KPI strip ── */
+        .kpi-strip {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
             margin-bottom: 20px;
         }
 
-        /* ── Stat Boxes ── */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .kpi {
-            padding: 16px;
-            background: #f8f9fc;
-            border-radius: 8px;
+        .kpi-tile {
+            background: white;
             border: 1px solid #ebebeb;
-            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, .05);
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .kpi .kpi-val {
-            font-size: 22px;
+        .kpi-tile .kpi-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .kpi-tile .kpi-val {
+            font-size: 24px;
             font-weight: 900;
             color: #1a1d29;
+            line-height: 1.1;
         }
 
-        .kpi .kpi-label {
-            font-size: 11px;
+        .kpi-tile .kpi-label {
+            font-size: 14px;
             color: #aaa;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .kpi.highlight .kpi-val {
-            color: #e85d24;
-        }
-
-        /* Stock level bar */
-        .stock-bar-wrap {
-            margin-top: 16px;
-        }
-
-        .stock-bar-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #aaa;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .stock-bar-bg {
-            height: 8px;
-            background: #f0f0f0;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .stock-bar-fill {
-            height: 100%;
-            border-radius: 4px;
-            background: #e85d24;
-            transition: width .6s ease;
-        }
-
-        .stock-bar-fill.low {
-            background: #ff9800;
-        }
-
-        .stock-bar-fill.good {
-            background: #4caf50;
-        }
-
-        /* Created / Updated info */
-        .date-info {
-            margin-top: 16px;
-        }
-
-        .date-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f5f5f5;
-            font-size: 12px;
-        }
-
-        .date-row:last-child {
-            border-bottom: none;
-        }
-
-        .date-row .dlabel {
-            color: #aaa;
-            font-weight: 600;
-        }
-
-        .date-row .dval {
-            color: #1a1d29;
             font-weight: 700;
+            margin-top: 2px;
+            letter-spacing: .2px;
+        }
+
+        .kpi-icon.in {  color: #2e7d32; }
+        .kpi-icon.out {   color: #c62828; }
+        .kpi-icon.net {   color: #e65100; }
+        .kpi-icon.age {  color: #5b5be0; }
+
+        /* ── Main grid (transactions + timeline) ── */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: start;
         }
 
         /* ── Transaction Table ── */
         .tx-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         .tx-table th {
             text-align: left;
-            padding: 8px 10px;
+            padding: 10px 16px;
             background: #f8f9fc;
-            color: #aaa;
+            color: #999;
             font-weight: 700;
-            font-size: 10px;
-            letter-spacing: .5px;
-            text-transform: uppercase;
+            font-size: 11.5px;
+            letter-spacing: .2px;
             border-bottom: 1px solid #ebebeb;
         }
 
+        .tx-table th.num, .tx-table td.num {
+            text-align: right;
+        }
+
         .tx-table td {
-            padding: 9px 10px;
+            padding: 11px 16px;
             border-bottom: 1px solid #f5f5f5;
             color: #1a1d29;
             font-weight: 600;
@@ -398,8 +488,12 @@
             border-bottom: none;
         }
 
+        .tx-table tr:nth-child(even) td {
+            background: #fbfbfd;
+        }
+
         .tx-table tr:hover td {
-            background: #fafafa;
+            background: #fdf3ee;
         }
 
         .tx-in {
@@ -412,17 +506,13 @@
             font-weight: 800;
         }
 
-        .tx-adj {
-            color: #e65100;
-            font-weight: 800;
-        }
-
         .tx-type {
             display: inline-block;
-            padding: 2px 8px;
+            padding: 3px 9px;
             border-radius: 10px;
-            font-size: 10px;
+            font-size: 11.5px;
             font-weight: 700;
+            white-space: nowrap;
         }
 
         .tx-type.in {
@@ -435,14 +525,9 @@
             color: #c62828;
         }
 
-        .tx-type.adj {
-            background: #fff3e0;
-            color: #e65100;
-        }
-
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 44px 20px;
             color: #ccc;
             font-size: 13px;
             font-weight: 600;
@@ -479,6 +564,10 @@
             position: relative;
         }
 
+        .tl-item:last-child {
+            padding-bottom: 0;
+        }
+
         .tl-dot {
             width: 10px;
             height: 10px;
@@ -498,11 +587,6 @@
             background: #4caf50;
         }
 
-        .tl-dot.orange {
-            box-shadow: 0 0 0 2px #ff9800;
-            background: #ff9800;
-        }
-
         .tl-dot.red {
             box-shadow: 0 0 0 2px #f44336;
             background: #f44336;
@@ -515,30 +599,27 @@
 
         .tl-body {
             flex: 1;
+            min-width: 0;
         }
 
         .tl-title {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             color: #1a1d29;
             margin: 0 0 2px;
         }
 
         .tl-time {
-            font-size: 10px;
+            font-size: 11.5px;
             color: #bbb;
             font-weight: 600;
         }
 
         .tl-note {
-            font-size: 11px;
+            font-size: 12.5px;
             color: #888;
             margin-top: 2px;
-        }
-
-        /* ── Full-width transaction section ── */
-        .full-card {
-            margin-bottom: 20px;
+            overflow-wrap: break-word;
         }
 
         /* ── Responsive ── */
@@ -547,20 +628,28 @@
                 grid-template-columns: 1fr;
             }
 
-            .bottom-grid {
+            .kpi-strip {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 768px) {
-            .bottom-grid {
-                grid-template-columns: 1fr;
-            }
-
             .show-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 8px;
+                gap: 10px;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-strip {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -573,7 +662,7 @@
         <div class="show-container">
             <div class="show-header" style="border-left-color:#dc2626; background:#fee2e2;">
                 <div>
-                    <h1 style="color:#dc2626;">⚠️ រកមិនឃើញទំនិញ</h1>
+                    <h1 style="color:#dc2626;"> រកមិនឃើញទំនិញ</h1>
                     <p>ទំនិញដែលភ្ជាប់ជាមួយកំណត់ត្រាស្តុកនេះលែងមានទៀតហើយ។</p>
                 </div>
             </div>
@@ -593,15 +682,15 @@
             $isLow = !$isOut && $inventory->quantity <= $inventory->reorder_level;
 
             $unitLabels = [
-             'kg' => 'គីឡូក្រាម',
-                                        'g' => 'ក្រាម',
-                                        'L' => 'លីត្រ',
-                                        'ml' => 'កំប៉ុង',
-                                        'pcs' => 'បន្ទះ',
-                                        'bag' => 'ដើម',
-                                        'box1' => 'កេស',
-                                        'box2' => 'ប្រអប់',
-                                        'pack' => 'កញ្ចប់',
+                'kg' => 'គីឡូក្រាម',
+                'g' => 'ក្រាម',
+                'L' => 'លីត្រ',
+                'ml' => 'កំប៉ុង',
+                'pcs' => 'បន្ទះ',
+                'bag' => 'ដើម',
+                'box1' => 'កេស',
+                'box2' => 'ប្រអប់',
+                'pack' => 'កញ្ចប់',
             ];
             $unit = $unitLabels[$inventory->product->unit] ?? $inventory->product->unit;
 
@@ -612,11 +701,16 @@
 
             // Movement history (stock in/out/adjustments), newest first
             $movements = $inventory->movements()->with('user')->latest()->take(10)->get();
-            $totalIn = $inventory->movements()->where('quantity_change', '>', 0)->sum('quantity_change');
-            $totalOut = abs($inventory->movements()->where('quantity_change', '<', 0)->sum('quantity_change'));
+            $totalIn = (int) $inventory->movements()->where('quantity_change', '>', 0)->sum('quantity_change');
+            $totalOut = (int) abs($inventory->movements()->where('quantity_change', '<', 0)->sum('quantity_change'));
+            $netChange = $totalIn - $totalOut;
+
+            // Estimated value currently held, using manual cost if set, else the product's USD price
+            $unitCost = $inventory->cost_per_unit ?? $inventory->product->price_usd ?? 0;
+            $stockValue = $inventory->quantity * $unitCost;
 
             $movementTypeLabels = [
-                'stock_create' => 'បង្កើតដំបូង',
+                'stock_create' => 'បង្កើត',
                 'manual_adjust' => 'កែសម្រួល',
                 'quick_adjust' => 'កែសម្រួលរហ័ស',
                 'stock_restock' => 'បន្ថែមស្តុក',
@@ -629,18 +723,33 @@
 
         <div class="show-container">
 
+            {{-- ── Breadcrumb ── --}}
+            <div class="breadcrumb">
+                <a href="{{ route('inventory.index') }}"><i class="fas fa-boxes"></i> ស្តុកទំនិញ</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">{{ $inventory->product->name }}</span>
+            </div>
+
             {{-- ── Header ── --}}
             <div class="show-header">
                 <div>
-                    <h1>{{ $inventory->product->name ?? 'មិនស្គាល់ទំនិញ' }}</h1>
+                    <div class="header-title-row">
+                        <h1>{{ $inventory->product->name ?? 'មិនស្គាល់ទំនិញ' }}</h1>
+                        <span class="badge {{ $isOut ? 'badge-bad' : ($isLow ? 'badge-warn' : 'badge-good') }}">
+                            @if($isOut) ✕ អស់ស្តុក
+                            @elseif($isLow) ⚠ ជិតអស់ស្តុក
+                            @else ✓ មានស្តុក
+                            @endif
+                        </span>
+                    </div>
                     <p>លេខស្តុក #{{ $inventory->id }} &nbsp;·&nbsp; កែប្រែចុងក្រោយ
                         {{ $inventory->updated_at ? $inventory->updated_at->diffForHumans() : '—' }}</p>
                 </div>
                 <div class="header-meta">
                     @if($inventory->warehouse_location)
-                        <span class="meta-pill"> {{ $inventory->warehouse_location }}</span>
+                        <span class="meta-pill"><i class="fas fa-warehouse"></i> {{ $inventory->warehouse_location }}</span>
                     @endif
-                    <span class="meta-pill">{{ $inventory->product->category ?? '—' }}</span>
+                    <span class="meta-pill"><i class="fas fa-tag"></i> {{ $inventory->product->category ?? '—' }}</span>
                 </div>
             </div>
 
@@ -649,61 +758,80 @@
 
                 {{-- Image --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> រូបភាពទំនិញ</div>
+                    <div class="card-header"><i class="fas fa-image"></i> រូបភាពទំនិញ</div>
                     <div class="card-body">
-                        <div class="prod-img {{ !($inventory->product->image ?? null) ? 'no-img' : '' }}">
+                        <div class="prod-img {{ !$inventory->product->imageUrl() ? 'no-img' : '' }}">
                             @if($inventory->product->imageUrl())
                                 <img src="{{ $inventory->product->imageUrl() }}" alt="{{ $inventory->product->name }}">
                             @else
                                 <i class="fas fa-image"></i>
+                                <span>គ្មានរូបភាព</span>
                             @endif
                         </div>
                         <p class="img-caption">{{ $inventory->product->name ?? '—' }} &nbsp;·&nbsp;
-                            {{ $inventory->product->category ?? '—' }}</p>
+                            {{ $inventory->product->category ?? '—' }}
+                            @if($inventory->product->created_at)
+                                <br>ក្នុងស្តុកតាំងពី {{ $inventory->product->created_at->format('d M Y') }}
+                            @endif
+                        </p>
                     </div>
                 </div>
 
                 {{-- Details --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> ព័ត៌មានលម្អិតស្តុក</div>
+                    <div class="card-header"><i class="fas fa-clipboard-list"></i> ព័ត៌មានលម្អិតស្តុក</div>
                     <div class="card-body">
-                        <h2 class="product-title">{{ $inventory->product->name ?? '—' }}</h2>
-                        <p class="product-cat">{{ $inventory->product->category ?? '—' }}</p>
 
-                        <span class="badge {{ $isOut ? 'badge-bad' : ($isLow ? 'badge-warn' : 'badge-good') }}">
-                            @if($isOut) ✕ អស់ស្តុក
-                            @elseif($isLow) ⚠ ជិតអស់ស្តុក
-                            @else ✓ មានស្តុក
-                            @endif
-                        </span>
-
-                        <div class="stat-row">
-                            <span class="stat-label">ចំនួនក្នុងស្តុក</span>
-                            <span class="stat-value" style="color:#e85d24;">{{ $inventory->quantity }} {{ $unit }}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">កម្រិតត្រូវបំពេញ</span>
-                            <span class="stat-value">{{ $inventory->reorder_level }} {{ $unit }}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">ទីតាំងស្តុក</span>
-                            <span class="stat-value">{{ $inventory->warehouse_location ?? '—' }}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">ខ្នាត</span>
-                            <span class="stat-value">{{ $unit }}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">SKU / បាកូដ</span>
-                            <span
-                                class="stat-value">{{ $inventory->product->sku ?? $inventory->product->barcode ?? '—' }}</span>
-                        </div>
-                        @if($inventory->cost_per_unit)
-                            <div class="stat-row">
-                                <span class="stat-label">តម្លៃដើម (កំណត់ដោយដៃ)</span>
-                                <span class="stat-value">${{ number_format($inventory->cost_per_unit, 2) }}</span>
+                        {{-- Hero stock figure --}}
+                        <div class="hero-stock">
+                            <div>
+                                <p class="hero-stock-label">ចំនួនក្នុងស្តុកបច្ចុប្បន្ន</p>
+                                <div class="hero-stock-num" style="color:{{ $isOut ? '#c62828' : ($isLow ? '#e65100' : '#1a1d29') }};">
+                                    {{ number_format($inventory->quantity) }}<span class="unit">{{ $unit }}</span>
+                                </div>
                             </div>
-                        @endif
+                            <div class="hero-reorder">
+                                កម្រិតត្រូវបំពេញ
+                                <b>{{ number_format($inventory->reorder_level) }} {{ $unit }}</b>
+                            </div>
+                        </div>
+
+                        <div class="stock-bar-wrap">
+                            <div class="stock-bar-label">
+                                <span>កម្រិតស្តុក</span>
+                                <span>{{ $pct }}%</span>
+                            </div>
+                            <div class="stock-bar-bg">
+                                <div class="stock-bar-fill {{ $barClass }}" style="width:{{ $pct }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-grid">
+                            <div class="stat-cell">
+                                <span class="stat-label">ទីតាំងស្តុក</span>
+                                <span class="stat-value">{{ $inventory->warehouse_location ?? '—' }}</span>
+                            </div>
+                            <div class="stat-cell">
+                                <span class="stat-label">ខ្នាត</span>
+                                <span class="stat-value">{{ $unit }}</span>
+                            </div>
+                            <div class="stat-cell">
+                                <span class="stat-label">SKU / បាកូដ</span>
+                                <span class="stat-value">{{ $inventory->product->sku ?? $inventory->product->barcode ?? '—' }}</span>
+                            </div>
+                            @if($inventory->cost_per_unit)
+                                <div class="stat-cell">
+                                    <span class="stat-label">តម្លៃដើម (កំណត់ដោយដៃ)</span>
+                                    <span class="stat-value">${{ number_format($inventory->cost_per_unit, 2) }}</span>
+                                </div>
+                            @endif
+                            @if($stockValue > 0)
+                                <div class="stat-cell full">
+                                    <span class="stat-label">តម្លៃស្តុកសរុប (ប៉ាន់ស្មាន)</span>
+                                    <span class="stat-value" style="color:#e85d24;">${{ number_format($stockValue, 2) }}</span>
+                                </div>
+                            @endif
+                        </div>
 
                         {{-- Pricing (KHR is the base price; USD is derived from it) --}}
                         <div class="prices">
@@ -717,22 +845,13 @@
                             </div>
                         </div>
 
-                        {{-- Stock level bar --}}
-                        <div class="stock-bar-wrap">
-                            <div class="stock-bar-label">
-                                <span>កម្រិតស្តុក</span>
-                                <span>{{ $pct }}%</span>
-                            </div>
-                            <div class="stock-bar-bg">
-                                <div class="stock-bar-fill {{ $barClass }}" style="width:{{ $pct }}%"></div>
-                            </div>
-                        </div>
-
                         {{-- Action buttons --}}
                         <div class="btns">
-                            <a href="{{ route('inventory.edit', $inventory) }}" class="btn-edit">
-                                <i class="fas fa-edit"></i> កែប្រែ
-                            </a>
+                            @unless(auth()->user()->isAuditor())
+                                <a href="{{ route('inventory.edit', $inventory) }}" class="btn-edit">
+                                    <i class="fas fa-edit"></i> កែ
+                                </a>
+                            @endunless
                             <a href="{{ route('inventory.index') }}" class="btn-back">
                                 <i class="fas fa-arrow-left"></i> ត្រឡប់
                             </a>
@@ -741,61 +860,48 @@
                 </div>
             </div>
 
-            {{-- ── Bottom 3-col: KPIs / Full Transactions / Activity Timeline ── --}}
-            <div class="bottom-grid">
-
-                {{-- KPIs + Dates --}}
-                <div class="card">
-                    <div class="card-header"><span class="dot"></span> សង្ខេបរហ័ស</div>
-                    <div class="card-body">
-                        <div class="kpi-grid">
-                            <div class="kpi highlight">
-                                <div class="kpi-val">{{ $inventory->quantity }}</div>
-                                <div class="kpi-label">ស្តុកបច្ចុប្បន្ន</div>
-                            </div>
-                            <div class="kpi">
-                                <div class="kpi-val">{{ $inventory->reorder_level }}</div>
-                                <div class="kpi-label">កម្រិតត្រូវបំពេញ</div>
-                            </div>
-                            <div class="kpi">
-                                <div class="kpi-val" style="color:#2e7d32;">+{{ $totalIn }}</div>
-                                <div class="kpi-label">ស្តុកចូលសរុប</div>
-                            </div>
-                            <div class="kpi">
-                                <div class="kpi-val" style="color:#c62828;">-{{ $totalOut }}</div>
-                                <div class="kpi-label">ស្តុកចេញសរុប</div>
-                            </div>
-                        </div>
-
-                        <div class="date-info">
-                            <div class="date-row">
-                                <span class="dlabel">បង្កើតនៅ</span>
-                                <span
-                                    class="dval">{{ $inventory->created_at ? $inventory->created_at->format('d M Y, H:i') : '—' }}</span>
-                            </div>
-                            <div class="date-row">
-                                <span class="dlabel">កែប្រែនៅ</span>
-                                <span
-                                    class="dval">{{ $inventory->updated_at ? $inventory->updated_at->format('d M Y, H:i') : '—' }}</span>
-                            </div>
-                            <div class="date-row">
-                                <span class="dlabel">រយៈពេល</span>
-                                <span
-                                    class="dval">{{ $inventory->created_at ? $inventory->created_at->diffForHumans() : '—' }}</span>
-                            </div>
-                            @if($inventory->product->created_at ?? null)
-                                <div class="date-row">
-                                    <span class="dlabel">ទំនិញមានតាំងពី</span>
-                                    <span class="dval">{{ $inventory->product->created_at->format('d M Y') }}</span>
-                                </div>
-                            @endif
-                        </div>
+            {{-- ── KPI strip ── --}}
+            <div class="kpi-strip">
+                <div class="kpi-tile">
+                    <div class="kpi-icon in"></i></div>
+                    <div>
+                        <div class="kpi-val" style="color:#2e7d32;">+{{ number_format($totalIn) }}</div>
+                        <div class="kpi-label">ស្តុកចូលសរុប</div>
                     </div>
                 </div>
+                <div class="kpi-tile">
+                    <div class="kpi-icon out"></div>
+                    <div>
+                        <div class="kpi-val" style="color:#c62828;">-{{ number_format($totalOut) }}</div>
+                        <div class="kpi-label">ស្តុកចេញសរុប</div>
+                    </div>
+                </div>
+                <div class="kpi-tile">
+                    <div class="kpi-icon net"></div>
+                    <div>
+                        <div class="kpi-val" style="color:{{ $netChange >= 0 ? '#2e7d32' : '#c62828' }};">
+                            {{ $netChange >= 0 ? '+' : '' }}{{ number_format($netChange) }}
+                        </div>
+                        <div class="kpi-label">ស្តុក (ចូល − ចេញ)</div>
+                    </div>
+                </div>
+                <div class="kpi-tile">
+                    <div class="kpi-icon age"></div>
+                    <div>
+                        <div class="kpi-val" style="font-size:24px;">
+                            {{ $inventory->created_at ? $inventory->created_at->diffForHumans(null, true) : '—' }}
+                        </div>
+                        <div class="kpi-label">តាមដានតាំងពី</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ── Main: Movements (wide) + Timeline (narrow) ── --}}
+            <div class="main-grid">
 
                 {{-- Recent Movements --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> ចលនាស្តុកថ្មីៗ</div>
+                    <div class="card-header"><i class="fas fa-exchange-alt"></i> ចលនាស្តុកថ្មីៗ</div>
                     <div class="card-body" style="padding:0;">
                         @if($movements->isEmpty())
                             <div class="empty-state">
@@ -803,50 +909,52 @@
                                 មិនទាន់មានចលនាស្តុកទេ
                             </div>
                         @else
-                            <table class="tx-table">
-                                <thead>
-                                    <tr>
-                                        <th>ប្រភេទ</th>
-                                        <th>ចំនួន</th>
-                                        <th>មូលហេតុ</th>
-                                        <th>អ្នកធ្វើ</th>
-                                        <th>កាលបរិច្ឆេទ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($movements as $m)
-                                        @php $isIn = $m->quantity_change > 0; @endphp
+                            <div style="overflow-x:auto;">
+                                <table class="tx-table">
+                                    <thead>
                                         <tr>
-                                            <td>
-                                                <span class="tx-type {{ $isIn ? 'in' : 'out' }}">
-                                                    {{ $movementLabel($m) }}
-                                                </span>
-                                            </td>
-                                            <td class="{{ $isIn ? 'tx-in' : 'tx-out' }}">
-                                                {{ $isIn ? '+' : '' }}{{ number_format($m->quantity_change) }}
-                                            </td>
-                                            <td
-                                                style="color:#888; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
-                                                title="{{ $m->note }}">
-                                                {{ $m->note ?? '—' }}
-                                            </td>
-                                            <td style="color:#888; white-space:nowrap;">
-                                                {{ $m->user?->name ?? '—' }}
-                                            </td>
-                                            <td style="color:#bbb; white-space:nowrap;">
-                                                {{ $m->created_at ? $m->created_at->format('d/m H:i') : '—' }}
-                                            </td>
+                                            <th>ប្រភេទ</th>
+                                            <th class="num">ចំនួន</th>
+                                            <th>មូលហេតុ</th>
+                                            <th>អ្នកចេញវិក្ក័យបត្រ</th>
+                                            <th>កាលបរិច្ឆេទ</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($movements as $m)
+                                            @php $isIn = $m->quantity_change > 0; @endphp
+                                            <tr>
+                                                <td>
+                                                    <span class="tx-type {{ $isIn ? 'in' : 'out' }}">
+                                                        {{ $movementLabel($m) }}
+                                                    </span>
+                                                </td>
+                                                <td class="num {{ $isIn ? 'tx-in' : 'tx-out' }}">
+                                                    {{ $isIn ? '+' : '' }}{{ number_format($m->quantity_change) }}
+                                                </td>
+                                                <td
+                                                    style="color:#888; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                                                    title="{{ $m->note }}">
+                                                    {{ $m->note ?? '—' }}
+                                                </td>
+                                                <td style="color:#888; white-space:nowrap;">
+                                                    {{ $m->user?->name ?? '—' }}
+                                                </td>
+                                                <td style="color:#bbb; white-space:nowrap;">
+                                                    {{ $m->created_at ? $m->created_at->format('d/m/Y H:i') : '—' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         @endif
                     </div>
                 </div>
 
                 {{-- Activity Timeline --}}
                 <div class="card">
-                    <div class="card-header"><span class="dot"></span> ប្រវត្តិសកម្មភាព</div>
+                    <div class="card-header"><i class="fas fa-history"></i> ប្រវត្តិសកម្មភាព</div>
                     <div class="card-body">
                         @if($movements->isEmpty() && !$inventory->created_at)
                             <div class="empty-state">
@@ -856,15 +964,16 @@
                         @else
                             <ul class="timeline">
 
-                                {{-- Created record --}}
-                                <li class="tl-item">
-                                    <div class="tl-dot gray"></div>
-                                    <div class="tl-body">
-                                        <p class="tl-title">បង្កើតកំណត់ត្រាស្តុក</p>
-                                        <p class="tl-time">
-                                            {{ $inventory->created_at ? $inventory->created_at->format('d M Y, H:i') : '—' }}</p>
-                                    </div>
-                                </li>
+                                {{-- Last updated (if different from created) — shown most recent first --}}
+                                @if($inventory->updated_at && $inventory->updated_at->ne($inventory->created_at))
+                                    <li class="tl-item">
+                                        <div class="tl-dot"></div>
+                                        <div class="tl-body">
+                                            <p class="tl-title">ការកែចុងក្រោយ</p>
+                                            <p class="tl-time">{{ $inventory->updated_at->format('d M Y, H:i') }}</p>
+                                        </div>
+                                    </li>
+                                @endif
 
                                 {{-- Movements as timeline events --}}
                                 @foreach($movements->take(7) as $m)
@@ -889,25 +998,24 @@
                                     </li>
                                 @endforeach
 
-                                {{-- Last updated (if different from created) --}}
-                                @if($inventory->updated_at && $inventory->updated_at->ne($inventory->created_at))
-                                    <li class="tl-item">
-                                        <div class="tl-dot"></div>
-                                        <div class="tl-body">
-                                            <p class="tl-title">កែប្រែចុងក្រោយ</p>
-                                            <p class="tl-time">{{ $inventory->updated_at->format('d M Y, H:i') }}</p>
-                                        </div>
-                                    </li>
-                                @endif
+                                {{-- Created record --}}
+                                <li class="tl-item">
+                                    <div class="tl-dot gray"></div>
+                                    <div class="tl-body">
+                                        <p class="tl-title">បង្កើតកំណត់ត្រាស្តុក</p>
+                                        <p class="tl-time">
+                                            {{ $inventory->created_at ? $inventory->created_at->format('d M Y, H:i') : '—' }}</p>
+                                    </div>
+                                </li>
 
                             </ul>
                         @endif
                     </div>
                 </div>
 
-            </div>{{-- /bottom-grid --}}
+            </div>
 
-        </div>{{-- /show-container --}}
+        </div>
     @endif
 
 @endsection

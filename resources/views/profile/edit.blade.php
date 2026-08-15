@@ -82,6 +82,7 @@
 
     .role-admin { background: rgba(220,38,38,0.2); color: #fca5a5; }
     .role-manager { background: rgba(59,130,246,0.2); color: #93c5fd; }
+    .role-boss { background: rgba(139,92,246,0.2); color: #c4b5fd; }
     .role-staff { background: rgba(168,85,247,0.2); color: #d8b4fe; }
 
     .section-card {
@@ -326,6 +327,8 @@
                         <i class="fas fa-crown"></i> Administrator
                     @elseif($user->role === 'manager')
                         <i class="fas fa-chart-line"></i> Manager
+                    @elseif($user->role === 'boss')
+                        <i class="fas fa-user-tie"></i> Boss
                     @else
                         <i class="fas fa-user"></i> Staff
                     @endif

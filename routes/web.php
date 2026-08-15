@@ -67,10 +67,15 @@ Route::middleware('auth')->group(function () {
 
     // Allow admin, manager, office staff and inventory staff to fully manage inventory
     Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
-        Route::resource('inventory', InventoryController::class);
+        Route::resource('inventory', InventoryController::class)->except(['index', 'show']);
         Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
         Route::post('inventory/{inventory}/restock', [InventoryController::class, 'restock'])->name('inventory.restock');
         Route::post('inventory/{inventory}/reduce', [InventoryController::class, 'reduce'])->name('inventory.reduce');
+    });
+
+    // Stock viewing (view-only) — same roles as above, plus auditor
+    Route::middleware('role:admin,manager,staff,staff_inventory,auditor')->group(function () {
+        Route::resource('inventory', InventoryController::class)->only(['index', 'show']);
         Route::get('inventory/export/excel', [InventoryController::class, 'exportExcel'])->name('inventory.export.excel');
         Route::get('inventory/export/pdf', [InventoryController::class, 'exportPdf'])->name('inventory.export.pdf');
     });
@@ -92,15 +97,12 @@ Route::middleware('auth')->group(function () {
         // role can also be granted full access without exposing other admin routes.
 
 
-        // Payment management
-        Route::resource('payments', PaymentController::class)->only(['index', 'store', 'update']);
-        Route::get('payments/export/excel', [PaymentController::class, 'exportExcel'])->name('payments.export.excel');
-        Route::get('payments/export/pdf', [PaymentController::class, 'exportPdf'])->name('payments.export.pdf');
+        // Payment management (write)
+        Route::resource('payments', PaymentController::class)->only(['store', 'update']);
         Route::post('orders/{order}/payments', [PaymentController::class, 'recordOrderPayment'])->name('orders.payments.store');
 
-        // Purchase management
-        Route::resource('purchases', PurchaseController::class);
-        Route::get('purchasing', [PurchaseController::class, 'index'])->name('purchasing');
+        // Purchase / expense management (write)
+        Route::resource('purchases', PurchaseController::class)->except(['index', 'show']);
 
         // Order delete (only admin/manager)
         Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
@@ -109,8 +111,27 @@ Route::middleware('auth')->group(function () {
         Route::get('invoices/trash', [InvoiceController::class, 'trashed'])->name('invoices.trash');
         Route::post('invoices/{id}/restore', [InvoiceController::class, 'restore'])->name('invoices.restore');
 
+        // Close this month's invoice numbering (only admin/manager)
+        Route::post('invoices/close-period', [InvoiceController::class, 'closePeriod'])->name('invoices.close-period');
+        // Undo an accidental close, only while nothing's been invoiced under the new period yet
+        Route::post('invoices/undo-close-period', [InvoiceController::class, 'undoClosePeriod'])->name('invoices.undo-close-period');
+        // Force-merge the active period back into the last closed one, renumbering its invoices to continue that sequence
+        Route::post('invoices/merge-back-period', [InvoiceController::class, 'mergeBackPeriod'])->name('invoices.merge-back-period');
+
         // Invoice delete (only admin/manager — staff/staff_inventory can't recover from trash)
         Route::delete('invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    });
+
+    // ============================================
+    // ADMIN, MANAGER & AUDITOR - Payments & Expenses (view-only for auditor)
+    // ============================================
+    Route::middleware('role:admin,manager,auditor')->group(function () {
+        Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::get('payments/export/excel', [PaymentController::class, 'exportExcel'])->name('payments.export.excel');
+        Route::get('payments/export/pdf', [PaymentController::class, 'exportPdf'])->name('payments.export.pdf');
+
+        Route::resource('purchases', PurchaseController::class)->only(['index', 'show']);
+        Route::get('purchasing', [PurchaseController::class, 'index'])->name('purchasing');
     });
 
     // Product management
@@ -157,11 +178,15 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
-        Route::get('invoices/export/report', [InvoiceController::class, 'exportReport'])->name('invoices.export');
         Route::resource('invoices', InvoiceController::class)->only(['edit', 'update']);
+        Route::post('invoices/{invoice}/toggle-printed', [InvoiceController::class, 'togglePrinted'])->name('invoices.toggle-printed');
+    });
+
+    // Invoice viewing/printing/export — read-only, includes auditor
+    Route::middleware('role:admin,manager,staff,staff_inventory,auditor')->group(function () {
+        Route::get('invoices/export/report', [InvoiceController::class, 'exportReport'])->name('invoices.export');
         Route::get('invoices/print-bulk', [InvoiceController::class, 'printBulk'])->name('invoices.print-bulk');
         Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
-        Route::post('invoices/{invoice}/toggle-printed', [InvoiceController::class, 'togglePrinted'])->name('invoices.toggle-printed');
     });
 
     // Packing labels
@@ -182,7 +207,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Invoice index/show view access. Staff can only view; admin/manager/staff_inventory use full routes above for write actions.
-    Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
+    Route::middleware('role:admin,manager,staff,staff_inventory,auditor')->group(function () {
         Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     });
@@ -199,7 +224,7 @@ Route::middleware('auth')->group(function () {
     // ============================================
     // ALL USERS - Reports
     // ============================================
-    Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
+    Route::middleware('role:admin,manager,staff,staff_inventory,auditor')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/', [ReportController::class, 'dashboard'])->name('dashboard');
             Route::get('/sales', [ReportController::class, 'sales'])->name('sales');
@@ -208,8 +233,8 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // Admin & Manager - Extra reports
-    Route::middleware('role:admin,manager')->group(function () {
+    // Admin, Manager & Auditor - Extra reports
+    Route::middleware('role:admin,manager,auditor')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/daily', [ReportController::class, 'daily'])->name('daily');
             Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');

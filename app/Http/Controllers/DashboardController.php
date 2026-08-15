@@ -19,6 +19,10 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        if (auth()->user()->isStaffInventory()) {
+            return redirect()->route('inventory.index');
+        }
+
         $today = Carbon::today('Asia/Phnom_Penh');
         $exchangeRate = 4000;
         $last7Start = $today->copy()->subDays(6);

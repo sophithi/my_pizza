@@ -79,6 +79,39 @@
             color: #065f46;
         }
 
+        .invoice-btn-warning {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #c2410c;
+        }
+
+        .invoice-btn-warning:hover {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .invoice-btn-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .invoice-btn-info:hover {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .invoice-btn-danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .invoice-btn-danger:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
         .stats-grid {
             display: grid;
             gap: 14px;
@@ -421,6 +454,56 @@
                     <a href="{{ route('invoices.trash') }}" class="invoice-btn invoice-btn-soft">
                         <i class="fas fa-trash"></i> វិក្ក័យបត្របានលុប
                     </a>
+                    @if($canUndoClosePeriod ?? false)
+                        <form method="POST" action="{{ route('invoices.undo-close-period') }}"
+                            data-confirm="លេខវិក្ក័យបត្រនឹងបន្តដូចមុន។"
+                            data-confirm-title="លុបចោលការបិទបញ្ជីវិក្ក័យបត្រចុងក្រោយ?"
+                            data-confirm-icon="question"
+                            data-confirm-color="#2563eb">
+                            @csrf
+                            <button type="submit" class="invoice-btn invoice-btn-info">
+                                <i class="fas fa-rotate-left"></i> លុបចោលការបិទបញ្ជី
+                            </button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('invoices.close-period') }}"
+                            data-confirm="វិក្ក័យបត្របន្ទាប់នឹងចាប់ផ្តើមពី INV-000001 ។"
+                            data-confirm-title="បិទបញ្ជីវិក្ក័យបត្រខែនេះ?"
+                            data-confirm-icon="warning">
+                            @csrf
+                            <button type="submit" class="invoice-btn invoice-btn-warning">
+                                <i class="fas fa-lock"></i> បិទបញ្ជីវិក្ក័យបត្រក្នុងខែនេះ
+                            </button>
+                        </form>
+                    @endif
+
+                    @if(!empty($mergeBackPreview))
+                        @php
+                            $mergeBackCount = count($mergeBackPreview);
+                            $mergeBackRows = collect($mergeBackPreview)
+                                ->map(fn($m) => '<div style="font-family:monospace;font-size:13px;padding:3px 0">'
+                                    . '<span style="color:#6b7280">' . e($m['old_number']) . '</span>'
+                                    . ' <i class="fas fa-arrow-right" style="font-size:10px;color:#9ca3af"></i> '
+                                    . '<span style="color:#e85d24;font-weight:700">' . e($m['new_number']) . '</span>'
+                                    . '</div>')
+                                ->implode('');
+                            $mergeBackHtml = 'លេខនឹងផ្លាស់ប្តូរ៖'
+                                . '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;margin:10px 0;text-align:left;max-height:160px;overflow-y:auto">'
+                                . $mergeBackRows . '</div>'
+                                . '<strong style="color:#dc2626">សកម្មភាពនេះមិនអាចលុបចោលវិញបានទេ។</strong>';
+                        @endphp
+                        <form method="POST" action="{{ route('invoices.merge-back-period') }}"
+                            data-confirm="{{ $mergeBackHtml }}"
+                            data-confirm-html="1"
+                            data-confirm-title="បញ្ចូលវិក្ក័យបត្រ {{ $mergeBackCount }} ត្រឡប់ទៅខែមុន?"
+                            data-confirm-icon="warning"
+                            data-confirm-color="#dc2626">
+                            @csrf
+                            <button type="submit" class="invoice-btn invoice-btn-danger">
+                                <i class="fas fa-code-merge"></i> បញ្ចូលមកវិញក្នុងខែមុន
+                            </button>
+                        </form>
+                    @endif
                 @endif
                 <a href="{{ route('orders.create') }}" class="invoice-btn invoice-btn-primary">
                     <i class="fas fa-plus"></i> បង្កើតបញ្ជាទិញ
@@ -491,9 +574,9 @@
                     <span class="date-placeholder">ជ្រើសរើសកាលបរិច្ឆេទ</span>
                 </div>
 
-                <a href="{{ route('invoices.index') }}" class="invoice-btn invoice-btn-soft">
+                <!-- <a href="{{ route('invoices.index') }}" class="invoice-btn invoice-btn-soft">
                     <i class="fas fa-rotate-left"></i> សម្អាត
-                </a>
+                </a> -->
 
                 <a href="{{ route('invoices.export', request()->query()) }}" class="invoice-btn invoice-btn-export">
                     <i class="fas fa-file-excel"></i> ទាញយក
@@ -572,14 +655,21 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    <form method="POST" action="{{ route('invoices.toggle-printed', $invoice) }}" class="m-0">
-                                        @csrf
+                                    @if(auth()->user()->isAuditor())
                                         <label class="printed-checkbox">
-                                            <input type="checkbox" onchange="this.form.submit()"
-                                                {{ $invoice->printed_at ? 'checked' : '' }}>
+                                            <input type="checkbox" disabled {{ $invoice->printed_at ? 'checked' : '' }}>
                                             <span class="printed-label">{{ $invoice->printed_at ? 'បានព្រីន' : 'មិនទាន់បានព្រីន' }}</span>
                                         </label>
-                                    </form>
+                                    @else
+                                        <form method="POST" action="{{ route('invoices.toggle-printed', $invoice) }}" class="m-0">
+                                            @csrf
+                                            <label class="printed-checkbox">
+                                                <input type="checkbox" onchange="this.form.submit()"
+                                                    {{ $invoice->printed_at ? 'checked' : '' }}>
+                                                <span class="printed-label">{{ $invoice->printed_at ? 'បានព្រីន' : 'មិនទាន់បានព្រីន' }}</span>
+                                            </label>
+                                        </form>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="action-row">
@@ -590,7 +680,7 @@
                                             title="ព្រីន ">
                                             <i class="fas fa-print"></i>
                                         </a>
-                                        @if ($invoice->status !== 'paid')
+                                        @if ($invoice->status !== 'paid' && !auth()->user()->isAuditor())
                                             <a href="{{ route('invoices.edit', $invoice) }}" class="icon-action icon-edit"
                                                 title="កែប្រែ">
                                                 <i class="fas fa-edit"></i>

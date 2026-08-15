@@ -68,10 +68,20 @@
                                             style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #e3f2fd; color: #1976d2;">
                                             <i class="fas fa-chart-line"></i> Manager
                                         </span>
+                                    @elseif($user->role == 'boss')
+                                        <span
+                                            style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #ede9fe; color: #6d28d9;">
+                                            <i class="fas fa-user-tie"></i> Boss
+                                        </span>
                                     @elseif($user->role == 'staff_inventory')
                                         <span
                                             style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #fff3e0; color: #e65100;">
                                             <i class="fas fa-boxes"></i> Staff (Inventory)
+                                        </span>
+                                    @elseif($user->role == 'auditor')
+                                        <span
+                                            style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #ccfbf1; color: #0f766e;">
+                                            <i class="fas fa-magnifying-glass-chart"></i> Auditor
                                         </span>
                                     @else
                                         <span

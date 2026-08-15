@@ -13,6 +13,7 @@ class Invoice extends Model
     protected $fillable = [
         'order_id',
         'invoice_number',
+        'invoice_period_id',
         'invoice_date',
         'due_date',
         'subtotal',
@@ -90,28 +91,48 @@ class Invoice extends Model
     }
 
     /**
-     * Generate next invoice number.
+     * Get the invoicing period this invoice belongs to. Numbering restarts
+     * from 1 at the start of each period (see InvoicePeriod::closeCurrentAndStartNew()).
      */
-    public static function generateInvoiceNumber(): string
+    public function period()
     {
-        $lastInvoice = self::withTrashed()->orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")->first();
+        return $this->belongsTo(InvoicePeriod::class, 'invoice_period_id');
+    }
+
+    /**
+     * Generate the next invoice number within a period. Defaults to the
+     * currently active period.
+     */
+    public static function generateInvoiceNumber(?int $periodId = null): string
+    {
+        $periodId = $periodId ?? InvoicePeriod::current()->id;
+        $lastInvoice = self::withTrashed()
+            ->where('invoice_period_id', $periodId)
+            ->orderByRaw("CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC")
+            ->first();
         $nextNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, 4) + 1 : 1;
         return 'INV-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
     }
 
     /**
-     * Create an invoice with a guaranteed-unique invoice_number. Two requests
-     * can still read the same "next number" before either commits; if the
-     * insert collides on the unique constraint, regenerate and retry rather
-     * than surface a 500.
+     * Create an invoice with a guaranteed-unique invoice_number within the
+     * active period. Two requests can still read the same "next number"
+     * before either commits; if the insert collides on the unique
+     * constraint, regenerate and retry rather than surface a 500.
      */
     public static function createUnique(array $attributes): self
     {
-        for ($attempt = 1; $attempt <= 5; $attempt++) {
+        $attempt = 1;
+
+        while (true) {
+            $periodId = InvoicePeriod::current()->id;
             try {
-                return self::create(['invoice_number' => self::generateInvoiceNumber()] + $attributes);
+                return self::create([
+                    'invoice_period_id' => $periodId,
+                    'invoice_number' => self::generateInvoiceNumber($periodId),
+                ] + $attributes);
             } catch (\Illuminate\Database\QueryException $e) {
-                if ($attempt === 5 || $e->getCode() !== '23000') {
+                if ($attempt++ >= 5 || $e->getCode() !== '23000') {
                     throw $e;
                 }
             }

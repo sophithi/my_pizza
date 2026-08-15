@@ -434,7 +434,7 @@
                 <a href="{{ route('invoices.print', $invoice) }}?return={{ urlencode($backUrl ?? route('invoices.index')) }}" class="invoice-btn invoice-btn-primary">
                     <i class="fas fa-print"></i> Print
                 </a>
-                @if(!auth()->user()->isStaffInventory())
+                @if(!auth()->user()->isStaffInventory() && !auth()->user()->isAuditor())
                     @if($invoice->packing_sent_at)
                         <span class="invoice-btn invoice-btn-success">
                             <i class="fas fa-check"></i> បានដាក់រៀបចំ
@@ -448,12 +448,12 @@
                         </form>
                     @endif
                 @endif
-                @if($invoice->order)
+                @if($invoice->order && !auth()->user()->isAuditor())
                     <a href="{{ route('orders.edit', $invoice->order) }}" class="invoice-btn invoice-btn-soft">
                         <i class="fas fa-shopping-cart"></i> កែបញ្ជាទិញ
                     </a>
                 @endif
-                @if($invoice->status !== 'paid')
+                @if($invoice->status !== 'paid' && !auth()->user()->isAuditor())
                     <a href="{{ route('invoices.edit', $invoice) }}" class="invoice-btn invoice-btn-soft">
                         <i class="fas fa-file-invoice"></i> កែវិក្ក័យបត្រ
                     </a>

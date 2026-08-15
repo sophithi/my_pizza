@@ -107,9 +107,11 @@
                 <p class="text-muted mb-0">{{ $reference }}</p>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('purchases.edit', $purchase) }}" class="btn expense-primary">
-                    <i class="fas fa-pen me-1"></i> Edit
-                </a>
+                @unless(auth()->user()->isAuditor())
+                    <a href="{{ route('purchases.edit', $purchase) }}" class="btn expense-primary">
+                        <i class="fas fa-pen me-1"></i> Edit
+                    </a>
+                @endunless
                 <a href="{{ route('purchases.index') }}" class="btn btn-outline-secondary">
                     Back
                 </a>
@@ -160,13 +162,15 @@
         @endif
 
         <div class="expense-card d-flex flex-wrap gap-2">
-            <a href="{{ route('purchases.edit', $purchase) }}" class="btn expense-primary">Edit Expense</a>
-            <form action="{{ route('purchases.destroy', $purchase) }}" method="POST"
-                onsubmit="return confirm('Delete this daily expense?');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger">Delete Expense</button>
-            </form>
+            @unless(auth()->user()->isAuditor())
+                <a href="{{ route('purchases.edit', $purchase) }}" class="btn expense-primary">Edit Expense</a>
+                <form action="{{ route('purchases.destroy', $purchase) }}" method="POST"
+                    onsubmit="return confirm('Delete this daily expense?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete Expense</button>
+                </form>
+            @endunless
             <a href="{{ route('purchases.index') }}" class="btn btn-outline-secondary">Back</a>
         </div>
     </div>

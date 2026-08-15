@@ -439,7 +439,7 @@
         <a href="{{ route('packing.delivery_mayo', $invoice) }}" target="_blank"
             class="brand-chip @if($currentRoute === 'packing.delivery_mayo') active @endif">ម៉ាយូនេស បន្ទាយឆ្មារ</a>
         <a href="{{ route('packing.delivery_tamon', $invoice) }}" target="_blank"
-            class="brand-chip @if($currentRoute === 'packing.delivery_tamon') active @endif">តាម៉ាន់មានជ័យ</a>
+            class="brand-chip @if($currentRoute === 'packing.delivery_tamon') active @endif">តាមាន់មានជ័យ</a>
         </div>
     {{-- Screen buttons --}}
     <div class="no-print">
@@ -461,6 +461,27 @@
         </a>
     </div>
 
+    <script>
+        // When opened inside the packing/index sticker popup (an iframe),
+        // brand-switch chips and the back link shouldn't navigate the iframe
+        // itself — that would either open a stray new tab or load the full
+        // app layout squeezed into the small frame. Talk to the parent
+        // instead. Standalone/new-tab views are unaffected.
+        if (window.self !== window.top) {
+            document.querySelectorAll('.brand-chip').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'navigate', url: link.href, title: document.title }, '*');
+                });
+            });
+            document.querySelectorAll('.btn-back').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.parent.postMessage({ source: 'sticker-page', action: 'close' }, '*');
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>
