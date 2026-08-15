@@ -66,11 +66,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is manager
+     * Check if user is manager (Boss has identical permissions to Manager)
      */
     public function isManager(): bool
     {
-        return $this->role === 'manager';
+        return in_array($this->role, ['manager', 'boss']);
+    }
+
+    /**
+     * Check if user is boss
+     */
+    public function isBoss(): bool
+    {
+        return $this->role === 'boss';
     }
 
     /**
@@ -98,6 +106,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is an auditor (view-only access to stock, invoices, expenses, payments, reports)
+     */
+    public function isAuditor(): bool
+    {
+        return $this->role === 'auditor';
+    }
+
+    /**
      * Get role label
      */
     public function getRoleLabel(): string
@@ -105,8 +121,10 @@ class User extends Authenticatable
         return match($this->role) {
             'admin' => 'Administrator',
             'manager' => 'Manager',
+            'boss' => 'Boss',
             'staff' => 'Staff (Office)',
             'staff_inventory' => 'Staff (Inventory)',
+            'auditor' => 'Auditor',
             default => 'Unknown',
         };
     }

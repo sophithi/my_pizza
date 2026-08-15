@@ -130,6 +130,12 @@ class PaymentController extends Controller
         $totalAmountKhr = $payment?->total_amount_khr ?? $order->totalKhr();
         $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $totalAmountKhr : 0);
 
+        // "Old debt" — a payment recorded today for an order originally placed
+        // on an earlier day.
+        $isOldDebt = $payment?->created_at
+            && $payment->created_at->isToday()
+            && Carbon::parse($order->order_date)->lt(Carbon::today());
+
         return (object) [
             'id' => $payment?->id,
             'payment_id' => $payment?->id,
@@ -137,6 +143,7 @@ class PaymentController extends Controller
             'customer_name' => $payment?->customer_name ?? $order->customer?->name ?? 'Walk-in Customer',
             'order_id' => 'ORD-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
             'order_date' => $payment?->created_at ?? $order->order_date,
+            'order_actual_date' => $order->order_date,
             'payment_date' => $payment?->created_at,
             'total_amount' => (float) $order->total_amount,
             'total_amount_khr' => (float) $totalAmountKhr,
@@ -157,6 +164,7 @@ class PaymentController extends Controller
             'exchange_rate' => (float) ($payment?->exchange_rate ?? 4000),
             'exchange_rate_notes' => $payment?->exchange_rate_notes,
             'has_exchange_rate_variance' => !empty($payment?->exchange_rate_notes),
+            'is_old_debt' => $isOldDebt,
         ];
     }
 
@@ -173,6 +181,7 @@ class PaymentController extends Controller
             'paid'        => $all->where('status', 'paid')->count(),
             'partial'     => $all->where('status', 'partial')->count(),
             'unpaid'      => $all->where('status', 'pending')->count(),
+            'old_debt'    => $all->where('is_old_debt', true)->count(),
             'method_breakdown' => $this->buildMethodBreakdown($all),
         ];
     }

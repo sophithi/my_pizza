@@ -87,6 +87,14 @@ class ReportController extends Controller
         $payments = $dayPayments->take(10);
         $paymentMethodBreakdown = $this->buildMethodBreakdown($dayPayments);
 
+        // "Old debt" — payments recorded on the report day for orders placed
+        // on an earlier day (someone settling a bill from before).
+        $oldDebtPayments = $dayPayments->filter(fn($payment) =>
+            $payment->order && Carbon::parse($payment->order->order_date)->toDateString() < $reportDate->toDateString()
+        );
+        $oldDebt = $oldDebtPayments->sum('paid_amount');
+        $oldDebtKhr = $oldDebtPayments->sum('paid_amount_khr');
+
         $purchases = Purchase::whereDate('purchase_date', $reportDate)
             ->latest()
             ->limit(10)
@@ -123,6 +131,8 @@ class ReportController extends Controller
             'unpaidKhr',
             'income',
             'incomeKhr',
+            'oldDebt',
+            'oldDebtKhr',
             'expenses',
             'expensesKhr',
             'netIncome',
@@ -506,7 +516,7 @@ class ReportController extends Controller
 
     private function getOrdersForSalesExport(array $dateRange)
     {
-        return Order::with(['customer', 'items'])
+        return Order::with(['customer', 'items', 'invoice'])
             ->where('status', '!=', 'cancelled')
             ->when($dateRange['start'], fn($q) => $q->whereDate('order_date', '>=', $dateRange['start']))
             ->when($dateRange['end'], fn($q) => $q->whereDate('order_date', '<=', $dateRange['end']))

@@ -392,10 +392,12 @@
                     target="_blank">
                     <i class="fas fa-file-pdf me-1"></i>  PDF
                 </a>
-                <button type="button" class="btn btn-sm text-white" style="background:#D85A30" data-bs-toggle="modal"
-                    data-bs-target="#paymentModal">
-                    <i class="fas fa-plus me-1"></i> កត់ត្រាការទូទាត់
-                </button>
+                @unless(auth()->user()->isAuditor())
+                    <button type="button" class="btn btn-sm text-white" style="background:#D85A30" data-bs-toggle="modal"
+                        data-bs-target="#paymentModal">
+                        <i class="fas fa-plus me-1"></i> កត់ត្រាការទូទាត់
+                    </button>
+                @endunless
             </div>
         </div>
 
@@ -415,25 +417,31 @@
                     <div class="pay-stat-usd">${{ number_format($stats['outstanding'], 2) }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md-2">
+            <div class="col-4 col-md">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">ការបញ្ជាទិញ</div>
                     <div class="pay-stat-count">{{ $stats['total'] }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md-2">
+            <div class="col-4 col-md">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">បានបង់គ្រប់</div>
                     <div class="pay-stat-count text-success">{{ $stats['paid'] }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md-2">
+            <div class="col-4 col-md">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">បង់ខ្លះ</div>
                     <div class="pay-stat-count text-warning">{{ $stats['partial'] }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md-2">
+            <div class="col-4 col-md">
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">សងបុងចាស់</div>
+                    <div class="pay-stat-count text-success">{{ $stats['old_debt'] }}</div>
+                </div>
+            </div>
+            <div class="col-4 col-md">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">មិនទាន់បង់</div>
                     <div class="pay-stat-count text-danger">{{ $stats['unpaid'] }}</div>
@@ -553,7 +561,14 @@
                                     <div class="fw-semibold">{{ $payment->customer_name }}</div>
                                     <div class="text-muted small">{{ $payment->order_id }}</div>
                                 </td>
-                                <td class="text-muted small">{{ \Carbon\Carbon::parse($payment->order_date)->format('d M Y') }}
+                                <td class="text-muted small">
+                                    {{ \Carbon\Carbon::parse($payment->order_date)->format('d M Y') }}
+                                    @if($payment->is_old_debt)
+                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle ms-1"
+                                            title="កាលបរិច្ឆេទបញ្ជាទិញដើម: {{ \Carbon\Carbon::parse($payment->order_actual_date)->format('d M Y') }}">
+                                            សងបុងចាស់
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="money-stack">
@@ -599,19 +614,21 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    @if($payment->payment_id)
-                                        <button class="btn btn-sm btn-outline-secondary"
-                                            onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
-                                            data-bs-target="#paymentModal">
-                                            <i class="fas fa-pen me-1"></i> កែសម្រួល
-                                        </button>
-                                    @else
-                                        <button class="btn btn-sm text-white" style="background:#D85A30"
-                                            onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
-                                            data-bs-target="#paymentModal">
-                                            <i class="fas fa-plus me-1"></i> កត់ត្រាការទូទាត់
-                                        </button>
-                                    @endif
+                                    @unless(auth()->user()->isAuditor())
+                                        @if($payment->payment_id)
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
+                                                data-bs-target="#paymentModal">
+                                                <i class="fas fa-pen me-1"></i> កែសម្រួល
+                                            </button>
+                                        @else
+                                            <button class="btn btn-sm text-white" style="background:#D85A30"
+                                                onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
+                                                data-bs-target="#paymentModal">
+                                                <i class="fas fa-plus me-1"></i> កត់ត្រាការទូទាត់
+                                            </button>
+                                        @endif
+                                    @endunless
                                 </td>
                             </tr>
                         @empty

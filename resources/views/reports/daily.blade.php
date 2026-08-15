@@ -153,7 +153,7 @@
         .metric-grid {
             display: grid;
             gap: 14px;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             margin-bottom: 16px;
         }
 
@@ -760,6 +760,14 @@
                     <div class="metric-value-usd">${{ number_format($expenses, 2) }}</div>
                 </div>
             </div>
+            <div class="metric is-income">
+                <div class="metric-icon"><i class="fas fa-hand-holding-dollar"></i></div>
+                <div>
+                    <div class="metric-label">សងបុងចាស់</div>
+                    <div class="metric-value">៛{{ number_format($oldDebtKhr, 0) }}</div>
+                    <div class="metric-value-usd">${{ number_format($oldDebt, 2) }}</div>
+                </div>
+            </div>
             <div class="metric is-unpaid">
                 <div class="metric-icon"><i class="fas fa-triangle-exclamation"></i></div>
                 <div>
@@ -792,7 +800,6 @@
                 <div class="report-card">
                     <div class="report-card-head">
                         <h3 class="report-card-title"><i class="fas fa-pizza-slice"></i> ទំនិញលក់បាន</h3>
-                       
                     </div>
                     @if($soldItems->count())
                         @php $maxSoldKhr = $soldItems->max('total_khr') ?: 1; @endphp
@@ -851,33 +858,6 @@
             </div>
 
             <div>
-                <!-- <div class="report-card">
-                    <div class="report-card-head">
-                        <h3 class="report-card-title"><i class="fas fa-hand-holding-dollar"></i> ចំណូលបានទទួល</h3>
-                        <span class="report-card-badge text-success">៛{{ number_format($incomeKhr, 0) }}</span>
-                    </div>
-                    @if($payments->count())
-                        <div class="table-responsive">
-                            <table class="table daily-table">
-                                <tbody>
-                                    @foreach($payments as $payment)
-                                        <tr>
-                                            <td class="person-name">{{ $payment->customer_name ?: ($payment->order?->customer?->name ?? 'Customer') }}</td>
-                                            <td class="text-end">
-                                                <div class="money-stack">
-                                                    <span class="khr">៛{{ number_format($payment->paid_amount_khr, 0) }}</span>
-                                                    <span class="usd">${{ number_format($payment->paid_amount, 2) }}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="empty-note"><i class="fas fa-hand-holding-dollar"></i>មិនមានការទូទាត់ទេ។</div>
-                    @endif
-                </div> -->
 
                 <div class="report-card">
                     <div class="report-card-head">
