@@ -82,14 +82,12 @@
                 <div class="customer-section-title">
                     <i class="fas fa-user me-2" style="color: #e85d24;"></i>ព័ត៌មានទូទៅ
                 </div>
-
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">ឈ្មោះអតិថិជន <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control" value="{{ old('name', $customer->name) }}"
                             required placeholder="បំពេញឈ្មោះ" autocomplete="off" spellcheck="false">
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">ប្រភេទអតិថិជន <span class="text-danger">*</span></label>
                         <select name="type" class="form-select" required autocomplete="off">
@@ -102,13 +100,11 @@
                             </option>
                         </select>
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">លេខទំនាក់ទំនង</label>
                         <input type="text" name="phone" class="form-control" value="{{ old('phone', $customer->phone) }}"
                             placeholder="បំពេញលេខទូរស័ព្ទ" autocomplete="off" spellcheck="false">
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Status</label>
                         <select name="status" class="form-select" autocomplete="off">
@@ -118,6 +114,20 @@
                             <option value="inactive" {{ old('status', $customer->status) === 'inactive' ? 'selected' : '' }}>
                                 អសកម្ម
                             </option>
+                             <option value="topgrade" {{ old('status', $customer->status) === 'topgrade' ? 'selected' : '' }}>
+                                Top Customer Orders
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">អ្នកលក់ / ភ្នាក់ងារលក់ (Salesperson)</label>
+                        <select name="salesperson_id" class="form-select" autocomplete="off">
+                            <option value="">-- ជ្រើសរើសអ្នកលក់ (None) --</option>
+                            @foreach($salespersons as $s)
+                                <option value="{{ $s->id }}" {{ old('salesperson_id', $customer->salesperson_id) == $s->id ? 'selected' : '' }}>
+                                    {{ $s->name }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

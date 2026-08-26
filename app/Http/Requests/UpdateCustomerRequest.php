@@ -28,8 +28,9 @@ class UpdateCustomerRequest extends FormRequest
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:100',
-            'status' => 'required|string|in:active,inactive',
+            'status' => 'required|string|in:active,inactive,topgrade',
             'notes' => 'nullable|string|max:1000',
+            'salesperson_id' => 'nullable|exists:users,id',
         ];
     }
 }

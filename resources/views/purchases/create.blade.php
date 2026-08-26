@@ -118,6 +118,14 @@
                         </select>
                     </div>
 
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">វិធីសាស្ត្រទូទាត់ (Payment Method) <span class="text-danger">*</span></label>
+                        <select name="payment_method" class="form-select" required autocomplete="off">
+                            <option value="cash" {{ old('payment_method', 'cash') === 'cash' ? 'selected' : '' }}>លុយក្រៅ (Cash)</option>
+                            <option value="bank" {{ old('payment_method') === 'bank' ? 'selected' : '' }}>ធនាគារ / វេរ (Bank)</option>
+                        </select>
+                    </div>
+
                     <div class="col-12">
                         <label class="form-label fw-semibold">កំណត់ចំណាំ</label>
                         <textarea name="notes" class="form-control" rows="4" placeholder="ព័ត៌មានបន្ថែម..." autocomplete="off"

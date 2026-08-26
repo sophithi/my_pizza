@@ -134,6 +134,11 @@ Route::middleware('auth')->group(function () {
         Route::get('purchasing', [PurchaseController::class, 'index'])->name('purchasing');
     });
 
+    // Cash denomination counter
+    Route::middleware('role:admin,manager,staff,staff_inventory,auditor')->group(function () {
+        Route::get('payments/cash', [PaymentController::class, 'cashCount'])->name('payments.cash');
+    });
+
     // Product management
     Route::middleware('role:admin,manager,staff')->group(function () {
         Route::get('products/images/{filename}', [ProductController::class, 'image'])
@@ -170,9 +175,9 @@ Route::middleware('auth')->group(function () {
         Route::post('orders/{order}/ready', [OrderController::class, 'ready'])->name('orders.ready');
     });
 
-    // ============================================
+    // ====================================================================
     // INVOICES - Admin, Manager, Staff Inventory can create; all can view
-    // ============================================
+    // ====================================================================
     Route::middleware('role:admin,manager,staff')->group(function () {
         Route::post('invoices/{invoice}/send-to-packing', [InvoiceController::class, 'sendToPacking'])->name('invoices.send-to-packing');
     });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
+use App\Models\User;
 use App\Traits\ExportableSpreadsheet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -20,6 +21,7 @@ class CustomerController extends Controller
     {
         $query = Customer::query()
             ->withCount('orders')
+            ->with('salesperson')
             ->withSum('orders as total_spent', 'total_amount')
             ->withMax('orders as last_order_at', 'order_date');
 
@@ -47,14 +49,20 @@ class CustomerController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('salesperson_id') && $request->salesperson_id !== 'all') {
+            $query->where('salesperson_id', $request->salesperson_id);
+        }
+
         $stats = [
             'total' => Customer::count(),
             'active' => Customer::where('status', 'active')->count(),
             'with_orders' => Customer::has('orders')->count(),
         ];
 
+        $salespersons = User::where('is_active', true)->orderBy('name')->get();
+
         $customers = $query->latest()->paginate(15)->withQueryString();
-        return view('customers.index', compact('customers', 'stats'));
+        return view('customers.index', compact('customers', 'stats', 'salespersons'));
     }
 
     /**
@@ -62,7 +70,8 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        return view('customers.create');
+        $salespersons = User::where('is_active', true)->orderBy('name')->get();
+        return view('customers.create', compact('salespersons'));
     }
 
     /**
@@ -79,7 +88,7 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        $customer->load(['orders' => fn($q) => $q->with(['items', 'invoice'])->latest('order_date')]);
+        $customer->load(['salesperson', 'orders' => fn($q) => $q->with(['items', 'invoice'])->latest('order_date')]);
         $summary = [
             'orders' => $customer->orders->count(),
             'spent' => $customer->orders->sum('total_amount'),
@@ -94,7 +103,8 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
-        return view('customers.edit', compact('customer'));
+        $salespersons = User::where('is_active', true)->orderBy('name')->get();
+        return view('customers.edit', compact('customer', 'salespersons'));
     }
 
     /**

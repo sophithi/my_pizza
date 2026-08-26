@@ -278,6 +278,7 @@
                                 <th>ប្រភេទ / អ្នកទទួល</th>
                                 <th>កាលបរិច្ឆេទ</th>
                                 <th>ចំនួនទឹកប្រាក់</th>
+                                <th>វិធីសាស្ត្រទូទាត់</th>
                                 <th>ស្ថានភាព</th>
                                 <th>សកម្មភាព</th>
                             </tr>
@@ -296,6 +297,13 @@
                                     <td>
                                         <span class="expense-money">៛{{ number_format($purchase->total_amount_khr) }}</span>
                                         <span class="expense-khr">${{ number_format($purchase->total_amount, 2) }}</span>
+                                    </td>
+                                    <td>
+                                        @if(($purchase->payment_method ?? 'cash') === 'cash')
+                                            <span class="badge bg-warning text-dark px-2 py-1" style="font-size: 11px;">លុយក្រៅ (Cash)</span>
+                                        @else
+                                            <span class="badge bg-info text-dark px-2 py-1" style="font-size: 11px;">ធនាគារ (Bank)</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="expense-status {{ $purchase->status }}">

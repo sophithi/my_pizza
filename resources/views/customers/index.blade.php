@@ -341,10 +341,19 @@
                     <option value="facebook" {{ request('type') === 'facebook' ? 'selected' : '' }}>Facebook</option>
                     <option value="telegram" {{ request('type') === 'telegram' ? 'selected' : '' }}>Telegram</option>
                 </select>
+                <select name="salesperson_id" class="form-select">
+                    <option value="all">គ្រប់ភ្នាក់ងារលក់</option>
+                    @foreach($salespersons as $s)
+                        <option value="{{ $s->id }}" {{ request('salesperson_id') == $s->id ? 'selected' : '' }}>
+                            {{ $s->name }}
+                        </option>
+                    @endforeach
+                </select>
                 <select name="status" class="form-select">
                     <option value="all">គ្រប់ស្ថានភាព</option>
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>សកម្ម</option>
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>អសកម្ម</option>
+                    <option value="topgrade" {{ request('status') === 'topgrade' ? 'selected' : ''}}>អតិថិជនកម្មង់ច្រើនបំផុត</option>
                 </select>
 
                 <a href="{{ route('customers.index') }}" class="customer-btn customer-btn-soft">
@@ -361,6 +370,7 @@
                             <th>ប្រភព</th>
                             <th>អតិថិជន</th>
                             <th>ទំនាក់ទំនង</th>
+                            <th>អ្នកលក់</th>
                             <th>ទីតាំង</th>
                             <th>ការបញ្ជាទិញ</th>
                             <th>ចំណាយ</th>
@@ -395,6 +405,13 @@
                                         <span class="text-muted">មិនមាន</span>
                                     @endif
                                 </td>
+                                <td>
+                                    @if($customer->salesperson)
+                                        <span class="badge bg-light text-dark border fw-normal">{{ $customer->salesperson->name }}</span>
+                                    @else
+                                        <span class="text-muted small">—</span>
+                                    @endif
+                                </td>
                                 <td class="text-muted">{{ $customer->city ?? $customer->address ?? 'មិនមាន' }}</td>
                                 <td>
                                     @if($customer->orders_count > 0)
@@ -416,10 +433,13 @@
                                         <span class="status-pill status-active"><i class="fas fa-check-circle"></i> សកម្ម</span>
                                     @elseif($customer->status == 'inactive')
                                         <span class="status-pill status-inactive"><i class="fas fa-times-circle"></i> អសកម្ម</span>
+                                     @elseif($customer->status == 'topgrade')
+                                       <span class="status-pill status-​topgrade"><i class="fas fa-times-circle"></i> អតិថិជនកម្មង់ច្រើនបំផុត</span>
                                     @else
                                         <span class="text-muted">{{ $customer->status ?? 'រង់ចាំ' }}</span>
                                     @endif
                                 </td>
+
                                 <td>
                                     <div class="action-row">
                                         <a href="{{ route('orders.create', ['customer_id' => $customer->id]) }}"

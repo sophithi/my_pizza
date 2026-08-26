@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Delivery;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\PaymentLine;
+use App\Models\Purchase;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -261,6 +263,59 @@ class PaymentController extends Controller
         );
 
         return view('payments.index', compact('payments', 'stats', 'deliveries'));
+    }
+
+    // ─── Cash Count ───────────────────────────────────────────────────────────
+
+    public function cashCount(Request $request)
+    {
+        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
+        $exchangeRate = (float) $request->get('exchange_rate', self::EXCHANGE_RATE);
+
+        // Find payments recorded on this date with Cash method
+        $cashLines = PaymentLine::whereHas('payment', function ($q) use ($date) {
+            $q->whereDate('created_at', $date);
+        })->where('method', 'Cash')->get();
+
+        $systemCashUsd = (float) $cashLines->where('currency', 'USD')->sum('amount_original');
+        $systemCashKhr = (float) $cashLines->where('currency', 'KHR')->sum('amount_original');
+
+        // Also check legacy payments without payment lines
+        $legacyPayments = Payment::whereDate('created_at', $date)
+            ->whereDoesntHave('lines')
+            ->where('method', 'like', '%Cash%')
+            ->get();
+
+        foreach ($legacyPayments as $legacy) {
+            $systemCashUsd += (float) $legacy->paid_amount;
+            $systemCashKhr += (float) $legacy->paid_amount_khr;
+        }
+
+        $cashTransactionsCount = $cashLines->count() + $legacyPayments->count();
+
+        // Find cash purchases (expenses) paid out of drawer on this date
+        $cashPurchases = Purchase::whereDate('purchase_date', $date)
+            ->where('status', 'received')
+            ->where('payment_method', 'cash')
+            ->get();
+
+        $systemCashPurchaseUsd = (float) $cashPurchases->filter(function($p) {
+            return ($p->currency ?? 'USD') === 'USD';
+        })->sum('total_amount');
+        
+        $systemCashPurchaseKhr = (float) $cashPurchases->filter(function($p) {
+            return ($p->currency ?? 'USD') === 'KHR';
+        })->sum('total_amount_khr');
+
+        return view('payments.cash', compact(
+            'date',
+            'exchangeRate',
+            'systemCashUsd',
+            'systemCashKhr',
+            'cashTransactionsCount',
+            'systemCashPurchaseUsd',
+            'systemCashPurchaseKhr'
+        ));
     }
 
     // ─── Store ────────────────────────────────────────────────────────────────

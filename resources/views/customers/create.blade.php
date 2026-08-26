@@ -214,6 +214,18 @@
                                value="{{ old('phone') }}"
                                placeholder="បញ្ចូលលេខទូរស័ព្ទ">
                     </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">អ្នកលក់ / ភ្នាក់ងារលក់ (Salesperson)</label>
+                        <select name="salesperson_id" class="form-select">
+                            <option value="">-- ជ្រើសរើសអ្នកលក់ (None) --</option>
+                            @foreach($salespersons as $s)
+                                <option value="{{ $s->id }}" {{ old('salesperson_id') == $s->id ? 'selected' : '' }}>
+                                    {{ $s->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
 

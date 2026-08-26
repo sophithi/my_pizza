@@ -59,10 +59,12 @@ class PurchaseController extends Controller
             'total_amount' => 'required|numeric|min:0.01',
             'amount_currency' => 'nullable|in:USD,KHR',
             'status' => 'required|in:pending,received,cancelled',
+            'payment_method' => 'required|in:cash,bank',
             'notes' => 'nullable|string',
         ]);
 
-        [$data['total_amount'], $data['total_amount_khr']] = $this->normalizeAmount($data['total_amount'], $data['amount_currency'] ?? 'USD');
+        $data['currency'] = $data['amount_currency'] ?? 'USD';
+        [$data['total_amount'], $data['total_amount_khr']] = $this->normalizeAmount($data['total_amount'], $data['currency']);
         unset($data['amount_currency']);
 
         Purchase::create($data);
@@ -90,10 +92,12 @@ class PurchaseController extends Controller
             'total_amount' => 'required|numeric|min:0.01',
             'amount_currency' => 'nullable|in:USD,KHR',
             'status' => 'required|in:pending,received,cancelled',
+            'payment_method' => 'required|in:cash,bank',
             'notes' => 'nullable|string',
         ]);
 
-        [$data['total_amount'], $data['total_amount_khr']] = $this->normalizeAmount($data['total_amount'], $data['amount_currency'] ?? 'USD');
+        $data['currency'] = $data['amount_currency'] ?? 'USD';
+        [$data['total_amount'], $data['total_amount_khr']] = $this->normalizeAmount($data['total_amount'], $data['currency']);
         unset($data['amount_currency']);
 
         $purchase->update($data);

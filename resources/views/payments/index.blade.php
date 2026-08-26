@@ -385,6 +385,9 @@
                 <i class="fas fa-credit-card me-2"></i> ការទូទាត់ពីអតិថិជន
             </h4>
             <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ route('payments.cash') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-calculator me-1"></i> រាប់លុយ (Cash Count)
+                </a>
                 <a href="{{ route('payments.export.excel', request()->query()) }}" class="btn btn-outline-success btn-sm">
                     <i class="fas fa-file-excel me-1"></i>  Excel
                 </a>

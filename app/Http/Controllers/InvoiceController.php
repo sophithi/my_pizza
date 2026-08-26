@@ -610,7 +610,7 @@ class InvoiceController extends Controller
      */
     public function print(Invoice $invoice)
     {
-        $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
+        $invoice->load('order.customer.salesperson', 'order.delivery', 'order.items.product', 'order.items.delivery');
         // Return to the filtered invoice list the user came from, if provided
         $backUrl = $this->resolveReturnUrl(route('invoices.index'));
         return view('packing.sticker-customer', compact('invoice', 'backUrl'));
@@ -629,7 +629,7 @@ class InvoiceController extends Controller
 
         abort_if($ids->isEmpty(), 404);
 
-        $invoices = Invoice::with('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery')
+        $invoices = Invoice::with('order.customer.salesperson', 'order.delivery', 'order.items.product', 'order.items.delivery')
             ->whereIn('id', $ids)
             ->get()
             ->sortBy(fn($invoice) => $ids->search($invoice->id))

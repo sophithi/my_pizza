@@ -13,12 +13,21 @@ class Customer extends Model
         'address',
         'city',
         'status',
+        'salesperson_id',
         'notes',
     ];
 
     protected $casts = [
         //
     ];
+
+    /**
+     * Get the salesperson/agent associated with this customer.
+     */
+    public function salesperson()
+    {
+        return $this->belongsTo(User::class, 'salesperson_id');
+     }
 
     /**
      * Get all orders for this customer.

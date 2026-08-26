@@ -554,7 +554,12 @@
 
                                 <tr @class(['free-item-row' => $isFreeItem])>
                                     <td class="fw-bold">
-                                        {{ $row->product?->name ?? 'N/A' }}
+                                        @php
+                                            $rowName = e($row->product?->name ?? 'N/A');
+                                            $rowName = preg_replace('/\bS\b/', '<strong class="text-danger border border-danger px-1 rounded bg-danger-subtle" style="font-size: 11.5px; color: #dc2626 !important; background-color: #fef2f2 !important; border-color: #fecaca !important; padding: 1px 4px;">S</strong>', $rowName);
+                                            $rowName = preg_replace('/\bM\b/', '<strong class="text-primary border border-primary px-1 rounded bg-primary-subtle" style="font-size: 11.5px; color: #0284c7 !important; background-color: #f0f9ff !important; border-color: #bae6fd !important; padding: 1px 4px;">M</strong>', $rowName);
+                                        @endphp
+                                        {!! $rowName !!}
                                         @if(!empty($row->is_custom_price))
                                             <span class="custom-price-badge"><i class="fas fa-tag"></i> តម្លៃពិសេស</span>
                                         @endif

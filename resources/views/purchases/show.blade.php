@@ -137,6 +137,16 @@
                     </div>
                 </div>
                 <div>
+                    <div class="expense-label">វិធីសាស្ត្រទូទាត់</div>
+                    <div class="expense-value">
+                        @if(($purchase->payment_method ?? 'cash') === 'cash')
+                            <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 13px;">លុយក្រៅ (Cash)</span>
+                        @else
+                            <span class="badge bg-info text-dark px-3 py-2" style="font-size: 13px;">ធនាគារ / វេរ (Bank)</span>
+                        @endif
+                    </div>
+                </div>
+                <div>
                     <div class="expense-label">កាលបរិច្ឆេទ</div>
                     <div class="expense-value">{{ $purchase->purchase_date->translatedFormat('d M Y') }}</div>
                 </div>

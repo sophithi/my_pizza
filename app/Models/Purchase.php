@@ -16,6 +16,8 @@ class Purchase extends Model
         'total_amount',
         'total_amount_khr',
         'status',
+        'payment_method',
+        'currency',
         'notes',
     ];
 

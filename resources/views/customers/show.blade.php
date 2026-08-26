@@ -361,6 +361,23 @@
 
             <div class="info-box">
                 <div class="info-title">
+                  អ្នកលក់ / ភ្នាក់ងារលក់ (Salesperson)
+                </div>
+
+                <div class="info-label">ឈ្មោះអ្នកលក់</div>
+                <div class="info-value">
+                    @if($customer->salesperson)
+                        <a href="{{ route('users.show', $customer->salesperson) }}" class="fw-bold text-decoration-none" style="color: #e85d24;">
+                            {{ $customer->salesperson->name }}
+                        </a>
+                    @else
+                        <span class="text-muted">មិនទាន់មាន (None)</span>
+                    @endif
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-title">
                     ទីតាំង
                 </div>
 
@@ -398,7 +415,7 @@
                         <tr>
                             <th>Invoice No</th>
                             <th>Date</th>
-                            <th>Items</th>
+        
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -417,9 +434,7 @@
                                     {{ $invoice?->invoice_date ? $invoice->invoice_date->format('d/m/Y') : 'N/A' }}
                                 </td>
 
-                                <td>
-                                    {{ $order->items->count() }} item(s)
-                                </td>
+                      
 
                                 <td>
                                     ${{ number_format($invoice?->total_amount ?? $order->total_amount, 2) }}

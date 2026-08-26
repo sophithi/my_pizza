@@ -100,15 +100,15 @@
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">រូបិយប័ណ្ណ</label>
                         <select name="amount_currency" class="form-select" autocomplete="off">
-                            <option value="USD" {{ old('amount_currency', 'USD') === 'USD' ? 'selected' : '' }}>USD ($)</option>
-                            <option value="KHR" {{ old('amount_currency') === 'KHR' ? 'selected' : '' }}>KHR (៛)</option>
+                            <option value="USD" {{ old('amount_currency', $purchase->currency ?? 'USD') === 'USD' ? 'selected' : '' }}>USD ($)</option>
+                            <option value="KHR" {{ old('amount_currency', $purchase->currency ?? 'USD') === 'KHR' ? 'selected' : '' }}>KHR (៛)</option>
                         </select>
                     </div>
 
                     <div class="col-md-8">
                         <label class="form-label fw-semibold">ចំនួនទឹកប្រាក់ <span class="text-danger">*</span></label>
                         <input type="number" name="total_amount" class="form-control" min="0.01" step="0.01"
-                            value="{{ old('total_amount', $purchase->total_amount) }}" placeholder="0.00" required autocomplete="off">
+                            value="{{ old('total_amount', ($purchase->currency ?? 'USD') === 'KHR' ? $purchase->total_amount_khr : $purchase->total_amount) }}" placeholder="0.00" required autocomplete="off">
                         <small class="text-muted">Existing records show USD by default. If KHR is selected, it converts using ៛4,000 = $1.</small>
                     </div>
 
@@ -118,6 +118,14 @@
                             <option value="pending" {{ old('status', $purchase->status) === 'pending' ? 'selected' : '' }}>មិនទាន់ទូទាត់</option>
                             <option value="received" {{ old('status', $purchase->status) === 'received' ? 'selected' : '' }}>បានទូទាត់</option>
                             <option value="cancelled" {{ old('status', $purchase->status) === 'cancelled' ? 'selected' : '' }}>បានលុប</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">វិធីសាស្ត្រទូទាត់ (Payment Method) <span class="text-danger">*</span></label>
+                        <select name="payment_method" class="form-select" required autocomplete="off">
+                            <option value="cash" {{ old('payment_method', $purchase->payment_method) === 'cash' ? 'selected' : '' }}>លុយក្រៅ (Cash)</option>
+                            <option value="bank" {{ old('payment_method', $purchase->payment_method) === 'bank' ? 'selected' : '' }}>ធនាគារ / វេរ (Bank)</option>
                         </select>
                     </div>
 

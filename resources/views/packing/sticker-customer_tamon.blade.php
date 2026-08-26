@@ -657,10 +657,14 @@
                             <span class="label">លេខ:</span>
                             <span class="value">{{ $customer->phone ?? '-' }}</span>
                         </div>
-
                     </div>
                     <div class="invoice-info">
                         <div class="section-title">Invoice Info</div>
+                        @if($customer->salesperson)
+                            <div style="margin-top: 4px; font-size: 11px;">
+                                <strong>seller:</strong> <span class="value">{{ $customer->salesperson->name }}</span>
+                            </div>
+                        @endif
                         @php
                             $deliveryItems = $invoice->order->items->filter(fn($item) => $item->delivery_id);
                             $deliveryGroups = $deliveryItems->groupBy('delivery_id');
@@ -706,7 +710,6 @@
                 return (float) $item->unit_price > 0;
             });
 
-
             $subtotalKhr = ($invoice->order?->grossSubtotalKhr() ?? 0) - ($invoice->order?->itemDiscountKhr() ?? 0);
             $grandTotalKhr = $invoice->order?->totalKhr() ?? 0;
         @endphp
@@ -729,7 +732,15 @@
                         $totalPriceKhr = $item->lineTotalKhr();
                     @endphp
                     <tr>
-                        <td>{{ $item->product->name ?? 'N/A' }}</td>
+                        <td>
+                            @php
+                                $itemName = e($item->product->name ?? 'N/A');
+                                $itemName = preg_replace('/\bS\b/', '<strong class="text-danger border border-danger px-1 rounded bg-danger-subtle" style="font-size: 11.5px; color: #dc2626 !important; background-color: #fef2f2 !important; border-color: #fecaca !important; padding: 1px 4px;">S</strong>', $itemName);
+                                $itemName = preg_replace('/\bM\b/', '<strong class="text-primary border border-primary px-1 rounded bg-primary-subtle" style="font-size: 11.5px; color: #0284c7 !important; background-color: #f0f9ff !important; border-color: #bae6fd !important; padding: 1px 4px;">M</strong>', $itemName);
+                                $itemName = preg_replace('/\bL\b/', '<strong class="text-success border border-success px-1 rounded bg-success-subtle" style="font-size: 11.5px; color: #16a34a !important; background-color: #f0fdf4 !important; border-color: #bbf7d0 !important; padding: 1px 4px;">L</strong>', $itemName);
+                            @endphp
+                            {!! $itemName !!}
+                        </td>
                         <td class="text-right">{{ $item->quantity }} x</td>
                         <td class="text-right">
                             ៛{{ number_format($unitPriceKhr, 0) }}
