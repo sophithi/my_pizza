@@ -129,24 +129,25 @@
             color: #b91c1c;
         }
 
-        /* ── Two-column layout ── */
+        /* ── Stack layout ── */
         .show-grid {
-            display: grid;
-            grid-template-columns: 1fr 340px;
+            display: flex;
+            flex-direction: column;
             gap: 18px;
-            align-items: start;
         }
 
         .show-left {
             display: flex;
             flex-direction: column;
             gap: 18px;
+            width: 100%;
         }
 
         .show-right {
             display: flex;
             flex-direction: column;
             gap: 18px;
+            width: 100%;
         }
 
         /* ── Card ── */
@@ -222,32 +223,33 @@
         /* ── Stats ── */
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
         }
 
         .stat-card {
-            background: #f9fafb;
+            background: #fff;
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px 12px;
+            border-radius: 12px;
+            padding: 20px 16px;
             text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
         }
 
         .stat-val {
-            font-size: 20px;
+            font-size: 26px;
             font-weight: 800;
             color: var(--accent);
             line-height: 1.2;
         }
 
         .stat-lbl {
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 800;
             text-transform: uppercase;
             color: var(--muted);
-            margin-top: 4px;
-            letter-spacing: 0.4px;
+            margin-top: 6px;
+            letter-spacing: 0.5px;
         }
 
         /* ── Case selector ── */
@@ -336,6 +338,7 @@
             text-transform: uppercase;
             text-align: left;
             letter-spacing: 0.4px;
+            white-space: nowrap;
         }
 
         .orders-table td {
@@ -475,10 +478,6 @@
         }
 
         @media (max-width: 800px) {
-            .show-grid {
-                grid-template-columns: 1fr;
-            }
-
             .stats-row {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
@@ -549,10 +548,44 @@
 
             <div class="show-grid">
 
+                {{-- Summary --}}
+                <div class="show-right">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-icon"><i class="fas fa-chart-bar"></i></div>
+                            <p class="card-header-title">Summary</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-row">
+                                <div class="stat-card">
+                                    <div class="stat-val">{{ $orderCount }}</div>
+                                    <div class="stat-lbl">ចំនួនវិក្ក័យបត្រ</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-val" id="statTotalBoxes">{{ number_format($totalBoxes, 0) }}</div>
+                                    <div class="stat-lbl">សរុបកេស</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-val">៛{{ number_format($currentUnitPrice, 0) }}</div>
+                                    <div class="stat-lbl">តម្លៃបច្ចុប្បន្ន/កេស</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-val" id="statTotalFee">៛{{ number_format($totalFee, 0) }}</div>
+                                    <div class="stat-lbl">សរុបថ្លៃដឹក</div>
+                                </div>
+                                @if($delivery->show_invoice_info)
+                                    <div class="stat-card">
+                                        <div class="stat-val">${{ number_format($totalAmount, 0) }}</div>
+                                        <div class="stat-lbl">សរុបវិក្ក័យបត្រ</div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- LEFT --}}
                 <div class="show-left">
-
-                
 
                     {{-- Linked Invoices --}}
                     <div class="card">
@@ -669,44 +702,6 @@
 
                 </div>
 
-                {{-- RIGHT --}}
-                <div class="show-right">
-
-                    {{-- Summary --}}
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-header-icon"><i class="fas fa-chart-bar"></i></div>
-                            <p class="card-header-title">Summary</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="stats-row">
-                                <div class="stat-card">
-                                    <div class="stat-val">{{ $orderCount }}</div>
-                                    <div class="stat-lbl">ចំនួនវិក្ក័យបត្រ</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-val" id="statTotalBoxes">{{ number_format($totalBoxes, 0) }}</div>
-                                    <div class="stat-lbl">សរុបកេស</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-val" style="font-size: 15px;">៛{{ number_format($currentUnitPrice, 0) }}</div>
-                                    <div class="stat-lbl">តម្លៃបច្ចុប្បន្ន/កេស</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-val" style="font-size: 15px;" id="statTotalFee">៛{{ number_format($totalFee, 0) }}</div>
-                                    <div class="stat-lbl">សរុបថ្លៃដឹក</div>
-                                </div>
-                                @if($delivery->show_invoice_info)
-                                    <div class="stat-card">
-                                        <div class="stat-val" style="font-size: 15px;">${{ number_format($totalAmount, 0) }}
-                                        </div>
-                                        <div class="stat-lbl">សរុបវិក្ក័យបត្រ</div>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
         </div>

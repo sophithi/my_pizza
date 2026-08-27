@@ -79,10 +79,10 @@ header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
                 <tr>
                     <td class="center">{{ $loop->iteration }}</td>
                     @if($delivery->show_invoice_info)
-                        <td>{{ $invoice?->invoice_number ?? 'N/A' }}</td>
+                        <td style="mso-number-format:'\@';">{{ $invoice?->invoice_number ?? 'N/A' }}</td>
                     @endif
                     <td>{{ $customer?->name ?? 'N/A' }}</td>
-                    <td>{{ $customer?->phone ?? '—' }}</td>
+                    <td style="mso-number-format:'\@';">{{ $customer?->phone ?? '—' }}</td>
                     <td>{{ $customer?->address ?? '—' }}</td>
                     <td class="center">{{ $smallQty }}</td>
                     <td class="center">{{ $bigQty }}</td>

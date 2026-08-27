@@ -482,10 +482,7 @@
                                                 <td>
                                                     {{ $invoice->invoice_number }}
                                                     @php
-                                                        // A resend after an order edit: packing_first_sent_at is set once
-                                                        // and never touched again, so once it stops matching the current
-                                                        // packing_sent_at we know this row isn't the invoice's first trip
-                                                        // through packing.
+                                                      
                                                         $isEditedResend = $invoice->packing_first_sent_at
                                                             && $invoice->packing_sent_at
                                                             && !$invoice->packing_first_sent_at->equalTo($invoice->packing_sent_at);

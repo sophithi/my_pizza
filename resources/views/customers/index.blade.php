@@ -326,10 +326,10 @@
                 <div class="stat-label">កំពុងប្រើប្រាស់</div>
                 <div class="stat-value text-success">{{ number_format($stats['active']) }}</div>
             </div>
-            <div class="stat-card">
+            <!-- <div class="stat-card">
                 <div class="stat-label">មានប្រវត្តិបញ្ជាទិញ</div>
                 <div class="stat-value text-primary">{{ number_format($stats['with_orders']) }}</div>
-            </div>
+            </div> -->
         </div>
         <form method="GET" action="{{ route('customers.index') }}" class="filter-card">
             <div class="filter-row">
