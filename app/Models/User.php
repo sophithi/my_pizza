@@ -137,13 +137,6 @@ class User extends Authenticatable
         return $this->hasMany(UserActivity::class);
     }
 
-    /**
-     * Get customers where this user is the assigned salesperson.
-     */
-    public function customers()
-    {
-        return $this->hasMany(Customer::class, 'salesperson_id');
-    }
 
     /**
      * Get user's orders (orders created by this user)

@@ -29,7 +29,7 @@ class StoreCustomerRequest extends FormRequest
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
-            'salesperson_id' => 'nullable|exists:users,id',
+            'salesperson_id' => 'nullable|exists:salespersons,id',
         ];
     }
 }

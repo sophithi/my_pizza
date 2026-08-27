@@ -12,6 +12,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\SalespersonController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 
@@ -222,6 +223,7 @@ Route::middleware('auth')->group(function () {
     // ============================================
     Route::middleware('role:staff,manager,admin')->group(function () {
         Route::resource('customers', CustomerController::class);
+        Route::resource('salespersons', SalespersonController::class);
         Route::get('customers/export/excel', [CustomerController::class, 'exportExcel'])->name('customers.export.excel');
         Route::get('customers/export/pdf', [CustomerController::class, 'exportPdf'])->name('customers.export.pdf');
     });

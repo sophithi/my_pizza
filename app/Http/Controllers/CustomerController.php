@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\User;
+use App\Models\Salesperson;
 use App\Traits\ExportableSpreadsheet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -59,7 +60,7 @@ class CustomerController extends Controller
             'with_orders' => Customer::has('orders')->count(),
         ];
 
-        $salespersons = User::where('is_active', true)->orderBy('name')->get();
+        $salespersons = Salesperson::where('status', 'active')->orderBy('name')->get();
 
         $customers = $query->latest()->paginate(15)->withQueryString();
         return view('customers.index', compact('customers', 'stats', 'salespersons'));
@@ -70,7 +71,7 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        $salespersons = User::where('is_active', true)->orderBy('name')->get();
+        $salespersons = Salesperson::where('status', 'active')->orderBy('name')->get();
         return view('customers.create', compact('salespersons'));
     }
 
@@ -103,7 +104,7 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
-        $salespersons = User::where('is_active', true)->orderBy('name')->get();
+        $salespersons = Salesperson::where('status', 'active')->orderBy('name')->get();
         return view('customers.edit', compact('customer', 'salespersons'));
     }
 

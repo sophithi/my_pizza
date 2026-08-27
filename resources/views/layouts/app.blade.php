@@ -506,6 +506,9 @@
                 <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i><span>អតិថិជន</span>
                 </a>
+                <a href="/salespersons" class="nav-link {{ request()->is('salespersons*') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i><span>ភ្នាក់ងារលក់</span>
+                </a>
             @endif
             {{-- Invoices (admin, manager, staff office, auditor) --}}
             @if($isAdminOrManager || $isOfficeStaff || $isAuditor)

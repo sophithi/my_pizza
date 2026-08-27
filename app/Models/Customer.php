@@ -26,8 +26,8 @@ class Customer extends Model
      */
     public function salesperson()
     {
-        return $this->belongsTo(User::class, 'salesperson_id');
-     }
+        return $this->belongsTo(Salesperson::class, 'salesperson_id');
+    }
 
     /**
      * Get all orders for this customer.

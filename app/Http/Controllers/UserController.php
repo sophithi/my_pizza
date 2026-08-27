@@ -105,10 +105,6 @@ class UserController extends Controller
         // Get orders list for the period
         $orders = (clone $ordersQuery)->with('customer', 'items.product')->latest('order_date')->paginate(10);
 
-        // Load customers managed by this user
-        $user->load(['customers' => function($q) {
-            $q->withCount('orders')->withSum('orders as total_spent', 'total_amount');
-        }]);
 
         // All-time stats
         $allTimeStats = [

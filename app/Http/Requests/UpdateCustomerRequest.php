@@ -30,7 +30,7 @@ class UpdateCustomerRequest extends FormRequest
             'city' => 'nullable|string|max:100',
             'status' => 'required|string|in:active,inactive,topgrade',
             'notes' => 'nullable|string|max:1000',
-            'salesperson_id' => 'nullable|exists:users,id',
+            'salesperson_id' => 'nullable|exists:salespersons,id',
         ];
     }
 }

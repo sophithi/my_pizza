@@ -335,59 +335,7 @@
         @endif
     </div>
 
-    <!-- Customers Managed Panel -->
-    <div class="orders-panel mt-4 mb-4">
-        <div class="orders-header">
-            <h3 class="orders-title">
-                <i class="fas fa-users" style="color: #e85d24; margin-right: 8px;"></i> អតិថិជនដែលគាត់គ្រប់គ្រង (Customers Managed)
-            </h3>
-            <span class="orders-count">{{ $user->customers->count() }} អតិថិជន</span>
-        </div>
 
-        @if($user->customers->count() > 0)
-        <table class="orders-table">
-            <thead>
-                <tr>
-                    <th>អតិថិជន (Customer)</th>
-                    <th>ទំនាក់ទំនង (Contact)</th>
-                    <th>ខេត្ត/ក្រុង (City)</th>
-                    <th>ចំណាយសរុប (Total Spent)</th>
-                    <th>ស្ថានភាព (Status)</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($user->customers as $cust)
-                <tr>
-                    <td style="font-weight: 600;">{{ $cust->name }}</td>
-                    <td>{{ $cust->phone ?? '—' }}</td>
-                    <td>{{ $cust->city ?? '—' }}</td>
-                    <td style="font-weight: 700;">
-                        ${{ number_format($cust->total_spent, 2) }}
-                    </td>
-                    <td>
-                        @if($cust->status == 'active')
-                            <span class="badge-sm badge-paid" style="background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 9999px; font-size: 11px;">សកម្ម</span>
-                        @else
-                            <span class="badge-sm badge-unpaid" style="background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 9999px; font-size: 11px;">អសកម្ម</span>
-                        @endif
-                    </td>
-                    <td>
-                        <a href="{{ route('customers.show', $cust) }}" class="btn-view">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @else
-        <div class="empty-orders">
-            <i class="fas fa-users-slash text-muted mb-2 fs-2"></i>
-            <p>មិនមានអតិថិជនដែលគ្រប់គ្រងដោយអ្នកលក់នេះទេ</p>
-        </div>
-        @endif
-    </div>
 </div>
 
 @endsection
