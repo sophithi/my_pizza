@@ -74,6 +74,7 @@
     .badge-facebook { background: #e7f3ff; color: #0a66c2; }
     .badge-active { background: #dcfce7; color: #166534; }
     .badge-inactive { background: #fee2e2; color: #991b1b; }
+    .badge-topgrade { background: #fef3c7; color: #854d0e; }
 
     .customer-actions {
         display: flex;
@@ -313,6 +314,10 @@
                     @if($customer->status == 'active')
                         <span class="badge-soft badge-active">
                             <i class="fas fa-check-circle"></i> សកម្ម
+                        </span>
+                    @elseif($customer->status == 'topgrade')
+                        <span class="badge-soft badge-topgrade">
+                            <i class="fas fa-crown"></i> អតិថិជនកម្មង់ច្រើនបំផុត
                         </span>
                     @else
                         <span class="badge-soft badge-inactive">

@@ -189,6 +189,11 @@
             color: #991b1b;
         }
 
+        .status-topgrade {
+            background: #fef3c7;
+            color: #854d0e;
+        }
+
         .order-pill {
             background: #eff6ff;
             color: #1d4ed8;
@@ -326,7 +331,6 @@
                 <div class="stat-value text-primary">{{ number_format($stats['with_orders']) }}</div>
             </div>
         </div>
-
         <form method="GET" action="{{ route('customers.index') }}" class="filter-card">
             <div class="filter-row">
                 <div class="customer-search">
@@ -355,7 +359,6 @@
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>អសកម្ម</option>
                     <option value="topgrade" {{ request('status') === 'topgrade' ? 'selected' : ''}}>អតិថិជនកម្មង់ច្រើនបំផុត</option>
                 </select>
-
                 <a href="{{ route('customers.index') }}" class="customer-btn customer-btn-soft">
                     <i class="fas fa-rotate-left"></i>
                 </a>
@@ -434,8 +437,8 @@
                                     @elseif($customer->status == 'inactive')
                                         <span class="status-pill status-inactive"><i class="fas fa-times-circle"></i> អសកម្ម</span>
                                      @elseif($customer->status == 'topgrade')
-                                       <span class="status-pill status-​topgrade"><i class="fas fa-times-circle"></i> អតិថិជនកម្មង់ច្រើនបំផុត</span>
-                                    @else
+                                       <span class="status-pill status-topgrade"><i class="fas fa-crown"></i> អតិថិជនកម្មង់ច្រើនបំផុត</span>
+                                     @else
                                         <span class="text-muted">{{ $customer->status ?? 'រង់ចាំ' }}</span>
                                     @endif
                                 </td>
