@@ -305,7 +305,6 @@
                             <th>លេខទូរស័ព្ទ</th>
                             <th>ទីតាំង/ខេត្ត</th>
                             <th class="text-right" style="text-align: right;">ចំនួនកម្មង់</th>
-                            <th class="text-right" style="text-align: right;">ចំណាយសរុប</th>
                             <th>ស្ថានភាព</th>
                             <th>សកម្មភាព</th>
                         </tr>
@@ -331,12 +330,6 @@
                                 <td>{{ $customer->city ?? $customer->address ?? '—' }}</td>
                                 <td class="text-right" style="text-align: right;">
                                     {{ number_format($customer->orders_count) }} ដង
-                                </td>
-                                <td class="text-right" style="text-align: right; font-weight: 800;">
-                                    ${{ number_format($customer->total_spent ?? 0, 2) }}
-                                    <div class="text-muted small" style="font-size: 11px; font-weight: normal;">
-                                        ៛{{ number_format(($customer->total_spent ?? 0) * 4000, 0) }}
-                                    </div>
                                 </td>
                                 <td>
                                     @if($customer->status == 'active')
@@ -367,7 +360,7 @@
             </div>
             @if($customers->hasPages())
                 <div class="card-footer bg-white border-top py-3 px-4">
-                    {{ $customers->links() }}
+                    {{ $customers->links('pagination::bootstrap-5') }}
                 </div>
             @endif
         </div>

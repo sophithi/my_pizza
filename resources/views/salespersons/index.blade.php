@@ -383,7 +383,7 @@
             </div>
             @if($salespersons->hasPages())
                 <div class="card-footer bg-white border-top py-3 px-4">
-                    {{ $salespersons->links() }}
+                    {{ $salespersons->links('pagination::bootstrap-5') }}
                 </div>
             @endif
         </div>
