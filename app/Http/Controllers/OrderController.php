@@ -138,7 +138,13 @@ class OrderController extends Controller
 
             // Create payment record if order is marked as paid
             if ($validated['payment_status'] === 'paid') {
-                \App\Models\Payment::create([
+                $methodStr = $validated['payment_method'] ?? 'Cash';
+                $methods = array_values(array_filter(array_map('trim', explode('+', $methodStr ?: 'Cash'))));
+                if (empty($methods)) {
+                    $methods = ['Cash'];
+                }
+
+                $payment = \App\Models\Payment::create([
                     'order_id' => $order->id,
                     'customer_name' => $order->customer?->name ?? 'Walk-in Customer',
                     'order_date' => $order->order_date,
@@ -146,9 +152,34 @@ class OrderController extends Controller
                     'total_amount_khr' => $order->totalKhr(),
                     'paid_amount' => $order->total_amount,
                     'paid_amount_khr' => $order->totalKhr(),
-                    'method' => $validated['payment_method'] ?? 'Cash',
+                    'method' => implode(' + ', $methods),
                     'status' => 'paid',
                 ]);
+
+                // Sync created_at to order_date
+                if ($order->order_date) {
+                    $payment->created_at = \Carbon\Carbon::parse($order->order_date);
+                    $payment->save();
+                }
+
+                $splitCount = count($methods);
+                $perMethodUsd = round($order->total_amount / $splitCount, 2);
+                $lines = [];
+
+                foreach ($methods as $i => $m) {
+                    $isLast = ($i === $splitCount - 1);
+                    $lineUsd = $isLast ? ($order->total_amount - ($perMethodUsd * ($splitCount - 1))) : $perMethodUsd;
+                    $payment->lines()->create([
+                        'method' => $m,
+                        'currency' => 'USD',
+                        'amount_original' => $lineUsd,
+                        'amount_usd' => $lineUsd,
+                        'exchange_rate' => 4000,
+                    ]);
+                    $lines[] = sprintf("%s: $%.2f USD", $m, $lineUsd);
+                }
+
+                $payment->update(['notes' => 'Paid: ' . implode(' + ', $lines)]);
             }
 
             return [$order, $invoiceNumber, $warnings];
@@ -301,7 +332,13 @@ class OrderController extends Controller
             // relation may already be cached with the pre-edit items at this point
             // (loaded by restoreInventoryForOrder() above when stock was deducted).
             if (($validated['payment_status'] ?? $order->payment_status) === 'paid') {
-                \App\Models\Payment::updateOrCreate(
+                $methodStr = $validated['payment_method'] ?? 'Cash';
+                $methods = array_values(array_filter(array_map('trim', explode('+', $methodStr ?: 'Cash'))));
+                if (empty($methods)) {
+                    $methods = ['Cash'];
+                }
+
+                $payment = \App\Models\Payment::updateOrCreate(
                     ['order_id' => $order->id],
                     [
                         'customer_name' => $order->customer?->name ?? 'Walk-in Customer',
@@ -310,10 +347,36 @@ class OrderController extends Controller
                         'total_amount_khr' => $totalKhr,
                         'paid_amount' => $totalAmount,
                         'paid_amount_khr' => $totalKhr,
-                        'method' => $validated['payment_method'] ?? 'Cash',
+                        'method' => implode(' + ', $methods),
                         'status' => 'paid',
                     ]
                 );
+
+                if ($order->order_date) {
+                    $payment->created_at = \Carbon\Carbon::parse($order->order_date);
+                    $payment->save();
+                }
+
+                // If lines don't exist or methods changed, sync lines
+                $splitCount = count($methods);
+                $perMethodUsd = round($totalAmount / $splitCount, 2);
+                $payment->lines()->delete();
+                $lines = [];
+
+                foreach ($methods as $i => $m) {
+                    $isLast = ($i === $splitCount - 1);
+                    $lineUsd = $isLast ? ($totalAmount - ($perMethodUsd * ($splitCount - 1))) : $perMethodUsd;
+                    $payment->lines()->create([
+                        'method' => $m,
+                        'currency' => 'USD',
+                        'amount_original' => $lineUsd,
+                        'amount_usd' => $lineUsd,
+                        'exchange_rate' => 4000,
+                    ]);
+                    $lines[] = sprintf("%s: $%.2f USD", $m, $lineUsd);
+                }
+
+                $payment->update(['notes' => 'Paid: ' . implode(' + ', $lines)]);
             }
 
             $order->items()->delete();

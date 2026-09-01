@@ -16,7 +16,6 @@ use App\Http\Controllers\SalespersonController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 
-// Health check route
 Route::get('/health', function () {
     $dbStatus = 'unknown';
     try {
@@ -56,9 +55,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // ============================================
+    // ======================================
     // ADMIN ONLY - User create/edit/delete
-    // ============================================
+    // ======================================
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', UserController::class)->except(['index', 'show']);
 
@@ -66,7 +65,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('invoices/{id}/force-delete', [InvoiceController::class, 'forceDelete'])->name('invoices.force-delete');
     });
 
-    // Allow admin, manager, office staff and inventory staff to fully manage inventory
     Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
         Route::resource('inventory', InventoryController::class)->except(['index', 'show']);
         Route::post('inventory/{inventory}/quick-update', [InventoryController::class, 'quickUpdate'])->name('inventory.quick-update');
@@ -81,21 +79,15 @@ Route::middleware('auth')->group(function () {
         Route::get('inventory/export/pdf', [InventoryController::class, 'exportPdf'])->name('inventory.export.pdf');
     });
 
-    // ============================================
-    // ADMIN & MANAGER - View users (index + show)
-    // ============================================
     Route::middleware('role:admin,manager')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
     });
 
-    // ============================================
+    // ====================================================
     // ADMIN & MANAGER - Full access except user management
-    // ============================================
+    // ====================================================
     Route::middleware('role:admin,manager')->group(function () {
-        // Inventory management (full CRUD)
-        // NOTE: inventory resource moved to a dedicated group below so staff_inventory
-        // role can also be granted full access without exposing other admin routes.
 
 
         // Payment management (write)
@@ -207,7 +199,7 @@ Route::middleware('auth')->group(function () {
         Route::get('packing/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('packing.customer');
         Route::get('packing/{invoice}/customer-mayo', [InvoiceController::class, 'stickerCustomerMayo'])->name('packing.customer_mayo');
         Route::get('packing/{invoice}/customer-tamon', [InvoiceController::class, 'stickerCustomerTamon'])->name('packing.customer_tamon');
-        // routes/web.php
+  
         Route::get('/packing/sticker/{invoice}/download', [InvoiceController::class, 'downloadSticker'])
             ->name('packing.sticker.download');
     });
@@ -218,9 +210,9 @@ Route::middleware('auth')->group(function () {
         Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     });
 
-    // ============================================
+    // ============================
     // STAFF (OFFICE) - Customers
-    // ============================================
+    // ============================
     Route::middleware('role:staff,manager,admin')->group(function () {
         Route::resource('customers', CustomerController::class);
         Route::resource('salespersons', SalespersonController::class);

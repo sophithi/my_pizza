@@ -675,16 +675,7 @@
                     @else
                         <p class="customer-name">N/A</p>
                     @endif
-                    <p>
-                        <strong>ការបង់ប្រាក់:</strong>
-                        @if($invoice->order?->payment_status === 'paid')
-                            បានទូទាត់
-                        @elseif($invoice->order?->payment_status === 'partial')
-                            បង់មួយផ្នែក
-                        @else
-                            មិនទាន់ទូទាត់
-                        @endif
-                    </p>
+           
 
                 </div>
             </div>

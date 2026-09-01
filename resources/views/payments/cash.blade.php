@@ -470,9 +470,16 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="form-label small fw-bold text-muted mb-0">លុយក្រៅបានពីការលក់ (Sales)៖</label>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 10px; padding: 3px 6px;">
-                                {{ $cashTransactionsCount }} ប្រតិបត្តិការ
-                            </span>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 10px; padding: 3px 6px;">
+                                    {{ $cashTransactionsCount }} ប្រតិបត្តិការ
+                                </span>
+                                @if(isset($cashTransactions) && count($cashTransactions) > 0)
+                                    <button type="button" class="btn btn-sm btn-link p-0 text-primary text-decoration-none" data-bs-toggle="collapse" data-bs-target="#cashTransactionsCollapse" title="បង្ហាញបញ្ជីលម្អិត" style="font-size: 11px;">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                @endif
+                            </div>
                         </div>
                         <div class="p-2 rounded bg-light border border-light-subtle">
                             <div class="d-flex justify-content-between small">
@@ -486,12 +493,42 @@
                             <input type="hidden" id="systemCashUsd" value="{{ $systemCashUsd }}">
                             <input type="hidden" id="systemCashKhr" value="{{ $systemCashKhr }}">
                         </div>
+
+                        {{-- Collapsible Cash Sales Details --}}
+                        @if(isset($cashTransactions) && count($cashTransactions) > 0)
+                            <div class="collapse mt-2" id="cashTransactionsCollapse">
+                                <div class="card card-body p-2 border bg-white small" style="max-height: 220px; overflow-y: auto; font-size: 11px;">
+                                    <div class="fw-bold text-muted border-bottom pb-1 mb-1">
+                                        <i class="fas fa-list-alt text-primary me-1"></i> បញ្ជីការទូទាត់លុយក្រៅ ({{ count($cashTransactions) }})
+                                    </div>
+                                    @foreach($cashTransactions as $tx)
+                                        <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
+                                            <div>
+                                                <div class="fw-semibold text-dark">{{ $tx->order_code }} - {{ $tx->customer_name }}</div>
+                                                <div class="text-muted" style="font-size: 9.5px;">
+                                                    {{ $tx->method_summary !== 'Cash' ? $tx->method_summary : 'Cash' }}
+                                                    @if($tx->time) · {{ $tx->time }} @endif
+                                                </div>
+                                            </div>
+                                            <div class="text-end fw-bold {{ $tx->currency === 'KHR' ? 'text-primary' : 'text-success' }}">
+                                                {{ $tx->currency === 'KHR' ? number_format($tx->amount_original, 0) . ' ៛' : '$' . number_format($tx->amount_original, 2) }}
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- System Cash Expenses/Purchases (From DB) --}}
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="form-label small fw-bold text-muted mb-0">ចំណាយលុយក្រៅ (Cash Expenses)៖</label>
+                            @if(isset($cashPurchases) && count($cashPurchases) > 0)
+                                <button type="button" class="btn btn-sm btn-link p-0 text-danger text-decoration-none" data-bs-toggle="collapse" data-bs-target="#cashPurchasesCollapse" title="បង្ហាញបញ្ជីចំណាយ" style="font-size: 11px;">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            @endif
                         </div>
                         <div class="p-2 rounded bg-danger-subtle border border-danger-subtle" style="background-color: #fff5f5 !important;">
                             <div class="d-flex justify-content-between small text-danger">
@@ -505,6 +542,28 @@
                             <input type="hidden" id="systemCashPurchaseUsd" value="{{ $systemCashPurchaseUsd }}">
                             <input type="hidden" id="systemCashPurchaseKhr" value="{{ $systemCashPurchaseKhr }}">
                         </div>
+
+                        {{-- Collapsible Cash Expenses Details --}}
+                        @if(isset($cashPurchases) && count($cashPurchases) > 0)
+                            <div class="collapse mt-2" id="cashPurchasesCollapse">
+                                <div class="card card-body p-2 border bg-white small text-danger" style="max-height: 180px; overflow-y: auto; font-size: 11px;">
+                                    <div class="fw-bold border-bottom pb-1 mb-1 text-danger">
+                                        <i class="fas fa-receipt me-1"></i> បញ្ជីចំណាយលុយក្រៅ ({{ count($cashPurchases) }})
+                                    </div>
+                                    @foreach($cashPurchases as $pur)
+                                        <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
+                                            <div>
+                                                <div class="fw-semibold text-dark">{{ $pur->supplier_name ?: 'Purchase' }}</div>
+                                                <div class="text-muted" style="font-size: 9.5px;">{{ $pur->invoice_number ?: '#' . $pur->id }}</div>
+                                            </div>
+                                            <div class="text-end fw-bold text-danger">
+                                                {{ ($pur->currency ?? 'USD') === 'KHR' ? '-' . number_format($pur->total_amount_khr, 0) . ' ៛' : '-$' . number_format($pur->total_amount, 2) }}
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Expected Cash in Drawer --}}

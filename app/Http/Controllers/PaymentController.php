@@ -105,6 +105,7 @@ class PaymentController extends Controller
                     $q->where('method', 'not like', '%Cash%')
                         ->where('method', 'not like', '%ABA%')
                         ->where('method', 'not like', '%ACLEDA%')
+                        ->where('method', 'not like', '%Wing%')
                         ->where('method', '!=', '—');
                 } else {
                     $q->where('method', 'like', "%{$method}%");
@@ -272,26 +273,53 @@ class PaymentController extends Controller
         $date = $request->get('date', Carbon::today()->format('Y-m-d'));
         $exchangeRate = (float) $request->get('exchange_rate', self::EXCHANGE_RATE);
 
-        // Find payments recorded on this date with Cash method
-        $cashLines = PaymentLine::whereHas('payment', function ($q) use ($date) {
-            $q->whereDate('created_at', $date);
-        })->where('method', 'Cash')->get();
+        // Find payments recorded on this date with Cash method lines
+        $cashLines = PaymentLine::with(['payment.order.customer'])
+            ->whereHas('payment', function ($q) use ($date) {
+                $q->whereDate('created_at', $date);
+            })
+            ->where('method', 'Cash')
+            ->get();
 
         $systemCashUsd = (float) $cashLines->where('currency', 'USD')->sum('amount_original');
         $systemCashKhr = (float) $cashLines->where('currency', 'KHR')->sum('amount_original');
 
         // Also check legacy payments without payment lines
-        $legacyPayments = Payment::whereDate('created_at', $date)
+        $legacyPayments = Payment::with(['order.customer'])
+            ->whereDate('created_at', $date)
             ->whereDoesntHave('lines')
             ->where('method', 'like', '%Cash%')
             ->get();
 
         foreach ($legacyPayments as $legacy) {
-            $systemCashUsd += (float) $legacy->paid_amount;
-            $systemCashKhr += (float) $legacy->paid_amount_khr;
+            $methods = array_filter(array_map('trim', explode('+', $legacy->method ?: 'Cash')));
+            $factor = count($methods) > 1 ? (1 / count($methods)) : 1;
+            $isKhr = str_contains((string) $legacy->notes, 'KHR') || str_contains((string) $legacy->notes, '៛');
+
+            if ($isKhr) {
+                $systemCashKhr += ((float) $legacy->paid_amount_khr) * $factor;
+            } else {
+                $systemCashUsd += ((float) $legacy->paid_amount) * $factor;
+            }
         }
 
-        $cashTransactionsCount = $cashLines->count() + $legacyPayments->count();
+        $cashTransactionsCount = $cashLines->pluck('payment_id')->merge($legacyPayments->pluck('id'))->unique()->count();
+
+        // Pass detailed cash transaction items for audit list
+        $cashTransactions = $cashLines->map(function ($line) {
+            $payment = $line->payment;
+            $order = $payment?->order;
+            return (object) [
+                'order_code' => $order ? ('ORD-' . str_pad($order->id, 4, '0', STR_PAD_LEFT)) : 'N/A',
+                'customer_name' => $payment?->customer_name ?? $order?->customer?->name ?? 'Walk-in Customer',
+                'method_summary' => $payment?->method ?? 'Cash',
+                'line_method' => $line->method,
+                'currency' => $line->currency,
+                'amount_original' => (float) $line->amount_original,
+                'amount_usd' => (float) $line->amount_usd,
+                'time' => $payment?->created_at ? $payment->created_at->format('h:i A') : '',
+            ];
+        });
 
         // Find cash purchases (expenses) paid out of drawer on this date
         $cashPurchases = Purchase::whereDate('purchase_date', $date)
@@ -313,6 +341,8 @@ class PaymentController extends Controller
             'systemCashUsd',
             'systemCashKhr',
             'cashTransactionsCount',
+            'cashTransactions',
+            'cashPurchases',
             'systemCashPurchaseUsd',
             'systemCashPurchaseKhr'
         ));
@@ -644,24 +674,20 @@ class PaymentController extends Controller
             return null;
         }
 
-        // Group lines by currency
-        $usdLines = collect($lines)->where('currency', 'USD');
-        $khrLines = collect($lines)->where('currency', 'KHR');
-
         $parts = [];
-
-        if ($usdLines->isNotEmpty()) {
-            $usdTotal = $usdLines->sum('amount_original');
-            $parts[] = sprintf("$%.2f USD", $usdTotal);
-        }
-
-        if ($khrLines->isNotEmpty()) {
-            $khrTotal = $khrLines->sum('amount_original');
-            $parts[] = sprintf("៛%s KHR", number_format($khrTotal, 0));
+        foreach ($lines as $line) {
+            $method = $line['method'] ?? 'Cash';
+            $currency = $line['currency'] ?? 'USD';
+            $orig = (float) ($line['amount_original'] ?? 0);
+            if ($currency === 'KHR') {
+                $parts[] = sprintf("%s: ៛%s KHR", $method, number_format($orig, 0));
+            } else {
+                $parts[] = sprintf("%s: $%.2f USD", $method, $orig);
+            }
         }
 
         if (count($parts) > 1) {
-            return 'Paid: ' . implode(' + ', $parts) . " @ ៛" . number_format($exchangeRate, 0) . "/USD";
+            return 'Paid: ' . implode(' + ', $parts);
         } elseif (count($parts) === 1) {
             return 'Paid: ' . $parts[0];
         }

@@ -527,6 +527,7 @@
                     <option value="Cash" {{ request('method') === 'Cash' ? 'selected' : '' }}>Cash</option>
                     <option value="ABA" {{ request('method') === 'ABA' ? 'selected' : '' }}>ABA Bank</option>
                     <option value="ACLEDA" {{ request('method') === 'ACLEDA' ? 'selected' : '' }}>ACLEDA Bank</option>
+                    <option value="Wing" {{ request('method') === 'Wing' ? 'selected' : '' }}>Wing Bank</option>
                     <option value="other" {{ request('method') === 'other' ? 'selected' : '' }}>ផ្សេងៗ (Other)</option>
                 </select>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="ស្វែងរកអតិថិជន ឬលេខការបញ្ជាទិញ..."
@@ -853,6 +854,14 @@
             updateStatusBadge();
         }
 
+        function getLocalDateString(d = new Date()) {
+            const date = new Date(d);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         function resetModal() {
             document.getElementById('paymentModalLabel').textContent = 'កត់ត្រាការទូទាត់អតិថិជន';
             document.getElementById('paymentForm').action = '{{ route("payments.store") }}';
@@ -861,8 +870,8 @@
             document.getElementById('form_source_order_id').value = '';
             document.getElementById('f_customer_name').value = '';
             document.getElementById('f_order_id').value = '';
-            document.getElementById('f_order_date').value = new Date().toISOString().slice(0, 10);
-            document.getElementById('f_payment_date').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('f_order_date').value = getLocalDateString();
+            document.getElementById('f_payment_date').value = getLocalDateString();
             document.getElementById('f_total').value = '';
             document.getElementById('f_total_khr').value = '';
             document.getElementById('f_paid').value = '0';
@@ -884,15 +893,35 @@
             document.getElementById('form_source_order_id').value = payment.source_order_id || '';
             document.getElementById('f_customer_name').value = payment.customer_name;
             document.getElementById('f_order_id').value = payment.order_id;
-            document.getElementById('f_order_date').value = String(payment.order_date).slice(0, 10);
-            document.getElementById('f_payment_date').value = payment.payment_date ? String(payment.payment_date).slice(0,10) : new Date().toISOString().slice(0,10);
+            document.getElementById('f_order_date').value = payment.order_date ? String(payment.order_date).slice(0, 10) : getLocalDateString();
+            document.getElementById('f_payment_date').value = payment.payment_date ? String(payment.payment_date).slice(0, 10) : getLocalDateString();
             document.getElementById('f_total').value = payment.total_amount;
             document.getElementById('f_total_khr').value = payment.total_amount_khr || usdToKhr(payment.total_amount);
             document.getElementById('f_notes').value = payment.notes || '';
             document.getElementById('f_method').value = payment.method === '—' ? 'Cash' : payment.method;
-            paymentLines = payment.lines && payment.lines.length
-                ? payment.lines.map(line => ({ method: line.method, currency: line.currency, amount: line.amount_original }))
-                : [{ method: payment.method === '—' ? 'Cash' : payment.method, currency: 'USD', amount: payment.paid_amount }];
+            
+            if (payment.lines && payment.lines.length > 0) {
+                paymentLines = payment.lines.map(line => ({
+                    method: paymentMethods.includes(line.method) ? line.method : 'Other',
+                    currency: line.currency || 'USD',
+                    amount: line.amount_original
+                }));
+            } else if (payment.method && payment.method.includes('+')) {
+                const methods = payment.method.split('+').map(m => m.trim()).filter(Boolean);
+                const splitAmount = (parseFloat(payment.paid_amount) || 0) / (methods.length || 1);
+                paymentLines = methods.map(m => ({
+                    method: paymentMethods.includes(m) ? m : 'Other',
+                    currency: 'USD',
+                    amount: Number(splitAmount.toFixed(2))
+                }));
+            } else {
+                const singleMethod = payment.method === '—' ? 'Cash' : payment.method;
+                paymentLines = [{
+                    method: paymentMethods.includes(singleMethod) ? singleMethod : 'Cash',
+                    currency: 'USD',
+                    amount: payment.paid_amount || 0
+                }];
+            }
             renderPaymentLines();
         }
 
