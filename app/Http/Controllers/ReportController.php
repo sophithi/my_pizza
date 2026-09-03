@@ -44,12 +44,17 @@ class ReportController extends Controller
         // confused with $income, which is payments recorded today for any order).
         $unpaid = 0.0;
         $unpaidKhr = 0.0;
+        $reportDateStr = $reportDate->toDateString();
         foreach ($dayOrders as $order) {
             $payment = $order->payments->first();
             $totalAmount = (float) $order->total_amount;
-            $totalKhrAmount = $order->totalKhr();
-            $paidAmount = $payment?->paid_amount ?? ($order->payment_status === 'paid' ? $totalAmount : 0);
-            $paidKhrAmount = $payment?->paid_amount_khr ?? ($order->payment_status === 'paid' ? $totalKhrAmount : 0);
+            $totalKhrAmount = (float) $order->totalKhr();
+            
+            $paymentDate = $payment ? Carbon::parse($payment->created_at)->toDateString() : null;
+            $isPaidOnOrBefore = ($payment && $paymentDate <= $reportDateStr);
+
+            $paidAmount = $isPaidOnOrBefore ? (float) $payment->paid_amount : ($order->payment_status === 'paid' && $paymentDate === null ? $totalAmount : 0);
+            $paidKhrAmount = $isPaidOnOrBefore ? (float) ($payment->paid_amount_khr ?: ($paidAmount * self::EXCHANGE_RATE)) : ($order->payment_status === 'paid' && $paymentDate === null ? $totalKhrAmount : 0);
 
             $unpaid += max(0, $totalAmount - $paidAmount);
             $unpaidKhr += max(0, $totalKhrAmount - $paidKhrAmount);

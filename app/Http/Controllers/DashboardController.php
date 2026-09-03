@@ -61,7 +61,6 @@ class DashboardController extends Controller
             'unpaid_amount' => Order::where('payment_status', '!=', 'paid')->sum('total_amount') ?? 0,
             'pending_payments' => Payment::whereIn('status', ['pending', 'partial'])->sum(DB::raw('GREATEST(total_amount - paid_amount, 0)')) ?? 0,
             'today_payments' => Payment::whereDate('created_at', $today)
-                ->where('status', 'paid')
                 ->sum('paid_amount') ?? 0,
 
             'today_expenses' => Purchase::whereDate('purchase_date', $today)

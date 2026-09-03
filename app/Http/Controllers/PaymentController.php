@@ -16,6 +16,28 @@ class PaymentController extends Controller
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
+    private function resolveDateRange(Request $request): array
+    {
+        $period = $request->get('period', 'all');
+        $today  = Carbon::today();
+
+        if ($period === 'today') {
+            return [$today->toDateString(), $today->toDateString()];
+        } elseif ($period === 'week') {
+            return [$today->copy()->startOfWeek()->toDateString(), $today->copy()->endOfWeek()->toDateString()];
+        } elseif ($period === 'month') {
+            return [$today->copy()->startOfMonth()->toDateString(), $today->copy()->endOfMonth()->toDateString()];
+        } elseif ($period === 'custom') {
+            $from = $request->date_from ? Carbon::parse($request->date_from)->toDateString() : null;
+            $to   = $request->date_to ? Carbon::parse($request->date_to)->toDateString() : null;
+            if ($from && !$to) $to = $from;
+            if ($to && !$from) $from = $to;
+            return [$from, $to];
+        }
+
+        return [null, null];
+    }
+
     private function applyFilters(Request $request)
     {
         $query = Order::with([
@@ -23,65 +45,20 @@ class PaymentController extends Controller
             'payments' => fn($q) => $q->with('lines')->latest('id'),
         ]);
 
-        // Date / period filter
-        $period = $request->get('period', 'all');
-        $today  = Carbon::today();
+        [$dateFrom, $dateTo] = $this->resolveDateRange($request);
 
-        // Apply period filter to either the order date or the payment creation date
-        if ($period === 'today') {
-            $query->where(function ($q) use ($today) {
-                $q->whereDate('order_date', $today)
-                  ->orWhereHas('payments', fn($p) => $p->whereDate('created_at', $today));
-            });
-        } elseif ($period === 'week') {
-            $start = $today->copy()->startOfWeek();
-            $end = $today->copy()->endOfWeek();
-
-            $query->where(function ($q) use ($start, $end) {
-                $q->whereBetween('order_date', [$start, $end])
-                  ->orWhereHas('payments', fn($p) => $p->whereBetween('created_at', [$start, $end]));
-            });
-        } elseif ($period === 'month') {
-            $query->where(function ($q) use ($today) {
-                $q->whereMonth('order_date', $today->month)
-                  ->whereYear('order_date', $today->year)
-                  ->orWhereHas('payments', fn($p) => $p->whereMonth('created_at', $today->month)
-                                                           ->whereYear('created_at', $today->year));
-            });
-        } elseif ($period === 'custom') {
-            if ($request->date_from) {
-                $query->where(function ($q) use ($request) {
-                    $q->whereDate('order_date', '>=', $request->date_from)
-                      ->orWhereHas('payments', fn($p) => $p->whereDate('created_at', '>=', $request->date_from));
-                });
-            }
-
-            if ($request->date_to) {
-                $query->where(function ($q) use ($request) {
-                    $q->whereDate('order_date', '<=', $request->date_to)
-                      ->orWhereHas('payments', fn($p) => $p->whereDate('created_at', '<=', $request->date_to));
-                });
-            }
-        }
-
-        // Status filter
-        $status = $request->get('status', 'all');
-        if ($status !== 'all') {
-            $orderStatus = match ($status) {
-                'pending' => 'unpaid',
-                default => $status,
-            };
-
-            $query->where(function ($q) use ($status, $orderStatus) {
-                $q->where('payment_status', $orderStatus)
-                    ->orWhereHas('payments', fn($p) => $p->where('status', $status));
+        // Filter orders that either:
+        // a) Were placed in this date range, OR
+        // b) Had a payment collected in this date range (including old debts settled during this period)
+        if ($dateFrom && $dateTo) {
+            $query->where(function ($q) use ($dateFrom, $dateTo) {
+                $q->whereBetween('order_date', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                  ->orWhereHas('payments', fn($p) => $p->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']));
             });
         }
 
         // Search
         if ($search = $request->get('search')) {
-            $orderId = preg_match('/(\d+)/', $search, $matches) ? (int) $matches[1] : null;
-
             $query->where(function ($q) use ($search) {
                 $q->whereHas('customer', fn($customer) =>
                     $customer->where('name', 'like', "%{$search}%"));
@@ -97,8 +74,7 @@ class PaymentController extends Controller
             $query->where('delivery_id', $deliveryId);
         }
 
-        // Payment method filter — payments.method is a "+"-joined summary
-        // (e.g. "Cash + ABA"), so match by substring rather than exact value.
+        // Payment method filter
         if ($method = $request->get('method')) {
             $query->whereHas('payments', function ($q) use ($method) {
                 if ($method === 'other') {
@@ -113,31 +89,72 @@ class PaymentController extends Controller
             });
         }
 
-        // Order by latest payment date when present, otherwise fall back to order_date
         return $query->orderByRaw(
             "COALESCE((select max(created_at) from payments where payments.order_id = orders.id), orders.order_date) desc"
         );
     }
 
-    private function mapOrderToPaymentRow(Order $order): object
+    private function mapOrderToPaymentRow(Order $order, ?string $dateFrom = null, ?string $dateTo = null): object
     {
         $payment = $order->payments->first();
+        $orderDateStr = Carbon::parse($order->order_date)->toDateString();
+        $paymentDateStr = $payment ? Carbon::parse($payment->created_at)->toDateString() : null;
 
-        $status = $payment?->status ?? match ($order->payment_status) {
-            'paid' => 'paid',
-            'partial' => 'partial',
-            default => 'pending',
-        };
+        // When viewing a bounded date period:
+        if ($dateFrom && $dateTo) {
+            // Case 1: Payment collected in this period
+            if ($payment && $paymentDateStr >= $dateFrom && $paymentDateStr <= $dateTo) {
+                $isOldDebt = ($orderDateStr < $dateFrom);
+                $status = $payment->status;
+                $paidAmount = (float) $payment->paid_amount;
+                $paidAmountKhr = (float) ($payment->paid_amount_khr ?: ($paidAmount * self::EXCHANGE_RATE));
+                $displayDate = $payment->created_at;
+            }
+            // Case 2: Order placed in this period, but paid LATER (or still unpaid)
+            elseif ($orderDateStr >= $dateFrom && $orderDateStr <= $dateTo) {
+                $isOldDebt = false;
+                $status = 'pending'; // In this period context, it was an uncollected debt
+                $paidAmount = 0.0;
+                $paidAmountKhr = 0.0;
+                $displayDate = $order->order_date;
+            }
+            // Case 3: Fallback
+            else {
+                $isOldDebt = false;
+                $status = $payment?->status ?? match ($order->payment_status) {
+                    'paid' => 'paid',
+                    'partial' => 'partial',
+                    default => 'pending',
+                };
+                $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
+                $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $order->totalKhr() : 0);
+                $displayDate = $payment?->created_at ?? $order->order_date;
+            }
+        } else {
+            // Unbounded ('all')
+            $isOldDebt = ($payment && $orderDateStr < $paymentDateStr);
+            $status = $payment?->status ?? match ($order->payment_status) {
+                'paid' => 'paid',
+                'partial' => 'partial',
+                default => 'pending',
+            };
+            $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
+            $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $order->totalKhr() : 0);
+            $displayDate = $payment?->created_at ?? $order->order_date;
+        }
 
-        $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
-        $totalAmountKhr = $payment?->total_amount_khr ?? $order->totalKhr();
-        $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $totalAmountKhr : 0);
+        $totalAmount = (float) $order->total_amount;
+        $totalAmountKhr = (float) ($payment?->total_amount_khr ?? $order->totalKhr());
+        $balance = max(0, $totalAmount - $paidAmount);
+        $balanceKhr = max(0, $totalAmountKhr - $paidAmountKhr);
 
-        // "Old debt" — a payment recorded today for an order originally placed
-        // on an earlier day.
-        $isOldDebt = $payment?->created_at
-            && $payment->created_at->isToday()
-            && Carbon::parse($order->order_date)->lt(Carbon::today());
+        $lines = ($paidAmount > 0 && $payment) ? ($payment->lines?->map(fn($line) => [
+            'method' => $line->method,
+            'currency' => $line->currency,
+            'amount_original' => (float) $line->amount_original,
+            'amount_usd' => (float) $line->amount_usd,
+            'exchange_rate' => (float) ($line->exchange_rate ?: self::EXCHANGE_RATE),
+        ])->values() ?? []) : [];
 
         return (object) [
             'id' => $payment?->id,
@@ -145,23 +162,17 @@ class PaymentController extends Controller
             'source_order_id' => $order->id,
             'customer_name' => $payment?->customer_name ?? $order->customer?->name ?? 'Walk-in Customer',
             'order_id' => 'ORD-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
-            'order_date' => $payment?->created_at ?? $order->order_date,
+            'order_date' => $displayDate,
             'order_actual_date' => $order->order_date,
             'payment_date' => $payment?->created_at,
-            'total_amount' => (float) $order->total_amount,
-            'total_amount_khr' => (float) $totalAmountKhr,
-            'paid_amount' => min((float) $order->total_amount, (float) $paidAmount),
-            'paid_amount_khr' => (float) $paidAmountKhr,
-            'balance' => max(0, (float) $order->total_amount - (float) $paidAmount),
-            'balance_khr' => max(0, (float) $totalAmountKhr - (float) $paidAmountKhr),
-            'method' => $payment?->method ?? '—',
-            'lines' => $payment?->lines?->map(fn($line) => [
-                'method' => $line->method,
-                'currency' => $line->currency,
-                'amount_original' => (float) $line->amount_original,
-                'amount_usd' => (float) $line->amount_usd,
-                'exchange_rate' => (float) ($line->exchange_rate ?: self::EXCHANGE_RATE),
-            ])->values() ?? [],
+            'total_amount' => $totalAmount,
+            'total_amount_khr' => $totalAmountKhr,
+            'paid_amount' => min($totalAmount, $paidAmount),
+            'paid_amount_khr' => $paidAmountKhr,
+            'balance' => $balance,
+            'balance_khr' => $balanceKhr,
+            'method' => ($paidAmount > 0) ? ($payment?->method ?? '—') : '—',
+            'lines' => $lines,
             'status' => $status,
             'notes' => $payment?->notes ?? $order->notes,
             'exchange_rate' => (float) ($payment?->exchange_rate ?? 4000),
@@ -171,20 +182,18 @@ class PaymentController extends Controller
         ];
     }
 
-    private function buildStats($query): array
+    private function buildStatsFromRows($all): array
     {
-        $all = (clone $query)->get()->map(fn($order) => $this->mapOrderToPaymentRow($order));
-
         return [
             'collected'       => $all->sum('paid_amount'),
             'collected_khr'   => $all->sum('paid_amount_khr'),
             'outstanding'     => $all->sum('balance'),
             'outstanding_khr' => $all->sum('balance_khr'),
-            'total'       => $all->count(),
-            'paid'        => $all->where('status', 'paid')->count(),
-            'partial'     => $all->where('status', 'partial')->count(),
-            'unpaid'      => $all->where('status', 'pending')->count(),
-            'old_debt'    => $all->where('is_old_debt', true)->count(),
+            'total'           => $all->count(),
+            'paid'            => $all->where('status', 'paid')->count(),
+            'partial'         => $all->where('status', 'partial')->count(),
+            'unpaid'          => $all->where('status', 'pending')->count(),
+            'old_debt'        => $all->where('is_old_debt', true)->count(),
             'method_breakdown' => $this->buildMethodBreakdown($all),
         ];
     }
@@ -205,14 +214,13 @@ class PaymentController extends Controller
         $breakdown['Other'] = ['label' => 'ផ្សេងៗ', 'usd' => 0.0, 'khr' => 0.0];
 
         foreach ($all as $row) {
+            if ($row->paid_amount <= 0) {
+                continue;
+            }
+
             $lines = $row->lines;
 
-            // Legacy payments recorded before the per-line breakdown existed have
-            // no lines — fall back to the payment-level (possibly "+"-joined) method.
-            // NOTE: $lines is sometimes a Collection (loaded relation) and sometimes
-            // a plain array (no payment at all) — count() works for both, whereas
-            // empty() is always false for an object, even an empty Collection.
-            if (count($lines) === 0 && $row->paid_amount > 0) {
+            if (count($lines) === 0) {
                 $matchedKey = 'Other';
                 foreach ($methodLabels as $key => $label) {
                     if (str_contains($row->method, $key)) {
@@ -255,12 +263,36 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
+        [$dateFrom, $dateTo] = $this->resolveDateRange($request);
         $query      = $this->applyFilters($request);
-        $stats      = $this->buildStats($query);
+        
+        $allOrders  = $query->get();
+        $allRows    = $allOrders->map(fn($order) => $this->mapOrderToPaymentRow($order, $dateFrom, $dateTo));
+
+        // Filter by status tab if specified
+        $status = $request->get('status', 'all');
+        $filteredRows = $allRows;
+        if ($status !== 'all') {
+            $filteredRows = $allRows->filter(function ($row) use ($status) {
+                if ($status === 'paid') return $row->status === 'paid';
+                if ($status === 'partial') return $row->status === 'partial';
+                if ($status === 'pending') return $row->status === 'pending';
+                return true;
+            });
+        }
+
+        $stats      = $this->buildStatsFromRows($allRows);
         $deliveries = Delivery::orderBy('delivery_name')->get();
-        $payments   = $query->paginate(20);
-        $payments->setCollection(
-            $payments->getCollection()->map(fn($order) => $this->mapOrderToPaymentRow($order))
+
+        // Paginate manually from collection
+        $page       = (int) $request->get('page', 1);
+        $perPage    = 20;
+        $payments   = new \Illuminate\Pagination\LengthAwarePaginator(
+            $filteredRows->forPage($page, $perPage)->values(),
+            $filteredRows->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
         );
 
         return view('payments.index', compact('payments', 'stats', 'deliveries'));

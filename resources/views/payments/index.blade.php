@@ -566,12 +566,13 @@
                                     <div class="text-muted small">{{ $payment->order_id }}</div>
                                 </td>
                                 <td class="text-muted small">
-                                    {{ \Carbon\Carbon::parse($payment->order_date)->format('d M Y') }}
+                                    <div class="fw-medium text-dark">{{ \Carbon\Carbon::parse($payment->order_date)->format('d M Y') }}</div>
                                     @if($payment->is_old_debt)
-                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle ms-1"
+                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle mt-1"
                                             title="កាលបរិច្ឆេទបញ្ជាទិញដើម: {{ \Carbon\Carbon::parse($payment->order_actual_date)->format('d M Y') }}">
-                                            សងបុងចាស់
+                                            <i class="fas fa-history me-1"></i>សងបុងចាស់
                                         </span>
+                                        <div class="text-muted" style="font-size: 10px;">(បុងថ្ងៃទី: {{ \Carbon\Carbon::parse($payment->order_actual_date)->format('d M Y') }})</div>
                                     @endif
                                 </td>
                                 <td>
@@ -687,8 +688,14 @@
                             <input type="date" name="order_date" id="f_order_date" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small text-muted">កាលបរិច្ឆេទទូទាត់</label>
-                            <input type="date" name="payment_date" id="f_payment_date" class="form-control">
+                            <label class="form-label small text-muted d-flex justify-content-between">
+                                <span>កាលបរិច្ឆេទទូទាត់ (Payment Date)</span>
+                                <span class="text-primary fw-medium" style="font-size: 11px;"><i class="fas fa-money-bill-wave me-1"></i>ថ្ងៃដែលលុយកត់ចូលចំណូល</span>
+                            </label>
+                            <input type="date" name="payment_date" id="f_payment_date" class="form-control" required>
+                            <small class="text-muted d-block mt-1" style="font-size: 11px;">
+                                * ប្រសិនបើសងបុងចាស់ លុយដែលបានបង់នឹងត្រូវកត់ត្រាចូលក្នុងចំណូលប្រចាំថ្ងៃនៃកាលបរិច្ឆេទនេះ។
+                            </small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small text-muted">សរុប</label>
@@ -893,7 +900,7 @@
             document.getElementById('form_source_order_id').value = payment.source_order_id || '';
             document.getElementById('f_customer_name').value = payment.customer_name;
             document.getElementById('f_order_id').value = payment.order_id;
-            document.getElementById('f_order_date').value = payment.order_date ? String(payment.order_date).slice(0, 10) : getLocalDateString();
+            document.getElementById('f_order_date').value = payment.order_actual_date ? String(payment.order_actual_date).slice(0, 10) : (payment.order_date ? String(payment.order_date).slice(0, 10) : getLocalDateString());
             document.getElementById('f_payment_date').value = payment.payment_date ? String(payment.payment_date).slice(0, 10) : getLocalDateString();
             document.getElementById('f_total').value = payment.total_amount;
             document.getElementById('f_total_khr').value = payment.total_amount_khr || usdToKhr(payment.total_amount);
