@@ -249,13 +249,18 @@ class PaymentController extends Controller
             }
 
             foreach ($lines as $line) {
-                $key = array_key_exists($line->method, $methodLabels) ? $line->method : 'Other';
-                $rate = (float) ($line->exchange_rate ?: self::EXCHANGE_RATE);
-                $khr = $line->currency === 'KHR'
-                    ? (float) $line->amount_original
-                    : round((float) $line->amount_usd * $rate);
+                $method = is_array($line) ? ($line['method'] ?? 'Other') : ($line->method ?? 'Other');
+                $currency = is_array($line) ? ($line['currency'] ?? 'USD') : ($line->currency ?? 'USD');
+                $amountOriginal = is_array($line) ? (float) ($line['amount_original'] ?? 0) : (float) ($line->amount_original ?? 0);
+                $amountUsd = is_array($line) ? (float) ($line['amount_usd'] ?? 0) : (float) ($line->amount_usd ?? 0);
+                $rate = is_array($line) ? (float) ($line['exchange_rate'] ?? self::EXCHANGE_RATE) : (float) ($line->exchange_rate ?? self::EXCHANGE_RATE);
 
-                $breakdown[$key]['usd'] += (float) $line->amount_usd;
+                $key = array_key_exists($method, $methodLabels) ? $method : 'Other';
+                $khr = $currency === 'KHR'
+                    ? $amountOriginal
+                    : round($amountUsd * $rate);
+
+                $breakdown[$key]['usd'] += $amountUsd;
                 $breakdown[$key]['khr'] += $khr;
             }
         }
@@ -300,12 +305,18 @@ class PaymentController extends Controller
             }
 
             foreach ($lines as $line) {
-                $key = array_key_exists($line->method, $methodLabels) ? $line->method : 'Other';
-                $khr = $line['currency'] === 'KHR'
-                    ? $line['amount_original']
-                    : round($line['amount_usd'] * $line['exchange_rate']);
+                $method = is_array($line) ? ($line['method'] ?? 'Other') : ($line->method ?? 'Other');
+                $currency = is_array($line) ? ($line['currency'] ?? 'USD') : ($line->currency ?? 'USD');
+                $amountOriginal = is_array($line) ? (float) ($line['amount_original'] ?? 0) : (float) ($line->amount_original ?? 0);
+                $amountUsd = is_array($line) ? (float) ($line['amount_usd'] ?? 0) : (float) ($line->amount_usd ?? 0);
+                $rate = is_array($line) ? (float) ($line['exchange_rate'] ?? self::EXCHANGE_RATE) : (float) ($line->exchange_rate ?? self::EXCHANGE_RATE);
 
-                $breakdown[$key]['usd'] += $line['amount_usd'];
+                $key = array_key_exists($method, $methodLabels) ? $method : 'Other';
+                $khr = $currency === 'KHR'
+                    ? $amountOriginal
+                    : round($amountUsd * $rate);
+
+                $breakdown[$key]['usd'] += $amountUsd;
                 $breakdown[$key]['khr'] += $khr;
             }
         }
