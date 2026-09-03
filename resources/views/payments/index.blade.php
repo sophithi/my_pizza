@@ -573,6 +573,12 @@
                                             <i class="fas fa-history me-1"></i>សងបុងចាស់
                                         </span>
                                         <div class="text-muted" style="font-size: 10px;">(បុងថ្ងៃទី: {{ \Carbon\Carbon::parse($payment->order_actual_date)->format('d M Y') }})</div>
+                                    @elseif(!empty($payment->settled_later))
+                                        <span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle mt-1"
+                                            title="បានទូទាត់នៅថ្ងៃទី: {{ \Carbon\Carbon::parse($payment->settled_date)->format('d M Y') }}">
+                                            <i class="fas fa-check-circle me-1"></i>សងនៅ {{ \Carbon\Carbon::parse($payment->settled_date)->format('d M Y') }}
+                                        </span>
+                                        <div class="text-muted" style="font-size: 10px;">(លុយកត់ចូលថ្ងៃ {{ \Carbon\Carbon::parse($payment->settled_date)->format('d M') }})</div>
                                     @endif
                                 </td>
                                 <td>
@@ -688,13 +694,15 @@
                             <input type="date" name="order_date" id="f_order_date" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small text-muted d-flex justify-content-between">
-                                <span>កាលបរិច្ឆេទទូទាត់ (Payment Date)</span>
-                                <span class="text-primary fw-medium" style="font-size: 11px;"><i class="fas fa-money-bill-wave me-1"></i>ថ្ងៃដែលលុយកត់ចូលចំណូល</span>
-                            </label>
-                            <input type="date" name="payment_date" id="f_payment_date" class="form-control" required>
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <label class="form-label small text-muted mb-0">កាលបរិច្ឆេទទូទាត់ (Payment Date)</label>
+                                <button type="button" class="btn btn-sm btn-link p-0 text-primary text-decoration-none fw-medium" style="font-size: 11px;" onclick="setPaymentDateToToday()">
+                                    <i class="fas fa-calendar-day me-1"></i>ថ្ងៃនេះ (Real-time)
+                                </button>
+                            </div>
+                            <input type="date" name="payment_date" id="f_payment_date" class="form-control" value="{{ date('Y-m-d') }}" required>
                             <small class="text-muted d-block mt-1" style="font-size: 11px;">
-                                * ប្រសិនបើសងបុងចាស់ លុយដែលបានបង់នឹងត្រូវកត់ត្រាចូលក្នុងចំណូលប្រចាំថ្ងៃនៃកាលបរិច្ឆេទនេះ។
+                                * ប្រព័ន្ធនឹងដាក់ថ្ងៃនេះ (Real-time) ដោយស្វ័យប្រវត្ត។ ប្រសិនបើសងបុងចាស់ លុយនឹងកត់ចូលចំណូលក្នុងថ្ងៃដែលបានជ្រើសរើសនេះ។
                             </small>
                         </div>
                         <div class="mb-3">
@@ -869,6 +877,10 @@
             return `${year}-${month}-${day}`;
         }
 
+        function setPaymentDateToToday() {
+            document.getElementById('f_payment_date').value = getLocalDateString();
+        }
+
         function resetModal() {
             document.getElementById('paymentModalLabel').textContent = 'កត់ត្រាការទូទាត់អតិថិជន';
             document.getElementById('paymentForm').action = '{{ route("payments.store") }}';
@@ -901,7 +913,10 @@
             document.getElementById('f_customer_name').value = payment.customer_name;
             document.getElementById('f_order_id').value = payment.order_id;
             document.getElementById('f_order_date').value = payment.order_actual_date ? String(payment.order_actual_date).slice(0, 10) : (payment.order_date ? String(payment.order_date).slice(0, 10) : getLocalDateString());
-            document.getElementById('f_payment_date').value = payment.payment_date ? String(payment.payment_date).slice(0, 10) : getLocalDateString();
+            
+            // Auto real-time daily date: ALWAYS default to TODAY (real-time)
+            document.getElementById('f_payment_date').value = getLocalDateString();
+            
             document.getElementById('f_total').value = payment.total_amount;
             document.getElementById('f_total_khr').value = payment.total_amount_khr || usdToKhr(payment.total_amount);
             document.getElementById('f_notes').value = payment.notes || '';

@@ -100,53 +100,51 @@ class PaymentController extends Controller
         $orderDateStr = Carbon::parse($order->order_date)->toDateString();
         $paymentDateStr = $payment ? Carbon::parse($payment->created_at)->toDateString() : null;
 
+        $isOldDebt = false;
+        $settledLater = false;
+        $settledDate = null;
+
+        $status = $payment?->status ?? match ($order->payment_status) {
+            'paid' => 'paid',
+            'partial' => 'partial',
+            default => 'pending',
+        };
+
+        $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
+        $totalAmountKhr = $payment?->total_amount_khr ?? $order->totalKhr();
+        $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $totalAmountKhr : 0);
+        $displayDate = $order->order_date;
+
         // When viewing a bounded date period:
         if ($dateFrom && $dateTo) {
-            // Case 1: Payment collected in this period
+            // Case 1: Old debt paid in this period
             if ($payment && $paymentDateStr >= $dateFrom && $paymentDateStr <= $dateTo) {
                 $isOldDebt = ($orderDateStr < $dateFrom);
-                $status = $payment->status;
-                $paidAmount = (float) $payment->paid_amount;
-                $paidAmountKhr = (float) ($payment->paid_amount_khr ?: ($paidAmount * self::EXCHANGE_RATE));
                 $displayDate = $payment->created_at;
             }
-            // Case 2: Order placed in this period, but paid LATER (or still unpaid)
-            elseif ($orderDateStr >= $dateFrom && $orderDateStr <= $dateTo) {
-                $isOldDebt = false;
-                $status = 'pending'; // In this period context, it was an uncollected debt
-                $paidAmount = 0.0;
-                $paidAmountKhr = 0.0;
+            // Case 2: Order created in this period, but settled on a LATER date
+            elseif ($orderDateStr >= $dateFrom && $orderDateStr <= $dateTo && $payment && $paymentDateStr > $dateTo) {
+                $settledLater = true;
+                $settledDate = $payment->created_at;
                 $displayDate = $order->order_date;
             }
-            // Case 3: Fallback
+            // Case 3: Order created in this period and not yet settled
             else {
-                $isOldDebt = false;
-                $status = $payment?->status ?? match ($order->payment_status) {
-                    'paid' => 'paid',
-                    'partial' => 'partial',
-                    default => 'pending',
-                };
-                $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
-                $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $order->totalKhr() : 0);
                 $displayDate = $payment?->created_at ?? $order->order_date;
             }
         } else {
             // Unbounded ('all')
-            $isOldDebt = ($payment && $orderDateStr < $paymentDateStr);
-            $status = $payment?->status ?? match ($order->payment_status) {
-                'paid' => 'paid',
-                'partial' => 'partial',
-                default => 'pending',
-            };
-            $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
-            $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $order->totalKhr() : 0);
-            $displayDate = $payment?->created_at ?? $order->order_date;
+            if ($payment && $orderDateStr < $paymentDateStr) {
+                $isOldDebt = true;
+                $displayDate = $payment->created_at;
+            } else {
+                $displayDate = $payment?->created_at ?? $order->order_date;
+            }
         }
 
         $totalAmount = (float) $order->total_amount;
-        $totalAmountKhr = (float) ($payment?->total_amount_khr ?? $order->totalKhr());
-        $balance = max(0, $totalAmount - $paidAmount);
-        $balanceKhr = max(0, $totalAmountKhr - $paidAmountKhr);
+        $balance = max(0, $totalAmount - (float) $paidAmount);
+        $balanceKhr = max(0, (float) $totalAmountKhr - (float) $paidAmountKhr);
 
         $lines = ($paidAmount > 0 && $payment) ? ($payment->lines?->map(fn($line) => [
             'method' => $line->method,
@@ -166,9 +164,9 @@ class PaymentController extends Controller
             'order_actual_date' => $order->order_date,
             'payment_date' => $payment?->created_at,
             'total_amount' => $totalAmount,
-            'total_amount_khr' => $totalAmountKhr,
-            'paid_amount' => min($totalAmount, $paidAmount),
-            'paid_amount_khr' => $paidAmountKhr,
+            'total_amount_khr' => (float) $totalAmountKhr,
+            'paid_amount' => min($totalAmount, (float) $paidAmount),
+            'paid_amount_khr' => (float) $paidAmountKhr,
             'balance' => $balance,
             'balance_khr' => $balanceKhr,
             'method' => ($paidAmount > 0) ? ($payment?->method ?? '—') : '—',
@@ -179,14 +177,30 @@ class PaymentController extends Controller
             'exchange_rate_notes' => $payment?->exchange_rate_notes,
             'has_exchange_rate_variance' => !empty($payment?->exchange_rate_notes),
             'is_old_debt' => $isOldDebt,
+            'settled_later' => $settledLater,
+            'settled_date' => $settledDate,
         ];
     }
 
-    private function buildStatsFromRows($all): array
+    private function buildStatsFromRows($all, ?string $dateFrom = null, ?string $dateTo = null): array
     {
+        // Actual collected income in this period (payments recorded in this date range)
+        if ($dateFrom && $dateTo) {
+            $periodPayments = Payment::with('lines')
+                ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->get();
+            $collected = (float) $periodPayments->sum('paid_amount');
+            $collectedKhr = (float) $periodPayments->sum('paid_amount_khr');
+            $methodBreakdown = $this->buildMethodBreakdownFromPayments($periodPayments);
+        } else {
+            $collected = (float) $all->sum('paid_amount');
+            $collectedKhr = (float) $all->sum('paid_amount_khr');
+            $methodBreakdown = $this->buildMethodBreakdown($all);
+        }
+
         return [
-            'collected'       => $all->sum('paid_amount'),
-            'collected_khr'   => $all->sum('paid_amount_khr'),
+            'collected'       => $collected,
+            'collected_khr'   => $collectedKhr,
             'outstanding'     => $all->sum('balance'),
             'outstanding_khr' => $all->sum('balance_khr'),
             'total'           => $all->count(),
@@ -194,8 +208,59 @@ class PaymentController extends Controller
             'partial'         => $all->where('status', 'partial')->count(),
             'unpaid'          => $all->where('status', 'pending')->count(),
             'old_debt'        => $all->where('is_old_debt', true)->count(),
-            'method_breakdown' => $this->buildMethodBreakdown($all),
+            'method_breakdown' => $methodBreakdown,
         ];
+    }
+
+    private function buildMethodBreakdownFromPayments($payments): array
+    {
+        $methodLabels = [
+            'Cash'   => 'លុយក្រៅ',
+            'ABA'    => 'ABA Bank',
+            'ACLEDA' => 'ACLEDA Bank',
+            'Wing'   => 'Wing',
+        ];
+
+        $breakdown = [];
+        foreach ($methodLabels as $key => $label) {
+            $breakdown[$key] = ['label' => $label, 'usd' => 0.0, 'khr' => 0.0];
+        }
+        $breakdown['Other'] = ['label' => 'ផ្សេងៗ', 'usd' => 0.0, 'khr' => 0.0];
+
+        foreach ($payments as $payment) {
+            if ((float) $payment->paid_amount <= 0) {
+                continue;
+            }
+
+            $lines = $payment->lines;
+
+            if ($lines->isEmpty()) {
+                $matchedKey = 'Other';
+                foreach ($methodLabels as $key => $label) {
+                    if (str_contains((string) $payment->method, $key)) {
+                        $matchedKey = $key;
+                        break;
+                    }
+                }
+
+                $breakdown[$matchedKey]['usd'] += (float) $payment->paid_amount;
+                $breakdown[$matchedKey]['khr'] += (float) ($payment->paid_amount_khr ?: ($payment->paid_amount * self::EXCHANGE_RATE));
+                continue;
+            }
+
+            foreach ($lines as $line) {
+                $key = array_key_exists($line->method, $methodLabels) ? $line->method : 'Other';
+                $rate = (float) ($line->exchange_rate ?: self::EXCHANGE_RATE);
+                $khr = $line->currency === 'KHR'
+                    ? (float) $line->amount_original
+                    : round((float) $line->amount_usd * $rate);
+
+                $breakdown[$key]['usd'] += (float) $line->amount_usd;
+                $breakdown[$key]['khr'] += $khr;
+            }
+        }
+
+        return $breakdown;
     }
 
     private function buildMethodBreakdown($all): array
@@ -235,7 +300,7 @@ class PaymentController extends Controller
             }
 
             foreach ($lines as $line) {
-                $key = array_key_exists($line['method'], $methodLabels) ? $line['method'] : 'Other';
+                $key = array_key_exists($line->method, $methodLabels) ? $line->method : 'Other';
                 $khr = $line['currency'] === 'KHR'
                     ? $line['amount_original']
                     : round($line['amount_usd'] * $line['exchange_rate']);
@@ -281,7 +346,7 @@ class PaymentController extends Controller
             });
         }
 
-        $stats      = $this->buildStatsFromRows($allRows);
+        $stats      = $this->buildStatsFromRows($allRows, $dateFrom, $dateTo);
         $deliveries = Delivery::orderBy('delivery_name')->get();
 
         // Paginate manually from collection
@@ -453,7 +518,6 @@ class PaymentController extends Controller
             ['order_id' => $order->id],
             $data
         );
-        $this->syncPaymentLines($payment, $lines);
 
         // If a payment date was provided, set the created_at timestamp accordingly
         if ($request->filled('payment_date')) {
@@ -464,6 +528,8 @@ class PaymentController extends Controller
                 logger()->warning('Failed to set payment created_at: ' . $e->getMessage());
             }
         }
+
+        $this->syncPaymentLines($payment, $lines);
 
         $order->update([
             'payment_status' => match ($data['status']) {
@@ -555,7 +621,6 @@ class PaymentController extends Controller
         unset($data['payment_lines']);
 
         $payment->update($data);
-        $this->syncPaymentLines($payment, $lines);
 
         // If a payment date was provided, set the created_at timestamp accordingly
         if ($request->filled('payment_date')) {
@@ -566,6 +631,8 @@ class PaymentController extends Controller
                 logger()->warning('Failed to set payment created_at after update: ' . $e->getMessage());
             }
         }
+
+        $this->syncPaymentLines($payment, $lines);
 
         $order->update([
             'payment_status' => match ($data['status']) {
@@ -732,6 +799,10 @@ class PaymentController extends Controller
         $payment->lines()->delete();
 
         foreach ($lines as $line) {
+            if ($payment->created_at) {
+                $line['created_at'] = $payment->created_at;
+                $line['updated_at'] = $payment->created_at;
+            }
             $payment->lines()->create($line);
         }
     }
