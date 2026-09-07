@@ -32,6 +32,7 @@ class Order extends Model
         'notes',
         'delivery_date',
         'deleted_by',
+        'delete_reason',
     ];
 
     protected $casts = [

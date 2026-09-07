@@ -481,19 +481,27 @@ class InvoiceController extends Controller
      * Its order is soft-deleted alongside it, so the order also disappears
      * from orders/payments listings until the invoice is restored.
      */
-    public function destroy(Invoice $invoice)
+    public function destroy(Request $request, Invoice $invoice)
     {
-        DB::transaction(function () use ($invoice) {
-            $invoice->update(['deleted_by' => auth()->id()]);
+        $deleteReason = $request->input('delete_reason') ?? $request->input('reason');
+
+        DB::transaction(function () use ($invoice, $deleteReason) {
+            $invoice->update([
+                'deleted_by' => auth()->id(),
+                'delete_reason' => $deleteReason,
+            ]);
             $invoice->delete();
 
             if ($order = $invoice->order) {
-                $order->update(['deleted_by' => auth()->id()]);
+                $order->update([
+                    'deleted_by' => auth()->id(),
+                    'delete_reason' => $deleteReason,
+                ]);
                 $order->delete();
             }
         });
 
-        return redirect()->route('invoices.index')->with('success', 'Invoice deleted successfully.');
+        return redirect()->route('invoices.index')->with('success', 'បានលុបវិក្កយបត្រដោយជោគជ័យ (ផ្ទេរទៅធុងសំរាម)។');
     }
 
     /**
@@ -554,16 +562,66 @@ class InvoiceController extends Controller
         $query = Invoice::onlyTrashed()
             ->with(['order.customer', 'deletedBy']);
 
-        if ($search = $request->get('search')) {
+        // Period filter (based on deleted_at)
+        $period = $request->get('period');
+        if ($period === 'today') {
+            $query->whereDate('deleted_at', today());
+        } elseif ($period === 'yesterday') {
+            $query->whereDate('deleted_at', today()->subDay());
+        } elseif ($period === 'month') {
+            $query->whereMonth('deleted_at', now()->month)->whereYear('deleted_at', now()->year);
+        } elseif ($period === 'year') {
+            $query->whereYear('deleted_at', now()->year);
+        } elseif ($request->filled('date')) {
+            $query->whereDate('deleted_at', $request->date);
+        }
+
+        // Deleted by user filter
+        if ($request->filled('deleted_by') && $request->deleted_by !== 'all') {
+            $query->where('deleted_by', $request->deleted_by);
+        }
+
+        // Delete reason filter
+        if ($request->filled('reason') && $request->reason !== 'all') {
+            $query->where('delete_reason', 'like', "%{$request->reason}%");
+        }
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('invoice_number', 'like', "%{$search}%")
-                    ->orWhereHas('order.customer', fn($c) => $c->where('name', 'like', "%{$search}%"));
+                    ->orWhere('order_id', 'like', "%{$search}%")
+                    ->orWhere('delete_reason', 'like', "%{$search}%")
+                    ->orWhereHas('order.customer', function ($customerQuery) use ($search) {
+                        $customerQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('deletedBy', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    });
             });
+        }
+
+        // Quick stats for trashed invoices
+        $baseStats = Invoice::onlyTrashed();
+        $stats = [
+            'total' => (clone $baseStats)->count(),
+            'today' => (clone $baseStats)->whereDate('deleted_at', today())->count(),
+            'month' => (clone $baseStats)->whereMonth('deleted_at', now()->month)->whereYear('deleted_at', now()->year)->count(),
+            'amount_usd' => (clone $baseStats)->sum('total_amount'),
+        ];
+
+        // Fetch users who deleted invoices (or all staff)
+        $deletedUserIds = Invoice::onlyTrashed()->whereNotNull('deleted_by')->distinct()->pluck('deleted_by');
+        $users = User::whereIn('id', $deletedUserIds)->orderBy('name')->get();
+        if ($users->isEmpty()) {
+            $users = User::orderBy('name')->get();
         }
 
         $invoices = $query->orderByDesc('deleted_at')->paginate(15)->withQueryString();
 
-        return view('invoices.trashed', compact('invoices'));
+        return view('invoices.trashed', compact('invoices', 'users', 'stats'));
     }
 
     /**
@@ -576,15 +634,21 @@ class InvoiceController extends Controller
 
         DB::transaction(function () use ($invoice) {
             $invoice->restore();
-            $invoice->update(['deleted_by' => null]);
+            $invoice->update([
+                'deleted_by' => null,
+                'delete_reason' => null,
+            ]);
 
             if ($order = Order::withTrashed()->find($invoice->order_id)) {
                 $order->restore();
-                $order->update(['deleted_by' => null]);
+                $order->update([
+                    'deleted_by' => null,
+                    'delete_reason' => null,
+                ]);
             }
         });
 
-        return redirect()->route('invoices.trash')->with('success', 'Invoice restored successfully.');
+        return redirect()->route('invoices.trash')->with('success', 'បានស្តារវិក្ក័យបត្រឡើងវិញដោយជោគជ័យ។');
     }
 
     /**

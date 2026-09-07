@@ -29,6 +29,7 @@ class Invoice extends Model
         'printed_at',
         'notes',
         'deleted_by',
+        'delete_reason',
     ];
 
     protected $casts = [

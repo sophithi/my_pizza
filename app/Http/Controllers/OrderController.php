@@ -470,9 +470,11 @@ class OrderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Order $order)
+    public function destroy(Request $request, Order $order)
     {
-        DB::transaction(function () use ($order) {
+        $deleteReason = $request->input('delete_reason') ?? $request->input('reason');
+
+        DB::transaction(function () use ($order, $deleteReason) {
             $this->restoreInventoryForOrder($order);
 
             // Order and invoice are always trashed/restored as a pair (see
@@ -480,15 +482,21 @@ class OrderController extends Controller
             // the order side never leaves an active invoice pointing at a
             // trashed order.
             if ($invoice = $order->invoice) {
-                $invoice->update(['deleted_by' => auth()->id()]);
+                $invoice->update([
+                    'deleted_by' => auth()->id(),
+                    'delete_reason' => $deleteReason,
+                ]);
                 $invoice->delete();
             }
 
-            $order->update(['deleted_by' => auth()->id()]);
+            $order->update([
+                'deleted_by' => auth()->id(),
+                'delete_reason' => $deleteReason,
+            ]);
             $order->delete();
         });
 
-        return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
+        return redirect()->route('orders.index')->with('success', 'បានលុបការបញ្ជាទិញដោយជោគជ័យ។');
     }
 
     /**
