@@ -525,7 +525,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-label">ចំនួនទឹកប្រាក់</div>
-                <div class="stat-value">{{ number_format($stats['amount_khr'] ?? 0, 0) }}</div>
+                <div class="stat-value">៛{{ number_format($stats['amount_khr'] ?? 0, 0) }}</div>
                 <div class="text-muted small fw-bold">${{ number_format($stats['amount_usd'], 2) }}</div>
             </div>
         </div>

@@ -313,7 +313,7 @@ class InvoiceController extends Controller
         // the order/invoice/packing pages instead of re-deriving its own
         // formula (which previously converted the USD discount at a flat
         // rate, drifting whenever a custom KHR price was used).
-        return $invoice->order?->totalKhr() ?? 0;
+        return (float) ($invoice->order?->totalKhr() ?? ((float) $invoice->total_amount * 4000));
     }
 
     private function invoiceStatusLabel(?string $status): string

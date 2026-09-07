@@ -499,7 +499,13 @@
         {{-- Search + Status Tabs --}}
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
             <ul class="nav border-bottom w-auto">
-                @foreach(['all' => 'ទាំងអស់', 'paid' => 'បានបង់', 'partial' => 'បង់ខ្លះ', 'pending' => 'មិនទាន់បង់'] as $key => $label)
+                @foreach([
+                    'all' => 'ទាំងអស់',
+                    'paid' => 'បានបង់',
+                    'partial' => 'បង់ខ្លះ',
+                    'old_debt' => 'បានសងបុងចាស់',
+                    'pending' => 'មិនទាន់បង់'
+                ] as $key => $label)
                     <li class="nav-item">
                         <a class="nav-link tab-link px-3 py-2 {{ request('status', 'all') === $key ? 'active' : 'text-muted' }}"
                             href="{{ route('payments.index', array_merge(request()->query(), ['status' => $key])) }}">

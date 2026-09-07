@@ -353,6 +353,7 @@ class PaymentController extends Controller
                 if ($status === 'paid') return $row->status === 'paid';
                 if ($status === 'partial') return $row->status === 'partial';
                 if ($status === 'pending') return $row->status === 'pending';
+                if ($status === 'old_debt') return (bool) $row->is_old_debt;
                 return true;
             });
         }
