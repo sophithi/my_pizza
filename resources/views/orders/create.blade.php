@@ -1473,15 +1473,16 @@
                                 </div>
 
                                 <div class="od-field full-span">
-                                    <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន</label>
+                                    <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន <span style="color:#dc2626;">*</span></label>
                                     <div class="delivery-combo">
-                                        <select id="delivery_select" name="delivery_id" class="form-control od-select">
+                                        <select id="delivery_select" name="delivery_id" class="form-control od-select" required>
                                             <option value="">សូមជ្រើសរើស</option>
                                             @foreach($deliveries as $delivery)
                                                 <option value="{{ $delivery->id }}"
                                                     data-name="{{ $delivery->delivery_name }}"
                                                     data-price="{{ $delivery->delivery_price_khr }}"
-                                                    data-price-big="{{ $delivery->delivery_price_khr_big }}">
+                                                    data-price-big="{{ $delivery->delivery_price_khr_big }}"
+                                                    {{ (string) old('delivery_id') === (string) $delivery->id ? 'selected' : '' }}>
                                                     {{ $delivery->delivery_name }}
                                                 </option>
                                             @endforeach
@@ -2083,6 +2084,11 @@
         if (!document.getElementById('hidden_customer_id').value) {
             e.preventDefault();
             showToast('warning', '⚠️', 'សូមជ្រើសរើសអតិថិជន', 'សូមជ្រើសរើសអតិថិជនមុននឹងបញ្ជាទិញ');
+            return false;
+        }
+        if (!document.getElementById('delivery_select').value) {
+            e.preventDefault();
+            showToast('warning', '🚚', 'សូមជ្រើសរើសការដឹកជញ្ជូន', 'សូមជ្រើសរើសក្រុមហ៊ុន/អ្នកដឹកជញ្ជូនមុននឹងបញ្ជាទិញ');
             return false;
         }
         if (Object.keys(cart).length === 0) {
