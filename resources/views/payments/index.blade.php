@@ -716,14 +716,14 @@
                             <div class="currency-input-group">
                                 <div class="row g-2">
                                     <div class="col">
-                                        <label class="form-label small text-muted">USD ($)</label>
-                                        <input type="number" name="total_amount" id="f_total" class="form-control" step="0.01"
-                                            min="0" placeholder="0.00" oninput="syncTotalFromUsd()" required>
-                                    </div>
-                                    <div class="col">
                                         <label class="form-label small text-muted">KHR (៛)</label>
                                         <input type="number" id="f_total_khr" class="form-control" step="1" min="0"
                                             placeholder="0" oninput="syncTotalFromKhr()">
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label small text-muted">USD ($)</label>
+                                        <input type="number" name="total_amount" id="f_total" class="form-control" step="0.01"
+                                            min="0" placeholder="0.00" oninput="syncTotalFromUsd()" required>
                                     </div>
                                 </div>
                                 <input type="hidden" name="exchange_rate" id="f_exchange_rate" value="{{ $exchangeRate }}">
@@ -740,11 +740,11 @@
                             <div class="payment-summary-box">
                                 <div class="d-flex justify-content-between">
                                     <span>ចំនួនទឹកប្រាក់ដែលបានបង់</span>
-                                    <strong>$<span id="paidSummaryUsd">0.00</span> / ៛<span id="paidSummaryKhr">0</span></strong>
+                                    <strong>៛<span id="paidSummaryKhr">0</span> / $<span id="paidSummaryUsd">0.00</span></strong>
                                 </div>
                                 <div class="d-flex justify-content-between mt-1">
                                     <span>ចំនួនទឹកប្រាក់ដែលនៅសល់</span>
-                                    <strong>$<span id="balanceSummaryUsd">0.00</span> / ៛<span id="balanceSummaryKhr">0</span></strong>
+                                    <strong>៛<span id="balanceSummaryKhr">0</span> / $<span id="balanceSummaryUsd">0.00</span></strong>
                                 </div>
                             </div>
                         </div>
@@ -815,7 +815,7 @@
         function addPaymentLine(line = {}) {
             paymentLines.push({
                 method: line.method || 'Cash',
-                currency: line.currency || 'USD',
+                currency: line.currency || 'KHR',
                 amount: Number(line.amount_original ?? line.amount ?? 0)
             });
             renderPaymentLines();
@@ -846,8 +846,8 @@
                                 ${paymentMethods.map(method => `<option value="${method}" ${line.method === method ? 'selected' : ''}>${method}</option>`).join('')}
                             </select>
                             <select class="form-select form-select-sm" onchange="updatePaymentLine(${index}, 'currency', this.value)">
-                                <option value="USD" ${line.currency === 'USD' ? 'selected' : ''}>USD</option>
                                 <option value="KHR" ${line.currency === 'KHR' ? 'selected' : ''}>KHR</option>
+                                <option value="USD" ${line.currency === 'USD' ? 'selected' : ''}>USD</option>
                             </select>
                             <input type="number" class="form-control form-control-sm" min="0" step="${line.currency === 'KHR' ? '1' : '0.01'}" value="${line.amount || ''}" placeholder="ទឹកប្រាក់" oninput="updatePaymentLine(${index}, 'amount', this.value)">
                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePaymentLine(${index})"><i class="fas fa-times"></i></button>
@@ -866,10 +866,10 @@
             const balanceUsd = balanceKhr / EXCHANGE_RATE;
 
             document.getElementById('f_paid').value = paidUsd.toFixed(2);
-            document.getElementById('paidSummaryUsd').textContent = paidUsd.toFixed(2);
             document.getElementById('paidSummaryKhr').textContent = paidKhr.toLocaleString();
-            document.getElementById('balanceSummaryUsd').textContent = balanceUsd.toFixed(2);
+            document.getElementById('paidSummaryUsd').textContent = paidUsd.toFixed(2);
             document.getElementById('balanceSummaryKhr').textContent = balanceKhr.toLocaleString();
+            document.getElementById('balanceSummaryUsd').textContent = balanceUsd.toFixed(2);
             document.getElementById('payment_lines_input').value = JSON.stringify(paymentLines);
             document.getElementById('f_method').value = [...new Set(paymentLines.map(line => line.method))].join(' + ') || 'Cash';
             updateStatusBadge();
@@ -931,7 +931,7 @@
             if (payment.lines && payment.lines.length > 0) {
                 paymentLines = payment.lines.map(line => ({
                     method: paymentMethods.includes(line.method) ? line.method : 'Other',
-                    currency: line.currency || 'USD',
+                    currency: line.currency || 'KHR',
                     amount: line.amount_original
                 }));
             } else if (payment.method && payment.method.includes('+')) {
@@ -939,14 +939,14 @@
                 const splitAmount = (parseFloat(payment.paid_amount) || 0) / (methods.length || 1);
                 paymentLines = methods.map(m => ({
                     method: paymentMethods.includes(m) ? m : 'Other',
-                    currency: 'USD',
+                    currency: 'KHR',
                     amount: Number(splitAmount.toFixed(2))
                 }));
             } else {
                 const singleMethod = payment.method === '—' ? 'Cash' : payment.method;
                 paymentLines = [{
                     method: paymentMethods.includes(singleMethod) ? singleMethod : 'Cash',
-                    currency: 'USD',
+                    currency: 'KHR',
                     amount: payment.paid_amount || 0
                 }];
             }

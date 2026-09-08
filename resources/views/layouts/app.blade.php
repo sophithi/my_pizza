@@ -243,48 +243,6 @@
             transition: all 0.2s ease;
         }
 
-        /* Nav Live Badges */
-        .nav-badge {
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            line-height: 1.2;
-            letter-spacing: 0.2px;
-            flex-shrink: 0;
-            transition: all 0.2s ease;
-        }
-
-        .nav-badge.badge-amber {
-            background: #fef08a;
-            color: #854d0e;
-        }
-
-        .sidebar .nav-link.active .nav-badge.badge-amber {
-            background: #ffffff;
-            color: #c2410c;
-        }
-
-        .nav-badge.badge-blue {
-            background: #bfdbfe;
-            color: #1e40af;
-        }
-
-        .sidebar .nav-link.active .nav-badge.badge-blue {
-            background: #ffffff;
-            color: #1e40af;
-        }
-
-        .nav-badge.badge-emerald {
-            background: #bbf7d0;
-            color: #166534;
-        }
-
-        .sidebar .nav-link.active .nav-badge.badge-emerald {
-            background: #ffffff;
-            color: #166534;
-        }
-
         /* Collapsed nav links - icons only */
         .sidebar.collapsed .nav-link {
             padding: 12px;
@@ -304,29 +262,6 @@
         .sidebar.collapsed .nav-link i {
             font-size: 18px;
             width: auto;
-        }
-
-        /* Collapsed badge dot indicator */
-        .sidebar.collapsed .nav-badge {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 8px;
-            height: 8px;
-            padding: 0;
-            border-radius: 50%;
-            font-size: 0;
-            line-height: 0;
-            border: 2px solid #0f172a;
-        }
-        .sidebar.collapsed .nav-badge.badge-amber {
-            background: #eab308;
-        }
-        .sidebar.collapsed .nav-badge.badge-blue {
-            background: #3b82f6;
-        }
-        .sidebar.collapsed .nav-badge.badge-emerald {
-            background: #22c55e;
         }
 
         /* Tooltip on hover when collapsed */
@@ -617,20 +552,6 @@
 
             $isAdminOrManager = $isAdmin || $isManager;
             $isOfficeStaff = $isStaff && !$isInventory;
-
-            // Live workflow counters for Option 4 Pizza Theme Badges
-            $todayActiveOrdersCount = \App\Models\Order::whereDate('order_date', \Carbon\Carbon::today())
-                ->whereIn('status', ['pending', 'processing'])
-                ->count();
-
-            $todayPackingCount = \App\Models\Invoice::whereNotNull('packing_sent_at')
-                ->whereNull('packing_completed_at')
-                ->whereDate('packing_sent_at', \Carbon\Carbon::today())
-                ->count();
-
-            $todayDeliveringCount = \App\Models\Order::whereDate('order_date', \Carbon\Carbon::today())
-                ->where('status', 'delivering')
-                ->count();
         @endphp
 
         <nav>
@@ -648,9 +569,6 @@
                 <div class="nav-label">ផ្នែកលក់ & កុម្ម៉ង់</div>
                 <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}" data-tooltip="ចេញវិក្កយបត្រ">
                     <i class="fas fa-shopping-cart"></i><span>ចេញវិក្កយបត្រ</span>
-                    @if($todayActiveOrdersCount > 0)
-                        <span class="nav-badge badge-amber" title="{{ $todayActiveOrdersCount }} កំពុងដំណើរការ">{{ $todayActiveOrdersCount }}</span>
-                    @endif
                 </a>
                 <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}" data-tooltip="អតិថិជន">
                     <i class="fas fa-users"></i><span>អតិថិជន</span>
@@ -670,18 +588,12 @@
             @if($isAdmin || $isManager || $isStaff || $isInventory)
                 <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') ? 'active' : '' }}" data-tooltip="រៀបចំទំនិញ">
                     <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
-                    @if($todayPackingCount > 0)
-                        <span class="nav-badge badge-blue" title="{{ $todayPackingCount }} កំពុងរៀបចំ">{{ $todayPackingCount }}</span>
-                    @endif
                 </a>
             @endif
 
             @if($isAdminOrManager || $isOfficeStaff)
                 <a href="/deliveries" class="nav-link {{ (request()->is('deliveries') || request()->is('deliveries/*')) && !request()->is('deliveries/map*') ? 'active' : '' }}" data-tooltip="ការដឹកជញ្ជូន">
                     <i class="fas fa-truck"></i><span>ការដឹកជញ្ជូន</span>
-                    @if($todayDeliveringCount > 0)
-                        <span class="nav-badge badge-emerald" title="{{ $todayDeliveringCount }} កំពុងដឹកជញ្ជូន">{{ $todayDeliveringCount }}</span>
-                    @endif
                 </a>
                 <a href="{{ route('deliveries.map') }}" class="nav-link {{ request()->is('deliveries/map*') ? 'active' : '' }}" data-tooltip="ផែនទីដឹកជញ្ជូន">
                     <i class="fas fa-map-marked-alt"></i><span>ផែនទីដឹកជញ្ជូន</span>

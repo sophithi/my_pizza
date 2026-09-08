@@ -100,8 +100,8 @@
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">រូបិយប័ណ្ណ</label>
                         <select name="amount_currency" class="form-select" autocomplete="off">
-                            <option value="USD" {{ old('amount_currency', $purchase->currency ?? 'USD') === 'USD' ? 'selected' : '' }}>USD ($)</option>
-                            <option value="KHR" {{ old('amount_currency', $purchase->currency ?? 'USD') === 'KHR' ? 'selected' : '' }}>KHR (៛)</option>
+                            <option value="KHR" {{ old('amount_currency', $purchase->currency ?? 'KHR') === 'KHR' ? 'selected' : '' }}>KHR (៛)</option>
+                            <option value="USD" {{ old('amount_currency', $purchase->currency ?? 'KHR') === 'USD' ? 'selected' : '' }}>USD ($)</option>
                         </select>
                     </div>
 
