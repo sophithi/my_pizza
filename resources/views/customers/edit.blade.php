@@ -84,12 +84,12 @@
                 </div>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">ឈ្មោះអតិថិជន <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">ឈ្មោះអតិថិជន <span class="req-tag">(ចាំបាច់)</span></label>
                         <input type="text" name="name" class="form-control" value="{{ old('name', $customer->name) }}"
                             required placeholder="បំពេញឈ្មោះ" autocomplete="off" spellcheck="false">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">ប្រភេទអតិថិជន <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">ប្រភេទអតិថិជន <span class="req-tag">(ចាំបាច់)</span></label>
                         <select name="type" class="form-select" required autocomplete="off">
                             <option value="">-- ជ្រើសរើស --</option>
                             <option value="facebook" {{ old('type', $customer->type) === 'facebook' ? 'selected' : '' }}>
@@ -117,7 +117,7 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">អ្នកលក់ / ភ្នាក់ងារលក់ <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">អ្នកលក់ / ភ្នាក់ងារលក់ <span class="req-tag">(ចាំបាច់)</span></label>
                         <select name="salesperson_id" class="form-select @error('salesperson_id') is-invalid @enderror" required autocomplete="off">
                             <option value="">-- សូមជ្រើសរើសអ្នកលក់ --</option>
                             @foreach($salespersons as $s)

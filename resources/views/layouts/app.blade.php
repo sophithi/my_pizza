@@ -450,6 +450,15 @@
             font-size: 14px;
             line-height: 1.6;
         }
+
+        .req-tag {
+            color: #dc2626;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 4px;
+            letter-spacing: 0.1px;
+            display: inline-block;
+        }
     </style>
     @stack('styles')
     <style>

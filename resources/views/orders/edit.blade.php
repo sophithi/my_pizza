@@ -1389,7 +1389,7 @@
                 <div class="od-field" style="display:grid; gap: 14px;">
                     <div style="display:flex; flex-wrap:wrap; gap: 14px; align-items:flex-end; justify-content:space-between;">
                         <div style="flex:1; min-width:220px;">
-                            <label for="customer_id" class="form-label">សូមជ្រើសរើសអតិថិជន</label>
+                            <label for="customer_id" class="form-label">សូមជ្រើសរើសអតិថិជន <span class="req-tag">(ចាំបាច់)</span></label>
                             <select name="customer_id" id="customer_id" class="form-control select2-customer" required>
                                 <option value="">សូមស្វែងរកឈ្មោះ / ទូរសព្ទ / ទីតាំង</option>
                                 @foreach($customers as $customer)
@@ -1605,7 +1605,7 @@
                                 </div>
 
                                 <div class="od-field">
-                                    <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន <span style="color:#dc2626;">*</span></label>
+                                    <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន <span class="req-tag">(ចាំបាច់)</span></label>
                                     <div class="delivery-combo">
                                         <select id="delivery_select" name="delivery_id" class="form-control od-select" required>
                                             <option value="">សូមជ្រើសរើស</option>

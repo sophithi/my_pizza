@@ -186,7 +186,7 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">
-                            ឈ្មោះអតិថិជន <span class="required">*</span>
+                            ឈ្មោះអតិថិជន <span class="req-tag">(ចាំបាច់)</span>
                         </label>
                         <input type="text" name="name" class="form-control"
                                value="{{ old('name') }}" required
@@ -195,7 +195,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label">
-                            ប្រភេទអតិថិជន <span class="required">*</span>
+                            ប្រភេទអតិថិជន <span class="req-tag">(ចាំបាច់)</span>
                         </label>
                         <select name="type" class="form-select" required>
                             <option value="">-- ជ្រើសរើសប្រភេទ --</option>
@@ -216,7 +216,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">
-                            អ្នកលក់ / ភ្នាក់ងារលក់ <span class="required">*</span>
+                            អ្នកលក់ / ភ្នាក់ងារលក់ <span class="req-tag">(ចាំបាច់)</span>
                         </label>
                         <select name="salesperson_id" class="form-select @error('salesperson_id') is-invalid @enderror" required>
                             <option value="">-- សូមជ្រើសរើសអ្នកលក់ --</option>

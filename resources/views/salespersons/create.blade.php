@@ -132,7 +132,7 @@
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">ឈ្មោះភ្នាក់ងារលក់ <span class="required">*</span></label>
+                            <label class="form-label">ឈ្មោះភ្នាក់ងារលក់ <span class="req-tag">(ចាំបាច់)</span></label>
                             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="បញ្ចូលឈ្មោះភ្នាក់ងារលក់" required>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -148,7 +148,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">ស្ថានភាព <span class="required">*</span></label>
+                            <label class="form-label">ស្ថានភាព <span class="req-tag">(ចាំបាច់)</span></label>
                             <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                                 <option value="active" {{ old('status', 'active') == 'active' ? 'selected' : '' }}>សកម្ម</option>
                                 <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>អសកម្ម</option>
