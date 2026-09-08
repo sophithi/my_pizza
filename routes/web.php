@@ -12,6 +12,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\CustomerLocationController;
 use App\Http\Controllers\SalespersonController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
@@ -41,6 +42,14 @@ Route::get('/health', function () {
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
+// Driver Mobile Portal & Live Tracking (Full mobile delivery web app)
+Route::get('/driver', [DeliveryController::class, 'driverPortal'])->name('deliveries.driver-portal');
+Route::get('/driver/{delivery}', [DeliveryController::class, 'driverPortal'])->name('deliveries.driver-portal-delivery');
+Route::post('/driver/orders/{order}/status', [DeliveryController::class, 'driverUpdateOrderStatus'])->name('deliveries.driver-update-status');
+Route::get('/driver-track/{order}', [DeliveryController::class, 'driverTrackView'])->name('deliveries.driver-track');
+Route::post('/driver-track/{order}/location', [DeliveryController::class, 'updateDriverLocation'])->name('deliveries.driver-location');
+Route::post('/driver-track/{order}/complete', [DeliveryController::class, 'driverCompleteOrder'])->name('deliveries.driver-complete');
+
 // Protected routes (require authentication)
 Route::middleware('auth')->group(function () {
     // Common routes for all authenticated users
@@ -61,7 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', UserController::class)->except(['index', 'show']);
 
-        // Permanently delete an invoice from the trash (irreversible — admin only)
+        // Permanently delete an invoice from the trash 
         Route::delete('invoices/{id}/force-delete', [InvoiceController::class, 'forceDelete'])->name('invoices.force-delete');
     });
 
@@ -103,10 +112,7 @@ Route::middleware('auth')->group(function () {
         // Deleted invoices — view & recover (only admin/manager)
         Route::get('invoices/trash', [InvoiceController::class, 'trashed'])->name('invoices.trash');
         Route::post('invoices/{id}/restore', [InvoiceController::class, 'restore'])->name('invoices.restore');
-
-        // Close this month's invoice numbering (only admin/manager)
         Route::post('invoices/close-period', [InvoiceController::class, 'closePeriod'])->name('invoices.close-period');
-        // Undo an accidental close, only while nothing's been invoiced under the new period yet
         Route::post('invoices/undo-close-period', [InvoiceController::class, 'undoClosePeriod'])->name('invoices.undo-close-period');
         // Force-merge the active period back into the last closed one, renumbering its invoices to continue that sequence
         Route::post('invoices/merge-back-period', [InvoiceController::class, 'mergeBackPeriod'])->name('invoices.merge-back-period');
@@ -143,6 +149,13 @@ Route::middleware('auth')->group(function () {
     });
 
     // Delivery management
+    Route::middleware('role:admin,manager,staff,staff_inventory,auditor')->group(function () {
+        Route::get('deliveries/map', [DeliveryController::class, 'map'])->name('deliveries.map');
+        Route::get('deliveries/live-data', [DeliveryController::class, 'liveData'])->name('deliveries.live-data');
+        Route::post('deliveries/update-order-status', [DeliveryController::class, 'updateOrderStatus'])->name('deliveries.update-order-status');
+        Route::post('deliveries/update-driver-location', [DeliveryController::class, 'updateDriverLocation'])->name('deliveries.update-driver-location');
+    });
+
     Route::middleware('role:admin,manager,staff')->group(function () {
         Route::resource('deliveries', DeliveryController::class);
         Route::patch('deliveries/{delivery}/orders/{order}', [DeliveryController::class, 'updateOrderPacking'])->name('deliveries.orders.update-packing');
@@ -218,11 +231,20 @@ Route::middleware('auth')->group(function () {
         Route::resource('salespersons', SalespersonController::class);
         Route::get('customers/export/excel', [CustomerController::class, 'exportExcel'])->name('customers.export.excel');
         Route::get('customers/export/pdf', [CustomerController::class, 'exportPdf'])->name('customers.export.pdf');
+
+        // Customer Locations / Google Map Management CRUD
+        Route::get('customer-locations', [CustomerLocationController::class, 'index'])->name('customer-locations.index');
+        Route::get('customer-locations/get-road-route', [CustomerLocationController::class, 'getRoadRoute'])->name('customer-locations.road-route');
+        Route::post('customer-locations', [CustomerLocationController::class, 'store'])->name('customer-locations.store');
+        Route::put('customer-locations/{customer}', [CustomerLocationController::class, 'update'])->name('customer-locations.update');
+        Route::delete('customer-locations/{customer}', [CustomerLocationController::class, 'destroy'])->name('customer-locations.destroy');
+        Route::post('customer-locations/quick-save', [CustomerLocationController::class, 'quickSave'])->name('customer-locations.quick-save');
+        Route::post('customer-locations/store-settings', [CustomerLocationController::class, 'updateStoreLocation'])->name('customer-locations.update-store');
     });
 
-    // ============================================
+    // =====================
     // ALL USERS - Reports
-    // ============================================
+    // =====================
     Route::middleware('role:admin,manager,staff,staff_inventory,auditor')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/', [ReportController::class, 'dashboard'])->name('dashboard');

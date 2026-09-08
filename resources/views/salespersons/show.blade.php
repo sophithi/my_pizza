@@ -336,10 +336,8 @@
                                         <span class="status-pill status-active"><i class="fas fa-check-circle"></i> សកម្ម</span>
                                     @elseif($customer->status == 'inactive')
                                         <span class="status-pill status-inactive"><i class="fas fa-times-circle"></i> អសកម្ម</span>
-                                    @elseif($customer->status == 'topgrade')
-                                        <span class="status-pill status-topgrade"><i class="fas fa-crown"></i> អតិថិជនកម្មង់ច្រើនបំផុត</span>
                                     @else
-                                        <span class="text-muted">{{ $customer->status ?? 'รង់ចាំ' }}</span>
+                                        <span class="text-muted">{{ $customer->status ?? 'រង់ចាំ' }}</span>
                                     @endif
                                 </td>
                                 <td>

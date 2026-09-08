@@ -32,7 +32,7 @@ class OrderController extends Controller
      */
     public function create()
     {
-        $customers = \App\Models\Customer::all();
+        $customers = \App\Models\Customer::with('salesperson')->get();
         $products = \App\Models\Product::all();
         $deliveries = \App\Models\Delivery::all();
         $selectedCustomerId = request('customer_id');
@@ -210,8 +210,8 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        $order->load('items.product', 'customer', 'delivery', 'invoice', 'payments');
-        $customers = \App\Models\Customer::all();
+        $order->load('items.product', 'customer.salesperson', 'delivery', 'invoice', 'payments');
+        $customers = \App\Models\Customer::with('salesperson')->get();
         $products = \App\Models\Product::all();
         $deliveries = \App\Models\Delivery::all();
 

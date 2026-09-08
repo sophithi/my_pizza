@@ -189,11 +189,6 @@
             color: #991b1b;
         }
 
-        .status-topgrade {
-            background: #fef3c7;
-            color: #854d0e;
-        }
-
         .order-pill {
             background: #eff6ff;
             color: #1d4ed8;
@@ -298,6 +293,9 @@
                 <p class="customer-subtitle">ស្វែងរកអតិថិជន មើលប្រវត្តិបញ្ជាទិញ និងបង្កើតការបញ្ជាទិញថ្មីបានរហ័ស។</p>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="{{ route('customer-locations.index') }}" class="customer-btn" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;" title="គ្រប់គ្រងទីតាំងផែនទី Google Maps">
+                    <i class="fas fa-map-marked-alt"></i> ទីតាំងផែនទី (Map)
+                </a>
                 <a href="{{ route('customers.export.excel', request()->query()) }}" class="customer-btn customer-btn-soft" title="នាំចេញ Excel">
                     <i class="fas fa-file-excel"></i> Excel
                 </a>
@@ -323,14 +321,15 @@
                 <div class="stat-value">{{ number_format($stats['total']) }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">កំពុងប្រើប្រាស់</div>
+                <div class="stat-label">សកម្ម (បញ្ជាទិញ ≥ 1)</div>
                 <div class="stat-value text-success">{{ number_format($stats['active']) }}</div>
             </div>
-            <!-- <div class="stat-card">
-                <div class="stat-label">មានប្រវត្តិបញ្ជាទិញ</div>
-                <div class="stat-value text-primary">{{ number_format($stats['with_orders']) }}</div>
-            </div> -->
+            <div class="stat-card">
+                <div class="stat-label">អសកម្ម (មិនទាន់មានបញ្ជាទិញ)</div>
+                <div class="stat-value text-danger">{{ number_format($stats['inactive']) }}</div>
+            </div>
         </div>
+
         <form method="GET" action="{{ route('customers.index') }}" class="filter-card">
             <div class="filter-row">
                 <div class="customer-search">
@@ -357,7 +356,6 @@
                     <option value="all">គ្រប់ស្ថានភាព</option>
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>សកម្ម</option>
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>អសកម្ម</option>
-                    <option value="topgrade" {{ request('status') === 'topgrade' ? 'selected' : ''}}>អតិថិជនកម្មង់ច្រើនបំផុត</option>
                 </select>
                 <a href="{{ route('customers.index') }}" class="customer-btn customer-btn-soft">
                     <i class="fas fa-rotate-left"></i>
@@ -408,6 +406,7 @@
                                         <span class="text-muted">មិនមាន</span>
                                     @endif
                                 </td>
+
                                 <td>
                                     @if($customer->salesperson)
                                         <span class="badge bg-light text-dark border fw-normal">{{ $customer->salesperson->name }}</span>
@@ -416,6 +415,7 @@
                                     @endif
                                 </td>
                                 <td class="text-muted">{{ $customer->city ?? $customer->address ?? 'មិនមាន' }}</td>
+
                                 <td>
                                     @if($customer->orders_count > 0)
                                         <span class="order-pill">{{ $customer->orders_count }} ការបញ្ជាទិញ</span>
@@ -423,6 +423,7 @@
                                         <span class="text-muted fst-italic">មិនទាន់មានការបញ្ជាទិញ</span>
                                     @endif
                                 </td>
+
                                 <td>
                                     <strong>${{ number_format($customer->total_spent ?? 0, 2) }}</strong>
                                     <div class="text-muted small">៛{{ number_format(($customer->total_spent ?? 0) * 4000, 0) }}
@@ -436,9 +437,7 @@
                                         <span class="status-pill status-active"><i class="fas fa-check-circle"></i> សកម្ម</span>
                                     @elseif($customer->status == 'inactive')
                                         <span class="status-pill status-inactive"><i class="fas fa-times-circle"></i> អសកម្ម</span>
-                                     @elseif($customer->status == 'topgrade')
-                                       <span class="status-pill status-topgrade"><i class="fas fa-crown"></i> អតិថិជនកម្មង់ច្រើនបំផុត</span>
-                                     @else
+                                    @else
                                         <span class="text-muted">{{ $customer->status ?? 'រង់ចាំ' }}</span>
                                     @endif
                                 </td>
@@ -485,7 +484,6 @@
 
         </div>
             <div class="pager-wrap">{{ $customers->links('pagination::bootstrap-5') }}</div>
-
     </div>
 
     @push('scripts')

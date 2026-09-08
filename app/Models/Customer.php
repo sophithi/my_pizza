@@ -11,6 +11,10 @@ class Customer extends Model
         'type',
         'phone',
         'address',
+        'latitude',
+        'longitude',
+        'map_url',
+        'landmark',
         'city',
         'status',
         'salesperson_id',
@@ -18,7 +22,8 @@ class Customer extends Model
     ];
 
     protected $casts = [
-        //
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     /**

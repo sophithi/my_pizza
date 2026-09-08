@@ -214,21 +214,24 @@
                                value="{{ old('phone') }}"
                                placeholder="បញ្ចូលលេខទូរស័ព្ទ">
                     </div>
-
                     <div class="col-md-6">
-                        <label class="form-label">អ្នកលក់ / ភ្នាក់ងារលក់ (Salesperson)</label>
-                        <select name="salesperson_id" class="form-select">
-                            <option value="">-- ជ្រើសរើសអ្នកលក់ (None) --</option>
+                        <label class="form-label">
+                            អ្នកលក់ / ភ្នាក់ងារលក់ <span class="required">*</span>
+                        </label>
+                        <select name="salesperson_id" class="form-select @error('salesperson_id') is-invalid @enderror" required>
+                            <option value="">-- សូមជ្រើសរើសអ្នកលក់ --</option>
                             @foreach($salespersons as $s)
                                 <option value="{{ $s->id }}" {{ old('salesperson_id') == $s->id ? 'selected' : '' }}>
                                     {{ $s->name }}
                                 </option>
                             @endforeach
                         </select>
+                        @error('salesperson_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
-
             <div class="form-section">
                 <div class="section-title">
                     <i class="fas fa-map-marker-alt"></i>

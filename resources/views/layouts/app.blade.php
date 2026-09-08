@@ -506,6 +506,9 @@
                 <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i><span>អតិថិជន</span>
                 </a>
+                <a href="{{ route('customer-locations.index') }}" class="nav-link {{ request()->is('customer-locations*') ? 'active' : '' }}">
+                    <i class="fas fa-map-marker-alt"></i><span>ទីតាំងអតិថិជននៅលើផែនទី</span>
+                </a>
                 <a href="/salespersons" class="nav-link {{ request()->is('salespersons*') ? 'active' : '' }}">
                     <i class="fas fa-user-tie"></i><span>ភ្នាក់ងារលក់</span>
                 </a>
@@ -561,8 +564,11 @@
 
             {{-- Deliveries (admin, manager, staff office) --}}
             @if($isAdminOrManager || $isOfficeStaff)
-                <a href="/deliveries" class="nav-link {{ request()->is('deliveries*') ? 'active' : '' }}">
+                <a href="/deliveries" class="nav-link {{ (request()->is('deliveries') || request()->is('deliveries/*')) && !request()->is('deliveries/map*') ? 'active' : '' }}">
                     <i class="fas fa-truck"></i><span>ការដឹកជញ្ចូន</span>
+                </a>
+                <a href="{{ route('deliveries.map') }}" class="nav-link {{ request()->is('deliveries/map*') ? 'active' : '' }}">
+                    <i class="fas fa-map-marked-alt"></i><span>ផែនទីដឹកជញ្ជូន</span>
                 </a>
             @endif
 

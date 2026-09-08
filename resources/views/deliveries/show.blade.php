@@ -517,6 +517,10 @@
                     @endif
                 </div>
                 <div class="header-actions">
+                    <a href="{{ route('deliveries.map', ['delivery_id' => $delivery->id]) }}"
+                        class="btn btn-sm" style="background: #1e293b; color: #38bdf8; border: 1px solid #334155;">
+                        <i class="fas fa-map-marked-alt text-warning"></i> ផែនទីដឹកជញ្ជូន
+                    </a>
                     <a href="{{ route('deliveries.export.excel', array_filter(['delivery' => $delivery->id, 'start_date' => $startDate, 'end_date' => $endDate])) }}"
                         class="btn btn-outline-success btn-sm">
                         <i class="fas fa-file-excel"></i> Excel

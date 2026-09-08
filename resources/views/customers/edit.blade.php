@@ -114,21 +114,21 @@
                             <option value="inactive" {{ old('status', $customer->status) === 'inactive' ? 'selected' : '' }}>
                                 អសកម្ម
                             </option>
-                             <option value="topgrade" {{ old('status', $customer->status) === 'topgrade' ? 'selected' : '' }}>
-                                Top Customer Orders
-                            </option>
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">អ្នកលក់ / ភ្នាក់ងារលក់ (Salesperson)</label>
-                        <select name="salesperson_id" class="form-select" autocomplete="off">
-                            <option value="">-- ជ្រើសរើសអ្នកលក់ (None) --</option>
+                        <label class="form-label fw-semibold">អ្នកលក់ / ភ្នាក់ងារលក់ <span class="text-danger">*</span></label>
+                        <select name="salesperson_id" class="form-select @error('salesperson_id') is-invalid @enderror" required autocomplete="off">
+                            <option value="">-- សូមជ្រើសរើសអ្នកលក់ --</option>
                             @foreach($salespersons as $s)
                                 <option value="{{ $s->id }}" {{ old('salesperson_id', $customer->salesperson_id) == $s->id ? 'selected' : '' }}>
                                     {{ $s->name }}
                                 </option>
                             @endforeach
                         </select>
+                        @error('salesperson_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -137,7 +137,6 @@
                 <div class="customer-section-title">
                     <i class="fas fa-map-marker-alt me-2" style="color: #e85d24;"></i>ទីតាំងអតិថិជន
                 </div>
-
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label fw-semibold">ទីតាំងទទួលទំនិញ</label>

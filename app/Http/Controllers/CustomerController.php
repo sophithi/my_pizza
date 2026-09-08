@@ -57,6 +57,7 @@ class CustomerController extends Controller
         $stats = [
             'total' => Customer::count(),
             'active' => Customer::where('status', 'active')->count(),
+            'inactive' => Customer::where('status', 'inactive')->count(),
             'with_orders' => Customer::has('orders')->count(),
         ];
 
@@ -80,7 +81,11 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        $customer = Customer::create($request->validated());
+        $data = $request->validated();
+        if (!isset($data['status'])) {
+            $data['status'] = 'inactive';
+        }
+        $customer = Customer::create($data);
         return redirect()->route('customers.show', $customer)->with('success', 'Customer created successfully.');
     }
 

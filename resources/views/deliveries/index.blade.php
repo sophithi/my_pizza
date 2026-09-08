@@ -365,11 +365,18 @@
         <div class="delivery-header">
             <div>
                 <h1 class="delivery-title">ការដឹកជញ្ជូន</h1>
-
             </div>
-            <a href="{{ route('deliveries.create') }}" class="delivery-btn delivery-btn-primary">
-                <i class="fas fa-plus"></i> បង្កើតថ្មី
-            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('deliveries.driver-portal') }}" target="_blank" class="delivery-btn" style="background: #047857; color: #a7f3d0; border: 1px solid #065f46;" title="បើកផ្ទាំង Mobile របស់អ្នកដឹក">
+                    <i class="fas fa-mobile-alt text-warning"></i> ផ្ទាំង Mobile អ្នកដឹក
+                </a>
+                <a href="{{ route('deliveries.map') }}" class="delivery-btn" style="background: #1e293b; color: #38bdf8; border: 1px solid #334155;">
+                    <i class="fas fa-map-marked-alt text-warning"></i> ផែនទីបន្តផ្ទាល់ (Live Map)
+                </a>
+                <a href="{{ route('deliveries.create') }}" class="delivery-btn delivery-btn-primary">
+                    <i class="fas fa-plus"></i> បង្កើតថ្មី
+                </a>
+            </div>
         </div>
 
         <form class="delivery-toolbar" method="GET" action="{{ route('deliveries.index') }}">
@@ -424,6 +431,12 @@
                                 </td>
                                 <td>
                                     <div class="actions">
+                                        <button type="button" class="action-btn" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;" title="QR Code សម្រាប់អ្នកដឹកនេះ" onclick="showDriverQrModal({{ $delivery->id }}, '{{ addslashes($delivery->delivery_name) }}')">
+                                            <i class="fas fa-qrcode"></i> QR
+                                        </button>
+                                        <a href="{{ route('deliveries.map', ['delivery_id' => $delivery->id]) }}" class="action-btn" style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;" title="មើលលើផែនទីដឹកជញ្ជូន">
+                                            <i class="fas fa-map-marked-alt"></i> ផែនទី
+                                        </a>
                                         <button type="button" class="action-btn action-view"
                                             onclick="toggleDetail(this, 'detail-{{ $delivery->id }}')">
                                             <i class="fas fa-eye"></i> View
@@ -474,7 +487,12 @@
                                                     <label>Updated At</label>
                                                     <span>{{ $delivery->updated_at->format('d M Y') }}</span>
                                                 </div> -->
-                                        <div class="detail-item" style="align-self: center;">
+                                        <div class="detail-item" style="align-self: center; display: flex; gap: 8px;">
+                                            <a href="{{ route('deliveries.map', ['delivery_id' => $delivery->id]) }}"
+                                                class="delivery-btn"
+                                                style="background: #1e293b; color: #38bdf8; border: 1px solid #334155; font-size: 12px; min-height: 32px; padding: 6px 12px;">
+                                                <i class="fas fa-map-marked-alt text-warning"></i> ផែនទី
+                                            </a>
                                             <a href="{{ route('deliveries.show', array_merge([$delivery], request()->only('filter', 'start_date', 'end_date'))) }}"
                                                 class="delivery-btn delivery-btn-primary"
                                                 style="font-size: 12px; min-height: 32px; padding: 6px 12px;">
@@ -509,10 +527,103 @@
      <div class="pager-wrap">
         {{ $deliveries->links('pagination::bootstrap-5') }}
     </div>
+
+    <!-- Ultra-Clean Compact Responsive QR Code Popup -->
+    <div id="indexDriverQrPopup" class="d-none" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(5px); z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 12px;" onclick="if(event.target === this) closeIndexQrModal();">
+        <div style="background: #1e293b; color: #f8fafc; border: 1px solid #334155; border-radius: 16px; width: 100%; max-width: 330px; padding: 18px; box-shadow: 0 20px 45px rgba(0,0,0,0.65); position: relative;" onclick="event.stopPropagation();">
+            
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-50">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fs-6">📱</span>
+                    <span class="fw-bold" style="font-size: 14px; color: #fff;">QR Code សម្រាប់អ្នកដឹក</span>
+                </div>
+                <button type="button" class="btn btn-sm text-secondary p-0 border-0" onclick="closeIndexQrModal()" style="font-size: 18px; line-height: 1; cursor: pointer;">
+                    <i class="fas fa-times text-light"></i>
+                </button>
+            </div>
+
+            <!-- Perfectly Centered QR Area -->
+            <div class="d-flex flex-column align-items-center justify-content-center my-2">
+                <div class="bg-white p-2 rounded-3 shadow-sm" style="display: inline-flex; align-items: center; justify-content: center;">
+                    <img id="indexQrModalImage" src="" alt="Driver QR" style="width: 145px; height: 145px; display: block;">
+                </div>
+
+                <div class="mt-2 text-center">
+                    <span id="indexQrDriverBadge" class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-50 px-2 py-1 fw-bold" style="font-size: 11.5px;">
+                        🛵 អ្នកដឹក៖ វីរះប៊ុនថាំ
+                    </span>
+                </div>
+            </div>
+
+            <!-- URL Input & Copy Group -->
+            <div class="input-group input-group-sm mb-2" style="border-radius: 8px;">
+                <input type="text" id="indexQrModalUrlInput" class="form-control bg-dark text-info border-secondary fw-bold" style="font-size: 11px; font-family: monospace;" readonly value="">
+                <button type="button" class="btn btn-outline-info fw-bold" onclick="copyIndexQrUrl()" title="ចម្លង Link">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+
+            <!-- Action Buttons Grid -->
+            <div class="d-grid gap-1.5 mt-2">
+                <button type="button" class="btn btn-sm btn-info text-dark fw-bold py-1.5 mb-1" style="font-size: 12px; border-radius: 8px;" onclick="copyIndexQrUrl()">
+                    <i class="fas fa-paper-plane me-1"></i> ចម្លង Link ផ្ញើ Telegram
+                </button>
+                <div class="d-flex gap-2">
+                    <a id="indexQrModalOpenBtn" href="#" target="_blank" class="btn btn-sm btn-primary flex-fill fw-bold py-1.5" style="font-size: 12px; border-radius: 8px;">
+                        <i class="fas fa-external-link-alt me-1"></i> បើកមើល
+                    </a>
+                    <button type="button" class="btn btn-sm btn-secondary flex-fill fw-bold py-1.5" style="font-size: 12px; border-radius: 8px;" onclick="closeIndexQrModal()">
+                        បិទ (Close)
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-center mt-2" style="font-size: 10px;">
+                <i class="fas fa-wifi text-warning me-1"></i> <span class="text-light text-opacity-75">ទូរស័ព្ទ និង PC ត្រូវភ្ជាប់ Wi-Fi ជាមួយគ្នា</span>
+            </div>
+
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <script>
+        let currentIndexQrUrl = '';
+
+        function showDriverQrModal(driverId, driverName) {
+            const baseRoot = '{{ request()->root() }}/driver';
+            currentIndexQrUrl = driverId ? `${baseRoot}/${driverId}` : baseRoot;
+
+            document.getElementById('indexQrDriverBadge').innerText = `🛵 អ្នកដឹក៖ ${driverName}`;
+            document.getElementById('indexQrModalImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(currentIndexQrUrl)}`;
+            const urlInput = document.getElementById('indexQrModalUrlInput');
+            if (urlInput) urlInput.value = currentIndexQrUrl;
+            document.getElementById('indexQrModalOpenBtn').href = currentIndexQrUrl;
+
+            const popup = document.getElementById('indexDriverQrPopup');
+            popup.classList.remove('d-none');
+            popup.style.display = 'flex';
+        }
+
+        function closeIndexQrModal() {
+            const popup = document.getElementById('indexDriverQrPopup');
+            popup.classList.add('d-none');
+            popup.style.display = 'none';
+        }
+
+        function copyIndexQrUrl() {
+            navigator.clipboard.writeText(currentIndexQrUrl).then(() => {
+                alert("📋 បានចម្លង Link អ្នកដឹកជញ្ជូនរួចរាល់!\n" + currentIndexQrUrl + "\nអ្នកអាចផ្ញើ Link នេះទៅកាន់ Telegram អ្នកដឹកជញ្ជូនដើម្បីបើកលើទូរស័ព្ទ។");
+            }).catch(() => {
+                prompt("សូមចម្លង Link នេះ៖", currentIndexQrUrl);
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeIndexQrModal();
+            }
+        });
         function toggleDetail(btn, id) {
             const detail = document.getElementById(id);
             const isOpen = detail.classList.toggle('open');

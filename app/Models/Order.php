@@ -50,6 +50,28 @@ class Order extends Model
         'stock_deducted' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::created(function ($order) {
+            if ($order->customer) {
+                $order->customer->update(['status' => 'active']);
+            }
+        });
+
+        static::deleted(function ($order) {
+            if ($order->customer) {
+                $hasOrders = $order->customer->orders()->count() > 0;
+                $order->customer->update(['status' => $hasOrders ? 'active' : 'inactive']);
+            }
+        });
+
+        static::restored(function ($order) {
+            if ($order->customer) {
+                $order->customer->update(['status' => 'active']);
+            }
+        });
+    }
+
     /**
      * Get the customer associated with the order.
      */

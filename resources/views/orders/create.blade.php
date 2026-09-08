@@ -1276,9 +1276,10 @@
                                         data-address="{{ $customer->address ?? $customer->location }}"
                                         data-type="{{ $customer->type ?? 'N/A' }}"
                                         data-status="{{ $customer->status ?? 'Unknown' }}"
+                                        data-salesperson="{{ $customer->salesperson?->name ?? 'None' }}"
                                         data-notes="{{ $customer->notes ?? '' }}"
                                         {{ (string) old('customer_id', $selectedCustomerId ?? '') === (string) $customer->id ? 'selected' : '' }}>
-                                        {{ $customer->name }}
+                                        {{ $customer->name }}{{ $customer->salesperson ? ' (អ្នកលក់: ' . $customer->salesperson->name . ')' : '' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -1303,6 +1304,10 @@
                                 <div class="customer-info-row">
                                     <strong>ទូរសព្ទ:</strong>
                                     <span id="customer_phone">-</span>
+                                </div>
+                                <div class="customer-info-row">
+                                    <strong>អ្នកលក់ / ភ្នាក់ងារ:</strong>
+                                    <span id="customer_salesperson" class="fw-bold text-dark">-</span>
                                 </div>
                                 <div class="customer-info-row">
                                     <strong>អាសយដ្ឋាន:</strong>
@@ -1723,13 +1728,15 @@
                 const address = opt.data('address') || '-';
                 const type    = opt.data('type')    || 'N/A';
                 const status  = opt.data('status')  || 'Unknown';
+                const salesperson = opt.data('salesperson') || 'None';
                 const notes   = opt.data('notes')   || '';
 
                 $('#customer_name').text(name);
                 $('#customer_phone').text(phone);
+                $('#customer_salesperson').text(salesperson !== 'None' ? salesperson : 'មិនមាន');
                 $('#customer_address').text(address);
                 $('#customer_type').text(type);
-                $('#customer_status').text(status);
+                $('#customer_status').text(status === 'active' ? 'សកម្ម' : (status === 'inactive' ? 'អសកម្ម' : status));
 
                 $('#editCustomerBtn')
                     .attr('href', `${customerEditUrlBase}/${custId}/edit?return_url=${customerEditReturnUrl}`)
