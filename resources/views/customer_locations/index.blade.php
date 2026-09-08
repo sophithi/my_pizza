@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ផែនទីដឹកជញ្ជូន (Customer Locations & Delivery Map)')
+@section('title', 'ផែនទីដឹកជញ្ជូន')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
@@ -9,37 +9,62 @@
     --primary-c: #e85d24;
     --primary-hover: #d04b16;
     --border-c: #e2e8f0;
+    --border-subtle: #f1f5f9;
     --text-dark: #0f172a;
+    --text-secondary: #475569;
     --text-muted: #64748b;
+    --bg-card: #ffffff;
+    --bg-soft: #f8fafc;
 }
 
 .loc-page {
-    padding: 6px 12px;
+    padding: 8px 14px;
 }
 
-/* Top Clean Compact Bar */
+/* ===== TOP BAR ===== */
 .loc-topbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 6px;
+    gap: 12px;
+    margin-bottom: 8px;
     flex-wrap: wrap;
+}
+
+.btn-top-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid var(--border-c);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.15s ease;
+    font-size: 12px;
+}
+
+.btn-top-back:hover {
+    background: #f1f5f9;
+    color: var(--text-dark);
+    border-color: #cbd5e1;
 }
 
 .store-badge-btn {
     background: #fff7ed;
     border: 1px solid #ffedd5;
     color: #c2410c;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 12px;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.15s ease;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 .store-badge-btn:hover {
     background: #ffedd5;
@@ -47,7 +72,7 @@
     color: #9a3412;
 }
 
-/* Layout: 75% Huge Map, 25% Compact Sidebar */
+/* ===== MAIN CONTAINER ===== */
 .loc-main-container {
     display: flex;
     gap: 10px;
@@ -56,7 +81,7 @@
     position: relative;
 }
 
-/* Map Pane */
+/* ===== MAP PANE ===== */
 .loc-map-pane {
     flex: 1;
     height: 100%;
@@ -76,15 +101,15 @@
     background: #f1f5f9;
 }
 
-/* Floating District Pills on Map */
+/* Floating District Filter Bar */
 .map-floating-districts {
     position: absolute;
     top: 10px;
     left: 55px;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.85);
     border-radius: 30px;
     padding: 3px 6px;
     display: flex;
@@ -92,6 +117,10 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     overflow-x: auto;
     max-width: calc(100% - 130px);
+}
+
+.map-floating-districts::-webkit-scrollbar {
+    display: none;
 }
 
 .district-pill {
@@ -149,7 +178,7 @@
     font-size: 12px;
 }
 
-/* Sidebar List */
+/* ===== SIDEBAR PANE ===== */
 .loc-sidebar-pane {
     width: 360px;
     flex: 0 0 360px;
@@ -166,7 +195,7 @@
 
 .loc-sidebar-header {
     padding: 8px 10px;
-    background: #f8fafc;
+    background: #fafbfc;
     border-bottom: 1px solid var(--border-c);
 }
 
@@ -185,10 +214,11 @@
     margin-bottom: 6px;
     transition: all 0.12s ease;
     cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 .loc-cust-card:hover {
-    border-color: var(--primary-c);
-    background: #fffdfc;
+    border-color: #cbd5e1;
+    background: #fafbfc;
     transform: translateY(-1px);
 }
 .loc-cust-card.active {
@@ -270,6 +300,58 @@
     overflow-y: auto;
 }
 
+/* ===== PAGER-WRAPPER ===== */
+.loc-sidebar-body .pager-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+.loc-sidebar-body .pager-wrap .pagination {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+}
+.loc-sidebar-body .pager-wrap .page-item .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 6px;
+    border: 1px solid var(--border-c);
+    background: #ffffff;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+.loc-sidebar-body .pager-wrap .page-item .page-link:hover,
+.loc-sidebar-body .pager-wrap .page-item .page-link:focus {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: var(--primary-c);
+    box-shadow: none;
+}
+.loc-sidebar-body .pager-wrap .page-item.active .page-link {
+    background: var(--primary-c);
+    border-color: var(--primary-c);
+    color: #ffffff;
+    font-weight: 700;
+}
+.loc-sidebar-body .pager-wrap .page-item.disabled .page-link {
+    background: #f8fafc;
+    border-color: #edf2f7;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
 @media (max-width: 992px) {
     .loc-main-container {
         flex-direction: column;
@@ -299,8 +381,11 @@
     {{-- Top Clean Compact Bar --}}
     <div class="loc-topbar">
         <div class="d-flex align-items-center gap-2">
-            <span class="fw-bold text-dark fs-6">
-                <i class="fas fa-map-marked-alt text-primary me-1"></i> ផែនទីដឹកជញ្ជូន
+            <a href="{{ route('customers.index') }}" class="btn-top-back" title="ត្រឡប់ទៅបញ្ជីអតិថិជន">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <span class="fw-bold text-dark fs-6 d-flex align-items-center gap-2">
+                <i class="fas fa-map-marked-alt text-primary"></i> ផែនទីទីតាំងអតិថិជន
             </span>
             <button type="button" class="store-badge-btn" onclick="openStoreModal()" title="ចុចដើម្បីកំណត់ទីតាំងហាងធំ">
                  <span id="headerStoreName">{{ $storeLocation['name'] }}</span> <i class="fas fa-cog text-muted ms-1" style="font-size: 10px;"></i>
@@ -366,10 +451,10 @@
             <div class="loc-sidebar-header">
                 {{-- Quick Link Paste / Search --}}
                 <div class="input-group input-group-sm mb-2">
-                    <span class="input-group-text bg-white border-end-0"><i class="fab fa-google text-danger"></i></span>
+                    <span class="input-group-text bg-white border-end-0 text-danger"><i class="fab fa-google"></i></span>
                     <input type="text" id="sidebar_gmaps_paste" class="form-control border-start-0" 
                            placeholder="Paste Google Maps Link / GPS..." onkeydown="if(event.key==='Enter') parseSidebarGmaps()">
-                    <button class="btn btn-outline-secondary" type="button" onclick="parseSidebarGmaps()">
+                    <button class="btn btn-outline-secondary" type="button" onclick="parseSidebarGmaps()" title="Parse">
                         <i class="fas fa-magic"></i>
                     </button>
                 </div>
@@ -384,7 +469,7 @@
                         <option value="pinned" {{ request('location_status') == 'pinned' ? 'selected' : '' }}>មាន GPS</option>
                         <option value="unpinned" {{ request('location_status') == 'unpinned' ? 'selected' : '' }}>គ្មាន GPS</option>
                     </select>
-                    <button type="submit" class="btn btn-sm btn-secondary px-2">
+                    <button type="submit" class="btn btn-sm btn-secondary px-2" title="ស្វែងរក">
                         <i class="fas fa-search"></i>
                     </button>
                 </form>
@@ -446,8 +531,8 @@
                     </div>
                 @endforelse
 
-                <div class="mt-2">
-                    {{ $customers->links() }}
+                <div class="pager-wrap">
+                    {{ $customers->links('pagination::bootstrap-5') }}
                 </div>
             </div>
 
@@ -497,8 +582,8 @@
                 </div>
 
                 <div class="mb-2">
-                    <label class="form-label small fw-bold mb-1" style="font-size: 11px;">ចំណាំសម្គាល់ (Landmark)</label>
-                    <input type="text" id="drawer_landmark" class="form-control form-control-sm" placeholder="ឧទាហរណ៍៖ ទល់មុខសាលា, ជិតផ្សារ...">
+                    <label class="form-label small fw-bold mb-1" style="font-size: 11px;">ចំណាំសម្គាល់</label>
+                    <input type="text" id="drawer_landmark" class="form-control form-control-sm" placeholder="ទល់មុខសាលា, ជិតផ្សារ...">
                 </div>
 
                 <div class="mb-2">

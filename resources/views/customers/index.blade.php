@@ -6,346 +6,625 @@
     <style>
         .customer-page {
             --accent: #e85d24;
-            --accent-dark: #d94a10;
-            --surface: #fff;
-            --border: #e5e7eb;
-            --text: #111827;
-            --muted: #6b7280;
+            --accent-hover: #d04b16;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --border-subtle: #f1f5f9;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --muted: #64748b;
+            --bg-soft: #f8fafc;
         }
 
+        /* ===== HEADER ===== */
         .customer-header {
-            align-items: flex-start;
             display: flex;
-            gap: 16px;
+            align-items: center;
             justify-content: space-between;
-            margin-bottom: 18px;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .customer-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .customer-title {
             color: var(--text);
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
             margin: 0;
+            letter-spacing: -0.3px;
         }
 
-        .customer-subtitle {
+        .customer-count-badge {
+            background: #f1f5f9;
             color: var(--muted);
-            margin: 6px 0 0;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .customer-btn {
-            align-items: center;
-            border: 0;
-            border-radius: 8px;
             display: inline-flex;
-            font-weight: 800;
-            gap: 8px;
+            align-items: center;
             justify-content: center;
-            min-height: 40px;
-            padding: 9px 14px;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            height: 38px;
+            padding: 0 14px;
+            border-radius: 8px;
             text-decoration: none;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
             white-space: nowrap;
         }
 
         .customer-btn-soft {
-            background: #f3f4f6;
-            color: #374151;
+            background: var(--surface);
+            color: var(--text-secondary);
+            border-color: var(--border);
         }
 
         .customer-btn-soft:hover {
-            background: #e5e7eb;
-            color: #111827;
+            background: #f8fafc;
+            color: var(--text);
+            border-color: #cbd5e1;
+        }
+
+        .customer-btn-map {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .customer-btn-map:hover {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #93c5fd;
         }
 
         .customer-btn-primary {
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            background: var(--accent);
             color: #fff;
+            box-shadow: 0 2px 6px rgba(232, 93, 36, 0.2);
         }
 
         .customer-btn-primary:hover {
+            background: var(--accent-hover);
             color: #fff;
-            box-shadow: 0 8px 18px rgba(232, 93, 36, .22);
+            box-shadow: 0 4px 12px rgba(232, 93, 36, 0.3);
             transform: translateY(-1px);
         }
 
+        /* ===== STATS GRID ===== */
         .stats-grid {
             display: grid;
             gap: 14px;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }
 
         .stat-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            min-height: 102px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .stat-card:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.total {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .stat-icon.active {
+            background: #ecfdf5;
+            color: #16a34a;
+        }
+
+        .stat-icon.inactive {
+            background: #fef2f2;
+            color: #dc2626;
         }
 
         .stat-label {
             color: var(--muted);
-            font-size: 12px;
-            font-weight: 800;
+            font-size: 11.5px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .stat-value {
             color: var(--text);
-            font-size: 24px;
-            font-weight: 900;
-            margin-top: 6px;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-top: 3px;
         }
 
+        /* ===== FILTER TOOLBAR ===== */
         .filter-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 16px;
-            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            padding: 10px 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         }
 
         .filter-row {
-            align-items: center;
             display: grid;
+            align-items: center;
             gap: 10px;
-            grid-template-columns: minmax(320px, 1fr) 170px 170px auto auto;
-        }
-
-        .filter-card .form-control,
-        .filter-card .form-select {
-            min-height: 42px;
+            grid-template-columns: minmax(240px, 1fr) 150px 160px 150px auto;
         }
 
         .customer-search {
+            position: relative;
             display: flex;
-            gap: 8px;
-            min-width: 0;
+            align-items: center;
+        }
+
+        .customer-search .search-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--muted);
+            font-size: 13px;
+            pointer-events: none;
         }
 
         .customer-search .form-control {
-            min-width: 0;
+            padding-left: 36px;
+            height: 38px;
+            font-size: 13px;
+            border-radius: 8px;
+            border-color: var(--border);
         }
 
-        .customer-search-btn {
-            min-width: 46px;
-            padding-inline: 12px;
+        .customer-search .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(232, 93, 36, 0.12);
         }
 
+        .filter-card .form-select {
+            height: 38px;
+            font-size: 13px;
+            border-radius: 8px;
+            border-color: var(--border);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .filter-card .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(232, 93, 36, 0.12);
+        }
+
+        .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            width: 38px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .btn-reset:hover {
+            background: #f1f5f9;
+            color: var(--text);
+            border-color: #cbd5e1;
+        }
+
+        /* ===== TABLE CARD ===== */
         .customer-table-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+            border-radius: 10px;
             overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        }
+
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
         }
 
         .customer-table th {
-            background: #f9fafb;
+            background: #fafbfc;
             border-bottom: 1px solid var(--border);
             color: var(--muted);
-            font-size: 12px;
-            font-weight: 900;
-            padding: 14px 16px;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 11px 14px;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
         .customer-table td {
-            border-bottom: 1px solid #f1f3f5;
+            border-bottom: 1px solid var(--border-subtle);
             color: var(--text);
-            padding: 14px 16px;
+            padding: 10px 14px;
             vertical-align: middle;
         }
 
-        .channel-pill,
-        .status-pill,
-        .order-pill {
-            align-items: center;
-            border-radius: 999px;
+        .customer-table tbody tr {
+            transition: background 0.12s ease;
+        }
+
+        .customer-table tbody tr:hover {
+            background: #fafbfc;
+        }
+
+        .customer-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ===== BADGES & PILLS ===== */
+        .channel-badge {
             display: inline-flex;
-            font-size: 12px;
-            font-weight: 800;
-            gap: 6px;
-            padding: 6px 10px;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
         }
 
-        .channel-facebook {
-            background: #e7f3ff;
-            color: #0a66c2;
-        }
-
-        .channel-telegram {
-            background: #e0f7ff;
-            color: #0088cc;
-        }
-
-        .status-active {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-inactive {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .order-pill {
+        .channel-fb {
             background: #eff6ff;
             color: #1d4ed8;
         }
 
-        .action-row {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
+        .channel-tg {
+            background: #e0f2fe;
+            color: #0369a1;
         }
 
-        .icon-action {
+        .status-badge {
+            display: inline-flex;
             align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-badge.active {
+            background: #ecfdf5;
+            color: #15803d;
+        }
+
+        .status-badge.inactive {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .order-count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            padding: 2px 8px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 11.5px;
+            font-weight: 700;
+            border-radius: 6px;
+        }
+
+        .salesperson-tag {
+            display: inline-block;
+            background: #f8fafc;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            white-space: nowrap;
+        }
+
+        /* ===== ROW ACTIONS ===== */
+        .action-btn-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn-row-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
             border: 0;
             background: transparent;
-            color: #2563eb;
-            display: inline-flex;
-            height: 32px;
-            justify-content: center;
+            color: var(--muted);
             text-decoration: none;
-            width: 32px;
+            transition: all 0.12s ease;
+            cursor: pointer;
+            font-size: 13px;
         }
 
-        .icon-danger {
+        .btn-row-action:hover {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-row-action.order-act:hover {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .btn-row-action.view-act:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .btn-row-action.edit-act:hover {
+            background: #fff7ed;
+            color: var(--accent);
+        }
+
+        .btn-row-action.del-act:hover {
+            background: #fef2f2;
             color: #dc2626;
         }
 
+        /* ===== EMPTY STATE ===== */
         .empty-state {
-            padding: 46px 16px;
+            padding: 40px 16px;
             text-align: center;
         }
 
         .empty-state-icon {
-            align-items: center;
-            background: #fff7ed;
-            border-radius: 999px;
-            color: var(--accent);
             display: inline-flex;
-            font-size: 24px;
-            height: 54px;
+            align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
-            width: 54px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fff7ed;
+            color: var(--accent);
+            font-size: 20px;
+            margin-bottom: 10px;
         }
 
         .empty-state-title {
             color: var(--text);
-            font-weight: 900;
-            margin-bottom: 4px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 2px;
         }
 
         .empty-state-text {
             color: var(--muted);
+            font-size: 12.5px;
             margin: 0;
         }
 
-        @media (max-width: 900px) {
+        /* ===== PAGER-WRAPPER ===== */
+        .pager-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 18px;
+        }
 
+        .pager-wrap .pagination {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0;
+            flex-wrap: wrap;
+            align-items: center;
+            list-style: none;
+            padding: 0;
+        }
+
+        .pager-wrap .page-item .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 11px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .pager-wrap .page-item .page-link:hover,
+        .pager-wrap .page-item .page-link:focus {
+            background: #fff7ed;
+            border-color: #fdba74;
+            color: var(--accent);
+            box-shadow: none;
+        }
+
+        .pager-wrap .page-item.active .page-link {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(232, 93, 36, 0.25);
+        }
+
+        .pager-wrap .page-item.disabled .page-link {
+            background: #f8fafc;
+            border-color: #edf2f7;
+            color: #94a3b8;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .filter-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .customer-search {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) {
             .customer-header {
-                align-items: stretch;
                 flex-direction: column;
+                align-items: stretch;
             }
-
+            .header-actions {
+                justify-content: flex-start;
+            }
             .stats-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-columns: 1fr;
             }
-
             .filter-row {
                 grid-template-columns: 1fr;
             }
-
-            .customer-search {
-                flex-direction: column;
-            }
-
-            .customer-btn {
+            .btn-reset {
                 width: 100%;
             }
         }
 
-        .pager-wrap {
-            margin-top: 16px;
-        }
-
-        @media (max-width: 560px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .customer-title {
-                font-size: 24px;
+        @media (max-width: 576px) {
+            .pager-wrap .page-item .page-link {
+                min-width: 30px;
+                height: 30px;
+                padding: 0 8px;
+                font-size: 12px;
             }
         }
     </style>
 @endpush
 
 @section('content')
-    <div class="container-fluid py-4 customer-page">
+    <div class="container-fluid py-3 customer-page">
+        {{-- Header --}}
         <div class="customer-header">
-            <div>
+            <div class="customer-title-group">
                 <h2 class="customer-title">អតិថិជន</h2>
-                <p class="customer-subtitle">ស្វែងរកអតិថិជន មើលប្រវត្តិបញ្ជាទិញ និងបង្កើតការបញ្ជាទិញថ្មីបានរហ័ស។</p>
+                <span class="customer-count-badge">{{ number_format($stats['total']) }}</span>
             </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <a href="{{ route('customer-locations.index') }}" class="customer-btn" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;" title="គ្រប់គ្រងទីតាំងផែនទី Google Maps">
-                    <i class="fas fa-map-marked-alt"></i> ទីតាំងផែនទី (Map)
+            <div class="header-actions">
+                <a href="{{ route('customer-locations.index') }}" class="customer-btn customer-btn-map" title="ផែនទី Google Maps">
+                    <i class="fas fa-map-marked-alt"></i> <span>ផែនទី</span>
                 </a>
                 <a href="{{ route('customers.export.excel', request()->query()) }}" class="customer-btn customer-btn-soft" title="នាំចេញ Excel">
-                    <i class="fas fa-file-excel"></i> Excel
+                    <i class="fas fa-file-excel text-success"></i> <span>Excel</span>
                 </a>
                 <a href="{{ route('customers.export.pdf', request()->query()) }}" class="customer-btn customer-btn-soft" target="_blank" title="នាំចេញ PDF">
-                    <i class="fas fa-file-pdf"></i> PDF
+                    <i class="fas fa-file-pdf text-danger"></i> <span>PDF</span>
                 </a>
                 <a href="{{ route('customers.create') }}" class="customer-btn customer-btn-primary">
-                    <i class="fas fa-plus"></i> បន្ថែមអតិថិជនថ្មី
+                    <i class="fas fa-plus"></i> <span>បន្ថែមអតិថិជន</span>
                 </a>
             </div>
         </div>
 
+        {{-- Success Alert --}}
         @if($message = Session::get('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ $message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="alert alert-success alert-dismissible fade show py-2 px-3 small mb-3 rounded-3" role="alert">
+                <i class="fas fa-check-circle me-1"></i> {{ $message }}
+                <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" style="padding: 10px;"></button>
             </div>
         @endif
 
+        {{-- Stats Grid --}}
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">អតិថិជនសរុប</div>
-                <div class="stat-value">{{ number_format($stats['total']) }}</div>
+                <div class="stat-icon total">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <div class="stat-label">អតិថិជនសរុប</div>
+                    <div class="stat-value">{{ number_format($stats['total']) }}</div>
+                </div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">សកម្ម (បញ្ជាទិញ ≥ 1)</div>
-                <div class="stat-value text-success">{{ number_format($stats['active']) }}</div>
+                <div class="stat-icon active">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div>
+                    <div class="stat-label">សកម្ម</div>
+                    <div class="stat-value text-success">{{ number_format($stats['active']) }}</div>
+                </div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">អសកម្ម (មិនទាន់មានបញ្ជាទិញ)</div>
-                <div class="stat-value text-danger">{{ number_format($stats['inactive']) }}</div>
+                <div class="stat-icon inactive">
+                    <i class="fas fa-user-clock"></i>
+                </div>
+                <div>
+                    <div class="stat-label">អសកម្ម</div>
+                    <div class="stat-value text-muted">{{ number_format($stats['inactive']) }}</div>
+                </div>
             </div>
         </div>
 
+        {{-- Filters --}}
         <form method="GET" action="{{ route('customers.index') }}" class="filter-card">
             <div class="filter-row">
                 <div class="customer-search">
+                    <i class="fas fa-search search-icon"></i>
                     <input type="search" name="search" value="{{ request('search') }}" class="form-control"
-                        placeholder="ស្វែងរកឈ្មោះ លេខទូរស័ព្ទ ទីក្រុង ឬទីតាំង..." autocomplete="off">
-                    <button type="submit" class="customer-btn customer-btn-primary customer-search-btn" title="ស្វែងរក">
-                        <i class="fas fa-search"></i>
-                    </button>
+                        placeholder="ស្វែងរកអតិថិជន..." autocomplete="off">
                 </div>
                 <select name="type" class="form-select">
-                    <option value="all">គ្រប់ប្រភព</option>
+                    <option value="all">ប្រភពទាំងអស់</option>
                     <option value="facebook" {{ request('type') === 'facebook' ? 'selected' : '' }}>Facebook</option>
                     <option value="telegram" {{ request('type') === 'telegram' ? 'selected' : '' }}>Telegram</option>
                 </select>
                 <select name="salesperson_id" class="form-select">
-                    <option value="all">គ្រប់ភ្នាក់ងារលក់</option>
+                    <option value="all">អ្នកលក់ទាំងអស់</option>
                     @foreach($salespersons as $s)
                         <option value="{{ $s->id }}" {{ request('salesperson_id') == $s->id ? 'selected' : '' }}>
                             {{ $s->name }}
@@ -353,31 +632,32 @@
                     @endforeach
                 </select>
                 <select name="status" class="form-select">
-                    <option value="all">គ្រប់ស្ថានភាព</option>
+                    <option value="all">ស្ថានភាពទាំងអស់</option>
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>សកម្ម</option>
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>អសកម្ម</option>
                 </select>
-                <a href="{{ route('customers.index') }}" class="customer-btn customer-btn-soft">
+                <a href="{{ route('customers.index') }}" class="btn-reset" title="សម្អាត">
                     <i class="fas fa-rotate-left"></i>
                 </a>
             </div>
         </form>
 
+        {{-- Customers Table --}}
         <div class="customer-table-card">
             <div class="table-responsive">
-                <table class="table customer-table mb-0">
+                <table class="customer-table mb-0">
                     <thead>
                         <tr>
-                            <th>ប្រភព</th>
-                            <th>អតិថិជន</th>
-                            <th>ទំនាក់ទំនង</th>
+                            <th style="width: 75px;">ប្រភព</th>
+                            <th>ឈ្មោះអតិថិជន</th>
+                            <th>លេខទូរស័ព្ទ</th>
                             <th>អ្នកលក់</th>
                             <th>ទីតាំង</th>
-                            <th>ការបញ្ជាទិញ</th>
+                            <th class="text-center">កុម្ម៉ង់</th>
                             <th>ចំណាយ</th>
-                            <th>បញ្ជាទិញចុងក្រោយ</th>
+                            <th>កាលបរិច្ឆេទចុងក្រោយ</th>
                             <th>ស្ថានភាព</th>
-                            <th class="text-center">សកម្មភាព</th>
+                            <th class="text-center" style="width: 140px;">សកម្មភាព</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -385,81 +665,82 @@
                             <tr>
                                 <td>
                                     @if($customer->type == 'facebook')
-                                        <span class="channel-pill channel-facebook"><i class="fab fa-facebook-f"></i>
-                                            Facebook</span>
+                                        <span class="channel-badge channel-fb"><i class="fab fa-facebook-f"></i> FB</span>
                                     @elseif($customer->type == 'telegram')
-                                        <span class="channel-pill channel-telegram"><i class="fab fa-telegram"></i> Telegram</span>
+                                        <span class="channel-badge channel-tg"><i class="fab fa-telegram-plane"></i> TG</span>
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="fw-bold">{{ $customer->name }}</div>
+                                    <a href="{{ route('customers.show', $customer) }}" class="fw-bold text-dark text-decoration-none">
+                                        {{ $customer->name }}
+                                    </a>
                                     @if($customer->notes)
-                                        <div class="text-muted small">{{ Str::limit($customer->notes, 45) }}</div>
+                                        <div class="text-muted small text-truncate" style="max-width: 200px;" title="{{ $customer->notes }}">{{ $customer->notes }}</div>
                                     @endif
                                 </td>
                                 <td>
                                     @if($customer->phone)
-                                        <a href="tel:{{ $customer->phone }}" class="text-decoration-none">{{ $customer->phone }}</a>
-                                    @else
-                                        <span class="text-muted">មិនមាន</span>
-                                    @endif
-                                </td>
-
-                                <td>
-                                    @if($customer->salesperson)
-                                        <span class="badge bg-light text-dark border fw-normal">{{ $customer->salesperson->name }}</span>
+                                        <a href="tel:{{ $customer->phone }}" class="text-dark font-monospace text-decoration-none small">
+                                            {{ $customer->phone }}
+                                        </a>
                                     @else
                                         <span class="text-muted small">—</span>
                                     @endif
                                 </td>
-                                <td class="text-muted">{{ $customer->city ?? $customer->address ?? 'មិនមាន' }}</td>
-
                                 <td>
-                                    @if($customer->orders_count > 0)
-                                        <span class="order-pill">{{ $customer->orders_count }} ការបញ្ជាទិញ</span>
+                                    @if($customer->salesperson)
+                                        <span class="salesperson-tag">{{ $customer->salesperson->name }}</span>
                                     @else
-                                        <span class="text-muted fst-italic">មិនទាន់មានការបញ្ជាទិញ</span>
+                                        <span class="text-muted small">—</span>
                                     @endif
                                 </td>
-
                                 <td>
-                                    <strong>${{ number_format($customer->total_spent ?? 0, 2) }}</strong>
-                                    <div class="text-muted small">៛{{ number_format(($customer->total_spent ?? 0) * 4000, 0) }}
-                                    </div>
+                                    <span class="text-secondary small text-truncate d-inline-block" style="max-width: 130px;" title="{{ $customer->city ?? $customer->address }}">
+                                        {{ $customer->city ?? $customer->address ?? '—' }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    @if($customer->orders_count > 0)
+                                        <span class="order-count-badge">{{ $customer->orders_count }}</span>
+                                    @else
+                                        <span class="text-muted small">0</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <strong class="text-dark">${{ number_format($customer->total_spent ?? 0, 2) }}</strong>
                                 </td>
                                 <td class="text-muted small">
                                     {{ $customer->last_order_at ? \Carbon\Carbon::parse($customer->last_order_at)->format('d/m/Y') : '—' }}
                                 </td>
                                 <td>
                                     @if($customer->status == 'active')
-                                        <span class="status-pill status-active"><i class="fas fa-check-circle"></i> សកម្ម</span>
+                                        <span class="status-badge active"><i class="fas fa-circle" style="font-size: 6px;"></i> សកម្ម</span>
                                     @elseif($customer->status == 'inactive')
-                                        <span class="status-pill status-inactive"><i class="fas fa-times-circle"></i> អសកម្ម</span>
+                                        <span class="status-badge inactive"><i class="fas fa-circle" style="font-size: 6px;"></i> អសកម្ម</span>
                                     @else
-                                        <span class="text-muted">{{ $customer->status ?? 'រង់ចាំ' }}</span>
+                                        <span class="text-muted small">{{ $customer->status ?? '—' }}</span>
                                     @endif
                                 </td>
-
                                 <td>
-                                    <div class="action-row">
+                                    <div class="action-btn-group">
                                         <a href="{{ route('orders.create', ['customer_id' => $customer->id]) }}"
-                                            class="icon-action" title="បង្កើតការបញ្ជាទិញថ្មី">
+                                            class="btn-row-action order-act" title="បង្កើតការកុម្ម៉ង់">
                                             <i class="fas fa-cart-plus"></i>
                                         </a>
-                                        <a href="{{ route('customers.show', $customer) }}" class="icon-action" title="មើល">
+                                        <a href="{{ route('customers.show', $customer) }}" class="btn-row-action view-act" title="មើល">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('customers.edit', $customer) }}" class="icon-action" title="កែប្រែ">
+                                        <a href="{{ route('customers.edit', $customer) }}" class="btn-row-action edit-act" title="កែប្រែ">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('customers.destroy', $customer) }}" method="POST"
-                                            data-delete="អតិថិជន" data-item-name="{{ $customer->name }}">
+                                            data-delete="អតិថិជន" data-item-name="{{ $customer->name }}" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="icon-action icon-danger" title="លុប">
-                                                <i class="fas fa-trash"></i>
+                                            <button type="submit" class="btn-row-action del-act" title="លុប">
+                                                <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -467,7 +748,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9">
+                                <td colspan="10">
                                     <div class="empty-state">
                                         <div class="empty-state-icon">
                                             <i class="fas fa-users"></i>
@@ -481,9 +762,12 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
-            <div class="pager-wrap">{{ $customers->links('pagination::bootstrap-5') }}</div>
+
+        {{-- Pagination --}}
+        <div class="pager-wrap">
+            {{ $customers->links('pagination::bootstrap-5') }}
+        </div>
     </div>
 
     @push('scripts')
@@ -493,7 +777,7 @@
                 if (!form) return;
 
                 const input = form.querySelector('input[name="search"]');
-                const selects = form.querySelectorAll('select[name="type"], select[name="status"]');
+                const selects = form.querySelectorAll('select[name="type"], select[name="salesperson_id"], select[name="status"]');
                 const submit = () => form.submit();
 
                 if (input) {
