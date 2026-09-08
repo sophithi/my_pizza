@@ -30,18 +30,41 @@
             background: #f5f7fa;
         }
 
-        /* ===== SIDEBAR ===== */
+        /* ===== SIDEBAR (Option 4: Pizza Brand Dark Theme with Live Badges & Counters) ===== */
         .sidebar {
             width: 260px;
             height: 100vh;
-            background: linear-gradient(180deg, #1a1d29 0%, #0f1117 100%);
+            background: #0f172a;
+            border-right: 1px solid #1e293b;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 1000;
-            transition: width 0.15s ease;
+            transition: width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
             overflow-y: auto;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar::-webkit-scrollbar,
+        .sidebar nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track,
+        .sidebar nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb,
+        .sidebar nav::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+
+        .sidebar:hover::-webkit-scrollbar-thumb,
+        .sidebar nav:hover::-webkit-scrollbar-thumb {
+            background: #334155;
         }
 
         .sidebar.collapsed {
@@ -49,141 +72,225 @@
         }
 
         .sidebar-brand {
-            background: linear-gradient(135deg, #e85d24 0%, #d94a10 100%);
-            padding: 20px 16px;
+            background: #0f172a;
+            border-bottom: 1px solid #1e293b;
+            padding: 16px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            min-height: 72px;
+            min-height: 68px;
+            gap: 8px;
         }
 
         .sidebar-brand .brand-inner {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             text-decoration: none;
+            min-width: 0;
+            flex: 1;
         }
 
-        .sidebar-logo {
-            height: 40px;
-            width: auto;
-            display: block;
+        .sidebar-brand-icon {
+            width: 34px;
+            height: 34px;
             border-radius: 8px;
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #ea580c, #c2410c);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
             flex-shrink: 0;
         }
 
         .sidebar-brand-text {
-            color: #fff;
-            font-size: 16px;
+            color: #f8fafc;
+            font-size: 15px;
             font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
-            transition: all 0.3s ease;
+            text-overflow: ellipsis;
+            transition: all 0.2s ease;
             text-decoration: none;
-            flex: 1;
+            letter-spacing: -0.2px;
         }
 
-        .sidebar.collapsed .sidebar-brand-text {
-            width: 0;
-            opacity: 0;
-            pointer-events: none;
+        /* In collapsed mode, hide brand-inner completely to avoid overlap with collapse button */
+        .sidebar.collapsed .brand-inner {
+            display: none;
         }
 
         .sidebar-collapse-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #fff;
-            width: 36px;
-            height: 36px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            width: 30px;
+            height: 30px;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
             flex-shrink: 0;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .sidebar-collapse-btn:hover {
-            background: rgba(255, 255, 255, 0.35);
-            transform: scale(1.1);
+            background: #ea580c;
+            color: #ffffff;
+            border-color: #ea580c;
+            transform: scale(1.05);
         }
 
         .sidebar.collapsed .sidebar-brand {
             justify-content: center;
+            padding: 16px 8px;
+        }
+
+        .sidebar.collapsed .sidebar-collapse-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            font-size: 13px;
         }
 
         /* Nav labels */
         .sidebar .nav-label {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.35);
-            padding: 14px 24px 4px;
+            font-size: 11px;
+            color: #64748b;
+            padding: 16px 20px 6px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
+            letter-spacing: 0.8px;
+            font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .sidebar.collapsed .nav-label {
             opacity: 0;
             height: 0;
             padding: 0;
+            margin: 0;
         }
 
         /* Nav links */
+        .sidebar nav {
+            padding: 10px 0 30px;
+            max-height: calc(100vh - 72px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
         .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.65);
-            padding: 12px 24px;
-            font-size: 14px;
-            font-weight: 500;
-            border-left: 4px solid transparent;
+            color: #cbd5e1;
+            padding: 10px 14px;
+            margin: 2px 12px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            border-left: none;
             display: flex;
             align-items: center;
             gap: 12px;
             text-decoration: none;
             white-space: nowrap;
             transition: all 0.15s ease;
+            position: relative;
         }
 
         .sidebar .nav-link:hover {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.08);
-            border-left-color: #e85d24;
+            color: #ffffff;
+            background: rgba(234, 88, 12, 0.15);
         }
 
         .sidebar .nav-link:hover i {
-            color: #e85d24;
+            color: #fb923c;
+            transform: scale(1.1);
         }
 
         .sidebar .nav-link.active {
-            color: #e85d24;
-            background: rgba(232, 93, 36, 0.15);
-            border-left-color: #e85d24;
-            font-weight: 600;
+            color: #ffffff;
+            background: linear-gradient(135deg, #ea580c, #c2410c);
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
         }
 
         .sidebar .nav-link i {
             font-size: 16px;
-            width: 20px;
+            width: 22px;
             text-align: center;
             flex-shrink: 0;
-            transition: color 0.25s ease;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar .nav-link:hover i {
+            color: #fb923c;
+        }
+
+        .sidebar .nav-link.active i {
+            color: #ffffff;
         }
 
         .sidebar .nav-link span {
-            transition: all 0.3s ease;
+            flex: 1;
             overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.2s ease;
+        }
+
+        /* Nav Live Badges */
+        .nav-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: 0.2px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .nav-badge.badge-amber {
+            background: #fef08a;
+            color: #854d0e;
+        }
+
+        .sidebar .nav-link.active .nav-badge.badge-amber {
+            background: #ffffff;
+            color: #c2410c;
+        }
+
+        .nav-badge.badge-blue {
+            background: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .sidebar .nav-link.active .nav-badge.badge-blue {
+            background: #ffffff;
+            color: #1e40af;
+        }
+
+        .nav-badge.badge-emerald {
+            background: #bbf7d0;
+            color: #166534;
+        }
+
+        .sidebar .nav-link.active .nav-badge.badge-emerald {
+            background: #ffffff;
+            color: #166534;
         }
 
         /* Collapsed nav links - icons only */
         .sidebar.collapsed .nav-link {
-            padding: 14px;
+            padding: 12px;
+            margin: 4px 10px;
             justify-content: center;
-            border-left: 4px solid transparent;
+            border-radius: 10px;
             position: relative;
         }
 
@@ -191,11 +298,35 @@
             width: 0;
             opacity: 0;
             pointer-events: none;
+            display: none;
         }
 
         .sidebar.collapsed .nav-link i {
-            font-size: 20px;
+            font-size: 18px;
             width: auto;
+        }
+
+        /* Collapsed badge dot indicator */
+        .sidebar.collapsed .nav-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 0;
+            line-height: 0;
+            border: 2px solid #0f172a;
+        }
+        .sidebar.collapsed .nav-badge.badge-amber {
+            background: #eab308;
+        }
+        .sidebar.collapsed .nav-badge.badge-blue {
+            background: #3b82f6;
+        }
+        .sidebar.collapsed .nav-badge.badge-emerald {
+            background: #22c55e;
         }
 
         /* Tooltip on hover when collapsed */
@@ -205,8 +336,8 @@
             left: 100%;
             top: 50%;
             transform: translateY(-50%) translateX(8px);
-            background: #1a1d29;
-            color: #fff;
+            background: #1e293b;
+            color: #f8fafc;
             padding: 6px 12px;
             border-radius: 6px;
             font-size: 12px;
@@ -214,9 +345,10 @@
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.25s ease, transform 0.25s ease;
+            transition: opacity 0.2s ease, transform 0.2s ease;
             z-index: 1001;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
         }
 
         .sidebar.collapsed .nav-link:hover::after {
@@ -225,8 +357,7 @@
         }
 
         .sidebar.collapsed .nav-link:hover {
-            background: rgba(232, 93, 36, 0.15);
-            border-left-color: #e85d24;
+            background: rgba(234, 88, 12, 0.15);
         }
 
         /* Sidebar close btn (mobile only) */
@@ -235,10 +366,13 @@
             position: absolute;
             top: 16px;
             right: 16px;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 20px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 14px;
             cursor: pointer;
             z-index: 10;
         }
@@ -356,22 +490,7 @@
             display: block;
         }
 
-        /* ===== SIDEBAR NAV SCROLL ===== */
-        .sidebar nav {
-            padding: 16px 0;
-            max-height: calc(100vh - 72px);
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
 
-        .sidebar nav::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .sidebar nav::-webkit-scrollbar-thumb {
-            background: rgba(232, 93, 36, 0.4);
-            border-radius: 2px;
-        }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
@@ -478,9 +597,12 @@
         <button class="sidebar-close-btn" id="sidebarCloseBtn"><i class="fas fa-times"></i></button>
         <div class="sidebar-brand">
             <a href="/" class="brand-inner">
+                <div class="sidebar-brand-icon">
+                    <i class="fas fa-pizza-slice"></i>
+                </div>
                 <span class="sidebar-brand-text">Pizza Happy Family</span>
             </a>
-            <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar">
+            <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="បង្រួម / ពង្រីក">
                 <i class="fas fa-chevron-left" id="collapseIcon"></i>
             </button>
         </div>
@@ -495,95 +617,121 @@
 
             $isAdminOrManager = $isAdmin || $isManager;
             $isOfficeStaff = $isStaff && !$isInventory;
+
+            // Live workflow counters for Option 4 Pizza Theme Badges
+            $todayActiveOrdersCount = \App\Models\Order::whereDate('order_date', \Carbon\Carbon::today())
+                ->whereIn('status', ['pending', 'processing'])
+                ->count();
+
+            $todayPackingCount = \App\Models\Invoice::whereNotNull('packing_sent_at')
+                ->whereNull('packing_completed_at')
+                ->whereDate('packing_sent_at', \Carbon\Carbon::today())
+                ->count();
+
+            $todayDeliveringCount = \App\Models\Order::whereDate('order_date', \Carbon\Carbon::today())
+                ->where('status', 'delivering')
+                ->count();
         @endphp
 
         <nav>
 
-            {{-- Dashboard (everyone except inventory staff) --}}
+            {{-- 1. Dashboard (ទំព័រដើម) --}}
             @if(!$isInventory)
-                <a href="/" class="nav-link {{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
+                <div class="nav-label">ទូទៅ</div>
+                <a href="/" class="nav-link {{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}" data-tooltip="ទំព័រដើម">
                     <i class="fas fa-tachometer-alt"></i><span>ទំព័រដើម</span>
                 </a>
             @endif
 
-            {{-- Customers & Orders (admin, manager, staff office) --}}
+            {{-- 2. Sales & Orders (ផ្នែកលក់ & កុម្ម៉ង់) --}}
             @if(!$isInventory && !$isAuditor)
-
-                <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}">
-                    <i class="fas fa-shopping-cart"></i><span>ចេញវិក្ក័យបត្រ</span>
+                <div class="nav-label">ផ្នែកលក់ & កុម្ម៉ង់</div>
+                <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}" data-tooltip="ចេញវិក្កយបត្រ">
+                    <i class="fas fa-shopping-cart"></i><span>ចេញវិក្កយបត្រ</span>
+                    @if($todayActiveOrdersCount > 0)
+                        <span class="nav-badge badge-amber" title="{{ $todayActiveOrdersCount }} កំពុងដំណើរការ">{{ $todayActiveOrdersCount }}</span>
+                    @endif
                 </a>
-                <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
+                <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}" data-tooltip="អតិថិជន">
                     <i class="fas fa-users"></i><span>អតិថិជន</span>
                 </a>
-                <a href="{{ route('customer-locations.index') }}" class="nav-link {{ request()->is('customer-locations*') ? 'active' : '' }}">
+                <a href="{{ route('customer-locations.index') }}" class="nav-link {{ request()->is('customer-locations*') ? 'active' : '' }}" data-tooltip="ទីតាំងអតិថិជន">
                     <i class="fas fa-map-marker-alt"></i><span>ទីតាំងអតិថិជននៅលើផែនទី</span>
                 </a>
-                <a href="/salespersons" class="nav-link {{ request()->is('salespersons*') ? 'active' : '' }}">
+                <a href="/salespersons" class="nav-link {{ request()->is('salespersons*') ? 'active' : '' }}" data-tooltip="ភ្នាក់ងារលក់">
                     <i class="fas fa-user-tie"></i><span>ភ្នាក់ងារលក់</span>
                 </a>
             @endif
-            {{-- Invoices (admin, manager, staff office, auditor) --}}
-            @if($isAdminOrManager || $isOfficeStaff || $isAuditor)
-                <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}">
-                    <i class="fas fa-receipt"></i><span>វិក័្កយបត្រ</span>
 
-                </a>
-
+            {{-- 3. Preparation & Delivery (ផ្នែករៀបចំ & ដឹកជញ្ជូន) --}}
+            @if($isAdmin || $isManager || $isStaff || $isInventory || $isOfficeStaff)
+                <div class="nav-label">រៀបចំ & ដឹកជញ្ជូន</div>
             @endif
-
-            {{-- Payments (admin, manager, auditor) --}}
-            @if($isAdminOrManager || $isAuditor)
-                <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}">
-                    <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
-                </a>
-            @endif
-            {{-- Purchasing / Reports (admin, manager, auditor) --}}
-            @if($isAdminOrManager || $isAuditor)
-                <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}">
-                    <i class="fas fa-file-invoice"></i><span>ការចំណាយ</span>
-                </a>
-                <a href="{{ route('reports.dashboard') }}" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}">
-                    <i class="fas fa-chart-line"></i><span>របាយការណ៍</span>
-                </a>
-            @endif
-
-            {{-- Products (admin, manager, staff office) --}}
-            @if($isAdminOrManager || $isOfficeStaff)
-                <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}">
-                    <i class="fas fa-pizza-slice"></i><span>ទំនិញ</span>
-                </a>
-            @endif
-
-            {{-- Inventory (everyone except none) --}}
-            @if($isAdmin || $isManager || $isStaff || $isInventory || $isAuditor)
-                <a href="{{ route('inventory.index', ['period' => 'today']) }}"
-                    class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}">
-                    <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
-                </a>
-            @endif
-
-
-            {{-- Packing labels (admin + staff inventory + staff office + manager) --}}
             @if($isAdmin || $isManager || $isStaff || $isInventory)
-                <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') ? 'active' : '' }}">
+                <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') ? 'active' : '' }}" data-tooltip="រៀបចំទំនិញ">
                     <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
+                    @if($todayPackingCount > 0)
+                        <span class="nav-badge badge-blue" title="{{ $todayPackingCount }} កំពុងរៀបចំ">{{ $todayPackingCount }}</span>
+                    @endif
                 </a>
-
             @endif
 
-            {{-- Deliveries (admin, manager, staff office) --}}
             @if($isAdminOrManager || $isOfficeStaff)
-                <a href="/deliveries" class="nav-link {{ (request()->is('deliveries') || request()->is('deliveries/*')) && !request()->is('deliveries/map*') ? 'active' : '' }}">
-                    <i class="fas fa-truck"></i><span>ការដឹកជញ្ចូន</span>
+                <a href="/deliveries" class="nav-link {{ (request()->is('deliveries') || request()->is('deliveries/*')) && !request()->is('deliveries/map*') ? 'active' : '' }}" data-tooltip="ការដឹកជញ្ជូន">
+                    <i class="fas fa-truck"></i><span>ការដឹកជញ្ជូន</span>
+                    @if($todayDeliveringCount > 0)
+                        <span class="nav-badge badge-emerald" title="{{ $todayDeliveringCount }} កំពុងដឹកជញ្ជូន">{{ $todayDeliveringCount }}</span>
+                    @endif
                 </a>
-                <a href="{{ route('deliveries.map') }}" class="nav-link {{ request()->is('deliveries/map*') ? 'active' : '' }}">
+                <a href="{{ route('deliveries.map') }}" class="nav-link {{ request()->is('deliveries/map*') ? 'active' : '' }}" data-tooltip="ផែនទីដឹកជញ្ជូន">
                     <i class="fas fa-map-marked-alt"></i><span>ផែនទីដឹកជញ្ជូន</span>
                 </a>
             @endif
 
-            {{-- Users (admin & manager only) --}}
+            {{-- 4. Invoicing & Finance (ផ្នែកគិតលុយ & ហិរញ្ញវត្ថុ) --}}
+            @if($isAdminOrManager || $isOfficeStaff || $isAuditor)
+                <div class="nav-label">គណនេយ្យ & ហិរញ្ញវត្ថុ</div>
+                <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}" data-tooltip="វិក្កយបត្រ">
+                    <i class="fas fa-receipt"></i><span>វិក្កយបត្រ</span>
+                </a>
+            @endif
+
+            @if($isAdminOrManager || $isAuditor)
+                <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}" data-tooltip="ការទូទាត់">
+                    <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
+                </a>
+                <a href="/purchasing" class="nav-link {{ request()->is('purchasing*') ? 'active' : '' }}" data-tooltip="ការចំណាយ">
+                    <i class="fas fa-file-invoice-dollar"></i><span>ការចំណាយ</span>
+                </a>
+            @endif
+
+            {{-- 5. Products & Inventory (ផ្នែកទំនិញ & ស្តុក) --}}
+            @if($isAdminOrManager || $isOfficeStaff || $isAdmin || $isManager || $isStaff || $isInventory || $isAuditor)
+                <div class="nav-label">មុខម្ហូប & ស្តុក</div>
+            @endif
+            @if($isAdminOrManager || $isOfficeStaff)
+                <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}" data-tooltip="ទំនិញ">
+                    <i class="fas fa-pizza-slice"></i><span>ទំនិញ</span>
+                </a>
+            @endif
+
+            @if($isAdmin || $isManager || $isStaff || $isInventory || $isAuditor)
+                <a href="{{ route('inventory.index', ['period' => 'today']) }}"
+                    class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}" data-tooltip="ស្តុកទំនិញ">
+                    <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
+                </a>
+            @endif
+
+            {{-- 6. Reports & System (ផ្នែករបាយការណ៍ & គ្រប់គ្រង) --}}
+            @if($isAdminOrManager || $isAuditor)
+                <div class="nav-label">របាយការណ៍ & ប្រព័ន្ធ</div>
+                <a href="{{ route('reports.dashboard') }}" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}" data-tooltip="របាយការណ៍">
+                    <i class="fas fa-chart-line"></i><span>របាយការណ៍</span>
+                </a>
+            @endif
+
             @if($isAdminOrManager)
-                <a href="/users" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
+                <a href="/users" class="nav-link {{ request()->is('users*') ? 'active' : '' }}" data-tooltip="បុគ្គលិក">
                     <i class="fas fa-users-cog"></i><span>បុគ្គលិក</span>
                 </a>
             @endif
