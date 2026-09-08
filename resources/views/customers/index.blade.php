@@ -63,9 +63,9 @@
             justify-content: center;
             gap: 6px;
             font-weight: 700;
-            font-size: 13px;
-            height: 38px;
-            padding: 0 14px;
+            font-size: 13.5px;
+            height: 40px;
+            padding: 0 16px;
             border-radius: 8px;
             text-decoration: none;
             border: 1px solid transparent;
@@ -136,13 +136,13 @@
         }
 
         .stat-icon {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 17px;
+            font-size: 18px;
             flex-shrink: 0;
         }
 
@@ -163,7 +163,7 @@
 
         .stat-label {
             color: var(--muted);
-            font-size: 11.5px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.3px;
@@ -171,7 +171,7 @@
 
         .stat-value {
             color: var(--text);
-            font-size: 22px;
+            font-size: 26px;
             font-weight: 800;
             line-height: 1.1;
             margin-top: 3px;
@@ -204,14 +204,14 @@
             position: absolute;
             left: 12px;
             color: var(--muted);
-            font-size: 13px;
+            font-size: 14px;
             pointer-events: none;
         }
 
         .customer-search .form-control {
-            padding-left: 36px;
-            height: 38px;
-            font-size: 13px;
+            padding-left: 38px;
+            height: 42px;
+            font-size: 14px;
             border-radius: 8px;
             border-color: var(--border);
         }
@@ -222,12 +222,12 @@
         }
 
         .filter-card .form-select {
-            height: 38px;
-            font-size: 13px;
+            height: 42px;
+            font-size: 14px;
             border-radius: 8px;
             border-color: var(--border);
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .filter-card .form-select:focus {
@@ -239,14 +239,15 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 38px;
-            width: 38px;
+            height: 42px;
+            width: 42px;
             border-radius: 8px;
             background: var(--surface);
             border: 1px solid var(--border);
             color: var(--muted);
             text-decoration: none;
             transition: all 0.15s ease;
+            font-size: 15px;
         }
 
         .btn-reset:hover {
@@ -267,26 +268,26 @@
         .customer-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .customer-table th {
-            background: #fafbfc;
+            background: #f8fafc;
             border-bottom: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 11.5px;
+            color: #334155;
+            font-size: 13.5px;
             font-weight: 700;
-            padding: 11px 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+            padding: 13px 14px;
+            letter-spacing: 0.2px;
             white-space: nowrap;
         }
 
         .customer-table td {
             border-bottom: 1px solid var(--border-subtle);
             color: var(--text);
-            padding: 10px 14px;
+            padding: 12px 14px;
             vertical-align: middle;
+            font-size: 14px;
         }
 
         .customer-table tbody tr {
@@ -305,12 +306,11 @@
         .channel-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            white-space: nowrap;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 15px;
         }
 
         .channel-fb {
@@ -326,10 +326,10 @@
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12.5px;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -348,11 +348,12 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 24px;
+            min-width: 28px;
+            height: 26px;
             padding: 2px 8px;
             background: #eff6ff;
             color: #1d4ed8;
-            font-size: 11.5px;
+            font-size: 13px;
             font-weight: 700;
             border-radius: 6px;
         }
@@ -362,9 +363,10 @@
             background: #f8fafc;
             color: var(--text-secondary);
             border: 1px solid var(--border);
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 6px;
-            font-size: 11.5px;
+            font-size: 13px;
+            font-weight: 600;
             white-space: nowrap;
         }
 
@@ -380,8 +382,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 6px;
             border: 0;
             background: transparent;
@@ -389,7 +391,7 @@
             text-decoration: none;
             transition: all 0.12s ease;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .btn-row-action:hover {
@@ -470,14 +472,14 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 36px;
-            height: 36px;
-            padding: 0 11px;
+            min-width: 38px;
+            height: 38px;
+            padding: 0 12px;
             border-radius: 8px;
             border: 1px solid var(--border);
             background: #ffffff;
             color: #475569;
-            font-size: 13px;
+            font-size: 13.5px;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.15s ease;
@@ -553,7 +555,7 @@
         <div class="customer-header">
             <div class="customer-title-group">
                 <h2 class="customer-title">អតិថិជន</h2>
-                <span class="customer-count-badge">{{ number_format($stats['total']) }}</span>
+     
             </div>
             <div class="header-actions">
                 <a href="{{ route('customer-locations.index') }}" class="customer-btn customer-btn-map" title="ផែនទី Google Maps">
@@ -648,7 +650,7 @@
                 <table class="customer-table mb-0">
                     <thead>
                         <tr>
-                            <th style="width: 75px;">ប្រភព</th>
+                            <th class="text-center" style="width: 60px;">ប្រភព</th>
                             <th>ឈ្មោះអតិថិជន</th>
                             <th>លេខទូរស័ព្ទ</th>
                             <th>អ្នកលក់</th>
@@ -663,41 +665,41 @@
                     <tbody>
                         @forelse($customers as $customer)
                             <tr>
-                                <td>
+                                <td class="text-center">
                                     @if($customer->type == 'facebook')
-                                        <span class="channel-badge channel-fb"><i class="fab fa-facebook-f"></i> FB</span>
+                                        <span class="channel-badge channel-fb" title="Facebook"><i class="fab fa-facebook-f"></i></span>
                                     @elseif($customer->type == 'telegram')
-                                        <span class="channel-badge channel-tg"><i class="fab fa-telegram-plane"></i> TG</span>
+                                        <span class="channel-badge channel-tg" title="Telegram"><i class="fab fa-telegram-plane"></i></span>
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('customers.show', $customer) }}" class="fw-bold text-dark text-decoration-none">
+                                    <a href="{{ route('customers.show', $customer) }}" class="fw-bold text-dark text-decoration-none" style="font-size: 15px;">
                                         {{ $customer->name }}
                                     </a>
                                     @if($customer->notes)
-                                        <div class="text-muted small text-truncate" style="max-width: 200px;" title="{{ $customer->notes }}">{{ $customer->notes }}</div>
+                                        <div class="text-muted text-truncate" style="font-size: 12px; max-width: 220px;" title="{{ $customer->notes }}">{{ $customer->notes }}</div>
                                     @endif
                                 </td>
                                 <td>
                                     @if($customer->phone)
-                                        <a href="tel:{{ $customer->phone }}" class="text-dark font-monospace text-decoration-none small">
+                                        <a href="tel:{{ $customer->phone }}" class="text-dark font-monospace text-decoration-none" style="font-size: 14px; font-weight: 600;">
                                             {{ $customer->phone }}
                                         </a>
                                     @else
-                                        <span class="text-muted small">—</span>
+                                        <span class="text-muted">—</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if($customer->salesperson)
                                         <span class="salesperson-tag">{{ $customer->salesperson->name }}</span>
                                     @else
-                                        <span class="text-muted small">—</span>
+                                        <span class="text-muted">—</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="text-secondary small text-truncate d-inline-block" style="max-width: 130px;" title="{{ $customer->city ?? $customer->address }}">
+                                    <span class="text-secondary text-truncate d-inline-block" style="font-size: 13.5px; max-width: 150px;" title="{{ $customer->city ?? $customer->address }}">
                                         {{ $customer->city ?? $customer->address ?? '—' }}
                                     </span>
                                 </td>
@@ -705,14 +707,16 @@
                                     @if($customer->orders_count > 0)
                                         <span class="order-count-badge">{{ $customer->orders_count }}</span>
                                     @else
-                                        <span class="text-muted small">0</span>
+                                        <span class="text-muted">0</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <strong class="text-dark">${{ number_format($customer->total_spent ?? 0, 2) }}</strong>
+                                    <strong class="text-dark" style="font-size: 15px;">${{ number_format($customer->total_spent ?? 0, 2) }}</strong>
                                 </td>
-                                <td class="text-muted small">
-                                    {{ $customer->last_order_at ? \Carbon\Carbon::parse($customer->last_order_at)->format('d/m/Y') : '—' }}
+                                <td>
+                                    <span class="text-secondary" style="font-size: 13.5px; font-weight: 500;">
+                                        {{ $customer->last_order_at ? \Carbon\Carbon::parse($customer->last_order_at)->format('d/m/Y') : '—' }}
+                                    </span>
                                 </td>
                                 <td>
                                     @if($customer->status == 'active')
@@ -720,7 +724,7 @@
                                     @elseif($customer->status == 'inactive')
                                         <span class="status-badge inactive"><i class="fas fa-circle" style="font-size: 6px;"></i> អសកម្ម</span>
                                     @else
-                                        <span class="text-muted small">{{ $customer->status ?? '—' }}</span>
+                                        <span class="text-muted">{{ $customer->status ?? '—' }}</span>
                                     @endif
                                 </td>
                                 <td>
