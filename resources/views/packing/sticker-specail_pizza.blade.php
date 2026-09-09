@@ -22,7 +22,7 @@
         }
 
         body {
-            font-family: 'Noto Sans Khmer', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
             background: #eef0f3;
             padding: 20px;
@@ -45,7 +45,13 @@
             align-items: flex-start;
             margin-bottom: 16px;
             padding-bottom: 12px;
-            border-bottom: 2px solid #3424e8;
+            border-bottom: 2px solid #8f1620;
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .logo {
@@ -55,10 +61,17 @@
             letter-spacing: 0.3px;
             margin-top: 8px;
             line-height: 1.3;
-            color: #3516e8;
-            /* text-shadow: 0 1px 0 rgba(0, 0, 0, 0.08); */
-             text-shadow: 2px 3px 3px rgba(178, 178, 178, 0.35);
+            color: #8f1620;
+            text-shadow: 2px 3px 3px rgba(178, 178, 178, 0.35);
         }
+/* 
+        .logo-sub {
+            font-size: 13px;
+            font-weight: 700;
+            color: #999;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        } */
 
         .invoice-details {
             text-align: right;
@@ -102,7 +115,7 @@
         .customer-info p,
         .invoice-info p {
             margin: 2px 0;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .customer-line {
@@ -169,7 +182,7 @@
         
         .khr-subbold {
             display: block;
-            color: #e85d24;
+            color: #8f1620;
             font-size: 18px;
             font-weight: 400;
             margin-top: 1px;
@@ -209,7 +222,7 @@
         }
 
         .grand-total .amount {
-            color: #e85d24;
+            color: #8f1620;
             font-size: 18px;
             text-align: right;
         }
@@ -223,7 +236,7 @@
 
         .free-product-item {
             margin: 2px 0;
-            color: #e85d24;
+            color: #8f1620;
             text-align: left;
         }
 
@@ -239,7 +252,7 @@
             padding: 10px;
             background: #f8f9fa;
             border-radius: 6px;
-             color: #e85d24;
+             color: #8f1620;
             font-size: 14px;
             text-align: left;
             display: flex;
@@ -281,7 +294,7 @@
         }
 
         .footer-brand {
-            color: #e85d24;
+            color: #8f1620;
             font-weight: 700;
             font-size: 15px;
             margin-bottom: 2px;
@@ -313,7 +326,7 @@
             border-radius: 10px;
             text-decoration: none;
 
-            background: linear-gradient(135deg, #5b3ff5, #3516e8);
+            background: linear-gradient(135deg, #a52a2a, #8f1620);
             color: #fff;
 
             font-size: 15px;
@@ -324,21 +337,21 @@
             transition: all .25s ease;
 
             box-shadow:
-                0 6px 16px rgba(53, 22, 232, .35),
+                0 6px 16px rgba(232, 93, 36, .35),
                 inset 0 1px 0 rgba(255, 255, 255, .25);
         }
 
         .btn-print:hover {
             transform: translateY(-2px);
-            background: linear-gradient(135deg, #6f56ff, #2a1cc4);
+            background: linear-gradient(135deg, #ff8c5c, #f2691f);
             box-shadow:
-                0 10px 24px rgba(53, 22, 232, .45),
+                0 10px 24px rgba(232, 93, 36, .45),
                 inset 0 1px 0 rgba(255, 255, 255, .3);
         }
 
         .btn-print:active {
             transform: translateY(0);
-            box-shadow: 0 4px 10px rgba(53, 22, 232, .35);
+            box-shadow: 0 4px 10px rgba(232, 93, 36, .35);
         }
 
         .btn-print .icon {
@@ -359,8 +372,8 @@
             border-radius: 10px;
 
             background: #ffffff;
-            color: #3516e8;
-            border: 2px solid #3516e8;
+            color: #8f1620;
+            border: 2px solid #8f1620;
 
             font-size: 15px;
             font-weight: 600;
@@ -371,7 +384,7 @@
         }
 
         .btn-save:hover {
-            background: #eef0ff;
+            background: #fff4ee;
             transform: translateY(-2px);
         }
 
@@ -406,23 +419,44 @@
         .btn-back {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
 
-            background: #f0f2f5;
-            color: #1a1d29;
-            border: 1px solid #e5e7eb;
-            padding: 10px 20px;
+            padding: 12px 24px;
+            min-width: 150px;
             height: 48px;
+
+            background: #ffffff;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
             border-radius: 10px;
-            cursor: pointer;
-            font-weight: 500;
+
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: .3px;
             text-decoration: none;
+
+            cursor: pointer;
             transition: all .2s ease;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .06);
         }
 
         .btn-back:hover {
-            background: #e5e7eb;
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            color: #111827;
             transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, .12);
+        }
+
+        .btn-back:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .08);
+        }
+
+        .btn-back .icon {
+            font-size: 16px;
+            display: inline-block;
         }
 
         .action-bar {
@@ -482,14 +516,14 @@
         }
 
         .brand-chip:hover {
-            border-color: #3516e8;
-            color: #3516e8;
+            border-color: #8f1620;
+            color: #8f1620;
             transform: translateY(-1px);
         }
 
         .brand-chip.active {
-            background: #3516e8;
-            border-color: #3516e8;
+            background: #8f1620;
+            border-color: #8f1620;
             color: #fff;
             cursor: default;
             pointer-events: none;
@@ -529,7 +563,11 @@
             }
 
             .logo {
-                font-size: 22px;
+                font-size: 21px;
+            }
+
+            .logo-sub {
+                font-size: 11px;
             }
 
             .invoice-number {
@@ -619,16 +657,17 @@
         }
     </style>
 </head>
-
 <body>
     <div class="sticker" id="invoice-content">
 
         <div class="header">
-            <div>
-                <div class="logo">ម៉ាយូនេស បន្ទាយឆ្មារ</div>
+            <div class="logo-wrap">
+                <div>
+                    <div class="logo">Specail Pizza</div>
+                    <!-- <div class="logo-sub">Pizza Happy Family</div> -->
+                </div>
             </div>
             <div class="invoice-details">
-
                 <div class="invoice-number">{{ $invoice->invoice_number }}</div>
                 <p>កាលបរិច្ឆេទ: {{ $invoice->invoice_date->translatedFormat('M d, Y') }}</p>
             </div>
@@ -698,17 +737,29 @@
                 @else
                     <p class="customer-name">N/A</p>
                 @endif
-
+                <!-- <p>
+                    <strong>ការបង់ប្រាក់:</strong>
+                    @if($invoice->order?->payment_status === 'paid')
+                        បានទូទាត់
+                    @elseif($invoice->order?->payment_status === 'partial')
+                        បង់មួយផ្នែក
+                    @else
+                        មិនទាន់ទូទាត់
+                    @endif
+                </p> -->
 
             </div>
         </div>
-
         @php
             $orderItems = $invoice->order?->items ?? collect();
             $paidItems = $orderItems->filter(function ($item) {
                 return (float) $item->unit_price > 0;
             });
 
+            // Canonical totals — see Order::grossSubtotalKhr()/itemDiscountKhr()/
+            // totalKhr(), so this always matches the order/invoice pages instead
+            // of re-deriving its own formula. Free items contribute 0 either way,
+            // so summing over all items here gives the same result as $paidItems.
             $subtotalKhr = ($invoice->order?->grossSubtotalKhr() ?? 0) - ($invoice->order?->itemDiscountKhr() ?? 0);
             $grandTotalKhr = $invoice->order?->totalKhr() ?? 0;
         @endphp
@@ -842,9 +893,8 @@
             <span class="icon" id="copyIcon">📋</span>
             <span id="copyText">Copy Invoice</span>
         </button>
-
         @unless(auth()->user()->isStaffInventory())
-        <a href="{{ route('invoices.index', $invoice) }}" class="btn-back">
+        <a href="{{ $backUrl ?? route('invoices.index') }}" class="btn-back">
             <span class="icon">←</span> ទំព័រវិក្ក័យបត្រ
         </a>
         @endunless

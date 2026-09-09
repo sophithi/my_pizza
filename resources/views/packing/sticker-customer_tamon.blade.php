@@ -825,6 +825,8 @@
         <span class="brand-switch-label">ជ្រើសរើស:</span>
         <a href="{{ route('packing.customer', $invoice) }}" target="_blank"
             class="brand-chip @if($currentRoute === 'packing.customer') active @endif">ភីហ្សា គ្រួសាររីករាយ</a>
+        <a href="{{ route('packing.customer_special', $invoice) }}" target="_blank"
+            class="brand-chip @if($currentRoute === 'packing.customer_special') active @endif">Special Pizza</a>
         <a href="{{ route('packing.customer_mayo', $invoice) }}" target="_blank"
             class="brand-chip @if($currentRoute === 'packing.customer_mayo') active @endif">ម៉ាយូនេស បន្ទាយឆ្មារ</a>
         <a href="{{ route('packing.customer_tamon', $invoice) }}" target="_blank"

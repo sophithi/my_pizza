@@ -206,10 +206,12 @@ Route::middleware('auth')->group(function () {
         Route::post('packing/{invoice}/complete', [InvoiceController::class, 'markPackingCompleted'])->name('packing.complete');
         Route::get('packing/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('packing.prep');
         Route::get('packing/{invoice}/ready', [InvoiceController::class, 'stickerReady'])->name('packing.delivery_pizza');
+        Route::get('packing/{invoice}/special', [InvoiceController::class, 'stickerSpecial'])->name('packing.delivery_special');
         Route::get('packing/{invoice}/mayo', [InvoiceController::class, 'stickerMayo'])->name('packing.delivery_mayo');
         Route::get('packing/{invoice}/tamon', [InvoiceController::class, 'stickerTamon'])->name('packing.delivery_tamon');
 
         Route::get('packing/{invoice}/customer', [InvoiceController::class, 'stickerCustomer'])->name('packing.customer');
+        Route::get('packing/{invoice}/customer-special', [InvoiceController::class, 'stickerCustomerSpecial'])->name('packing.customer_special');
         Route::get('packing/{invoice}/customer-mayo', [InvoiceController::class, 'stickerCustomerMayo'])->name('packing.customer_mayo');
         Route::get('packing/{invoice}/customer-tamon', [InvoiceController::class, 'stickerCustomerTamon'])->name('packing.customer_tamon');
   

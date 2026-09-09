@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Sticker - {{ $invoice->invoice_number }}</title>
+    <title>Sticker - {{ $invoice->invoice_number }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -12,9 +12,9 @@
         rel="stylesheet">
     <style>
         :root {
-            --red: #c0272d;
-            --red-dark: #8f1620;
-            --red-soft: #f0c3c3;
+            --red: #8f1620;
+            --red-dark: #671019;
+            --red-soft: #d9a3a8;
         }
 
         body {
@@ -59,28 +59,32 @@
 
         .brand-name {
             font-family: 'Moul', 'Noto Sans Khmer', 'Segoe UI', sans-serif;
-            font-size: 40px;
+            font-size: 35px;
             font-weight: normal;
             letter-spacing: 0.8px;
             line-height: 1.4;
-            margin-top: 6px;
-            color: #0627e8;
-            -webkit-text-stroke: 10px #ffffff;
+            margin-top: 8px;
+            color: #fff5f5;
+            -webkit-text-stroke: 6px #d10303;
             paint-order: stroke fill;
             text-shadow: 0 3px 4px rgba(0, 0, 0, .35);
         }
-
+/* 
         .brand-sub-title {
-            font-size: 10pt;
-            color: #222;
+            font-size: 12pt;
+            font-weight: 700;
+            color: var(--red);
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
             margin-top: 3px;
-        }
+        } */
 
         /* ── WARNING TITLE BANNER ── */
         .warning-band {
-            background: transparent;
+            background: white;
             padding: 10px 24px;
-            display: flex;
+           
+            display: flex;  
             align-items: center;
             justify-content: center;
             gap: 10px;
@@ -91,9 +95,9 @@
 
         .warning-text {
             font-family: 'Hanuman', 'Noto Sans Khmer', sans-serif;
-            font-size: 28pt;
+            font-size: 24pt;
             font-weight: 900;
-            color: black;
+            color: #0a0a0a;
             letter-spacing: 0.3px;
             text-align: center;
         }
@@ -145,23 +149,11 @@
             word-break: break-word;
         }
 
-        .row-taxi .row-value {
-            background: #ffffff;
-            color: #0627e8;
-            padding: 2px 12px;
-            border-radius: 6px;
-            display: inline-block;
-        }
-         .row-phone .row-value {
-            background: #fff;
-            color: #0627e8;
-            padding: 2px 12px;
-            border-radius: 6px;
-            display: inline-block;
-        }
+        .row-taxi .row-value,
+        .row-phone .row-value,
         .row-addr .row-value {
             background: #fff;
-            color: #0627e8;
+            color: var(--red);
             padding: 2px 12px;
             border-radius: 6px;
             display: inline-block;
@@ -191,7 +183,7 @@
         .footer-thanks {
             font-family: 'Pacifico', cursive;
             font-size: 18pt;
-            color: black;
+            color: var(--red);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -271,7 +263,7 @@
         }
 
         .brand-switch-label {
-            color: #6b7280;
+            color: #757b86;
             font-weight: 600;
             font-size: 13px;
             margin-right: 2px;
@@ -360,13 +352,16 @@
         {{-- Header --}}
         <div class="header">
             <div class="brand-container">
-                <div class="brand-name">ម៉ាយូនេស បន្ទាយឆ្មារ</div>
+                <div class="brand-name">Special Pizza</div>
+               
             </div>
         </div>
 
         {{-- Warning banner --}}
         <div class="warning-band">
-            <span class="warning-text">បញ្ជាក់៖ កំុដាក់របស់ធ្ងន់ពីលើប្រយ័ត្នខូច</span>
+          
+            <span class="warning-text">សូមដាក់កេសបញ្ឈរ កំុដាក់របស់ធ្ងន់ពីលើប្រយ័ត្នបែក</span>
+     
         </div>
 
         {{-- Body rows --}}
@@ -390,7 +385,7 @@
             <div class="info-row row-phone">
                 <div class="row-label">លេខអ្នកទទួល</div>
                 <div class="row-divider"></div>
-                <div class="row-value">{{ $invoice->order->customer->phone ?? 'N/A' }}</div>
+                <div class="row-value">{{ $invoice->order->customer->phone ?? '#' }}</div>
             </div>
 
             {{-- Sender taxi phone --}}
@@ -417,14 +412,6 @@
         <div class="footer">
             <div class="footer-contact">
                 ទំនាក់ទំនងបោះដុំ៖ <strong>012 312 477</strong>
-            </div>
-            <div class="footer-thanks">
-                Thank You!
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path
-                        d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.8z" />
-                </svg>
             </div>
         </div>
 
@@ -459,16 +446,11 @@
                 stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6" />
             </svg>
-            Back
+            ត្រឡប់
         </a>
     </div>
 
     <script>
-        // When opened inside the packing/index sticker popup (an iframe),
-        // brand-switch chips and the back link shouldn't navigate the iframe
-        // itself — that would either open a stray new tab or load the full
-        // app layout squeezed into the small frame. Talk to the parent
-        // instead. Standalone/new-tab views are unaffected.
         if (window.self !== window.top) {
             document.querySelectorAll('.brand-chip').forEach(function (link) {
                 link.addEventListener('click', function (e) {

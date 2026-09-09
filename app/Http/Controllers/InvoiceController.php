@@ -726,6 +726,16 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Show the Special Pizza delivery sticker.
+     */
+    public function stickerSpecial(Invoice $invoice)
+    {
+        $invoice->load('order.customer', 'order.items.product', 'order.items.delivery');
+        $backUrl = route('packing.index');
+        return view('packing.delivery_pizza_specail', compact('invoice', 'backUrl'));
+    }
+
+    /**
      * Show the delivery sticker for mayonnaise-only orders.
      */
     public function stickerMayo(Invoice $invoice)
@@ -756,6 +766,19 @@ class InvoiceController extends Controller
             : route('invoices.show', $invoice);
 
         return view('packing.sticker-customer', compact('invoice', 'backUrl'));
+    }
+
+    /**
+     * Show the customer label branded for Special Pizza.
+     */
+    public function stickerCustomerSpecial(Invoice $invoice)
+    {
+        $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
+        $backUrl = auth()->user()?->isStaffInventory()
+            ? route('packing.index')
+            : route('invoices.show', $invoice);
+
+        return view('packing.sticker-specail_pizza', compact('invoice', 'backUrl'));
     }
 
     /**

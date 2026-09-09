@@ -619,7 +619,7 @@
 
             {{-- 5. Products & Inventory (ផ្នែកទំនិញ & ស្តុក) --}}
             @if($isAdminOrManager || $isOfficeStaff || $isAdmin || $isManager || $isStaff || $isInventory || $isAuditor)
-                <div class="nav-label">មុខម្ហូប & ស្តុក</div>
+                <div class="nav-label">ទំនិញ & ស្តុក</div>
             @endif
             @if($isAdminOrManager || $isOfficeStaff)
                 <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}" data-tooltip="ទំនិញ">

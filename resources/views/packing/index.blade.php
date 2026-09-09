@@ -535,6 +535,11 @@
                                                                 </a>
                                                             </li>
                                                             <li>
+                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.delivery_special', $invoice) }}" data-title="បិតលើកេស — {{ $invoice->invoice_number }} — Special Pizza">
+                                                                    Special Pizza
+                                                                </a>
+                                                            </li>
+                                                            <li>
                                                                 <a class="dropdown-item sticker-modal-link" href="{{ route('packing.delivery_mayo', $invoice) }}" data-title="បិតលើកេស — {{ $invoice->invoice_number }} — ម៉ាយូនេស បន្ទាយឆ្មា">
                                                                     ម៉ាយូនេស បន្ទាយឆ្មា
                                                                 </a>
@@ -558,6 +563,11 @@
                                                             <li>
                                                                 <a class="dropdown-item sticker-modal-link" href="{{ route('packing.customer', $invoice) }}" data-title="វិក្ក័យបត្រភ្ញៀវ — {{ $invoice->invoice_number }} — ភីហ្សា គ្រួសាររីករាយ">
                                                                     ភីហ្សា គ្រួសាររីករាយ
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.customer_special', $invoice) }}" data-title="វិក្ក័យបត្រភ្ញៀវ — {{ $invoice->invoice_number }} — Special Pizza">
+                                                                    Special Pizza
                                                                 </a>
                                                             </li>
                                                             <li>
