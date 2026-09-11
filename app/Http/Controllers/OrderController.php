@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Delivery;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -137,7 +138,7 @@ class OrderController extends Controller
             $invoiceNumber = $invoice->invoice_number;
 
             // Create payment record if order is marked as paid
-            if ($validated['payment_status'] === 'paid') {
+            if (($validated['payment_status'] ?? 'unpaid') === 'paid') {
                 $methodStr = $validated['payment_method'] ?? 'Cash';
                 $methods = array_values(array_filter(array_map('trim', explode('+', $methodStr ?: 'Cash'))));
                 if (empty($methods)) {

@@ -280,7 +280,7 @@
     }
 
     .invoice-items {
-        max-height: 260px;
+        max-height: 420px;
         overflow-y: auto;
         margin-bottom: 12px;
     }
@@ -482,7 +482,7 @@
 
     .invoice-summary {
         background: #f7f8fa;
-        padding: 14px 16px;
+        padding: 6px 16px;
         border-radius: 10px;
         border: 1px solid var(--border);
     }
@@ -490,15 +490,15 @@
     .summary-row {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 8px;
+        margin-bottom: 2px;
         font-size: 13px;
         color: var(--text);
     }
 
     .summary-row.total {
         border-top: 2px solid var(--border);
-        padding-top: 14px;
-        margin-top: 14px;
+        padding-top: 6px;
+        margin-top: 6px;
         font-weight: 700;
         font-size: 16px;
         color: var(--accent);
@@ -713,7 +713,7 @@
     }
 
     .checkout-section {
-        margin-bottom: 18px;
+        margin-bottom: 10px;
     }
 
     .checkout-section-title {
@@ -808,7 +808,7 @@
         text-transform: uppercase;
         letter-spacing: 0.3px;
         text-align: center;
-        padding: 4px 0;
+        padding: 2px 0;
         border-bottom: 1px solid var(--border);
     }
 
@@ -818,12 +818,28 @@
         border-radius: 0;
         text-align: center;
         font-weight: 700;
-        min-height: 32px;
+        min-height: 28px;
     }
 
     .box-inline input:focus {
         outline: none;
         box-shadow: inset 0 0 0 2px rgba(232, 93, 36, 0.15);
+    }
+
+    .pack-qty-alert {
+        display: none;
+        margin-top: 6px;
+        padding: 6px 10px;
+        border: 1px solid #f5c26b;
+        border-radius: 6px;
+        background: #fff8e1;
+        color: #9a6700;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .pack-qty-alert.show {
+        display: block;
     }
 
     /* Toast Notification */
@@ -877,12 +893,44 @@
     }
     .toast-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(232,93,36,0.3); }
 
+    .confirm-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .confirm-btn {
+        min-width: 100px;
+        padding: 9px 18px;
+        border: 0;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .confirm-btn-yes {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .confirm-btn-yes:hover { background: #d94a10; }
+
+    .confirm-btn-no {
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .confirm-btn-no:hover { background: var(--surface); }
+
     /* Free Products Section */
     .free-product-row {
         display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
-        padding: 12px;
+        gap: 6px;
+        margin-bottom: 6px;
+        padding: 6px;
         background: rgba(232, 93, 36, 0.03);
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -892,12 +940,22 @@
     .free-product-row select,
     .free-product-row input { flex: 1; }
 
+    .free-product-row .form-control {
+        height: 34px;
+        min-height: 34px;
+        padding: 4px 8px;
+    }
+
     .free-product-row input[type="number"] { flex: 0 0 80px; }
+
+    .free-product-row:not(:first-child) .add-free-product-btn {
+        display: none;
+    }
 
     .btn-remove-free {
         background: var(--danger);
         color: white; border: none;
-        padding: 8px 12px; border-radius: 6px;
+        padding: 5px 8px; border-radius: 6px;
         cursor: pointer; font-size: 12px;
         transition: all 0.2s ease; flex: 0 0 auto;
     }
@@ -1426,52 +1484,6 @@
                         <div class="checkout-section">
                             <div class="order-details-grid">
 
-                                <div class="od-field">
-                                    <label class="od-label"><i class="fas fa-money-bill-wave"></i> ការបង់ប្រាក់</label>
-                                    <select id="payment_status" name="payment_status" class="form-control od-select">
-                                        <option value="unpaid"  {{ old('payment_status') == 'unpaid'  ? 'selected' : '' }}>មិនទាន់បង់</option>
-                                        <option value="partial" {{ old('payment_status') == 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
-                                        <option value="paid"    {{ old('payment_status') == 'paid'    ? 'selected' : '' }}>បានបង់</option>
-                                    </select>
-                                </div>
-
-                                <div class="od-field full-span" id="payment_method_field" style="display:none;">
-                                    <label class="od-label"><i class="fas fa-credit-card"></i> វិធីបង់ប្រាក់</label>
-
-                                    <!-- Selected Methods Display -->
-                                    <div id="selected_methods_display" style="margin-bottom: 12px; min-height: 40px;">
-                                        <div id="selected_methods_tags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-                                    </div>
-
-                                    <!-- Hidden inputs for payment methods -->
-                                    <input type="hidden" name="payment_method" id="payment_method" value="{{ old('payment_method', '') }}">
-                                    <input type="hidden" id="payment_methods_array" value="[]">
-
-                                    <!-- Payment Method Selection Grid -->
-                                    <div class="payment-methods-grid payment-multi-select">
-                                        <button type="button" class="payment-method-btn" data-method="Cash" title="លុយក្រៅ">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                            <span>លុយក្រៅ</span>
-                                            <span class="method-check" style="display:none;">✓</span>
-                                        </button>
-                                        <button type="button" class="payment-method-btn" data-method="ABA" title="ធនាគារ ABA">
-                                            <i class="fas fa-university"></i>
-                                            <span>ABA</span>
-                                            <span class="method-check" style="display:none;">✓</span>
-                                        </button>
-                                        <button type="button" class="payment-method-btn" data-method="ACLEDA" title="ធនាគារ ACLEDA">
-                                            <i class="fas fa-university"></i>
-                                            <span>ACLEDA</span>
-                                            <span class="method-check" style="display:none;">✓</span>
-                                        </button>
-                                        <button type="button" class="payment-method-btn" data-method="Wing" title="Wing Money">
-                                            <i class="fas fa-university"></i>
-                                            <span>Wing</span>
-                                            <span class="method-check" style="display:none;">✓</span>
-                                        </button>
-                                    </div>
-                                </div>
-
                                 <div class="od-field full-span">
                                     <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន <span class="req-tag">(ចាំបាច់)</span></label>
                                     <div class="delivery-combo">
@@ -1498,6 +1510,10 @@
                                             value="{{ old('big_pack_qty', 0) }}">
                                         </div>
                                     </div>
+                                    <div id="packQtyAlert" class="pack-qty-alert" role="status">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        តើពិតជាមិនគិតចំនួនកេសមែនទេ?
+                                    </div>
                                 </div>
 
                                 <div class="od-field full-span" id="taxi_phone_field" style="display:none;">
@@ -1509,9 +1525,6 @@
                                 <div class="od-field full-span">
                                     <label class="od-label"><i class="fas fa-gift"></i> Free ជូនអតិថិជន</label>
                                     <div id="freeProductsContainer"></div>
-                                    <button type="button" id="addFreeProductBtn" class="btn btn-sm btn-outline-primary mt-2">
-                                        + Add Free
-                                    </button>
                                 </div>
 
                                 <div class="od-field full-span">
@@ -1769,14 +1782,19 @@
             calculateTotal();
             updateCartData();
             updateTaxiPhoneVisibility();
+            updatePackQtyAlert();
         });
         updateTaxiPhoneVisibility();
+        updatePackQtyAlert();
 
         /* ── product search ── */
         $('#productSearch').on('input', function () { filterProducts(this.value); });
 
         /* ── free products ── */
-        $('#addFreeProductBtn').on('click', function (e) { e.preventDefault(); addFreeProductRow(); });
+        $(document).on('click', '.add-free-product-btn', function (e) {
+            e.preventDefault();
+            addFreeProductRow();
+        });
         addFreeProductRow();
     });
 
@@ -1997,6 +2015,12 @@
         return Math.max(parseInt($('#big_pack_qty').val() || 0, 10) || 0, 0);
     }
 
+    function updatePackQtyAlert() {
+        const hasDelivery = Boolean($('#delivery_select').val());
+        const hasPackQty = getSmallPackQty() > 0 || getBigPackQty() > 0;
+        $('#packQtyAlert').toggleClass('show', hasDelivery && !hasPackQty);
+    }
+
     function getSelectedDeliveryFeeKhr() {
         const selected = $('#delivery_select option:selected');
         const smallPrice = parseFloat(selected.data('price') || 0) || 0;
@@ -2080,7 +2104,7 @@
     }
 
     /* ─── Form validation ───────────────────────────────────── */
-    document.getElementById('orderForm').addEventListener('submit', function (e) {
+    document.getElementById('orderForm').addEventListener('submit', async function (e) {
         if (!document.getElementById('hidden_customer_id').value) {
             e.preventDefault();
             showToast('warning', '⚠️', 'សូមជ្រើសរើសអតិថិជន', 'សូមជ្រើសរើសអតិថិជនមុននឹងបញ្ជាទិញ');
@@ -2091,6 +2115,16 @@
             showToast('warning', '🚚', 'សូមជ្រើសរើសការដឹកជញ្ជូន', 'សូមជ្រើសរើសក្រុមហ៊ុន/អ្នកដឹកជញ្ជូនមុននឹងបញ្ជាទិញ');
             return false;
         }
+        if (!this.dataset.zeroPackConfirmed && getSmallPackQty() === 0 && getBigPackQty() === 0) {
+            e.preventDefault();
+            const confirmed = await showZeroPackConfirmation();
+            if (confirmed) {
+                this.dataset.zeroPackConfirmed = 'true';
+                this.requestSubmit();
+            }
+            return false;
+        }
+        delete this.dataset.zeroPackConfirmed;
         if (Object.keys(cart).length === 0) {
             e.preventDefault();
             showToast('warning', '🛒', 'សូមបន្ថែមទំនិញ', 'សូមជ្រើសរើសទំនិញ');
@@ -2120,6 +2154,41 @@
         setTimeout(() => { $('.toast-overlay, .toast-box').remove(); }, 300);
     }
 
+    function showZeroPackConfirmation() {
+        return new Promise(function (resolve) {
+            $('.toast-overlay, .toast-box').remove();
+
+            const overlay = $('<div class="toast-overlay"></div>');
+            const box = $(`
+                <div class="toast-box">
+                    <div class="toast-icon warning"><i class="fas fa-box-open"></i></div>
+                    <div class="toast-title">បញ្ជាក់ចំនួនកេស</div>
+                    <div class="toast-message">តើពិតជាចង់មិនគិតចំនួនកេសមែនទេ?</div>
+                    <div class="confirm-actions">
+                        <button type="button" class="confirm-btn confirm-btn-no">បោះបង់</button>
+                        <button type="button" class="confirm-btn confirm-btn-yes">យល់ព្រម</button>
+                    </div>
+                </div>`);
+
+            let resolved = false;
+            const finish = function (confirmed) {
+                if (resolved) return;
+                resolved = true;
+                closeToast();
+                resolve(confirmed);
+            };
+
+            box.find('.confirm-btn-yes').on('click', function () { finish(true); });
+            box.find('.confirm-btn-no').on('click', function () { finish(false); });
+            overlay.on('click', function () { finish(false); });
+            $('body').append(overlay).append(box);
+            requestAnimationFrame(function () {
+                overlay.addClass('show');
+                box.addClass('show');
+            });
+        });
+    }
+
     /* ─── Free product rows ─────────────────────────────────── */
     function addFreeProductRow() {
         const rowId = freeProductCount++;
@@ -2134,6 +2203,9 @@
                     min="0" placeholder="ចំនួន" value="1">
                 <button type="button" class="btn-remove-free" onclick="removeFreeProductRow(${rowId})">
                     <i class="fas fa-trash"></i> លុប
+                </button>
+                <button type="button" class="btn-outline-primary add-free-product-btn">
+                    + Add Free
                 </button>
             </div>`);
     }

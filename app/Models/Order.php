@@ -205,9 +205,16 @@ class Order extends Model
     /**
      * Net KHR total actually charged: gross subtotal minus each item's own
      * discount, plus delivery.
+     * When an invoice is attached, uses the invoice's delivery fee to ensure
+     * that dispatch-level packing adjustments never alter the customer's
+     * issued invoice total.
      */
     public function totalKhr(): float
     {
-        return $this->grossSubtotalKhr() - $this->itemDiscountKhr() + (float) $this->delivery_fee_khr;
+        $deliveryFeeKhr = $this->invoice
+            ? (float) ($this->invoice->delivery_fee_khr ?? 0)
+            : (float) ($this->delivery_fee_khr ?? 0);
+
+        return (float) ($this->grossSubtotalKhr() - $this->itemDiscountKhr() + $deliveryFeeKhr);
     }
 }

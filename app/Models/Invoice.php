@@ -63,10 +63,23 @@ class Invoice extends Model
     {
         return $this->belongsTo(User::class, 'deleted_by');
     }
-   public function items()
-{
-    return $this->hasMany(OrderItem::class, 'order_id', 'order_id');
-}
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class, 'order_id', 'order_id');
+    }
+
+    /**
+     * Net KHR total for this invoice: gross subtotal minus item discount
+     * plus invoice's delivery fee.
+     */
+    public function totalKhr(): float
+    {
+        if ($this->order) {
+            return (float) ($this->order->grossSubtotalKhr() - $this->order->itemDiscountKhr() + (float) ($this->delivery_fee_khr ?? 0));
+        }
+
+        return (float) ($this->total_amount * 4000);
+    }
     /**
      * Mark invoice as sent.
      */
