@@ -137,8 +137,11 @@
         $orders = $delivery->orders;
         $orderCount = $orders->count();
         $totalFee = $orders->sum('delivery_fee_khr');
+        $totalSmallBoxes = $orders->sum(fn($o) => (int) ($o->small_pack_qty ?? $o->box_qty ?? 1));
+        $totalBigBoxes = $orders->sum(fn($o) => (int) ($o->big_pack_qty ?? 0));
+        $totalBoxes = $totalSmallBoxes + $totalBigBoxes;
+        $totalFee = $orders->sum('delivery_fee_khr');
         $totalAmount = $orders->sum(fn($o) => $o->invoice?->total_amount ?? $o->total_amount ?? 0);
-        $totalBoxes = $orders->sum(fn($o) => (int) ($o->small_pack_qty ?? $o->box_qty ?? 0) + (int) ($o->big_pack_qty ?? 0));
     @endphp
 
     <div class="header">
@@ -226,6 +229,19 @@
                 </tr>
             @endforelse
         </tbody>
+        @if($orders->isNotEmpty())
+            <tfoot>
+                <tr style="background:#f3f4f6;font-weight:bold">
+                    <td colspan="{{ $delivery->show_invoice_info ? 5 : 4 }}" style="text-align:right">សរុប ៖</td>
+                    <td style="text-align:center">{{ number_format($totalSmallBoxes, 0) }}</td>
+                    <td style="text-align:center">{{ number_format($totalBigBoxes, 0) }}</td>
+                    <td style="text-align:right;color:#D85A30">៛{{ number_format($totalFee, 0) }}</td>
+                    @if($delivery->show_invoice_info)
+                        <td style="text-align:right;color:#059669">${{ number_format($totalAmount, 0) }}</td>
+                    @endif
+                </tr>
+            </tfoot>
+        @endif
     </table>
 
     <div class="footer">

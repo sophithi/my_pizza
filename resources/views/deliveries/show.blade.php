@@ -543,10 +543,13 @@
             </div>
 
             @php
+                $totalSmallBoxes = $delivery->orders->sum(fn($o) => (int) ($o->small_pack_qty ?? $o->box_qty ?? 1));
+                $totalBigBoxes = $delivery->orders->sum(fn($o) => (int) ($o->big_pack_qty ?? 0));
+                $totalBoxes = $totalSmallBoxes + $totalBigBoxes;
                 $totalFee = $delivery->orders->sum('delivery_fee_khr');
                 $totalAmount = $delivery->orders->sum(fn($o) => $o->invoice?->total_amount ?? $o->total_amount ?? 0);
+                $totalInvoicesKhr = $delivery->orders->sum(fn($o) => $o->totalKhr());
                 $orderCount = $delivery->orders_count ?? $delivery->orders->count();
-                $totalBoxes = $delivery->orders->sum(fn($o) => max((int) ($o->box_qty ?? 1), 1));
                 $currentUnitPrice = (float) $delivery->delivery_price_khr;
             @endphp
 
@@ -565,6 +568,7 @@
                                     <div class="stat-val">{{ $orderCount }}</div>
                                     <div class="stat-lbl">ចំនួនវិក្ក័យបត្រ</div>
                                 </div>
+                     
                                 <div class="stat-card">
                                     <div class="stat-val" id="statTotalBoxes">{{ number_format($totalBoxes, 0) }}</div>
                                     <div class="stat-lbl">សរុបកេស</div>
@@ -700,6 +704,29 @@
                                         </tr>
                                     @endforelse
                                 </tbody>
+                                @if($delivery->orders->isNotEmpty())
+                                    <tfoot>
+                                        <tr style="background:#f9fafb; border-top:2px solid var(--border); font-weight:800;">
+                                            <td colspan="{{ $delivery->show_invoice_info ? 5 : 4 }}" style="text-align:right; font-weight:800; font-size:13px;">
+                                                សរុប ៖
+                                            </td>
+                                            <td id="footerTotalSmall" style="text-align:center; font-weight:800; font-size:14px; color:var(--text);">
+                                                {{ number_format($totalSmallBoxes, 0) }}
+                                            </td>
+                                            <td id="footerTotalBig" style="text-align:center; font-weight:800; font-size:14px; color:var(--text);">
+                                                {{ number_format($totalBigBoxes, 0) }}
+                                            </td>
+                                            <td id="footerTotalFee" style="text-align:right; font-weight:800; font-size:14px; color:var(--accent);">
+                                                ៛{{ number_format($totalFee, 0) }}
+                                            </td>
+                                            @if($delivery->show_invoice_info)
+                                                <td id="footerTotalAmount" style="text-align:right; font-weight:800; font-size:14px; color:var(--text);">
+                                                    ៛{{ number_format($totalInvoicesKhr, 0) }}
+                                                </td>
+                                            @endif
+                                        </tr>
+                                    </tfoot>
+                                @endif
                             </table>
                         </div>
                     </div>
@@ -797,19 +824,41 @@
         }
 
         function recalculateSummary() {
-            let totalBoxes = 0;
+            let totalSmall = 0;
+            let totalBig = 0;
             let totalFee = 0;
 
             document.querySelectorAll('#deliveryOrdersTable tbody tr[data-order-row]').forEach(row => {
-                const small = parseInt(row.querySelector('.qty-view[data-field="small"]').textContent.replace(/,/g, ''), 10) || 0;
-                const big = parseInt(row.querySelector('.qty-view[data-field="big"]').textContent.replace(/,/g, ''), 10) || 0;
-                const fee = parseFloat(row.querySelector('.fee-view').textContent.replace(/[^\d.]/g, '')) || 0;
-                totalBoxes += small + big;
+                const small = parseInt(row.querySelector('.qty-view[data-field="small"]')?.textContent.replace(/,/g, ''), 10) || 0;
+                const big = parseInt(row.querySelector('.qty-view[data-field="big"]')?.textContent.replace(/,/g, ''), 10) || 0;
+                const fee = parseFloat(row.querySelector('.fee-view')?.textContent.replace(/[^\d.]/g, '')) || 0;
+                totalSmall += small;
+                totalBig += big;
                 totalFee += fee;
             });
 
-            document.getElementById('statTotalBoxes').textContent = totalBoxes.toLocaleString();
-            document.getElementById('statTotalFee').textContent = '៛' + totalFee.toLocaleString();
+            const totalBoxes = totalSmall + totalBig;
+
+            const elSmall = document.getElementById('statTotalSmallBoxes');
+            if (elSmall) elSmall.textContent = totalSmall.toLocaleString();
+
+            const elBig = document.getElementById('statTotalBigBoxes');
+            if (elBig) elBig.textContent = totalBig.toLocaleString();
+
+            const elBoxes = document.getElementById('statTotalBoxes');
+            if (elBoxes) elBoxes.textContent = totalBoxes.toLocaleString();
+
+            const elFee = document.getElementById('statTotalFee');
+            if (elFee) elFee.textContent = '៛' + totalFee.toLocaleString();
+
+            const elFootSmall = document.getElementById('footerTotalSmall');
+            if (elFootSmall) elFootSmall.textContent = totalSmall.toLocaleString();
+
+            const elFootBig = document.getElementById('footerTotalBig');
+            if (elFootBig) elFootBig.textContent = totalBig.toLocaleString();
+
+            const elFootFee = document.getElementById('footerTotalFee');
+            if (elFootFee) elFootFee.textContent = '៛' + totalFee.toLocaleString();
         }
 
         async function saveRowEdit(orderId) {
