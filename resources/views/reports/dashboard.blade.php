@@ -208,9 +208,60 @@
             color: var(--success);
         }
 
-        .metric-card.is-orders .metric-icon {
+        .metric-card.is-paid .metric-icon {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .metric-card.is-pending .metric-icon {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .metric-card.is-old-debt .metric-icon {
             background: var(--info-soft);
             color: var(--info);
+        }
+
+        .metric-card.is-orders .metric-icon {
+            background: rgba(232, 93, 36, .12);
+            color: var(--accent);
+        }
+
+        .metric-badge {
+            background: var(--soft);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            white-space: nowrap;
+        }
+
+        .metric-badge.is-paid {
+            background: var(--success-soft);
+            border-color: rgba(22, 163, 74, .25);
+            color: var(--success);
+        }
+
+        .metric-badge.is-pending {
+            background: var(--danger-soft);
+            border-color: rgba(220, 38, 38, .25);
+            color: var(--danger);
+        }
+
+        .metric-badge.is-old-debt {
+            background: var(--info-soft);
+            border-color: rgba(37, 99, 235, .25);
+            color: var(--info);
+        }
+
+        .metric-grid-secondary {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-bottom: 16px;
         }
 
         .metric-label {
@@ -363,7 +414,8 @@
 
         @media (max-width: 1200px) {
             .report-link-grid,
-            .metric-grid {
+            .metric-grid,
+            .metric-grid-secondary {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
@@ -376,7 +428,8 @@
 
             .filter-row,
             .report-link-grid,
-            .metric-grid {
+            .metric-grid,
+            .metric-grid-secondary {
                 grid-template-columns: 1fr;
             }
         }
@@ -464,33 +517,56 @@
             @endif
         </div>
 
+        {{-- Primary Financial & Status Cards --}}
         <div class="metric-grid">
             <div class="metric-card is-revenue">
                 <div class="metric-icon"><i class="fas fa-sack-dollar"></i></div>
-                <div>
-
-                <script>
-                    (() => {
-                        const filter = document.querySelector('[data-report-filter]');
-                        const periodSelect = filter?.querySelector('[data-period-select]');
-                        const dateFields = filter?.querySelectorAll('[data-date-field]');
-
-                        if (!filter || !periodSelect || !dateFields) return;
-
-                        periodSelect.addEventListener('change', () => {
-                            const isCustom = periodSelect.value === 'custom';
-                            filter.classList.toggle('has-dates', isCustom);
-                            dateFields.forEach((field) => field.classList.toggle('is-hidden', !isCustom));
-
-                            if (!isCustom) filter.closest('form').submit();
-                        });
-                    })();
-                </script>
+                <div class="flex-grow-1">
                     <p class="metric-label">លក់សរុប</p>
                     <div class="metric-value">៛{{ number_format($totalRevenueKhr, 0) }}</div>
                     <div class="metric-value-usd">${{ number_format($totalRevenue, 2) }}</div>
                 </div>
             </div>
+
+            <div class="metric-card is-paid">
+                <div class="metric-icon"><i class="fas fa-circle-check"></i></div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="metric-label">វិក្កយបត្របានបង់</p>
+                        <span class="metric-badge is-paid">{{ number_format($paidOrdersCount) }}</span>
+                    </div>
+                    <div class="metric-value text-success">៛{{ number_format($totalPaidKhr, 0) }}</div>
+                    <div class="metric-value-usd">${{ number_format($totalPaid, 2) }}</div>
+                </div>
+            </div>
+
+            <div class="metric-card is-pending">
+                <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="metric-label">មិនទាន់ទូទាត់</p>
+                        <span class="metric-badge is-pending">{{ number_format($pendingOrdersCount) }}</span>
+                    </div>
+                    <div class="metric-value text-danger">៛{{ number_format($totalUnpaidKhr, 0) }}</div>
+                    <div class="metric-value-usd">${{ number_format($totalUnpaid, 2) }}</div>
+                </div>
+            </div>
+
+            <div class="metric-card is-old-debt">
+                <div class="metric-icon"><i class="fas fa-hand-holding-dollar"></i></div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="metric-label">សរុបលុយសងបុងចាស់</p>
+                        <span class="metric-badge is-old-debt">{{ number_format($oldDebtCount) }}</span>
+                    </div>
+                    <div class="metric-value text-primary">៛{{ number_format($totalOldDebtKhr, 0) }}</div>
+                    <div class="metric-value-usd">${{ number_format($totalOldDebt, 2) }}</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Volume Overview Cards --}}
+        <div class="metric-grid-secondary">
             <div class="metric-card is-orders">
                 <div class="metric-icon"><i class="fas fa-receipt"></i></div>
                 <div>
@@ -621,4 +697,22 @@
             }
         </script>
     @endif
+
+    <script>
+        (() => {
+            const filter = document.querySelector('[data-report-filter]');
+            const periodSelect = filter?.querySelector('[data-period-select]');
+            const dateFields = filter?.querySelectorAll('[data-date-field]');
+
+            if (!filter || !periodSelect || !dateFields) return;
+
+            periodSelect.addEventListener('change', () => {
+                const isCustom = periodSelect.value === 'custom';
+                filter.classList.toggle('has-dates', isCustom);
+                dateFields.forEach((field) => field.classList.toggle('is-hidden', !isCustom));
+
+                if (!isCustom) filter.closest('form').submit();
+            });
+        })();
+    </script>
 @endsection

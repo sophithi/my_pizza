@@ -680,14 +680,86 @@ class ReportController extends Controller
             $query->whereDate('order_date', '<=', $dateRange['end']);
         }
 
-        $totalRevenue = (clone $query)->where('status', '!=', 'cancelled')->sum('total_amount');
-        $totalRevenueKhr = (clone $query)->where('status', '!=', 'cancelled')
-            ->with('items')
-            ->get()
-            ->sum(fn($order) => $order->totalKhr());
+        // Orders in this period (excluding cancelled)
+        $ordersInPeriod = (clone $query)->where('status', '!=', 'cancelled')
+            ->with(['items', 'payments'])
+            ->get();
+
+        $totalRevenue = (float) $ordersInPeriod->sum('total_amount');
+        $totalRevenueKhr = (float) $ordersInPeriod->sum(fn($order) => $order->totalKhr());
         $totalOrders = (clone $query)->count();
         $totalProducts = Product::count();
         $totalCustomers = Customer::count();
+
+        // Calculate Paid vs Pending for orders in this period
+        $paidOrdersCount = 0;
+        $pendingOrdersCount = 0;
+        $totalPaid = 0.0;
+        $totalPaidKhr = 0.0;
+        $totalUnpaid = 0.0;
+        $totalUnpaidKhr = 0.0;
+
+        foreach ($ordersInPeriod as $order) {
+            $totalAmt = (float) $order->total_amount;
+            $totalKhrAmt = (float) $order->totalKhr();
+            $payment = $order->payments->first();
+
+            $status = $payment?->status ?? match ($order->payment_status) {
+                'paid' => 'paid',
+                'partial' => 'partial',
+                default => 'pending',
+            };
+
+            $paidAmt = $payment?->paid_amount ?? ($status === 'paid' ? $totalAmt : 0);
+            $paidKhrAmt = $payment?->paid_amount_khr ?? ($status === 'paid' ? $totalKhrAmt : 0);
+
+            $paidAmt = min($totalAmt, (float) $paidAmt);
+            $paidKhrAmt = min($totalKhrAmt, (float) $paidKhrAmt);
+
+            $unpaidAmt = max(0, $totalAmt - $paidAmt);
+            $unpaidKhrAmt = max(0, $totalKhrAmt - $paidKhrAmt);
+
+            $totalPaid += $paidAmt;
+            $totalPaidKhr += $paidKhrAmt;
+            $totalUnpaid += $unpaidAmt;
+            $totalUnpaidKhr += $unpaidKhrAmt;
+
+            if ($status === 'paid') {
+                $paidOrdersCount++;
+            } else {
+                $pendingOrdersCount++;
+            }
+        }
+
+        // Old debt payments collected in this period
+        if ($dateRange['start'] && $dateRange['end']) {
+            $periodPayments = Payment::with('order')
+                ->whereBetween('created_at', [
+                    $dateRange['start']->copy()->startOfDay(),
+                    $dateRange['end']->copy()->endOfDay()
+                ])
+                ->get();
+
+            $startDateStr = $dateRange['start']->toDateString();
+            $oldDebtPayments = $periodPayments->filter(function ($payment) use ($startDateStr) {
+                if (!$payment->order) return false;
+                $orderDateStr = Carbon::parse($payment->order->order_date)->toDateString();
+                return $orderDateStr < $startDateStr;
+            });
+        } else {
+            // All-time period: old debt is any payment recorded after the order date
+            $allPayments = Payment::with('order')->get();
+            $oldDebtPayments = $allPayments->filter(function ($payment) {
+                if (!$payment->order) return false;
+                $orderDateStr = Carbon::parse($payment->order->order_date)->toDateString();
+                $paymentDateStr = Carbon::parse($payment->created_at)->toDateString();
+                return $orderDateStr < $paymentDateStr;
+            });
+        }
+
+        $totalOldDebt = (float) $oldDebtPayments->sum('paid_amount');
+        $totalOldDebtKhr = (float) $oldDebtPayments->sum('paid_amount_khr');
+        $oldDebtCount = $oldDebtPayments->count();
 
         $recentOrders = (clone $query)->with(['customer', 'items'])->latest('order_date')->limit(5)->get();
         $lowStockAlerts = Inventory::whereRaw('quantity <= reorder_level')
@@ -704,6 +776,15 @@ class ReportController extends Controller
             'totalOrders',
             'totalProducts',
             'totalCustomers',
+            'paidOrdersCount',
+            'pendingOrdersCount',
+            'totalPaid',
+            'totalPaidKhr',
+            'totalUnpaid',
+            'totalUnpaidKhr',
+            'totalOldDebt',
+            'totalOldDebtKhr',
+            'oldDebtCount',
             'recentOrders',
             'lowStockAlerts',
             'chartData',
