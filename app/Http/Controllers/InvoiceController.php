@@ -262,6 +262,13 @@ class InvoiceController extends Controller
             $query->whereMonth('invoice_date', now()->month)->whereYear('invoice_date', now()->year);
         } elseif ($period === 'year') {
             $query->whereYear('invoice_date', now()->year);
+        } elseif ($request->filled('start_date') || $request->filled('end_date')) {
+            if ($request->filled('start_date')) {
+                $query->whereDate('invoice_date', '>=', $request->start_date);
+            }
+            if ($request->filled('end_date')) {
+                $query->whereDate('invoice_date', '<=', $request->end_date);
+            }
         } elseif ($request->filled('date')) {
             $query->whereDate('invoice_date', $request->date);
         }

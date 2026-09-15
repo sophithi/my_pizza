@@ -185,7 +185,12 @@
                     class="khr">៛{{ number_format($stats['outstanding_khr'], 0) }}</span></div>
         </div>
         <div class="sm">
-            <div class="sl">ការបញ្ជាទិញ</div>
+            <div class="sl">សរុបលុយសងបុងចាស់</div>
+            <div class="sv" style="color:#059669">${{ number_format($stats['old_debt_collected'], 2) }}<span
+                    class="khr">៛{{ number_format($stats['old_debt_collected_khr'], 0) }}</span></div>
+        </div>
+        <div class="sm">
+            <div class="sl">ចំនួនបុងទូទាត់</div>
             <div class="sv">{{ $stats['total'] }}</div>
         </div>
         <div class="sm">
@@ -195,6 +200,10 @@
         <div class="sm">
             <div class="sl">បង់ខ្លះ</div>
             <div class="sv" style="color:#d97706">{{ $stats['partial'] }}</div>
+        </div>
+        <div class="sm">
+            <div class="sl">សងបុងចាស់</div>
+            <div class="sv" style="color:#059669">{{ $stats['old_debt'] }}</div>
         </div>
         <div class="sm">
             <div class="sl">មិនទាន់បង់</div>

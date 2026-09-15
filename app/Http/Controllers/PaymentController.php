@@ -198,17 +198,21 @@ class PaymentController extends Controller
             $methodBreakdown = $this->buildMethodBreakdown($all);
         }
 
+        $oldDebtRows = $all->where('is_old_debt', true);
+
         return [
-            'collected'       => $collected,
-            'collected_khr'   => $collectedKhr,
-            'outstanding'     => $all->sum('balance'),
-            'outstanding_khr' => $all->sum('balance_khr'),
-            'total'           => $all->count(),
-            'paid'            => $all->where('status', 'paid')->count(),
-            'partial'         => $all->where('status', 'partial')->count(),
-            'unpaid'          => $all->where('status', 'pending')->count(),
-            'old_debt'        => $all->where('is_old_debt', true)->count(),
-            'method_breakdown' => $methodBreakdown,
+            'collected'              => $collected,
+            'collected_khr'          => $collectedKhr,
+            'outstanding'            => $all->sum('balance'),
+            'outstanding_khr'        => $all->sum('balance_khr'),
+            'old_debt_collected'     => (float) $oldDebtRows->sum('paid_amount'),
+            'old_debt_collected_khr' => (float) $oldDebtRows->sum('paid_amount_khr'),
+            'total'                  => $all->count(),
+            'paid'                   => $all->where('status', 'paid')->count(),
+            'partial'                => $all->where('status', 'partial')->count(),
+            'unpaid'                 => $all->where('status', 'pending')->count(),
+            'old_debt'               => $oldDebtRows->count(),
+            'method_breakdown'       => $methodBreakdown,
         ];
     }
 
@@ -682,14 +686,16 @@ class PaymentController extends Controller
 
     public function exportPdf(Request $request)
     {
+        [$dateFrom, $dateTo] = $this->resolveDateRange($request);
         $query       = $this->applyFilters($request);
-        $payments    = $query->get()->map(fn($order) => $this->mapOrderToPaymentRow($order));
-        $stats       = $this->buildStats($query);
+        $payments    = $query->get()->map(fn($order) => $this->mapOrderToPaymentRow($order, $dateFrom, $dateTo));
+        $stats       = $this->buildStatsFromRows($payments, $dateFrom, $dateTo);
         $periodLabel = $this->periodLabel($request);
         $statusLabel = match ($request->get('status', 'all')) {
             'paid'    => 'បានបង់',
             'partial' => 'បង់ខ្លះ',
             'pending' => 'មិនទាន់បង់',
+            'old_debt'=> 'បានសងបុងចាស់',
             default   => null,
         };
 

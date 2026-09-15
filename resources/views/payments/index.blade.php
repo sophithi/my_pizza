@@ -406,45 +406,52 @@
 
         {{-- Stats Cards --}}
         <div class="row g-3 mb-3">
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-4 col-xl-2">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">បានប្រមូល</div>
                     <div class="pay-stat-khr text-primary">៛{{ number_format($stats['collected_khr'], 0) }}</div>
                     <div class="pay-stat-usd">${{ number_format($stats['collected'], 2) }}</div>
                 </div>
             </div>
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-4 col-xl-2">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">នៅសល់</div>
                     <div class="pay-stat-khr text-danger">៛{{ number_format($stats['outstanding_khr'], 0) }}</div>
                     <div class="pay-stat-usd">${{ number_format($stats['outstanding'], 2) }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md">
+            <div class="col-6 col-md-4 col-xl-2">
                 <div class="pay-stat h-100">
-                    <div class="pay-stat-label">ការបញ្ជាទិញ</div>
+                    <div class="pay-stat-label">សរុបលុយសងបុងចាស់</div>
+                    <div class="pay-stat-khr text-success">៛{{ number_format($stats['old_debt_collected_khr'], 0) }}</div>
+                    <div class="pay-stat-usd">${{ number_format($stats['old_debt_collected'], 2) }}</div>
+                </div>
+            </div>
+            <div class="col-4 col-md col-xl">
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">ចំនួនបុងទូទាត់</div>
                     <div class="pay-stat-count">{{ $stats['total'] }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md">
+            <div class="col-4 col-md col-xl">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">បានបង់គ្រប់</div>
                     <div class="pay-stat-count text-success">{{ $stats['paid'] }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md">
+            <div class="col-4 col-md col-xl">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">បង់ខ្លះ</div>
                     <div class="pay-stat-count text-warning">{{ $stats['partial'] }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md">
+            <div class="col-4 col-md col-xl">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">សងបុងចាស់</div>
                     <div class="pay-stat-count text-success">{{ $stats['old_debt'] }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md">
+            <div class="col-4 col-md col-xl">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">មិនទាន់បង់</div>
                     <div class="pay-stat-count text-danger">{{ $stats['unpaid'] }}</div>

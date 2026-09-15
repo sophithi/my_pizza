@@ -568,10 +568,16 @@
                     <option value="unprinted" {{ request('printed') === 'unprinted' ? 'selected' : '' }}>មិនទាន់បានព្រីន</option>
                 </select>
 
-                <div class="date-field {{ request('date') ? 'has-value' : '' }}">
-                    <input type="date" name="date" value="{{ request('date') }}" class="form-control"
-                        title="ជ្រើសរើសកាលបរិច្ឆេទ">
-                    <span class="date-placeholder">ជ្រើសរើសកាលបរិច្ឆេទ</span>
+                <div class="date-field {{ request('start_date') ? 'has-value' : '' }}">
+                    <input type="date" name="start_date" value="{{ request('start_date') }}" class="form-control"
+                        title="ចាប់ពីថ្ងៃ">
+                    <span class="date-placeholder">ចាប់ពីថ្ងៃ</span>
+                </div>
+
+                <div class="date-field {{ request('end_date') ? 'has-value' : '' }}">
+                    <input type="date" name="end_date" value="{{ request('end_date') }}" class="form-control"
+                        title="ដល់ថ្ងៃ">
+                    <span class="date-placeholder">ដល់ថ្ងៃ</span>
                 </div>
 
                 <!-- <a href="{{ route('invoices.index') }}" class="invoice-btn invoice-btn-soft">
@@ -719,9 +725,8 @@
                 if (!form) return;
 
                 const search = form.querySelector('input[name="search"]');
-                const controls = form.querySelectorAll('select[name="status"], select[name="user_id"], select[name="printed"], input[name="date"]');
-                const dateField = form.querySelector('.date-field');
-                const dateInput = form.querySelector('input[name="date"]');
+                const controls = form.querySelectorAll('select[name="status"], select[name="user_id"], select[name="printed"], input[name="start_date"], input[name="end_date"]');
+                const dateFields = form.querySelectorAll('.date-field');
                 let timer = null;
 
                 const submit = () => form.submit();
@@ -744,7 +749,10 @@
                     control.addEventListener('change', submit);
                 });
 
-                if (dateField && dateInput) {
+                dateFields.forEach(function (dateField) {
+                    const dateInput = dateField.querySelector('input[type="date"]');
+                    if (!dateInput) return;
+
                     const syncDatePlaceholder = () => {
                         dateField.classList.toggle('has-value', Boolean(dateInput.value));
                     };
@@ -752,7 +760,7 @@
                     dateInput.addEventListener('input', syncDatePlaceholder);
                     dateInput.addEventListener('change', syncDatePlaceholder);
                     syncDatePlaceholder();
-                }
+                });
 
             })();
 

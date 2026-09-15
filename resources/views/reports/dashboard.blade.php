@@ -62,6 +62,10 @@
             grid-template-columns: minmax(180px, 240px) minmax(170px, 220px) minmax(170px, 220px) auto;
         }
 
+        .date-field.is-hidden {
+            display: none;
+        }
+
         .date-field {
             position: relative;
         }
@@ -404,8 +408,8 @@
                 <p class="reports-subtitle">{{ $rangeText }}</p>
             </div>
             <form method="GET" action="{{ route('reports.dashboard') }}" class="reports-filter">
-                <div class="filter-row {{ $selectedPeriod === 'custom' ? 'has-dates' : '' }}">
-                    <select name="period" class="form-select" onchange="this.form.submit()">
+                <div class="filter-row {{ $selectedPeriod === 'custom' ? 'has-dates' : '' }}" data-report-filter>
+                    <select name="period" class="form-select" data-period-select>
                         <option value="today" {{ $selectedPeriod === 'today' ? 'selected' : '' }}>ថ្ងៃនេះ</option>
                         <option value="week" {{ $selectedPeriod === 'week' ? 'selected' : '' }}>សប្ដាហ៍នេះ</option>
                         <option value="month" {{ $selectedPeriod === 'month' ? 'selected' : '' }}>ខែនេះ</option>
@@ -413,16 +417,14 @@
                         <option value="all" {{ $selectedPeriod === 'all' ? 'selected' : '' }}>ទាំងអស់</option>
                         <option value="custom" {{ $selectedPeriod === 'custom' ? 'selected' : '' }}>ជ្រើសថ្ងៃ</option>
                     </select>
-                    @if($selectedPeriod === 'custom')
-                        <label class="date-field">
-                            <span class="date-field-label">From</span>
-                            <input type="date" name="start_date" class="form-control" value="{{ $startDate ?? '' }}">
-                        </label>
-                        <label class="date-field">
-                            <span class="date-field-label">To</span>
-                            <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
-                        </label>
-                    @endif
+                    <label class="date-field {{ $selectedPeriod === 'custom' ? '' : 'is-hidden' }}" data-date-field>
+                        <span class="date-field-label">From</span>
+                        <input type="date" name="start_date" class="form-control" value="{{ $startDate ?? '' }}">
+                    </label>
+                    <label class="date-field {{ $selectedPeriod === 'custom' ? '' : 'is-hidden' }}" data-date-field>
+                        <span class="date-field-label">To</span>
+                        <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
+                    </label>
                     <button type="submit" class="report-btn">&nbsp; Apply</button>
                 </div>
             </form>
@@ -466,6 +468,24 @@
             <div class="metric-card is-revenue">
                 <div class="metric-icon"><i class="fas fa-sack-dollar"></i></div>
                 <div>
+
+                <script>
+                    (() => {
+                        const filter = document.querySelector('[data-report-filter]');
+                        const periodSelect = filter?.querySelector('[data-period-select]');
+                        const dateFields = filter?.querySelectorAll('[data-date-field]');
+
+                        if (!filter || !periodSelect || !dateFields) return;
+
+                        periodSelect.addEventListener('change', () => {
+                            const isCustom = periodSelect.value === 'custom';
+                            filter.classList.toggle('has-dates', isCustom);
+                            dateFields.forEach((field) => field.classList.toggle('is-hidden', !isCustom));
+
+                            if (!isCustom) filter.closest('form').submit();
+                        });
+                    })();
+                </script>
                     <p class="metric-label">លក់សរុប</p>
                     <div class="metric-value">៛{{ number_format($totalRevenueKhr, 0) }}</div>
                     <div class="metric-value-usd">${{ number_format($totalRevenue, 2) }}</div>
