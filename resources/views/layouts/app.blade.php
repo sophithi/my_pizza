@@ -545,6 +545,7 @@
             $user = auth()->user();
 
             $isAdmin = $user->isAdmin();
+            $isBoss = $user->isBoss();
             $isManager = $user->isManager();
             $isStaff = $user->isStaff();
             $isInventory = $user->isStaffInventory();
@@ -565,7 +566,7 @@
             @endif
 
             {{-- 2. Sales & Orders (ផ្នែកលក់ & កុម្ម៉ង់) --}}
-            @if(!$isInventory && !$isAuditor)
+            @if(!$isBoss && !$isInventory && !$isAuditor)
                 <div class="nav-label">ផ្នែកលក់ & កុម្ម៉ង់</div>
                 <a href="/orders" class="nav-link {{ request()->is('orders*') ? 'active' : '' }}" data-tooltip="ចេញវិក្កយបត្រ">
                     <i class="fas fa-shopping-cart"></i><span>ចេញវិក្កយបត្រ</span>
@@ -582,16 +583,16 @@
             @endif
 
             {{-- 3. Preparation & Delivery (ផ្នែករៀបចំ & ដឹកជញ្ជូន) --}}
-            @if($isAdmin || $isManager || $isStaff || $isInventory || $isOfficeStaff)
+            @if(!$isBoss && ($isAdmin || $isManager || $isStaff || $isInventory || $isOfficeStaff))
                 <div class="nav-label">រៀបចំ & ដឹកជញ្ជូន</div>
             @endif
-            @if($isAdmin || $isManager || $isStaff || $isInventory)
+            @if(!$isBoss && ($isAdmin || $isManager || $isStaff || $isInventory))
                 <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') ? 'active' : '' }}" data-tooltip="រៀបចំទំនិញ">
                     <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
                 </a>
             @endif
 
-            @if($isAdminOrManager || $isOfficeStaff)
+            @if(!$isBoss && ($isAdminOrManager || $isOfficeStaff))
                 <a href="/deliveries" class="nav-link {{ (request()->is('deliveries') || request()->is('deliveries/*')) && !request()->is('deliveries/map*') ? 'active' : '' }}" data-tooltip="ការដឹកជញ្ជូន">
                     <i class="fas fa-truck"></i><span>ការដឹកជញ្ជូន</span>
                 </a>
@@ -601,14 +602,14 @@
             @endif
 
             {{-- 4. Invoicing & Finance (ផ្នែកគិតលុយ & ហិរញ្ញវត្ថុ) --}}
-            @if($isAdminOrManager || $isOfficeStaff || $isAuditor)
+            @if(!$isBoss && ($isAdminOrManager || $isOfficeStaff || $isAuditor))
                 <div class="nav-label">គណនេយ្យ & ហិរញ្ញវត្ថុ</div>
                 <a href="/invoices" class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}" data-tooltip="វិក្កយបត្រ">
                     <i class="fas fa-receipt"></i><span>វិក្កយបត្រ</span>
                 </a>
             @endif
 
-            @if($isAdminOrManager || $isAuditor)
+            @if(!$isBoss && ($isAdminOrManager || $isAuditor))
                 <a href="/payments" class="nav-link {{ request()->is('payments*') ? 'active' : '' }}" data-tooltip="ការទូទាត់">
                     <i class="fas fa-credit-card"></i><span>ការទូទាត់</span>
                 </a>
@@ -618,16 +619,16 @@
             @endif
 
             {{-- 5. Products & Inventory (ផ្នែកទំនិញ & ស្តុក) --}}
-            @if($isAdminOrManager || $isOfficeStaff || $isAdmin || $isManager || $isStaff || $isInventory || $isAuditor)
+            @if(!$isBoss && ($isAdminOrManager || $isOfficeStaff || $isAdmin || $isManager || $isStaff || $isInventory || $isAuditor))
                 <div class="nav-label">ទំនិញ & ស្តុក</div>
             @endif
-            @if($isAdminOrManager || $isOfficeStaff)
+            @if(!$isBoss && ($isAdminOrManager || $isOfficeStaff))
                 <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}" data-tooltip="ទំនិញ">
                     <i class="fas fa-pizza-slice"></i><span>ទំនិញ</span>
                 </a>
             @endif
 
-            @if($isAdmin || $isManager || $isStaff || $isInventory || $isAuditor)
+            @if(!$isBoss && ($isAdmin || $isManager || $isStaff || $isInventory || $isAuditor))
                 <a href="{{ route('inventory.index', ['period' => 'today']) }}"
                     class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}" data-tooltip="ស្តុកទំនិញ">
                     <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>

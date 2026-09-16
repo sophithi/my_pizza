@@ -1008,16 +1008,16 @@ function updateCalculations() {
     document.getElementById('expectedKhr').innerText = formatKhr(expectedKhr);
     document.getElementById('expectedKhrFormula').innerText = '(តម្កល់ ' + formatMoney(floatKhr, 0) + ' ៛ + លក់ ' + formatMoney(systemCashKhr, 0) + ' ៛ - ចំណាយ ' + formatMoney(systemCashPurchaseKhr, 0) + ' ៛)';
 
-    // Variance = Actual Counted Combined USD - Expected Combined USD
-    const varianceUsd = grandUsd - expectedCombinedUsd;
-    const varianceKhr = varianceUsd * rate;
+    // KHR is the base currency for reconciliation; USD is display-only.
+    const varianceKhr = grandKhr - expectedKhr;
+    const varianceUsd = varianceKhr / rate;
 
     const varianceBox = document.getElementById('varianceBox');
     const varianceTitle = document.getElementById('varianceTitle');
     const varianceAmount = document.getElementById('varianceAmount');
     const varianceSubtext = document.getElementById('varianceSubtext');
 
-    if (Math.abs(varianceUsd) < 0.05) {
+    if (Math.abs(varianceKhr) < 1) {
         varianceBox.className = 'p-3 rounded text-center border bg-success-subtle border-success text-success';
         varianceTitle.innerText = 'ផ្ទៀងផ្ទាត់៖ ស្មើគ្នាត្រឹមត្រូវ (Balanced)';
         varianceAmount.innerText = '$0.00';
