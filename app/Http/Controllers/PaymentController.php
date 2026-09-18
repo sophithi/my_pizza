@@ -248,19 +248,17 @@ class PaymentController extends Controller
             $dateFrom && $dateTo ? ($row->period_paid_amount_khr ?? 0) : $row->paid_amount_khr
         );
 
-        $currentSalesRows = $all->filter(function ($row) {
+        $currentOutstandingRows = $all->filter(function ($row) {
             return !$row->is_old_debt && ($row->order_status ?? null) !== 'cancelled';
         });
-        $currentSales = (float) $currentSalesRows->sum('total_amount');
-        $currentSalesKhr = (float) $currentSalesRows->sum('total_amount_khr');
-        $currentOutstanding = (float) $currentSalesRows->sum('balance');
-        $currentOutstandingKhr = (float) $currentSalesRows->sum('balance_khr');
+        $currentOutstanding = (float) $currentOutstandingRows->sum('balance');
+        $currentOutstandingKhr = (float) $currentOutstandingRows->sum('balance_khr');
 
         return [
             'collected'              => $collected,
             'collected_khr'          => $collectedKhr,
-            'collected_excluding_old_debt' => max(0, $currentSales - $currentOutstanding),
-            'collected_excluding_old_debt_khr' => max(0, $currentSalesKhr - $currentOutstandingKhr),
+            'collected_excluding_old_debt' => max(0, $collected - $oldDebtCollected),
+            'collected_excluding_old_debt_khr' => max(0, $collectedKhr - $oldDebtCollectedKhr),
             'outstanding'            => $currentOutstanding,
             'outstanding_khr'        => $currentOutstandingKhr,
             'old_debt_collected'     => $oldDebtCollected,
