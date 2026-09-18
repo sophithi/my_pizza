@@ -35,6 +35,8 @@ class InvoiceController extends Controller
         ];
 
         $invoices = $this->orderInvoices($query)->paginate(15)->withQueryString();
+        // Keep the headline total tied to the exact filtered table result.
+        $stats['total'] = $invoices->total();
         $invoices->getCollection()->each(function ($invoice) {
             $invoice->total_khr = $this->invoiceTotalKhr($invoice);
         });

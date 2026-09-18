@@ -144,12 +144,7 @@ class PaymentController extends Controller
             }
         } else {
             // Unbounded ('all')
-            if ($payment && $orderDateStr < $paymentDateStr) {
-                $isOldDebt = true;
-                $displayDate = $payment->created_at;
-            } else {
-                $displayDate = $payment?->created_at ?? $order->order_date;
-            }
+            $displayDate = $payment?->created_at ?? $order->order_date;
         }
 
         $balance = max(0, $totalAmount - (float) $paidAmount);
@@ -202,6 +197,7 @@ class PaymentController extends Controller
             'order_id' => 'ORD-' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
             'order_date' => $displayDate,
             'order_actual_date' => $order->order_date,
+            'order_status' => $order->status,
             'payment_date' => $payment?->created_at,
             'total_amount' => $totalAmount,
             'total_amount_khr' => (float) $totalAmountKhr,
@@ -252,13 +248,21 @@ class PaymentController extends Controller
             $dateFrom && $dateTo ? ($row->period_paid_amount_khr ?? 0) : $row->paid_amount_khr
         );
 
+        $currentSalesRows = $all->filter(function ($row) {
+            return !$row->is_old_debt && ($row->order_status ?? null) !== 'cancelled';
+        });
+        $currentSales = (float) $currentSalesRows->sum('total_amount');
+        $currentSalesKhr = (float) $currentSalesRows->sum('total_amount_khr');
+        $currentOutstanding = (float) $currentSalesRows->sum('balance');
+        $currentOutstandingKhr = (float) $currentSalesRows->sum('balance_khr');
+
         return [
             'collected'              => $collected,
             'collected_khr'          => $collectedKhr,
-            'collected_excluding_old_debt' => max(0, $collected - $oldDebtCollected),
-            'collected_excluding_old_debt_khr' => max(0, $collectedKhr - $oldDebtCollectedKhr),
-            'outstanding'            => $all->sum('balance'),
-            'outstanding_khr'        => $all->sum('balance_khr'),
+            'collected_excluding_old_debt' => max(0, $currentSales - $currentOutstanding),
+            'collected_excluding_old_debt_khr' => max(0, $currentSalesKhr - $currentOutstandingKhr),
+            'outstanding'            => $currentOutstanding,
+            'outstanding_khr'        => $currentOutstandingKhr,
             'old_debt_collected'     => $oldDebtCollected,
             'old_debt_collected_khr' => $oldDebtCollectedKhr,
             'total'                  => $all->count(),

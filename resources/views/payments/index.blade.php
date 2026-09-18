@@ -408,9 +408,9 @@
         <div class="row g-3 mb-3">
             <div class="col-6 col-md-4 col-xl-2">
                 <div class="pay-stat h-100">
-                    <div class="pay-stat-label">បានប្រមូល</div>
-                    <div class="pay-stat-khr text-primary">៛{{ number_format($stats['collected_khr'], 0) }}</div>
-                    <div class="pay-stat-usd">${{ number_format($stats['collected'], 2) }}</div>
+                    <div class="pay-stat-label">បានប្រមូលមិនរាប់បុងចាស់</div>
+                    <div class="pay-stat-khr text-primary">៛{{ number_format($stats['collected_excluding_old_debt_khr'], 0) }}</div>
+                    <div class="pay-stat-usd">${{ number_format($stats['collected_excluding_old_debt'], 2) }}</div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-xl-2">
@@ -420,13 +420,13 @@
                     <div class="pay-stat-usd">${{ number_format($stats['outstanding'], 2) }}</div>
                 </div>
             </div>
-             <div class="col-6 col-md-4 col-xl-2">
+             <!-- <div class="col-6 col-md-4 col-xl-2">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">ចំនួនលុយសរុបមិនគិតការសងបុងចាស់</div>
                     <div class="pay-stat-khr text-success">៛{{ number_format($stats['collected_excluding_old_debt_khr'], 0) }}</div>
                     <div class="pay-stat-usd">${{ number_format($stats['collected_excluding_old_debt'], 2) }}</div>
                 </div>
-            </div>
+            </div> -->
             <div class="col-6 col-md-4 col-xl-2">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">សរុបលុយសងបុងចាស់</div>
@@ -434,12 +434,12 @@
                     <div class="pay-stat-usd">${{ number_format($stats['old_debt_collected'], 2) }}</div>
                 </div>
             </div>
-            <div class="col-4 col-md col-xl">
+            <!-- <div class="col-4 col-md col-xl">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">ចំនួនបុងទូទាត់</div>
                     <div class="pay-stat-count">{{ $stats['total'] }}</div>
                 </div>
-            </div>
+            </div> -->
             <div class="col-4 col-md col-xl">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">បានបង់គ្រប់</div>
