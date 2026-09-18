@@ -153,7 +153,7 @@
         .metric-grid {
             display: grid;
             gap: 14px;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             margin-bottom: 16px;
         }
 
@@ -202,11 +202,48 @@
             color: var(--warning);
         }
 
+        .metric.is-old-debt .metric-icon {
+            background: rgba(37, 99, 235, .12);
+            color: #2563eb;
+        }
+
         .metric-label {
             color: var(--muted);
             font-size: 12.5px;
             font-weight: 800;
+            line-height: 1.35;
+            margin: 0;
+            min-width: 0;
             text-transform: uppercase;
+        }
+
+        .metric-content {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .metric-header {
+            align-items: flex-start;
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+        }
+
+        .metric-badge {
+            background: var(--soft);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            white-space: nowrap;
+        }
+
+        .metric-badge.is-old-debt {
+            background: rgba(37, 99, 235, .1);
+            border-color: rgba(37, 99, 235, .25);
+            color: #2563eb;
         }
 
         .metric-value {
@@ -295,6 +332,79 @@
 
         .daily-table tbody tr:hover {
             background: var(--soft);
+        }
+
+        .customer-table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .customer-table-title {
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 900;
+            margin: 0;
+            padding: 14px 16px;
+        }
+
+        .invoice-filter {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .invoice-filter a {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 5px 9px;
+            text-decoration: none;
+        }
+
+        .invoice-filter a:hover,
+        .invoice-filter a.is-active {
+            background: var(--accent-soft);
+            border-color: rgba(232, 93, 36, .4);
+            color: var(--accent-dark);
+        }
+
+        .customer-table th,
+        .customer-table td {
+            border: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .customer-table .customer-name {
+            color: var(--text);
+            font-weight: 800;
+        }
+
+        .customer-table .invoice-code {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .customer-table .amount-paid {
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .customer-table .amount-due {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .customer-table .amount-due .text-muted {
+            color: inherit !important;
         }
 
         .item-name {
@@ -647,6 +757,17 @@
             .metric-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
+
+            .customer-table-title {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .invoice-filter a {
+                flex: 1;
+                text-align: center;
+            }
+
         }
 
         @media (max-width: 480px) {
@@ -744,14 +865,24 @@
                     <div class="metric-value-usd">${{ number_format($grossSales, 2) }}</div>
                 </div>
             </div>
-            <div class="metric is-income">
+            <!-- <div class="metric is-income">
                 <div class="metric-icon"><i class="fas fa-hand-holding-dollar"></i></div>
                 <div>
                     <div class="metric-label">ចំណូលបានទទួល</div>
                     <div class="metric-value">៛{{ number_format($incomeKhr, 0) }}</div>
                     <div class="metric-value-usd">${{ number_format($income, 2) }}</div>
                 </div>
+            </div> -->
+            
+            <div class="metric is-income">
+                <div class="metric-icon"><i class="fas fa-hand-holding-dollar"></i></div>
+                <div class="metric-content">
+                    <p class="metric-label">ប្រាក់ទទួលបានមិនរាប់បុងចាស់</p>
+                    <div class="metric-value">៛{{ number_format($totalPaidExcludingOldDebtKhr, 0) }}</div>
+                    <div class="metric-value-usd">${{ number_format($totalPaidExcludingOldDebt, 2) }}</div>
+                </div>
             </div>
+
             <div class="metric is-expense">
                 <div class="metric-icon"><i class="fas fa-file-invoice-dollar"></i></div>
                 <div>
@@ -795,7 +926,66 @@
             </div>
         </div>
 
-        <div class="report-grid">
+        <div class="customer-table-wrap">
+            <div class="customer-table-title">
+                <span><i class="fas fa-file-invoice me-2" style="color:var(--accent);"></i>ទិន្នន័យវិក្ក័យប័ត្រតាមអតិថិជន</span>
+                <span class="invoice-filter">
+                    <a href="{{ route('reports.daily', ['date' => $date, 'invoice_status' => 'all']) }}" class="{{ $invoiceFilter === 'all' ? 'is-active' : '' }}">ទាំងអស់</a>
+                    <a href="{{ route('reports.daily', ['date' => $date, 'invoice_status' => 'paid']) }}" class="{{ $invoiceFilter === 'paid' ? 'is-active' : '' }}">បានទូទាត់</a>
+                    <a href="{{ route('reports.daily', ['date' => $date, 'invoice_status' => 'unpaid']) }}" class="{{ $invoiceFilter === 'unpaid' ? 'is-active' : '' }}">មិនទាន់ទូទាត់</a>
+                </span>
+            </div>
+            <div class="table-responsive">
+                <table class="table daily-table customer-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>លេខវិក្ក័យប័ត្រ</th>
+                            <th>ឈ្មោះអតិថិជន</th>
+                            <th>វិធីបង់ប្រាក់</th>
+                            <th class="text-end">ស្ថានភាព</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($invoiceOrders as $order)
+                            @php
+                                $paymentsAsOfDate = $order->payments->filter(fn($payment) =>
+                                    \Carbon\Carbon::parse($payment->created_at)->toDateString() <= $reportDate->toDateString()
+                                );
+                                $paidAmount = min((float) $order->total_amount, (float) $paymentsAsOfDate->sum('paid_amount'));
+                                $dueAmount = max(0, (float) $order->total_amount - $paidAmount);
+                                $paidKhrAmount = min((float) $order->totalKhr(), (float) $paymentsAsOfDate->sum(fn($payment) =>
+                                    $payment->paid_amount_khr ?: ((float) $payment->paid_amount * $exchangeRate)
+                                ));
+                                $dueKhrAmount = max(0, (float) $order->totalKhr() - $paidKhrAmount);
+                                $isPaid = $order->payment_status === 'paid'
+                                    || $paidAmount >= ((float) $order->total_amount - 0.01);
+                            @endphp
+                            <tr>
+                                <td>
+                                    <div class="invoice-code">{{ $order->invoice?->invoice_number ?? 'N/A' }}</div>
+                                </td>
+                                <td>
+                                    <div class="customer-name">{{ $order->customer?->name ?? 'អតិថិជនមិនស្គាល់' }}</div>
+                                </td>
+                                <td>
+                                    {{ $order->payments->pluck('method')->filter()->unique()->implode(' + ') ?: 'មិនទាន់បង់' }}
+                                </td>
+                                <td class="text-end {{ $isPaid ? 'amount-paid' : 'amount-due' }}">
+                                    <div>៛{{ number_format($paidKhrAmount, 0) }}</div>
+                                    <div class="text-muted small">${{ number_format($paidAmount, 2) }}</div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">មិនមានទិន្នន័យវិក្ក័យប័ត្រទេ។</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- <div class="report-grid">
             <div>
                 <div class="report-card">
                     <div class="report-card-head">
@@ -923,6 +1113,6 @@
                     @endif
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 @endsection

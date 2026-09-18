@@ -417,11 +417,7 @@
             </div>
         </div>
         <div class="loc-main-container">
-
-           
             <div class="loc-map-pane">
-
- 
                 <div class="map-floating-districts">
                     <button type="button" class="district-pill active" onclick="filterDistrict('all')">ទាំងអស់</button>
                     <button type="button" class="district-pill"

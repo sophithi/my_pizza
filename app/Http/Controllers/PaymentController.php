@@ -96,31 +96,41 @@ class PaymentController extends Controller
 
     private function mapOrderToPaymentRow(Order $order, ?string $dateFrom = null, ?string $dateTo = null): object
     {
-        $payment = $order->payments->first();
+        $payments = $order->payments;
+        $payment = $payments->first();
         $orderDateStr = Carbon::parse($order->order_date)->toDateString();
         $paymentDateStr = $payment ? Carbon::parse($payment->created_at)->toDateString() : null;
+        $periodPayments = collect();
+        if ($dateFrom && $dateTo) {
+            $periodPayments = $payments->filter(function ($item) use ($dateFrom, $dateTo) {
+                $paymentDate = Carbon::parse($item->created_at)->toDateString();
+
+                return $paymentDate >= $dateFrom && $paymentDate <= $dateTo;
+            });
+        }
 
         $isOldDebt = false;
         $settledLater = false;
         $settledDate = null;
+        $hasInstallments = $payments->count() > 1;
 
-        $status = $payment?->status ?? match ($order->payment_status) {
-            'paid' => 'paid',
-            'partial' => 'partial',
-            default => 'pending',
-        };
-
-        $paidAmount = $payment?->paid_amount ?? ($status === 'paid' ? (float) $order->total_amount : 0);
-        $totalAmountKhr = $payment?->total_amount_khr ?? $order->totalKhr();
-        $paidAmountKhr = $payment?->paid_amount_khr ?? ($status === 'paid' ? (float) $totalAmountKhr : 0);
+        $totalAmount = (float) $order->total_amount;
+        $totalAmountKhr = (float) $order->totalKhr();
+        $paidAmount = $payments->sum(fn($item) => (float) $item->paid_amount);
+        $paidAmountKhr = $payments->sum(fn($item) => (float) ($item->paid_amount_khr ?: 0));
+        if ($payments->isEmpty() && $order->payment_status === 'paid') {
+            $paidAmount = $totalAmount;
+            $paidAmountKhr = $totalAmountKhr;
+        }
+        $status = $this->resolveStatus($totalAmountKhr, $paidAmountKhr);
         $displayDate = $order->order_date;
 
         // When viewing a bounded date period:
         if ($dateFrom && $dateTo) {
             // Case 1: Old debt paid in this period
-            if ($payment && $paymentDateStr >= $dateFrom && $paymentDateStr <= $dateTo) {
-                $isOldDebt = ($orderDateStr < $dateFrom);
-                $displayDate = $payment->created_at;
+            if ($periodPayments->isNotEmpty()) {
+                $isOldDebt = $orderDateStr < $dateFrom;
+                $displayDate = $periodPayments->first()->created_at;
             }
             // Case 2: Order created in this period, but settled on a LATER date
             elseif ($orderDateStr >= $dateFrom && $orderDateStr <= $dateTo && $payment && $paymentDateStr > $dateTo) {
@@ -142,9 +152,14 @@ class PaymentController extends Controller
             }
         }
 
-        $totalAmount = (float) $order->total_amount;
         $balance = max(0, $totalAmount - (float) $paidAmount);
         $balanceKhr = max(0, (float) $totalAmountKhr - (float) $paidAmountKhr);
+        $periodPaidAmount = null;
+        $periodPaidAmountKhr = null;
+        if ($dateFrom && $dateTo) {
+            $periodPaidAmount = $periodPayments->sum(fn($item) => (float) $item->paid_amount);
+            $periodPaidAmountKhr = $periodPayments->sum(fn($item) => (float) ($item->paid_amount_khr ?: 0));
+        }
 
         $lines = ($paidAmount > 0 && $payment) ? ($payment->lines?->map(fn($line) => [
             'method' => $line->method,
@@ -153,6 +168,31 @@ class PaymentController extends Controller
             'amount_usd' => (float) $line->amount_usd,
             'exchange_rate' => (float) ($line->exchange_rate ?: self::EXCHANGE_RATE),
         ])->values() ?? []) : [];
+        $paymentNotes = $payments
+            ->filter(fn($item) => (float) $item->paid_amount > 0 || (float) ($item->paid_amount_khr ?: 0) > 0)
+            ->map(fn($item) => $item->notes)
+            ->filter()
+            ->values()
+            ->join(' | ');
+        $installmentSummary = $payments
+            ->filter(fn($item) => (float) $item->paid_amount > 0 || (float) ($item->paid_amount_khr ?: 0) > 0)
+            ->sortBy('created_at')
+            ->map(function ($item) {
+                $amounts = $item->lines->map(function ($line) {
+                    return $line->currency === 'KHR'
+                        ? '៛' . number_format((float) $line->amount_original, 0)
+                        : '$' . number_format((float) $line->amount_original, 2);
+                })->values()->implode(' + ');
+
+                if ($amounts === '') {
+                    $amounts = '$' . number_format((float) $item->paid_amount, 2);
+                }
+
+                return Carbon::parse($item->created_at)->format('d M') . ': '
+                    . ($item->method ?: 'ការទូទាត់') . ' ' . $amounts;
+            })
+            ->values()
+            ->implode(' | ');
 
         return (object) [
             'id' => $payment?->id,
@@ -167,18 +207,24 @@ class PaymentController extends Controller
             'total_amount_khr' => (float) $totalAmountKhr,
             'paid_amount' => min($totalAmount, (float) $paidAmount),
             'paid_amount_khr' => (float) $paidAmountKhr,
+            'period_paid_amount' => $periodPaidAmount,
+            'period_paid_amount_khr' => $periodPaidAmountKhr,
             'balance' => $balance,
             'balance_khr' => $balanceKhr,
-            'method' => ($paidAmount > 0) ? ($payment?->method ?? '—') : '—',
+            'method' => ($paidAmount > 0)
+                ? $payments->filter(fn($item) => (float) $item->paid_amount > 0 || (float) ($item->paid_amount_khr ?: 0) > 0)->pluck('method')->filter()->unique()->join(' + ')
+                : '—',
             'lines' => $lines,
             'status' => $status,
-            'notes' => $payment?->notes ?? $order->notes,
+            'notes' => $paymentNotes ?: $order->notes,
+            'installment_summary' => $installmentSummary,
             'exchange_rate' => (float) ($payment?->exchange_rate ?? 4000),
             'exchange_rate_notes' => $payment?->exchange_rate_notes,
             'has_exchange_rate_variance' => !empty($payment?->exchange_rate_notes),
             'is_old_debt' => $isOldDebt,
             'settled_later' => $settledLater,
             'settled_date' => $settledDate,
+            'has_installments' => $hasInstallments,
         ];
     }
 
@@ -199,14 +245,22 @@ class PaymentController extends Controller
         }
 
         $oldDebtRows = $all->where('is_old_debt', true);
+        $oldDebtCollected = (float) $oldDebtRows->sum(fn($row) =>
+            $dateFrom && $dateTo ? ($row->period_paid_amount ?? 0) : $row->paid_amount
+        );
+        $oldDebtCollectedKhr = (float) $oldDebtRows->sum(fn($row) =>
+            $dateFrom && $dateTo ? ($row->period_paid_amount_khr ?? 0) : $row->paid_amount_khr
+        );
 
         return [
             'collected'              => $collected,
             'collected_khr'          => $collectedKhr,
+            'collected_excluding_old_debt' => max(0, $collected - $oldDebtCollected),
+            'collected_excluding_old_debt_khr' => max(0, $collectedKhr - $oldDebtCollectedKhr),
             'outstanding'            => $all->sum('balance'),
             'outstanding_khr'        => $all->sum('balance_khr'),
-            'old_debt_collected'     => (float) $oldDebtRows->sum('paid_amount'),
-            'old_debt_collected_khr' => (float) $oldDebtRows->sum('paid_amount_khr'),
+            'old_debt_collected'     => $oldDebtCollected,
+            'old_debt_collected_khr' => $oldDebtCollectedKhr,
             'total'                  => $all->count(),
             'paid'                   => $all->where('status', 'paid')->count(),
             'partial'                => $all->where('status', 'partial')->count(),
@@ -528,6 +582,39 @@ class PaymentController extends Controller
         // an exactly-paid order stuck at "partial".
         $data['status'] = $this->resolveStatus($data['total_amount_khr'], $paidKhr);
         $data['method'] = $this->summarizeMethods($lines);
+
+        if ($request->boolean('additional_payment')) {
+            $existing = $order->payments()->get();
+            $cumulativeKhr = $existing->sum(fn($item) => (float) ($item->paid_amount_khr ?: 0)) + $paidKhr;
+            if ($cumulativeKhr > (float) $data['total_amount_khr']) {
+                $remainingKhr = max(0, (float) $data['total_amount_khr'] - $existing->sum(fn($item) => (float) ($item->paid_amount_khr ?: 0)));
+                abort(422, 'Additional payment cannot exceed the remaining balance of ' . number_format($remainingKhr, 0) . ' KHR.');
+            }
+            $data['status'] = $this->resolveStatus((float) $data['total_amount_khr'], $cumulativeKhr);
+
+            unset($data['payment_lines']);
+            $payment = Payment::create($data);
+            if ($request->filled('payment_date')) {
+                $payment->created_at = Carbon::parse($request->payment_date);
+                $payment->save();
+            }
+            $this->syncPaymentLines($payment, $lines);
+            $order->update(['payment_status' => $data['status'] === 'pending' ? 'unpaid' : $data['status']]);
+
+            // Keep the linked invoice status in sync when an installment completes the order.
+            try {
+                $invoice = \App\Models\Invoice::where('order_id', $order->id)->first();
+                if ($invoice && $invoice->status !== 'cancelled') {
+                    $invoiceStatus = $data['status'] === 'paid' ? 'paid' : 'draft';
+                    $invoice->update(['status' => $invoiceStatus]);
+                }
+            } catch (\Throwable $e) {
+                logger()->warning('Failed to update invoice status after additional payment: ' . $e->getMessage());
+            }
+
+            return back()->with('success', 'Additional payment recorded successfully.');
+        }
+
         unset($data['payment_lines']);
 
         $payment = Payment::updateOrCreate(
@@ -634,6 +721,18 @@ class PaymentController extends Controller
         // Auto-set status — compare in KHR (ground truth), see store() for why.
         $data['status']      = $this->resolveStatus($data['total_amount_khr'], $paidKhr);
         $data['method'] = $this->summarizeMethods($lines);
+
+        if ($paidKhr <= 0) {
+            $payment->lines()->delete();
+            $payment->delete();
+
+            $remainingPaidKhr = $order->payments()->sum('paid_amount_khr');
+            $remainingStatus = $this->resolveStatus((float) $order->totalKhr(), (float) $remainingPaidKhr);
+            $order->update(['payment_status' => $remainingStatus === 'pending' ? 'unpaid' : $remainingStatus]);
+
+            return back()->with('success', 'Empty payment installment removed.');
+        }
+
         unset($data['payment_lines']);
 
         $payment->update($data);

@@ -45,4 +45,43 @@ class PaymentDateTest extends TestCase
             $payment->created_at->toDateString()
         );
     }
+
+    public function test_installment_payments_keep_separate_dates_and_cumulative_khr_total()
+    {
+        $customer = Customer::factory()->create();
+        $order = Order::factory()->create([
+            'customer_id' => $customer->id,
+            'order_date' => '2026-09-16',
+            'total_amount' => 40,
+        ]);
+
+        $this->post(route('payments.store'), [
+            'source_order_id' => $order->id,
+            'payment_date' => '2026-09-16',
+            'payment_lines' => json_encode([[
+                'method' => 'Cash',
+                'currency' => 'KHR',
+                'amount' => 95000,
+            ]]),
+        ])->assertRedirect();
+
+        $this->post(route('payments.store'), [
+            'source_order_id' => $order->id,
+            'additional_payment' => '1',
+            'payment_date' => '2026-09-17',
+            'payment_lines' => json_encode([[
+                'method' => 'Cash',
+                'currency' => 'KHR',
+                'amount' => 65000,
+            ]]),
+        ])->assertRedirect();
+
+        $payments = Payment::where('order_id', $order->id)->orderBy('id')->get();
+
+        $this->assertCount(2, $payments);
+        $this->assertSame('2026-09-16', $payments[0]->created_at->toDateString());
+        $this->assertSame('2026-09-17', $payments[1]->created_at->toDateString());
+        $this->assertSame(160000.0, (float) $payments->sum('paid_amount_khr'));
+        $this->assertSame('paid', $payments[1]->status);
+    }
 }

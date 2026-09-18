@@ -420,6 +420,13 @@
                     <div class="pay-stat-usd">${{ number_format($stats['outstanding'], 2) }}</div>
                 </div>
             </div>
+             <div class="col-6 col-md-4 col-xl-2">
+                <div class="pay-stat h-100">
+                    <div class="pay-stat-label">ចំនួនលុយសរុបមិនគិតការសងបុងចាស់</div>
+                    <div class="pay-stat-khr text-success">៛{{ number_format($stats['collected_excluding_old_debt_khr'], 0) }}</div>
+                    <div class="pay-stat-usd">${{ number_format($stats['collected_excluding_old_debt'], 2) }}</div>
+                </div>
+            </div>
             <div class="col-6 col-md-4 col-xl-2">
                 <div class="pay-stat h-100">
                     <div class="pay-stat-label">សរុបលុយសងបុងចាស់</div>
@@ -441,7 +448,7 @@
             </div>
             <div class="col-4 col-md col-xl">
                 <div class="pay-stat h-100">
-                    <div class="pay-stat-label">បង់ខ្លះ</div>
+                    <div class="pay-stat-label">បង់មិនទាន់គ្រប់</div>
                     <div class="pay-stat-count text-warning">{{ $stats['partial'] }}</div>
                 </div>
             </div>
@@ -497,7 +504,7 @@
                 <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-control form-control-sm"
                     style="width:160px">
                 <label class="small text-muted mb-0">ដល់ថ្ងៃទី</label>
-                <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control form-control-sm"
+                <input type="date" name="date_to" value="{{ request('date_to', request('date_from')) }}" class="form-control form-control-sm"
                     style="width:160px">
                 <button type="submit" class="btn btn-sm btn-secondary">អនុវត្ត</button>
             </form>
@@ -509,7 +516,7 @@
                 @foreach([
                     'all' => 'ទាំងអស់',
                     'paid' => 'បានបង់',
-                    'partial' => 'បង់ខ្លះ',
+                    'partial' => 'បង់មិនទាន់គ្រប់',
                     'old_debt' => 'បានសងបុងចាស់',
                     'pending' => 'មិនទាន់បង់'
                 ] as $key => $label)
@@ -580,7 +587,13 @@
                                 </td>
                                 <td class="text-muted small">
                                     <div class="fw-medium text-dark">{{ \Carbon\Carbon::parse($payment->order_date)->format('d M Y') }}</div>
-                                    @if($payment->is_old_debt)
+                                    @if($payment->has_installments)
+                                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle mt-1"
+                                            title="ការទូទាត់មានច្រើនដំណាក់កាល">
+                                            <i class="fas fa-layer-group me-1"></i>បុងទូទាត់ច្រើនដង
+                                        </span>
+                                        <!-- <div class="text-muted" style="font-size: 10px;">(ទូទាត់ច្រើនលើក)</div> -->
+                                    @elseif($payment->is_old_debt)
                                         <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle mt-1"
                                             title="កាលបរិច្ឆេទបញ្ជាទិញដើម: {{ \Carbon\Carbon::parse($payment->order_actual_date)->format('d M Y') }}">
                                             <i class="fas fa-history me-1"></i>សងបុងចាស់
@@ -605,6 +618,9 @@
                                         <span class="usd">${{ number_format($payment->paid_amount, 2) }}</span>
                                         <span class="khr">៛{{ number_format($payment->paid_amount_khr, 0) }}</span>
                                     </div>
+                                    <!-- @if($payment->period_paid_amount !== null)
+                                        <div class="text-muted" style="font-size: 10px;">បានបង់ថ្ងៃនេះ៖ ${{ number_format($payment->period_paid_amount, 2) }} / ៛{{ number_format($payment->period_paid_amount_khr, 0) }}</div>
+                                    @endif -->
                                 </td>
                                 <td>
                                     @if($payment->balance > 0)
@@ -620,7 +636,9 @@
                              
                                 <td>
                                     <div class="small text-muted" style="max-width: 200px;">
-                                        @if($payment->notes)
+                                        @if($payment->has_installments && $payment->installment_summary)
+                                            <div class="text-primary mt-1">{{ $payment->installment_summary }}</div>
+                                        @elseif($payment->notes)
                                             {{ $payment->notes }}
                                         @else
                                             —
@@ -634,17 +652,24 @@
                                 </td>
                                 <td>
                                     <span class="badge rounded-pill px-3 py-1 badge-{{ $payment->status }}">
-                                        {{ $payment->status === 'pending' ? 'មិនទាន់បង់' : ($payment->status === 'partial' ? 'បង់ខ្លះ' : 'បានបង់') }}
+                                        {{ $payment->status === 'pending' ? 'មិនទាន់បង់' : ($payment->status === 'partial' ? 'បង់មិនទាន់គ្រប់' : 'បានបង់') }}
                                     </span>
                                 </td>
                                 <td class="text-center">
                                     @unless(auth()->user()->isAuditor())
                                         @if($payment->payment_id)
                                             <button class="btn btn-sm btn-outline-secondary"
-                                                onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
+                                                onclick="openPaymentForm(@js($payment), false)" data-bs-toggle="modal"
                                                 data-bs-target="#paymentModal">
                                                 <i class="fas fa-pen me-1"></i> កែសម្រួល
                                             </button>
+                                            @if($payment->status !== 'paid')
+                                                <button class="btn btn-sm btn-outline-success"
+                                                    onclick="openPaymentForm(@js($payment), true)" data-bs-toggle="modal"
+                                                    data-bs-target="#paymentModal">
+                                                    <i class="fas fa-plus me-1"></i> បង់បន្ថែម
+                                                </button>
+                                            @endif
                                         @else
                                             <button class="btn btn-sm text-white" style="background:#D85A30"
                                                 onclick="openPaymentForm(@js($payment))" data-bs-toggle="modal"
@@ -743,7 +768,12 @@
                             </div>
                             <div id="paymentLines"></div>
                             <input type="hidden" name="payment_lines" id="payment_lines_input" value="[]">
+                            <input type="hidden" name="additional_payment" id="f_additional_payment" value="0">
                             <input type="hidden" name="paid_amount" id="f_paid" value="0">
+                            <div id="previousPaymentSummary" class="alert alert-info py-2 small d-none">
+                                <div class="fw-bold">បានបង់ពីមុន</div>
+                                <div id="previousPaymentSummaryText"></div>
+                            </div>
                             <div class="payment-summary-box">
                                 <div class="d-flex justify-content-between">
                                     <span>ចំនួនទឹកប្រាក់ដែលបានបង់</span>
@@ -759,7 +789,7 @@
                         <div class="mb-3">
                             <label class="form-label small text-muted">កំណត់ចំណាំ (បើមាន)</label>
                             <textarea name="notes" id="f_notes" class="form-control" rows="2"
-                                placeholder="ឧ. ចំនួននៅសល់នឹងបង់ថ្ងៃស្អែក"></textarea>
+                                placeholder="ឧ. ចំនួននៅសល់នឹងបង់ពេលក្រោយ"></textarea>
                         </div>
                         <div class="d-flex align-items-center justify-content-between bg-light rounded px-3 py-2">
                             <span class="text-muted small">ការបង់ប្រាក់</span>
@@ -816,7 +846,7 @@
             badge.className = 'badge rounded-pill px-3 ';
             if (paid <= 0) { badge.classList.add('badge-pending'); badge.textContent = 'មិនទាន់បង់'; }
             else if (paid >= total) { badge.classList.add('badge-paid'); badge.textContent = 'បានបង់'; }
-            else { badge.classList.add('badge-partial'); badge.textContent = 'បង់ខ្លះ'; }
+            else { badge.classList.add('badge-partial'); badge.textContent = 'បង់មិនទាន់គ្រប់'; }
         }
 
         function addPaymentLine(line = {}) {
@@ -899,6 +929,8 @@
             document.getElementById('paymentForm').action = '{{ route("payments.store") }}';
             document.getElementById('form_method').value = 'POST';
             document.getElementById('form_payment_id').value = '';
+            document.getElementById('f_additional_payment').value = '0';
+            document.getElementById('previousPaymentSummary').classList.add('d-none');
             document.getElementById('form_source_order_id').value = '';
             document.getElementById('f_customer_name').value = '';
             document.getElementById('f_order_id').value = '';
@@ -913,35 +945,46 @@
             addPaymentLine();
         }
 
-        function openPaymentForm(payment) {
+        function openPaymentForm(payment, additional = false) {
             const isEdit = !!payment.payment_id;
 
-            document.getElementById('paymentModalLabel').textContent = (isEdit ? 'កែការទូទាត់ - ' : 'កត់ត្រាការទូទាត់ - ') + payment.order_id;
-            document.getElementById('paymentForm').action = isEdit
-                ? '{{ url('/payments') }}/' + payment.payment_id
-                : '{{ route("payments.store") }}';
-            document.getElementById('form_method').value = isEdit ? 'PUT' : 'POST';
-            document.getElementById('form_payment_id').value = payment.payment_id || '';
+            document.getElementById('paymentModalLabel').textContent = (additional ? 'កត់ត្រាការបង់បន្ថែម - ' : (isEdit ? 'កែការទូទាត់ - ' : 'កត់ត្រាការទូទាត់ - ')) + payment.order_id;
+            document.getElementById('paymentForm').action = additional
+                ? '{{ route("payments.store") }}'
+                : (isEdit ? '{{ url('/payments') }}/' + payment.payment_id : '{{ route("payments.store") }}');
+            document.getElementById('form_method').value = additional ? 'POST' : (isEdit ? 'PUT' : 'POST');
+            document.getElementById('form_payment_id').value = additional ? '' : (payment.payment_id || '');
+            document.getElementById('f_additional_payment').value = additional ? '1' : '0';
+            document.getElementById('previousPaymentSummary').classList.toggle('d-none', !additional);
+            if (additional) {
+                document.getElementById('previousPaymentSummaryText').textContent =
+                    `៛${Number(payment.paid_amount_khr || 0).toLocaleString()} / $${Number(payment.paid_amount || 0).toFixed(2)} — នៅសល់ ៛${Number(payment.balance_khr || 0).toLocaleString()} / $${Number(payment.balance || 0).toFixed(2)}`;
+            }
             document.getElementById('form_source_order_id').value = payment.source_order_id || '';
             document.getElementById('f_customer_name').value = payment.customer_name;
             document.getElementById('f_order_id').value = payment.order_id;
             document.getElementById('f_order_date').value = payment.order_actual_date ? String(payment.order_actual_date).slice(0, 10) : (payment.order_date ? String(payment.order_date).slice(0, 10) : getLocalDateString());
             
-            // Auto real-time daily date: ALWAYS default to TODAY (real-time)
-            document.getElementById('f_payment_date').value = getLocalDateString();
+            // Preserve the selected installment date when editing; new payments use today.
+            document.getElementById('f_payment_date').value = additional
+                ? getLocalDateString()
+                : (payment.payment_date ? getLocalDateString(new Date(payment.payment_date)) : getLocalDateString());
             
             document.getElementById('f_total').value = payment.total_amount;
             document.getElementById('f_total_khr').value = payment.total_amount_khr || usdToKhr(payment.total_amount);
             document.getElementById('f_notes').value = payment.notes || '';
             document.getElementById('f_method').value = payment.method === '—' ? 'Cash' : payment.method;
             
-            if (payment.lines && payment.lines.length > 0) {
+            if (additional) {
+                paymentLines = [];
+                addPaymentLine();
+            } else if (payment.lines && payment.lines.length > 0) {
                 paymentLines = payment.lines.map(line => ({
                     method: paymentMethods.includes(line.method) ? line.method : 'Other',
                     currency: line.currency || 'KHR',
                     amount: line.amount_original
                 }));
-            } else if (payment.method && payment.method.includes('+')) {
+            } else if (payment.paid_amount > 0 && payment.method && payment.method.includes('+')) {
                 const methods = payment.method.split('+').map(m => m.trim()).filter(Boolean);
                 const splitAmount = (parseFloat(payment.paid_amount) || 0) / (methods.length || 1);
                 paymentLines = methods.map(m => ({
@@ -949,13 +992,16 @@
                     currency: 'KHR',
                     amount: Number(splitAmount.toFixed(2))
                 }));
-            } else {
+            } else if (payment.paid_amount > 0) {
                 const singleMethod = payment.method === '—' ? 'Cash' : payment.method;
                 paymentLines = [{
                     method: paymentMethods.includes(singleMethod) ? singleMethod : 'Cash',
                     currency: 'KHR',
                     amount: payment.paid_amount || 0
                 }];
+            } else {
+                paymentLines = [];
+                addPaymentLine();
             }
             renderPaymentLines();
         }

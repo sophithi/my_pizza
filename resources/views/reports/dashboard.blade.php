@@ -124,7 +124,7 @@
         }
 
         .metric-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
         }
 
         .report-link-card {
@@ -220,6 +220,10 @@
 
         .metric-card.is-old-debt .metric-icon {
             background: var(--info-soft);
+            color: var(--info);
+        } 
+        .metric-card.total-old-debt .metric-icon {
+            background-color: var(--info-soft);
             color: var(--info);
         }
 
@@ -414,9 +418,12 @@
 
         @media (max-width: 1200px) {
             .report-link-grid,
-            .metric-grid,
             .metric-grid-secondary {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .metric-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
 
@@ -537,6 +544,15 @@
                     </div>
                     <div class="metric-value text-success">៛{{ number_format($totalPaidKhr, 0) }}</div>
                     <div class="metric-value-usd">${{ number_format($totalPaid, 2) }}</div>
+                </div>
+            </div>
+
+            <div class="metric-card is-paid">
+                <div class="metric-icon"><i class="fas fa-hand-holding-dollar"></i></div>
+                <div class="flex-grow-1">
+                    <p class="metric-label">ប្រាក់បានបង់ មិនរាប់បុងចាស់</p>
+                    <div class="metric-value text-success">៛{{ number_format($totalPaidExcludingOldDebtKhr, 0) }}</div>
+                    <div class="metric-value-usd">${{ number_format($totalPaidExcludingOldDebt, 2) }}</div>
                 </div>
             </div>
 

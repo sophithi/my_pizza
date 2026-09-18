@@ -5,9 +5,11 @@
 @push('styles')
     <style>
         .dashboard-page {
-            max-width: 1400px;
+            box-sizing: border-box;
+            max-width: 1240px;
             margin: 0 auto;
-            padding: 28px;
+            padding: 28px 24px 44px;
+            width: 100%;
         }
 
         .dash-hero {
@@ -18,10 +20,10 @@
             color: #fff;
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
-            gap: 24px;
-            margin-bottom: 18px;
+            gap: 18px;
+            margin-bottom: 16px;
             overflow: hidden;
-            padding: 30px 28px;
+            padding: 24px 26px;
             position: relative;
         }
 
@@ -39,7 +41,7 @@
         }
 
         .dash-title {
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 800;
             line-height: 1.1;
             margin: 0;
@@ -52,7 +54,7 @@
         }
 
         .dash-brand img {
-            height: 56px;
+            height: 44px;
             width: auto;
             border-radius: 8px;
             box-shadow: 0 8px 20px rgba(15,23,42,.12);
@@ -66,21 +68,21 @@
         .dash-today {
             align-self: center;
             color: #fff;
-            min-width: 220px;
+            min-width: 180px;
             text-align: right;
         }
 
         .dash-today strong {
             display: block;
-            font-size: 26px;
+            font-size: 20px;
             margin-bottom: 4px;
         }
 
         .quick-actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 18px;
         }
 
         .quick-action {
@@ -92,8 +94,8 @@
             color: #0f172a;
             display: inline-flex;
             gap: 8px;
-            min-height: 44px;
-            padding: 10px 16px;
+            min-height: 38px;
+            padding: 8px 12px;
             text-decoration: none;
             font-weight: 700;
             transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
@@ -245,13 +247,19 @@
         }
 
         .sales-panel .panel-body {
-            padding: 24px 22px 22px;
+            padding: 24px 24px 22px;
         }
 
         .bar-chart {
             align-items: end;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0,
+                transparent 39px,
+                #edf1f5 40px
+            );
             display: grid;
-            gap: 14px;
+            gap: 18px;
             grid-template-columns: repeat(7, minmax(0, 1fr));
             min-height: 250px;
             padding: 8px 0 4px;
@@ -267,14 +275,14 @@
 
         .bar-track {
             align-items: end;
-            background: linear-gradient(180deg, #f8fafc, #eef2f7);
-            border: 1px solid #edf0f4;
-            border-radius: 8px;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
             display: flex;
             height: 165px;
             justify-self: center;
-            overflow: hidden;
-            padding: 5px;
+            padding: 0;
+            position: relative;
             width: min(100%, 64px);
         }
 
@@ -284,6 +292,18 @@
             box-shadow: 0 8px 16px rgba(232, 93, 36, .18);
             min-height: 4px;
             width: 100%;
+        }
+
+        .bar-value {
+            bottom: calc(var(--bar-height) + 6px);
+            color: #0f172a;
+            font-size: 11px;
+            font-weight: 900;
+            left: 50%;
+            line-height: 1;
+            position: absolute;
+            transform: translateX(-50%);
+            white-space: nowrap;
         }
 
         .bar-money {
@@ -297,6 +317,13 @@
             color: #64748b;
             font-size: 12px;
             font-weight: 700;
+            text-align: center;
+        }
+
+        .bar-date {
+            color: #94a3b8;
+            font-size: 9px;
+            margin-top: -5px;
             text-align: center;
         }
 
@@ -451,6 +478,14 @@
             .dash-today {
                 text-align: left;
             }
+
+            .bar-value {
+                font-size: 8px;
+            }
+
+            .bar-date {
+                font-size: 8px;
+            }
         }
     </style>
 @endpush
@@ -500,12 +535,17 @@
                 <div class="panel-body">
                     <div class="bar-chart">
                         @foreach($sales_by_day as $day)
+                            @php
+                                $barHeight = max(4, ($day['total'] / $maxSales) * 100);
+                                $barValue = '$' . number_format((float) $day['total'], 2);
+                            @endphp
                             <div class="bar-item" title="{{ $day['date'] }}: ${{ $fmt($day['total']) }}">
                                 <div class="bar-track">
-                                    <div class="bar-fill" style="height: {{ max(4, ($day['total'] / $maxSales) * 100) }}%;"></div>
+                                    <div class="bar-fill" style="--bar-height: {{ $barHeight }}%; height: {{ $barHeight }}%;"></div>
+                                    <span class="bar-value" style="--bar-height: {{ $barHeight }}%;">{{ $barValue }}</span>
                                 </div>
-                                <div class="bar-money">${{ $fmt($day['total']) }}</div>
                                 <div class="bar-label">{{ $day['label'] }}</div>
+                                <div class="bar-date">{{ $day['date'] }}</div>
                             </div>
                         @endforeach
                     </div>

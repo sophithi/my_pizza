@@ -36,9 +36,24 @@ class ReportController extends Controller
         $grossSales = (clone $orders)->where('status', '!=', 'cancelled')->sum('total_amount');
 
         $dayOrders = (clone $orders)->where('status', '!=', 'cancelled')
-            ->with(['items', 'payments'])
+            ->with(['items', 'payments', 'invoice'])
             ->get();
         $grossSalesKhr = $dayOrders->sum(fn($order) => $order->totalKhr());
+        $invoiceFilter = $request->input('invoice_status', 'all');
+        if (!in_array($invoiceFilter, ['all', 'paid', 'unpaid'], true)) {
+            $invoiceFilter = 'all';
+        }
+        $invoiceOrders = $dayOrders->filter(function ($order) use ($invoiceFilter) {
+            $paymentsAsOfOrderDate = $order->payments
+                ->filter(fn($payment) => Carbon::parse($payment->created_at)->toDateString() <= Carbon::parse($order->order_date)->toDateString());
+            $paidAmount = (float) $paymentsAsOfOrderDate->sum('paid_amount');
+            $isPaid = $paidAmount >= ((float) $order->total_amount - 0.01)
+                || ($order->payments->isEmpty() && $order->payment_status === 'paid');
+
+            return $invoiceFilter === 'all'
+                || ($invoiceFilter === 'paid' && $isPaid)
+                || ($invoiceFilter === 'unpaid' && !$isPaid);
+        });
 
         // Outstanding balance owed on today's orders specifically (not to be
         // confused with $income, which is payments recorded today for any order).
@@ -46,15 +61,23 @@ class ReportController extends Controller
         $unpaidKhr = 0.0;
         $reportDateStr = $reportDate->toDateString();
         foreach ($dayOrders as $order) {
-            $payment = $order->payments->first();
+            $paymentsAsOfDate = $order->payments->filter(fn($payment) =>
+                Carbon::parse($payment->created_at)->toDateString() <= $reportDateStr
+            );
             $totalAmount = (float) $order->total_amount;
             $totalKhrAmount = (float) $order->totalKhr();
-            
-            $paymentDate = $payment ? Carbon::parse($payment->created_at)->toDateString() : null;
-            $isPaidOnOrBefore = ($payment && $paymentDate <= $reportDateStr);
 
-            $paidAmount = $isPaidOnOrBefore ? (float) $payment->paid_amount : ($order->payment_status === 'paid' && $paymentDate === null ? $totalAmount : 0);
-            $paidKhrAmount = $isPaidOnOrBefore ? (float) ($payment->paid_amount_khr ?: ($paidAmount * self::EXCHANGE_RATE)) : ($order->payment_status === 'paid' && $paymentDate === null ? $totalKhrAmount : 0);
+            $paidAmount = (float) $paymentsAsOfDate->sum('paid_amount');
+            $paidKhrAmount = (float) $paymentsAsOfDate->sum(fn($payment) =>
+                $payment->paid_amount_khr ?: ((float) $payment->paid_amount * self::EXCHANGE_RATE)
+            );
+            if ($paymentsAsOfDate->isEmpty() && $order->payment_status === 'paid') {
+                $paidAmount = $totalAmount;
+                $paidKhrAmount = $totalKhrAmount;
+            }
+
+            $paidAmount = min($totalAmount, $paidAmount);
+            $paidKhrAmount = min($totalKhrAmount, $paidKhrAmount);
 
             $unpaid += max(0, $totalAmount - $paidAmount);
             $unpaidKhr += max(0, $totalKhrAmount - $paidKhrAmount);
@@ -99,6 +122,11 @@ class ReportController extends Controller
         );
         $oldDebt = $oldDebtPayments->sum('paid_amount');
         $oldDebtKhr = $oldDebtPayments->sum('paid_amount_khr');
+        $totalOldDebt = (float) $oldDebt;
+        $totalOldDebtKhr = (float) $oldDebtKhr;
+        $totalPaidExcludingOldDebt = max(0, (float) $income - $totalOldDebt);
+        $totalPaidExcludingOldDebtKhr = max(0, (float) $incomeKhr - $totalOldDebtKhr);
+        $oldDebtCount = $oldDebtPayments->count();
 
         $purchases = Purchase::whereDate('purchase_date', $reportDate)
             ->latest()
@@ -136,8 +164,15 @@ class ReportController extends Controller
             'unpaidKhr',
             'income',
             'incomeKhr',
+            'invoiceOrders',
+            'invoiceFilter',
             'oldDebt',
             'oldDebtKhr',
+            'totalOldDebt',
+            'totalOldDebtKhr',
+            'totalPaidExcludingOldDebt',
+            'totalPaidExcludingOldDebtKhr',
+            'oldDebtCount',
             'expenses',
             'expensesKhr',
             'netIncome',
@@ -153,12 +188,7 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * Break down a set of payments (any date range — a single day or a whole
-     * report period) by method (Cash/ABA/ACLEDA/Wing/Other), summing both KHR
-     * and USD. Mirrors PaymentController's breakdown but works directly off
-     * Payment models rather than mapped order rows.
-     */
+
     private function buildMethodBreakdown($payments): array
     {
         $methodLabels = [
@@ -702,16 +732,17 @@ class ReportController extends Controller
         foreach ($ordersInPeriod as $order) {
             $totalAmt = (float) $order->total_amount;
             $totalKhrAmt = (float) $order->totalKhr();
-            $payment = $order->payments->first();
+            $paidAmt = (float) $order->payments->sum('paid_amount');
+            $paidKhrAmt = (float) $order->payments->sum('paid_amount_khr');
 
-            $status = $payment?->status ?? match ($order->payment_status) {
-                'paid' => 'paid',
-                'partial' => 'partial',
-                default => 'pending',
-            };
+            if ($order->payments->isEmpty() && $order->payment_status === 'paid') {
+                $paidAmt = $totalAmt;
+                $paidKhrAmt = $totalKhrAmt;
+            }
 
-            $paidAmt = $payment?->paid_amount ?? ($status === 'paid' ? $totalAmt : 0);
-            $paidKhrAmt = $payment?->paid_amount_khr ?? ($status === 'paid' ? $totalKhrAmt : 0);
+            $status = $paidKhrAmt >= $totalKhrAmt
+                ? 'paid'
+                : ($paidKhrAmt > 0 ? 'partial' : 'pending');
 
             $paidAmt = min($totalAmt, (float) $paidAmt);
             $paidKhrAmt = min($totalKhrAmt, (float) $paidKhrAmt);
@@ -749,6 +780,7 @@ class ReportController extends Controller
         } else {
             // All-time period: old debt is any payment recorded after the order date
             $allPayments = Payment::with('order')->get();
+            $periodPayments = $allPayments;
             $oldDebtPayments = $allPayments->filter(function ($payment) {
                 if (!$payment->order) return false;
                 $orderDateStr = Carbon::parse($payment->order->order_date)->toDateString();
@@ -757,8 +789,14 @@ class ReportController extends Controller
             });
         }
 
+        // Dashboard payment totals are based on payments recorded in the
+        // selected period, matching the Payments and Daily reports.
+        $totalPaid = (float) $periodPayments->sum('paid_amount');
+        $totalPaidKhr = (float) $periodPayments->sum('paid_amount_khr');
         $totalOldDebt = (float) $oldDebtPayments->sum('paid_amount');
         $totalOldDebtKhr = (float) $oldDebtPayments->sum('paid_amount_khr');
+        $totalPaidExcludingOldDebt = max(0, $totalPaid - $totalOldDebt);
+        $totalPaidExcludingOldDebtKhr = max(0, $totalPaidKhr - $totalOldDebtKhr);
         $oldDebtCount = $oldDebtPayments->count();
 
         $recentOrders = (clone $query)->with(['customer', 'items'])->latest('order_date')->limit(5)->get();
@@ -784,6 +822,8 @@ class ReportController extends Controller
             'totalUnpaidKhr',
             'totalOldDebt',
             'totalOldDebtKhr',
+            'totalPaidExcludingOldDebt',
+            'totalPaidExcludingOldDebtKhr',
             'oldDebtCount',
             'recentOrders',
             'lowStockAlerts',
