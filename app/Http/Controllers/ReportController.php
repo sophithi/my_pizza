@@ -124,8 +124,11 @@ class ReportController extends Controller
         $oldDebtKhr = $oldDebtPayments->sum('paid_amount_khr');
         $totalOldDebt = (float) $oldDebt;
         $totalOldDebtKhr = (float) $oldDebtKhr;
-        $totalPaidExcludingOldDebt = max(0, (float) $income - $totalOldDebt);
-        $totalPaidExcludingOldDebtKhr = max(0, (float) $incomeKhr - $totalOldDebtKhr);
+        // Use the order balance to calculate current-sales collections. This
+        // keeps current collections + outstanding balance equal to gross sales,
+        // including legacy orders marked paid without a payment record.
+        $totalPaidExcludingOldDebt = max(0, (float) $grossSales - $unpaid);
+        $totalPaidExcludingOldDebtKhr = max(0, (float) $grossSalesKhr - $unpaidKhr);
         $oldDebtCount = $oldDebtPayments->count();
 
         $purchases = Purchase::whereDate('purchase_date', $reportDate)

@@ -7,6 +7,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Pizza Happy Family</title>
 
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
@@ -520,11 +524,28 @@
         .no-transition * {
             transition: none !important
         }
+
+        #page-loading-bar {
+            background: #f97316;
+            height: 3px;
+            left: 0;
+            opacity: 0;
+            position: fixed;
+            top: 0;
+            transition: opacity 0.15s ease;
+            width: 100%;
+            z-index: 2000;
+        }
+
+        #page-loading-bar.is-loading {
+            opacity: 1;
+        }
     </style>
 </head>
 
 <body class="no-transition">
 
+    <div id="page-loading-bar" aria-hidden="true"></div>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Sidebar -->
@@ -775,6 +796,23 @@
             document.querySelectorAll('.sidebar .nav-link').forEach(link => {
                 link.addEventListener('click', () => {
                     if (window.innerWidth <= 768) closeSidebar();
+                });
+            });
+
+            const pageLoadingBar = document.getElementById('page-loading-bar');
+            document.querySelectorAll('a[href]').forEach(link => {
+                link.addEventListener('click', event => {
+                    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                        return;
+                    }
+
+                    const target = link.getAttribute('target');
+                    const href = link.getAttribute('href');
+                    if (target === '_blank' || !href || href.startsWith('#') || href.startsWith('javascript:') || link.hasAttribute('download')) {
+                        return;
+                    }
+
+                    pageLoadingBar?.classList.add('is-loading');
                 });
             });
 

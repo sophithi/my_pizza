@@ -11,11 +11,11 @@ class ExchangeRateService
 {
     public function usdToKhr(): array
     {
-        return Cache::remember('live_exchange_rate_usd_khr', now()->addHours(2), function () {
+        return Cache::remember('live_exchange_rate_usd_khr', now()->addHours(12), function () {
             $fallbackRate = (float) ExchangeRate::getUSDtoKHRRate();
 
             try {
-                $response = Http::timeout(3)->get(config('services.exchange_rate.url'));
+                $response = Http::timeout(1)->get(config('services.exchange_rate.url'));
 
                 if ($response->successful()) {
                     $rate = (float) data_get($response->json(), 'rates.KHR');
