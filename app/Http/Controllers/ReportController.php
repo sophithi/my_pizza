@@ -124,10 +124,8 @@ class ReportController extends Controller
         $oldDebtKhr = $oldDebtPayments->sum('paid_amount_khr');
         $totalOldDebt = (float) $oldDebt;
         $totalOldDebtKhr = (float) $oldDebtKhr;
-        // Match the dashboard and payment ledger: this is the actual amount
-        // collected today, excluding payments settling older orders.
-        $totalPaidExcludingOldDebt = max(0, (float) $income - $totalOldDebt);
-        $totalPaidExcludingOldDebtKhr = max(0, (float) $incomeKhr - $totalOldDebtKhr);
+        $totalPaidExcludingOldDebt = max(0, (float) $grossSales - $unpaid);
+        $totalPaidExcludingOldDebtKhr = max(0, (float) $grossSalesKhr - $unpaidKhr);
         $oldDebtCount = $oldDebtPayments->count();
 
         $purchases = Purchase::whereDate('purchase_date', $reportDate)
@@ -735,7 +733,9 @@ class ReportController extends Controller
             $totalAmt = (float) $order->total_amount;
             $totalKhrAmt = (float) $order->totalKhr();
             $paidAmt = (float) $order->payments->sum('paid_amount');
-            $paidKhrAmt = (float) $order->payments->sum('paid_amount_khr');
+            $paidKhrAmt = (float) $order->payments->sum(fn($payment) =>
+                $payment->paid_amount_khr ?: ((float) $payment->paid_amount * self::EXCHANGE_RATE)
+            );
 
             if ($order->payments->isEmpty() && $order->payment_status === 'paid') {
                 $paidAmt = $totalAmt;
@@ -791,14 +791,10 @@ class ReportController extends Controller
             });
         }
 
-        // Dashboard payment totals are based on payments recorded in the
-        // selected period, matching the Payments and Daily reports.
-        $totalPaid = (float) $periodPayments->sum('paid_amount');
-        $totalPaidKhr = (float) $periodPayments->sum('paid_amount_khr');
         $totalOldDebt = (float) $oldDebtPayments->sum('paid_amount');
         $totalOldDebtKhr = (float) $oldDebtPayments->sum('paid_amount_khr');
-        $totalPaidExcludingOldDebt = max(0, $totalPaid - $totalOldDebt);
-        $totalPaidExcludingOldDebtKhr = max(0, $totalPaidKhr - $totalOldDebtKhr);
+        $totalPaidExcludingOldDebt = $totalPaid;
+        $totalPaidExcludingOldDebtKhr = $totalPaidKhr;
         $oldDebtCount = $oldDebtPayments->count();
 
         $recentOrders = (clone $query)->with(['customer', 'items'])->latest('order_date')->limit(5)->get();
