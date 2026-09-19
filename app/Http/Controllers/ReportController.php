@@ -764,6 +764,31 @@ class ReportController extends Controller
             }
         }
 
+        if ($dateRange['start'] && $dateRange['end']) {
+            $oldDebtOrders = Order::where('status', '!=', 'cancelled')
+                ->whereDate('order_date', '<', $dateRange['start'])
+                ->whereHas('payments', fn($q) => $q->whereBetween('created_at', [
+                    $dateRange['start']->copy()->startOfDay(),
+                    $dateRange['end']->copy()->endOfDay(),
+                ]))
+                ->with(['items', 'payments'])
+                ->get();
+
+            foreach ($oldDebtOrders as $order) {
+                $paidKhrAmt = (float) $order->payments->sum(fn($payment) =>
+                    $payment->paid_amount_khr ?: ((float) $payment->paid_amount * self::EXCHANGE_RATE)
+                );
+
+                if ($order->payments->isEmpty() && $order->payment_status === 'paid') {
+                    $paidKhrAmt = (float) $order->totalKhr();
+                }
+
+                if ($paidKhrAmt >= (float) $order->totalKhr()) {
+                    $paidOrdersCount++;
+                }
+            }
+        }
+
         // Old debt payments collected in this period
         if ($dateRange['start'] && $dateRange['end']) {
             $periodPayments = Payment::with('order')
@@ -791,10 +816,16 @@ class ReportController extends Controller
             });
         }
 
-        $totalOldDebt = (float) $oldDebtPayments->sum('paid_amount');
-        $totalOldDebtKhr = (float) $oldDebtPayments->sum('paid_amount_khr');
         $totalPaidExcludingOldDebt = $totalPaid;
         $totalPaidExcludingOldDebtKhr = $totalPaidKhr;
+        $totalPaid = (float) $periodPayments->sum('paid_amount');
+        $totalPaidKhr = (float) $periodPayments->sum(fn($payment) =>
+            $payment->paid_amount_khr ?: ((float) $payment->paid_amount * self::EXCHANGE_RATE)
+        );
+        $totalOldDebt = (float) $oldDebtPayments->sum('paid_amount');
+        $totalOldDebtKhr = (float) $oldDebtPayments->sum(fn($payment) =>
+            $payment->paid_amount_khr ?: ((float) $payment->paid_amount * self::EXCHANGE_RATE)
+        );
         $oldDebtCount = $oldDebtPayments->count();
 
         $recentOrders = (clone $query)->with(['customer', 'items'])->latest('order_date')->limit(5)->get();
