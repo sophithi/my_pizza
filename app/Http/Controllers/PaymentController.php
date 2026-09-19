@@ -226,21 +226,21 @@ class PaymentController extends Controller
 
     private function buildStatsFromRows($all, ?string $dateFrom = null, ?string $dateTo = null): array
     {
-        // Actual collected income in this period (payments recorded in this date range)
         if ($dateFrom && $dateTo) {
             $periodPayments = Payment::with('lines')
                 ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
                 ->get();
-            $collected = (float) $periodPayments->sum('paid_amount');
-            $collectedKhr = (float) $periodPayments->sum('paid_amount_khr');
             $methodBreakdown = $this->buildMethodBreakdownFromPayments($periodPayments);
         } else {
-            $collected = (float) $all->sum('paid_amount');
-            $collectedKhr = (float) $all->sum('paid_amount_khr');
             $methodBreakdown = $this->buildMethodBreakdown($all);
         }
 
         $oldDebtRows = $all->where('is_old_debt', true);
+        $currentRows = $all->filter(function ($row) {
+            return !$row->is_old_debt && ($row->order_status ?? null) !== 'cancelled';
+        });
+        $collected = (float) $currentRows->sum(fn($row) => max(0, (float) $row->total_amount - (float) $row->balance));
+        $collectedKhr = (float) $currentRows->sum(fn($row) => max(0, (float) $row->total_amount_khr - (float) $row->balance_khr));
         $oldDebtCollected = (float) $oldDebtRows->sum(fn($row) =>
             $dateFrom && $dateTo ? ($row->period_paid_amount ?? 0) : $row->paid_amount
         );
@@ -248,17 +248,14 @@ class PaymentController extends Controller
             $dateFrom && $dateTo ? ($row->period_paid_amount_khr ?? 0) : $row->paid_amount_khr
         );
 
-        $currentOutstandingRows = $all->filter(function ($row) {
-            return !$row->is_old_debt && ($row->order_status ?? null) !== 'cancelled';
-        });
-        $currentOutstanding = (float) $currentOutstandingRows->sum('balance');
-        $currentOutstandingKhr = (float) $currentOutstandingRows->sum('balance_khr');
+        $currentOutstanding = (float) $currentRows->sum('balance');
+        $currentOutstandingKhr = (float) $currentRows->sum('balance_khr');
 
         return [
             'collected'              => $collected,
             'collected_khr'          => $collectedKhr,
-            'collected_excluding_old_debt' => max(0, $collected - $oldDebtCollected),
-            'collected_excluding_old_debt_khr' => max(0, $collectedKhr - $oldDebtCollectedKhr),
+            'collected_excluding_old_debt' => $collected,
+            'collected_excluding_old_debt_khr' => $collectedKhr,
             'outstanding'            => $currentOutstanding,
             'outstanding_khr'        => $currentOutstandingKhr,
             'old_debt_collected'     => $oldDebtCollected,
