@@ -826,6 +826,8 @@ class ReportController extends Controller
         $totalOldDebtKhr = (float) $oldDebtPayments->sum(fn($payment) =>
             $payment->paid_amount_khr ?: ((float) $payment->paid_amount * self::EXCHANGE_RATE)
         );
+        $totalPaid = $totalPaidExcludingOldDebt + $totalOldDebt;
+        $totalPaidKhr = $totalPaidExcludingOldDebtKhr + $totalOldDebtKhr;
         $oldDebtCount = $oldDebtPayments->count();
 
         $recentOrders = (clone $query)->with(['customer', 'items'])->latest('order_date')->limit(5)->get();
