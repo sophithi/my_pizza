@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Salesperson;
+use App\Models\OrderItem;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class SalespersonController extends Controller
@@ -68,8 +70,55 @@ class SalespersonController extends Controller
             }
         }
 
+        // 3 core pizza products: S (13), M (14), L (15)
+        $targetIds = [13, 14, 15];
+
+        // 1. Overall Pizza Sales Summary for this Salesperson in the period
+        $productSalesQuery = OrderItem::query()
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('customers', 'orders.customer_id', '=', 'customers.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->where('customers.salesperson_id', $salesperson->id)
+            ->whereIn('order_items.product_id', $targetIds)
+            ->where('orders.status', '!=', 'cancelled')
+            ->whereNull('orders.deleted_at');
+
+        if ($start) {
+            $productSalesQuery->where('orders.order_date', '>=', $start);
+        }
+        if ($end) {
+            $productSalesQuery->where('orders.order_date', '<=', $end);
+        }
+
+        $productSummary = (clone $productSalesQuery)
+            ->groupBy('order_items.product_id', 'products.name', 'products.unit', 'products.image', 'products.sku')
+            ->selectRaw('order_items.product_id as id, products.name, products.unit, products.image, products.sku, SUM(order_items.quantity) as total_qty, COUNT(DISTINCT customers.id) as customer_count, SUM(order_items.total_price) as total_usd')
+            ->orderByRaw("FIELD(order_items.product_id, 13, 14, 15)")
+            ->get();
+
+        $totalPizzasSold = $productSummary->sum('total_qty');
+        $totalPizzaSalesUsd = $productSummary->sum('total_usd');
+
+        // Total orders in the period
+        $ordersCountQuery = Order::query()
+            ->join('customers', 'orders.customer_id', '=', 'customers.id')
+            ->where('customers.salesperson_id', $salesperson->id)
+            ->where('orders.status', '!=', 'cancelled')
+            ->whereNull('orders.deleted_at');
+
+        if ($start) {
+            $ordersCountQuery->where('orders.order_date', '>=', $start);
+        }
+        if ($end) {
+            $ordersCountQuery->where('orders.order_date', '<=', $end);
+        }
+
+        $totalPeriodOrders = $ordersCountQuery->count();
+
+        // 2. Customers query
         $customersQuery = $salesperson->customers()
             ->withCount(['orders' => function ($q) use ($start, $end) {
+                $q->where('status', '!=', 'cancelled');
                 if ($start) {
                     $q->where('order_date', '>=', $start);
                 }
@@ -78,6 +127,7 @@ class SalespersonController extends Controller
                 }
             }])
             ->withSum(['orders as total_spent' => function ($q) use ($start, $end) {
+                $q->where('status', '!=', 'cancelled');
                 if ($start) {
                     $q->where('order_date', '>=', $start);
                 }
@@ -88,7 +138,45 @@ class SalespersonController extends Controller
 
         $customers = $customersQuery->orderBy('name')->paginate(15)->withQueryString();
 
-        return view('salespersons.show', compact('salesperson', 'customers'));
+        // 3. For paginated customers, load S, M, L pizza quantities
+        $customerIds = $customers->pluck('id');
+        $customerPizzas = [];
+
+        if ($customerIds->isNotEmpty()) {
+            $itemsQuery = OrderItem::query()
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->whereIn('orders.customer_id', $customerIds)
+                ->whereIn('order_items.product_id', $targetIds)
+                ->where('orders.status', '!=', 'cancelled')
+                ->whereNull('orders.deleted_at');
+
+            if ($start) {
+                $itemsQuery->where('orders.order_date', '>=', $start);
+            }
+            if ($end) {
+                $itemsQuery->where('orders.order_date', '<=', $end);
+            }
+
+            $items = $itemsQuery
+                ->groupBy('orders.customer_id', 'order_items.product_id')
+                ->selectRaw('orders.customer_id, order_items.product_id, SUM(order_items.quantity) as qty')
+                ->get();
+
+            foreach ($items as $item) {
+                $customerPizzas[$item->customer_id][$item->product_id] = (int) $item->qty;
+            }
+        }
+
+        return view('salespersons.show', compact(
+            'salesperson',
+            'customers',
+            'productSummary',
+            'totalPizzasSold',
+            'totalPizzaSalesUsd',
+            'totalPeriodOrders',
+            'customerPizzas',
+            'period'
+        ));
     }
 
     public function edit(Salesperson $salesperson)

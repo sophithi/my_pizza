@@ -1,354 +1,621 @@
 @extends('layouts.app')
 
-@section('title', 'Salesperson Details')
+@section('title', $salesperson->name . ' - ភ្នាក់ងារលក់')
 
 @push('styles')
     <style>
-        .profile-container {
+        .page-wrap {
             max-width: 1400px;
             margin: 0 auto;
         }
 
-        .profile-header {
+        /* Header */
+        .page-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
-            gap: 16px;
+            margin-bottom: 20px;
+            gap: 12px;
         }
 
-        .profile-title {
-            font-size: 28px;
-            font-weight: 900;
-            color: #111827;
+        .page-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
             margin: 0;
         }
 
-        .btn-action-back {
-            background: #f1f5f9;
+        .btn-back {
+            background: #fff;
             border: 1px solid #e2e8f0;
             color: #475569;
             font-weight: 700;
             border-radius: 8px;
-            padding: 10px 16px;
-            font-size: 14px;
+            padding: 8px 14px;
+            font-size: 13px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            transition: all .15s;
         }
 
-        .btn-action-back:hover {
-            background: #e2e8f0;
-            color: #334155;
+        .btn-back:hover {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #cbd5e1;
         }
 
-        .info-card {
+        /* Info Card */
+        .person-card {
             background: #fff;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .05);
-            margin-bottom: 24px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 20px 24px;
+            margin-bottom: 18px;
             display: flex;
-            gap: 24px;
+            gap: 20px;
             align-items: center;
+            justify-content: space-between;
             flex-wrap: wrap;
         }
 
-        .avatar-wrap {
-            width: 72px;
-            height: 72px;
+        .person-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .person-avatar {
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            background: #ff6b35;
+            background: #e85d24;
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            font-weight: 900;
+            font-size: 24px;
+            font-weight: 800;
         }
 
-        .profile-details {
-            flex: 1;
-            min-width: 240px;
-        }
-
-        .details-name {
-            font-size: 22px;
-            font-weight: 900;
-            color: #111827;
-            margin: 0;
+        .person-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 6px 0;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .details-meta {
-            margin-top: 8px;
+        .person-meta {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             flex-wrap: wrap;
-            font-size: 14px;
+            font-size: 13.5px;
             color: #64748b;
         }
 
-        .details-meta span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-pill {
-            align-items: center;
-            border-radius: 999px;
+        /* Status & Badges */
+        .status-badge {
             display: inline-flex;
-            font-size: 12px;
-            font-weight: 800;
-            gap: 6px;
-            padding: 4px 10px;
+            align-items: center;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 999px;
         }
 
-        .status-active {
-            background: #d1fae5;
-            color: #065f46;
+        .status-badge.active {
+            background: #dcfce7;
+            color: #166534;
         }
 
-        .status-inactive {
+        .status-badge.inactive {
             background: #fee2e2;
             color: #991b1b;
         }
 
-        .status-topgrade {
-            background: #fef3c7;
-            color: #854d0e;
-        }
-
-        .channel-pill {
-            border-radius: 999px;
-            display: inline-flex;
-            align-items: center;
+        .channel-tag {
             font-size: 11px;
-            font-weight: 800;
-            padding: 3px 8px;
-            gap: 4px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            display: inline-block;
         }
 
-        .channel-facebook {
+        .channel-tag.facebook {
             background: #e7f3ff;
             color: #0a66c2;
         }
 
-        .channel-telegram {
+        .channel-tag.telegram {
             background: #e0f7ff;
             color: #0088cc;
         }
 
-        .customers-card {
+        /* Filter Bar */
+        .filter-bar {
             background: #fff;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .05);
-        }
-
-        .card-header {
-            padding: 18px 24px;
-            border-bottom: 1px solid #edf0f4;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 18px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .card-title {
-            font-size: 18px;
-            font-weight: 900;
-            color: #111827;
-            margin: 0;
+        .filter-tabs {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
-        .card-title i {
+        .filter-tab {
+            font-size: 12.5px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            background: #fff;
+            transition: all .15s;
+        }
+
+        .filter-tab:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .filter-tab.active {
+            background: #e85d24;
+            border-color: #e85d24;
+            color: #fff;
+        }
+
+        /* KPI Row (3 boxes) */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .kpi-box {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 18px;
+        }
+
+        .kpi-box-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .kpi-box-val {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .kpi-box-val.accent {
             color: #e85d24;
         }
 
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .customers-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .customers-table th {
-            background: #f8fafc;
-            padding: 14px 20px;
-            font-size: 13px;
-            font-weight: 800;
-            color: #475569;
-            text-align: left;
-            border-bottom: 1px solid #edf2f7;
-        }
-
-        .customers-table td {
-            padding: 14px 20px;
-            font-size: 14px;
-            color: #334155;
-            border-bottom: 1px solid #edf2f7;
-        }
-
-        .customers-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .btn-view {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
+        /* Tables & Cards */
+        .panel-card {
             background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .panel-head {
+            padding: 14px 18px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .btn-toggle-panel {
+            font-size: 12px;
+            font-weight: 700;
             color: #64748b;
-            transition: all .2s;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 4px 10px;
+            cursor: pointer;
             text-decoration: none;
         }
 
-        .btn-view:hover {
+        .btn-toggle-panel:hover {
+            color: #0f172a;
+            background: #f8fafc;
+        }
+
+        .clean-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .clean-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 800;
+            font-size: 12.5px;
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        .clean-table td {
+            padding: 12px 14px;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .clean-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .clean-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Size Qty Badges */
+        .size-qty {
+            display: inline-block;
+            min-width: 28px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .size-qty.s {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #dcfce7;
+        }
+
+        .size-qty.m {
             background: #eff6ff;
-            color: #2563eb;
-            border-color: #bfdbfe;
+            color: #1d4ed8;
+            border: 1px solid #dbeafe;
+        }
+
+        .size-qty.l {
+            background: #faf5ff;
+            color: #7e22ce;
+            border: 1px solid #f3e8ff;
+        }
+
+        .size-qty.total {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #ffedd5;
+            font-size: 13.5px;
+        }
+
+        .size-qty.zero {
+            color: #94a3b8;
+            font-weight: normal;
+        }
+
+        .badge-qty {
+            background: #f1f5f9;
+            color: #0f172a;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .btn-edit-main {
+            background: #e85d24;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all .15s;
+        }
+
+        .btn-edit-main:hover {
+            background: #d04b16;
+            color: #fff;
+        }
+
+        .btn-view-icon {
+            color: #64748b;
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .btn-view-icon:hover {
+            color: #e85d24;
+            border-color: #fed7aa;
+            background: #fff7ed;
         }
     </style>
 @endpush
 
 @section('content')
-    <div class="container-fluid py-4 profile-container">
-        <div class="profile-header">
+    <div class="container-fluid py-4 page-wrap">
+        <!-- Header -->
+        <div class="page-header">
             <div>
-                <h2 class="profile-title">លម្អិតភ្នាក់ងារលក់</h2>
+                <h2 class="page-title">លម្អិតភ្នាក់ងារលក់</h2>
             </div>
             <div>
-                <a href="{{ route('salespersons.index') }}" class="btn-action-back">
-                    <i class="fas fa-arrow-left"></i> ត្រឡប់ក្រោយ
+                <a href="{{ route('salespersons.index') }}" class="btn-back">
+                    ត្រឡប់ក្រោយ
                 </a>
             </div>
         </div>
 
-        <div class="info-card">
-            <div class="avatar-wrap">
-                {{ strtoupper(substr($salesperson->name, 0, 1)) }}
-            </div>
-            <div class="profile-details">
-                <h3 class="details-name">
-                    {{ $salesperson->name }}
-                    @if($salesperson->status == 'active')
-                        <span class="status-pill status-active"><i class="fas fa-check-circle"></i> សកម្ម</span>
-                    @else
-                        <span class="status-pill status-inactive"><i class="fas fa-times-circle"></i> អសកម្ម</span>
-                    @endif
-                </h3>
-                <div class="details-meta">
-                    <span>
-                        <i class="fas fa-phone-alt"></i> {{ $salesperson->phone ?? 'គ្មានលេខទូរស័ព្ទ' }}
-                    </span>
-                    <span>
-                        <i class="fas fa-users"></i> អតិថិជនសរុប៖ {{ number_format($salesperson->customers()->count()) }} នាក់
-                    </span>
+        <!-- Salesperson Information Card -->
+        <div class="person-card">
+            <div class="person-left">
+                <div class="person-avatar">
+                    {{ strtoupper(substr($salesperson->name, 0, 1)) }}
+                </div>
+                <div>
+                    <h3 class="person-name">
+                        {{ $salesperson->name }}
+                        @if($salesperson->status == 'active')
+                            <span class="status-badge active">សកម្ម</span>
+                        @else
+                            <span class="status-badge inactive">អសកម្ម</span>
+                        @endif
+                    </h3>
+                    <div class="person-meta">
+                        <span>ទូរស័ព្ទ៖ <strong>{{ $salesperson->phone ?? '—' }}</strong></span>
+                        <span>អតិថិជន៖ <strong>{{ number_format($salesperson->customers()->count()) }} នាក់</strong></span>
+                    </div>
                 </div>
             </div>
             <div>
-                <a href="{{ route('salespersons.edit', $salesperson) }}" class="sales-btn sales-btn-primary" style="padding: 10px 20px;">
-                    <i class="fas fa-edit"></i> កែប្រែព័ត៌មាន
+                <a href="{{ route('salespersons.edit', $salesperson) }}" class="btn-edit-main">
+                    កែប្រែ
                 </a>
             </div>
         </div>
 
-        <div class="customers-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-users"></i> អតិថិជនដែលគ្រប់គ្រង (Customers Managed)
-                </h3>
-            </div>
-
-            {{-- Period Filter --}}
-            <div class="mb-2 d-flex align-items-center gap-2 flex-wrap" style="padding: 16px 24px 8px 24px;">
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-tabs">
                 @foreach(['all' => 'គ្រប់ពេល', 'today' => 'ថ្ងៃនេះ', 'month' => 'ខែនេះ', 'custom' => 'កំណត់ថ្ងៃ'] as $key => $label)
                     <a href="{{ route('salespersons.show', [$salesperson, 'period' => $key]) }}"
-                        style="font-size: 12px; font-weight: 800; border-radius: 9999px; padding: 5px 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; border: 1px solid {{ request('period', 'all') === $key ? '#e85d24' : '#cbd5e1' }}; color: {{ request('period', 'all') === $key ? '#fff' : '#475569' }}; background-color: {{ request('period', 'all') === $key ? '#e85d24' : '#fff' }}; transition: all 0.2s;">
+                       class="filter-tab {{ request('period', 'all') === $key ? 'active' : '' }}">
                         {{ $label }}
                     </a>
                 @endforeach
             </div>
 
             @if(request('period') === 'custom')
-                <form method="GET" action="{{ route('salespersons.show', $salesperson) }}" class="d-flex gap-2 align-items-center flex-wrap" style="padding: 0 24px 16px 24px;">
+                <form method="GET" action="{{ route('salespersons.show', $salesperson) }}" class="d-flex gap-2 align-items-center flex-wrap m-0">
                     <input type="hidden" name="period" value="custom">
-                    <label class="small text-muted mb-0 fw-bold" style="font-size: 13px;">ពីថ្ងៃទី</label>
-                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-control form-control-sm" style="width:160px; min-height: 34px; padding: 4px 8px; font-size: 13px;">
-                    <label class="small text-muted mb-0 fw-bold" style="font-size: 13px;">ដល់ថ្ងៃទី</label>
-                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control form-control-sm" style="width:160px; min-height: 34px; padding: 4px 8px; font-size: 13px;">
-                    <button type="submit" class="sales-btn sales-btn-primary" style="padding: 6px 12px; font-size: 13px; border-radius: 6px;">អនុវត្ត</button>
+                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-control form-control-sm" style="width:140px; font-size:12.5px;">
+                    <span class="text-muted small">ដល់</span>
+                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-control form-control-sm" style="width:140px; font-size:12.5px;">
+                    <button type="submit" class="btn-edit-main" style="padding: 5px 12px; font-size: 12.5px;">អនុវត្ត</button>
                 </form>
             @endif
+        </div>
+
+        <!-- KPI Row (3 boxes: Customers, Orders, Pizzas) -->
+        <div class="kpi-row">
+            <div class="kpi-box">
+                <div class="kpi-box-label">អតិថិជនសរុប</div>
+                <div class="kpi-box-val">{{ number_format($salesperson->customers()->count()) }} នាក់</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-box-label">ចំនួនកុម្ម៉ង់</div>
+                <div class="kpi-box-val">{{ number_format($totalPeriodOrders ?? 0) }} ដង</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-box-label">នំសរុប (S+M+L)</div>
+                <div class="kpi-box-val accent">{{ number_format($totalPizzasSold ?? 0) }} នំ</div>
+            </div>
+        </div>
+
+        <!-- 1. Pizza Products Summary Panel (S, M, L) -->
+        <div class="panel-card">
+            <div class="panel-head">
+                <h3 class="panel-title">
+                    សង្ខេបការលក់នំភីហ្សា
+                </h3>
+                <button type="button" class="btn-toggle-panel" onclick="toggleProductSummary(this)">
+                    លាក់/បង្ហាញ
+                </button>
+            </div>
+
+            <div id="productSummaryBody">
+                @if($productSummary->isEmpty())
+                    <div class="p-3 text-center text-muted small">
+                        គ្មានការបញ្ជាទិញនំភីហ្សាក្នុងចន្លោះពេលនេះទេ។
+                    </div>
+                @else
+                    <div class="table-responsive">
+                        <table class="clean-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>ទំហំនំ (Pizza Size)</th>
+                                    <th class="text-center">ចំនួនលក់សរុប</th>
+                                    <th class="text-center">អតិថិជនបានទិញ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($productSummary as $index => $item)
+                                    <tr>
+                                        <td class="text-muted fw-bold">{{ $index + 1 }}</td>
+                                        <td class="fw-bold">
+                                            @if($item->id == 13)
+                                                <span class="size-qty s me-1">S</span> នំតូចខ្នាត (S 15cm)
+                                            @elseif($item->id == 14)
+                                                <span class="size-qty m me-1">M</span> នំកណ្តាលខ្នាត (M 20cm)
+                                            @elseif($item->id == 15)
+                                                <span class="size-qty l me-1">L</span> នំធំខ្នាត (L 25cm)
+                                            @else
+                                                {{ $item->name }}
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="size-qty total">
+                                                {{ number_format($item->total_qty) }} នំ
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-muted">{{ number_format($item->customer_count) }} នាក់</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- 2. Customers Table with S, M, L Columns -->
+        <div class="panel-card">
+            <div class="panel-head">
+                <h3 class="panel-title">
+                    បញ្ជីអតិថិជន & បរិមាណនំតាមទំហំ
+                </h3>
+                <span class="text-muted small">សរុប {{ $customers->total() }} នាក់</span>
+            </div>
 
             <div class="table-responsive">
-                <table class="customers-table">
+                <table class="clean-table">
                     <thead>
                         <tr>
                             <th>អតិថិជន</th>
                             <th>ប្រភេទ</th>
                             <th>លេខទូរស័ព្ទ</th>
-                            <th>ទីតាំង/ខេត្ត</th>
-                            <th class="text-right" style="text-align: right;">ចំនួនកម្មង់</th>
-                            <th>ស្ថានភាព</th>
-                            <th>សកម្មភាព</th>
+                            <th>ទីតាំង</th>
+                            <th class="text-center">កុម្ម៉ង់</th>
+                            <th class="text-center" title="នំតូចខ្នាត (S 15cm)">នំតូច (S)</th>
+                            <th class="text-center" title="នំកណ្តាលខ្នាត (M 20cm)">នំកណ្តាល (M)</th>
+                            <th class="text-center" title="នំធំខ្នាត (L 25cm)">នំធំ (L)</th>
+                            <th class="text-center" title="នំសរុបទាំងអស់">នំសរុប</th>
+                            <th class="text-center">ស្ថានភាព</th>
+                            <th class="text-center" style="width: 50px;">មើល</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($customers as $customer)
+                            @php
+                                $qtyS = $customerPizzas[$customer->id][13] ?? 0;
+                                $qtyM = $customerPizzas[$customer->id][14] ?? 0;
+                                $qtyL = $customerPizzas[$customer->id][15] ?? 0;
+                                $totalPizza = $qtyS + $qtyM + $qtyL;
+                            @endphp
                             <tr>
-                                <td class="fw-bold" style="font-weight: 800;">
-                                    <a href="{{ route('customers.show', $customer) }}" style="color: #e85d24; text-decoration: none;">
+                                <td class="fw-bold">
+                                    <a href="{{ route('customers.show', $customer) }}" style="color: #0f172a; text-decoration: none;">
                                         {{ $customer->name }}
                                     </a>
                                 </td>
                                 <td>
                                     @if($customer->type == 'facebook')
-                                        <span class="channel-pill channel-facebook"><i class="fab fa-facebook-f"></i> Facebook</span>
+                                        <span class="channel-tag facebook">Facebook</span>
                                     @elseif($customer->type == 'telegram')
-                                        <span class="channel-pill channel-telegram"><i class="fab fa-telegram-plane"></i> Telegram</span>
+                                        <span class="channel-tag telegram">Telegram</span>
                                     @else
-                                        <span class="text-muted">—</span>
+                                        <span class="text-muted small">—</span>
                                     @endif
                                 </td>
-                                <td>{{ $customer->phone ?? '—' }}</td>
-                                <td>{{ $customer->city ?? $customer->address ?? '—' }}</td>
-                                <td class="text-right" style="text-align: right;">
-                                    {{ number_format($customer->orders_count) }} ដង
+                                <td><span class="text-muted">{{ $customer->phone ?? '—' }}</span></td>
+                                <td><span class="text-muted small">{{ $customer->city ?? $customer->address ?? '—' }}</span></td>
+                                <td class="text-center">
+                                    <span class="badge-qty">{{ number_format($customer->orders_count) }}</span>
                                 </td>
-                                <td>
+                                <td class="text-center">
+                                    @if($qtyS > 0)
+                                        <span class="size-qty s">{{ number_format($qtyS) }}</span>
+                                    @else
+                                        <span class="size-qty zero">—</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($qtyM > 0)
+                                        <span class="size-qty m">{{ number_format($qtyM) }}</span>
+                                    @else
+                                        <span class="size-qty zero">—</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($qtyL > 0)
+                                        <span class="size-qty l">{{ number_format($qtyL) }}</span>
+                                    @else
+                                        <span class="size-qty zero">—</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($totalPizza > 0)
+                                        <span class="size-qty total">{{ number_format($totalPizza) }}</span>
+                                    @else
+                                        <span class="size-qty zero">0</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
                                     @if($customer->status == 'active')
-                                        <span class="status-pill status-active"><i class="fas fa-check-circle"></i> សកម្ម</span>
+                                        <span class="status-badge active">សកម្ម</span>
                                     @elseif($customer->status == 'inactive')
-                                        <span class="status-pill status-inactive"><i class="fas fa-times-circle"></i> អសកម្ម</span>
+                                        <span class="status-badge inactive">អសកម្ម</span>
                                     @else
-                                        <span class="text-muted">{{ $customer->status ?? 'រង់ចាំ' }}</span>
+                                        <span class="text-muted small">{{ $customer->status ?? '—' }}</span>
                                     @endif
                                 </td>
-                                <td>
-                                    <a href="{{ route('customers.show', $customer) }}" class="btn-view" title="មើលលម្អិត">
-                                        <i class="fas fa-eye"></i>
+                                <td class="text-center">
+                                    <a href="{{ route('customers.show', $customer) }}" class="btn-view-icon" title="មើលព័ត៌មាន">
+                                        មើល
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">
+                                <td colspan="11" class="text-center py-4 text-muted small">
                                     មិនទាន់មានអតិថិជនដែលគ្រប់គ្រងដោយភ្នាក់ងារលក់នេះទេ។
                                 </td>
                             </tr>
@@ -356,6 +623,7 @@
                     </tbody>
                 </table>
             </div>
+
             @if($customers->hasPages())
                 <div class="card-footer bg-white border-top py-3 px-4">
                     {{ $customers->links('pagination::bootstrap-5') }}
@@ -365,3 +633,15 @@
     </div>
 @endsection
 
+@push('scripts')
+    <script>
+        function toggleProductSummary(btn) {
+            const body = document.getElementById('productSummaryBody');
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+            } else {
+                body.style.display = 'none';
+            }
+        }
+    </script>
+@endpush

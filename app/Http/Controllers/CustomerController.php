@@ -92,16 +92,66 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Customer $customer)
+    public function show(Request $request, Customer $customer)
     {
-        $customer->load(['salesperson', 'orders' => fn($q) => $q->with(['items', 'invoice'])->latest('order_date')]);
+        $customer->load('salesperson');
+
+        $allOrders = $customer->orders()->where('status', '!=', 'cancelled')->get();
         $summary = [
-            'orders' => $customer->orders->count(),
-            'spent' => $customer->orders->sum('total_amount'),
-            'paid' => $customer->orders->where('payment_status', 'paid')->count(),
-            'unpaid' => $customer->orders->where('payment_status', 'unpaid')->count(),
+            'orders' => $allOrders->count(),
+            'spent' => $allOrders->sum('total_amount'),
+            'paid' => $allOrders->where('payment_status', 'paid')->count(),
+            'unpaid' => $allOrders->where('payment_status', 'unpaid')->count(),
         ];
-        return view('customers.show', compact('customer', 'summary'));
+
+        $period = $request->get('period', 'all');
+        $status = $request->get('status', 'all');
+        $search = $request->get('search');
+
+        $ordersQuery = $customer->orders()
+            ->with(['items.product', 'invoice'])
+            ->latest('order_date');
+
+        // Filter by period
+        if ($period === 'today') {
+            $ordersQuery->whereDate('order_date', \Carbon\Carbon::today());
+        } elseif ($period === 'month') {
+            $ordersQuery->whereBetween('order_date', [
+                \Carbon\Carbon::today()->startOfMonth(),
+                \Carbon\Carbon::today()->endOfMonth(),
+            ]);
+        } elseif ($period === 'custom') {
+            if ($request->filled('date_from')) {
+                $ordersQuery->where('order_date', '>=', \Carbon\Carbon::parse($request->input('date_from'))->startOfDay());
+            }
+            if ($request->filled('date_to')) {
+                $ordersQuery->where('order_date', '<=', \Carbon\Carbon::parse($request->input('date_to'))->endOfDay());
+            }
+        }
+
+        // Filter by status
+        if ($status === 'paid') {
+            $ordersQuery->where('payment_status', 'paid');
+        } elseif ($status === 'unpaid') {
+            $ordersQuery->where('payment_status', 'unpaid')->where('status', '!=', 'cancelled');
+        } elseif ($status === 'partial') {
+            $ordersQuery->where('payment_status', 'partial');
+        } elseif ($status === 'cancelled') {
+            $ordersQuery->where('status', 'cancelled');
+        }
+
+        // Search by invoice number or order ID
+        if (!empty($search)) {
+            $ordersQuery->where(function ($q) use ($search) {
+                $q->whereHas('invoice', function ($iq) use ($search) {
+                    $iq->where('invoice_number', 'like', '%' . $search . '%');
+                })->orWhere('id', 'like', '%' . $search . '%');
+            });
+        }
+
+        $orders = $ordersQuery->paginate(15)->withQueryString();
+
+        return view('customers.show', compact('customer', 'summary', 'orders', 'period', 'status', 'search'));
     }
 
     /**
