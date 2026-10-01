@@ -4,7 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+/**
+ * @property int $id
+ * @property string $status
+ * @property string $payment_status
+ * @property string $notes
+ * @property float $total_amount
+ * @property \Carbon\Carbon $order_date
+ * @property-read Customer|null $customer
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Payment> $payments
+ */
 class Order extends Model
 {
     use SoftDeletes;

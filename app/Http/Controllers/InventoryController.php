@@ -19,22 +19,26 @@ class InventoryController extends Controller
      */
     public function index(Request $request)
     {
-        if (!$request->has('period') && !$request->filled('date')) {
-            $request->merge(['period' => 'today']);
-        }
+        $statsRecord = Inventory::toBase()->selectRaw("
+            COUNT(*) as total,
+            COUNT(CASE WHEN quantity > reorder_level THEN 1 END) as in_stock,
+            COUNT(CASE WHEN quantity > 0 AND quantity <= reorder_level THEN 1 END) as low_stock,
+            COUNT(CASE WHEN quantity <= 0 THEN 1 END) as out_stock
+        ")->first();
 
         $stats = [
-            'total' => Inventory::count(),
-            'in_stock' => Inventory::whereColumn('quantity', '>', 'reorder_level')->count(),
-            'low_stock' => Inventory::where('quantity', '>', 0)
-                ->whereColumn('quantity', '<=', 'reorder_level')
-                ->count(),
-            'out_stock' => Inventory::where('quantity', '<=', 0)->count(),
+            'total' => (int) ($statsRecord->total ?? 0),
+            'in_stock' => (int) ($statsRecord->in_stock ?? 0),
+            'low_stock' => (int) ($statsRecord->low_stock ?? 0),
+            'out_stock' => (int) ($statsRecord->out_stock ?? 0),
         ];
 
         $sort = $request->get('sort');
         $period = $request->get('period');
+        [$fromDate, $toDate] = $this->getDateRange($request);
+        $hasDateRange = (bool) ($fromDate || $toDate);
         $movementDate = $this->movementDateFromRequest($request);
+        $hasMovementFilter = $hasDateRange || $movementDate || in_array($period, ['month', 'year'], true);
         $query = Inventory::with('product');
 
         if ($request->filled('search')) {
@@ -62,7 +66,18 @@ class InventoryController extends Controller
             $query->whereRaw('LOWER(warehouse_location) = ?', [strtolower($request->get('warehouse'))]);
         }
 
-        if ($movementDate) {
+        if ($hasDateRange) {
+            $query->whereHas('movements', function ($movementQuery) use ($fromDate, $toDate) {
+                if ($fromDate && $toDate) {
+                    $movementQuery->whereDate('created_at', '>=', $fromDate)
+                        ->whereDate('created_at', '<=', $toDate);
+                } elseif ($fromDate) {
+                    $movementQuery->whereDate('created_at', '>=', $fromDate);
+                } else {
+                    $movementQuery->whereDate('created_at', '<=', $toDate);
+                }
+            });
+        } elseif ($movementDate) {
             $query->whereHas('movements', function ($movementQuery) use ($movementDate) {
                 $movementQuery->whereDate('created_at', $movementDate);
             });
@@ -77,7 +92,7 @@ class InventoryController extends Controller
             });
         }
 
-        if ($movementDate || in_array($period, ['month', 'year'], true) || $sort === 'day') {
+        if ($hasMovementFilter || $sort === 'day') {
             $query = $query->withMax('movements as last_movement_at', 'created_at')
                 ->orderByDesc('last_movement_at');
         } else {
@@ -95,7 +110,7 @@ class InventoryController extends Controller
             ->orderBy('warehouse_location')
             ->pluck('warehouse_location');
 
-        return view('inventory.index', compact('inventories', 'stats', 'movementDate', 'movementsByInventory', 'warehouses'));
+        return view('inventory.index', compact('inventories', 'stats', 'movementDate', 'movementsByInventory', 'warehouses', 'fromDate', 'toDate'));
     }
 
     /**
@@ -125,10 +140,58 @@ class InventoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Inventory $inventory)
+    public function show(Request $request, Inventory $inventory)
     {
         $inventory->load('product');
-        return view('inventory.show', compact('inventory'));
+
+        $totalIn = (int) $inventory->movements()->where('quantity_change', '>', 0)->sum('quantity_change');
+        $totalOut = (int) abs($inventory->movements()->where('quantity_change', '<', 0)->sum('quantity_change'));
+        $netChange = $totalIn - $totalOut;
+        $totalTransactions = $inventory->movements()->count();
+
+        $movementsQuery = $inventory->movements()->with(['user', 'order'])->latest('id');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $movementsQuery->where(function ($q) use ($search) {
+                $q->where('note', 'like', "%{$search}%")
+                    ->orWhere('order_id', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('type')) {
+            $type = $request->type;
+            if ($type === 'in') {
+                $movementsQuery->where('quantity_change', '>', 0);
+            } elseif ($type === 'out') {
+                $movementsQuery->where('quantity_change', '<', 0);
+            } else {
+                $movementsQuery->where('type', $type);
+            }
+        }
+
+        [$fromDate, $toDate] = $this->getDateRange($request);
+        if ($fromDate && $toDate) {
+            $movementsQuery->whereDate('created_at', '>=', $fromDate)
+                ->whereDate('created_at', '<=', $toDate);
+        } elseif ($fromDate) {
+            $movementsQuery->whereDate('created_at', '>=', $fromDate);
+        } elseif ($toDate) {
+            $movementsQuery->whereDate('created_at', '<=', $toDate);
+        } elseif ($request->get('period') === 'today') {
+            $movementsQuery->whereDate('created_at', today());
+        } elseif ($request->get('period') === 'yesterday') {
+            $movementsQuery->whereDate('created_at', today()->subDay());
+        } elseif ($request->get('period') === 'month') {
+            $movementsQuery->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
+        }
+
+        $movements = $movementsQuery->paginate(15)->withQueryString();
+
+        return view('inventory.show', compact('inventory', 'movements', 'totalIn', 'totalOut', 'netChange', 'totalTransactions'));
     }
 
     /**
@@ -174,15 +237,15 @@ class InventoryController extends Controller
     {
         $inventory = Inventory::findOrFail($id);
         $validated = request()->validate([
-            'quantity' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
             'note' => 'nullable|string|max:255',
         ]);
-        $quantity = $validated['quantity'];
+        $quantity = (int) $validated['quantity'];
         $note = trim($validated['note'] ?? '') ?: 'Quick stock update';
 
         DB::transaction(function () use ($inventory, $quantity, $note) {
             $before = (int) $inventory->quantity;
-            $after = (int) $quantity;
+            $after = $quantity;
             $inventory->update(['quantity' => $after]);
 
             if ($before !== $after) {
@@ -190,7 +253,7 @@ class InventoryController extends Controller
             }
         });
 
-        return redirect()->route('inventory.index')->with('success', 'បានកែប្រែចំនួនស្តុកដោយជោគជ័យ។');
+        return redirect()->back()->with('success', 'បានកែប្រែចំនួនស្តុកដោយជោគជ័យ។');
     }
 
     public function restock(Inventory $inventory)
@@ -209,9 +272,7 @@ class InventoryController extends Controller
             $this->recordManualMovement($inventory, 'stock_restock', $addedQuantity, $before, $after, 'Stock added to inventory');
         });
 
-        return redirect()
-            ->route('inventory.index', ['period' => 'today'])
-            ->with('success', 'បានបន្ថែមចំនួនទំនិញចូលស្តុកដោយជោគជ័យ។');
+        return redirect()->back()->with('success', 'បានបន្ថែមចំនួនទំនិញចូលស្តុកដោយជោគជ័យ។');
     }
 
     public function reduce(Inventory $inventory)
@@ -224,6 +285,12 @@ class InventoryController extends Controller
         $removedQuantity = (int) $validated['quantity'];
         $reason = trim($validated['reason']);
 
+        if ($removedQuantity > (int) $inventory->quantity) {
+            return redirect()->back()->withErrors([
+                'quantity' => 'ចំនួនដែលត្រូវកាត់ចេញមិនអាចលើសពីចំនួនក្នុងស្តុកបច្ចុប្បន្ន (' . number_format($inventory->quantity) . ') ឡើយ។'
+            ]);
+        }
+
         DB::transaction(function () use ($inventory, $removedQuantity, $reason) {
             $before = (int) $inventory->quantity;
             $inventory->decrement('quantity', $removedQuantity);
@@ -232,9 +299,15 @@ class InventoryController extends Controller
             $this->recordManualMovement($inventory, 'stock_reduce', -$removedQuantity, $before, $after, $reason);
         });
 
-        return redirect()
-            ->route('inventory.index', ['period' => 'today'])
-            ->with('success', 'បានកាត់ចំនួនទំនិញចេញពីស្តុកដោយជោគជ័យ។');
+        return redirect()->back()->with('success', 'បានកាត់ចំនួនទំនិញចេញពីស្តុកដោយជោគជ័យ។');
+    }
+
+    private function getDateRange(Request $request): array
+    {
+        $from = $request->get('from_date') ?: $request->get('start_date') ?: $request->get('from');
+        $to = $request->get('to_date') ?: $request->get('end_date') ?: $request->get('to');
+
+        return [$from ?: null, $to ?: null];
     }
 
     private function movementDateFromRequest(Request $request): ?string
@@ -285,9 +358,17 @@ class InventoryController extends Controller
     private function applyMovementDateFilter($query, Request $request): void
     {
         $period = $request->get('period');
+        [$fromDate, $toDate] = $this->getDateRange($request);
         $movementDate = $this->movementDateFromRequest($request);
 
-        if ($movementDate) {
+        if ($fromDate && $toDate) {
+            $query->whereDate('created_at', '>=', $fromDate)
+                ->whereDate('created_at', '<=', $toDate);
+        } elseif ($fromDate) {
+            $query->whereDate('created_at', '>=', $fromDate);
+        } elseif ($toDate) {
+            $query->whereDate('created_at', '<=', $toDate);
+        } elseif ($movementDate) {
             $query->whereDate('created_at', $movementDate);
         } elseif ($period === 'month') {
             $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
@@ -364,15 +445,24 @@ class InventoryController extends Controller
 
     private function getInventoriesForFilter(Request $request)
     {
-        return Inventory::with('product')
-            ->when($request->filled('search'), function($q) use ($request) {
-                $q->where('warehouse_location', 'like', "%{$request->search}%")
-                  ->orWhereHas('product', function ($pq) use ($request) {
-                      $pq->where('name', 'like', "%{$request->search}%")
-                          ->orWhere('category', 'like', "%{$request->search}%");
-                  });
+        $period = $request->get('period');
+        [$fromDate, $toDate] = $this->getDateRange($request);
+        $hasDateRange = (bool) ($fromDate || $toDate);
+        $movementDate = $this->movementDateFromRequest($request);
+        $hasMovementFilter = $hasDateRange || $movementDate || in_array($period, ['month', 'year'], true);
+
+        $query = Inventory::with('product')
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+                $q->where(function ($sq) use ($search) {
+                    $sq->where('warehouse_location', 'like', "%{$search}%")
+                        ->orWhereHas('product', function ($pq) use ($search) {
+                            $pq->where('name', 'like', "%{$search}%")
+                                ->orWhere('category', 'like', "%{$search}%");
+                        });
+                });
             })
-            ->when($request->filled('status'), function($q) use ($request) {
+            ->when($request->filled('status'), function ($q) use ($request) {
                 if ($request->status === 'out') {
                     $q->where('quantity', '<=', 0);
                 } elseif ($request->status === 'low') {
@@ -383,8 +473,41 @@ class InventoryController extends Controller
             })
             ->when($request->filled('warehouse'), function ($q) use ($request) {
                 $q->whereRaw('LOWER(warehouse_location) = ?', [strtolower($request->warehouse)]);
-            })
-            ->latest()
-            ->get();
+            });
+
+        if ($hasDateRange) {
+            $query->whereHas('movements', function ($movementQuery) use ($fromDate, $toDate) {
+                if ($fromDate && $toDate) {
+                    $movementQuery->whereDate('created_at', '>=', $fromDate)
+                        ->whereDate('created_at', '<=', $toDate);
+                } elseif ($fromDate) {
+                    $movementQuery->whereDate('created_at', '>=', $fromDate);
+                } else {
+                    $movementQuery->whereDate('created_at', '<=', $toDate);
+                }
+            });
+        } elseif ($movementDate) {
+            $query->whereHas('movements', function ($movementQuery) use ($movementDate) {
+                $movementQuery->whereDate('created_at', $movementDate);
+            });
+        } elseif ($period === 'month') {
+            $query->whereHas('movements', function ($movementQuery) {
+                $movementQuery->whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year);
+            });
+        } elseif ($period === 'year') {
+            $query->whereHas('movements', function ($movementQuery) {
+                $movementQuery->whereYear('created_at', now()->year);
+            });
+        }
+
+        if ($hasMovementFilter || $request->get('sort') === 'day') {
+            $query = $query->withMax('movements as last_movement_at', 'created_at')
+                ->orderByDesc('last_movement_at');
+        } else {
+            $query = $query->orderByDesc('id');
+        }
+
+        return $query->get();
     }
 }

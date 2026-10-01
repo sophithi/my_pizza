@@ -333,6 +333,74 @@ class ReportController extends Controller
             $aovDeltaPct = $pctDelta($averageOrderValue, $prevAov);
         }
 
+        // Product sold and returned quantities
+        $soldQuery = OrderItem::query()
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->where('orders.status', '!=', 'cancelled')
+            ->whereNull('orders.deleted_at');
+
+        if ($dateRange['start']) {
+            $soldQuery->whereDate('orders.order_date', '>=', $dateRange['start']);
+        }
+        if ($dateRange['end']) {
+            $soldQuery->whereDate('orders.order_date', '<=', $dateRange['end']);
+        }
+
+        $soldProducts = $soldQuery
+            ->groupBy('order_items.product_id', 'products.name', 'products.unit', 'products.sku', 'products.category')
+            ->selectRaw('order_items.product_id as id, products.name, products.unit, products.sku, products.category, SUM(order_items.quantity) as sold_qty, SUM(order_items.total_price) as total_revenue_usd')
+            ->get()
+            ->keyBy('id');
+
+        $returnQuery = InventoryMovement::query()
+            ->join('products', 'inventory_movements.product_id', '=', 'products.id')
+            ->where('inventory_movements.type', 'order_restore');
+
+        if ($dateRange['start']) {
+            $returnQuery->whereDate('inventory_movements.created_at', '>=', $dateRange['start']);
+        }
+        if ($dateRange['end']) {
+            $returnQuery->whereDate('inventory_movements.created_at', '<=', $dateRange['end']);
+        }
+
+        $returnedProducts = $returnQuery
+            ->groupBy('inventory_movements.product_id', 'products.name', 'products.unit', 'products.sku', 'products.category')
+            ->selectRaw('inventory_movements.product_id as id, products.name, products.unit, products.sku, products.category, SUM(inventory_movements.quantity_change) as returned_qty')
+            ->get()
+            ->keyBy('id');
+
+        $allProductIds = $soldProducts->keys()->merge($returnedProducts->keys())->unique();
+        $allProducts = Product::whereIn('id', $allProductIds)->get()->keyBy('id');
+
+        $productStats = $allProducts->map(function ($product) use ($soldProducts, $returnedProducts) {
+            $sold = (int) ($soldProducts[$product->id]->sold_qty ?? 0);
+            $returned = (int) ($returnedProducts[$product->id]->returned_qty ?? 0);
+            $revenue = (float) ($soldProducts[$product->id]->total_revenue_usd ?? 0);
+            $net = max(0, $sold - $returned);
+
+            return (object) [
+                'id' => $product->id,
+                'name' => $product->name,
+                'sku' => $product->sku,
+                'unit' => $product->unit ?? 'pcs',
+                'category' => $product->category,
+                'sold_qty' => $sold,
+                'returned_qty' => $returned,
+                'net_qty' => $net,
+                'revenue' => $revenue,
+            ];
+        })->sortBy(function ($item) {
+            if ($item->id == 13) return -3;
+            if ($item->id == 14) return -2;
+            if ($item->id == 15) return -1;
+            return 1000000000 - $item->sold_qty;
+        })->values();
+
+        $totalSoldQty = $productStats->sum('sold_qty');
+        $totalReturnedQty = $productStats->sum('returned_qty');
+        $totalNetQty = $productStats->sum('net_qty');
+
         // Revenue by product (cancelled orders don't count as sold)
         $productRevenue = Product::with(['orderItems' => function ($q) use ($dateRange) {
             $q->whereHas('order', fn($oq) => $oq->where('status', '!=', 'cancelled'));
@@ -419,6 +487,10 @@ class ReportController extends Controller
             'recentOrders',
             'employeePerformance',
             'productRevenue',
+            'productStats',
+            'totalSoldQty',
+            'totalReturnedQty',
+            'totalNetQty',
             'ordersByStatus',
             'customerRevenue',
             'customerSort',

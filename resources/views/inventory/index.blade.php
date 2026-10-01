@@ -4,7 +4,9 @@
 
 @push('styles')
     <style>
-        .inventory-page {
+        :root,
+        .inventory-page,
+        .restock-overlay {
             --accent: #e85d24;
             --accent-dark: #d94a10;
             --accent-soft: #fff7ed;
@@ -58,13 +60,17 @@
         }
 
         .inventory-btn-primary {
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            box-shadow: 0 10px 22px rgba(232, 93, 36, .18);
-            color: #fff;
+            background-color: #e85d24 !important;
+            background: linear-gradient(135deg, #e85d24, #d94a10) !important;
+            box-shadow: 0 10px 22px rgba(232, 93, 36, .22) !important;
+            color: #ffffff !important;
+            border: 0 !important;
         }
 
         .inventory-btn-primary:hover {
-            color: #fff;
+            background-color: #d94a10 !important;
+            background: linear-gradient(135deg, #d94a10, #b83d0c) !important;
+            color: #ffffff !important;
         }
 
         .inventory-btn-soft {
@@ -297,25 +303,96 @@
         }
 
         .stock-cell {
-            min-width: 160px;
+            min-width: 155px;
         }
 
-        .stock-number {
-            color: var(--text);
+        .stock-pill-btn {
+            align-items: center;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 999px;
             cursor: pointer;
-            font-size: 20px;
+            display: inline-flex;
+            gap: 5px;
+            justify-content: center;
+            padding: 5px 14px;
+            text-decoration: none;
+            transition: all .18s ease;
+        }
+
+        .stock-pill-btn:hover {
+            box-shadow: 0 4px 14px rgba(15, 23, 42, .08);
+            transform: translateY(-1px);
+        }
+
+        .stock-pill-btn.stock-pill-in {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #15803d;
+        }
+
+        .stock-pill-btn.stock-pill-in:hover {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+
+        .stock-pill-btn.stock-pill-low {
+            background: #fffbeb;
+            border-color: #fde68a;
+            color: #b45309;
+        }
+
+        .stock-pill-btn.stock-pill-low:hover {
+            background: #fef3c7;
+            border-color: #fcd34d;
+            color: #92400e;
+        }
+
+        .stock-pill-btn.stock-pill-out {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .stock-pill-btn.stock-pill-out:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #b91c1c;
+        }
+
+        .stock-val {
+            font-size: 16px;
             font-weight: 900;
-            text-decoration: underline;
-            text-decoration-color: rgba(232, 93, 36, .35);
-            text-underline-offset: 4px;
+            letter-spacing: -.3px;
+            line-height: 1;
+        }
+
+        .stock-unit-tag {
+            font-size: 11px;
+            font-weight: 800;
+            opacity: .85;
+            line-height: 1;
+        }
+
+        .stock-edit-hint {
+            font-size: 9.5px;
+            margin-left: 2px;
+            opacity: 0;
+            transition: opacity .15s ease, transform .15s ease;
+        }
+
+        .stock-pill-btn:hover .stock-edit-hint {
+            opacity: .75;
+            transform: scale(1.15);
         }
 
         .stock-progress {
-            background: #edf2f7;
+            background: #f1f5f9;
             border-radius: 999px;
-            height: 7px;
-            margin: 7px auto 0;
-            max-width: 120px;
+            height: 5px;
+            margin: 6px auto 0;
+            max-width: 100px;
             overflow: hidden;
         }
 
@@ -324,7 +401,7 @@
             border-radius: inherit;
             display: block;
             height: 100%;
-            min-width: 4px;
+            transition: width .3s ease;
         }
 
         .stock-progress.low span {
@@ -333,6 +410,7 @@
 
         .stock-progress.out span {
             background: var(--danger);
+            opacity: .35;
         }
 
         .status-pill {
@@ -478,8 +556,9 @@
 
         .restock-header {
             align-items: center;
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            color: #fff;
+            background-color: #e85d24 !important;
+            background: linear-gradient(135deg, #e85d24, #d94a10) !important;
+            color: #ffffff !important;
             display: flex;
             justify-content: space-between;
             padding: 16px 18px;
@@ -597,12 +676,18 @@
         }
 
         .restock-actions .inventory-btn-primary {
-            color: #fff;
-            min-width: 118px;
+            background-color: #e85d24 !important;
+            background: linear-gradient(135deg, #e85d24, #d94a10) !important;
+            box-shadow: 0 8px 18px rgba(232, 93, 36, .22) !important;
+            color: #ffffff !important;
+            border: 0 !important;
+            min-width: 110px;
         }
 
         .restock-actions .inventory-btn-primary:hover {
-            color: #fff;
+            background-color: #d94a10 !important;
+            background: linear-gradient(135deg, #d94a10, #b83d0c) !important;
+            color: #ffffff !important;
         }
 
         .restock-error {
@@ -721,7 +806,12 @@
 
 @section('content')
     @php
-        $movementActive = $movementDate || in_array(request('period'), ['month', 'year'], true);
+        $fromDateVal = request('from_date', request('start_date', request('from', request('date'))));
+        $toDateVal = request('to_date', request('end_date', request('to')));
+        $hasDateRange = !empty($fromDateVal) || !empty($toDateVal);
+        $toolbarPeriod = request('period', $hasDateRange ? 'custom' : 'everyday');
+        $toolbarCustomDate = $toolbarPeriod === 'custom' || $hasDateRange;
+        $movementActive = $movementDate || $hasDateRange || in_array(request('period'), ['month', 'year'], true);
         $unitLabels = [
             'kg' => 'គីឡូក្រាម',
             'g' => 'ក្រាម',
@@ -739,7 +829,6 @@
         <div class="inventory-header">
             <div>
                 <h2 class="inventory-title">ស្តុកទំនិញ</h2>
-                <p class="inventory-subtitle">តាមដានចំនួនទំនិញ កម្រិតស្តុក និងទីតាំងស្តុកសម្រាប់ការរៀបចំទំនិញ</p>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <div class="export-group">
@@ -785,23 +874,17 @@
             </div>
         </div>
 
-        @php
-            $toolbarPeriod = request('period', 'today');
-            $toolbarCustomDate = !in_array($toolbarPeriod, ['today', 'yesterday', 'all'], true);
-        @endphp
-
         <div class="filter-card">
             <form id="inventoryFilters" method="GET" action="{{ route('inventory.index') }}">
                 <div class="toolbar-row">
                     <div class="toolbar-field toolbar-search">
                         <i class="fas fa-search"></i>
-                        <input type="search" name="search" id="inventorySearch" value="{{ request('search') }}" placeholder="ស្វែងរកទំនិញ ឬប្រភេទ..." autocomplete="off">
+                        <input type="search" name="search" id="inventorySearch" value="{{ request('search') }}" placeholder="ស្វែងរក..." autocomplete="off">
                     </div>
 
                     <div class="toolbar-divider"></div>
 
                     <div class="toolbar-field">
-                      
                         <select id="statusFilter" name="status" onchange="this.form.submit()">
                             <option value="">គ្រប់ស្ថានភាព</option>
                             <option value="in" {{ request('status') === 'in' ? 'selected' : '' }}>មានក្នុងស្តុក</option>
@@ -827,23 +910,30 @@
                     <div class="toolbar-field">
                         <i class="fas fa-calendar-day"></i>
                         <select id="periodSelect" name="period" onchange="handlePeriodChange(this)">
+                            <option value="everyday" {{ in_array($toolbarPeriod, ['everyday', 'all'], true) && !$hasDateRange ? 'selected' : '' }}>គ្រប់ទំនិញ</option>
                             <option value="today" {{ $toolbarPeriod === 'today' ? 'selected' : '' }}>ថ្ងៃនេះ</option>
                             <option value="yesterday" {{ $toolbarPeriod === 'yesterday' ? 'selected' : '' }}>ម្សិលមិញ</option>
-                            <option value="everyday" {{ $toolbarPeriod === 'everyday' ? 'selected' : '' }}>រៀងរាល់ថ្ងៃ</option>
-                            <option value="" {{ $toolbarCustomDate ? 'selected' : '' }}>ជ្រើសកាលបរិច្ឆេទ...</option>
+                            <option value="month" {{ $toolbarPeriod === 'month' ? 'selected' : '' }}>ខែនេះ</option>
+                            <option value="custom" {{ $toolbarCustomDate ? 'selected' : '' }}>ជ្រើសកាលបរិច្ឆេទ</option>
                         </select>
                     </div>
 
-                    <div class="toolbar-divider toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}" id="toolbarDateDivider"></div>
+                    <div class="toolbar-divider toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}"></div>
 
-                    <div class="toolbar-field toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}" id="toolbarDateField">
-                        <i class="fas fa-calendar"></i>
-                        <input type="date" name="date" id="toolbarDate" value="{{ request('date') }}" title="ត្រងតាមកាលបរិច្ឆេទចលនាស្តុក">
+                    <div class="toolbar-field toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}" style="gap: 6px;">
+                        <i class="fas fa-calendar-alt" style="color:var(--accent);" title="ចាប់ពីថ្ងៃ"></i>
+                        <span style="font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;">ពី:</span>
+                        <input type="date" name="from_date" id="toolbarFromDate" value="{{ $fromDateVal }}" title="ចាប់ពីថ្ងៃ (From Date)">
                     </div>
 
-                    <button type="submit" class="toolbar-search-btn">
-                        <i class="fas fa-search"></i> ស្វែងរក
-                    </button>
+                    <div class="toolbar-divider toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}"></div>
+
+                    <div class="toolbar-field toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}" style="gap: 6px;">
+                        <i class="fas fa-calendar-check" style="color:var(--success);" title="ដល់ថ្ងៃ"></i>
+                        <span style="font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;">ដល់:</span>
+                        <input type="date" name="to_date" id="toolbarToDate" value="{{ $toDateVal }}" title="ដល់ថ្ងៃ (To Date)">
+                    </div>
+
                 </div>
             </form>
         </div>
@@ -856,12 +946,12 @@
                             <tr>
                                 <th>ទំនិញ</th>
                                 <th>ប្រភេទ</th>
-                                <th>ទីតាំងស្តុក</th>
+                                <th>ទីតាំង</th>
                                 <th class="text-center">ចំនួន</th>
                                 @if($movementActive)
-                                    <th class="text-center">ចលនាស្តុក</th>
+                                    <th class="text-center">ចលនា</th>
                                 @endif
-                                <th class="text-center" title="ស្តុកគួរបន្ថែម នៅពេលចំនួនធ្លាក់ចុះដល់កម្រិតនេះ">កម្រិតកណត់ថាជិតអស់ <i class="fas fa-circle-info" style="font-size:11px;opacity:.6;"></i></th>
+                                <th class="text-center">កម្រិតជិតអស់</th>
                                 <th class="text-center">ស្ថានភាព</th>
                                 <th class="text-end">សកម្មភាព</th>
                             </tr>
@@ -875,9 +965,11 @@
                                     $statusClass = $isOut ? 'status-out' : ($isLow ? 'status-low' : 'status-good');
                                     $statusLabel = $isOut ? 'អស់ស្តុក' : ($isLow ? 'ជិតអស់' : 'មានក្នុងស្តុក');
                                     $progressClass = $isOut ? 'out' : ($isLow ? 'low' : '');
-                                    $progress = $inv->reorder_level > 0
-                                        ? min(100, max(0, ($inv->quantity / max($inv->reorder_level * 2, 1)) * 100))
-                                        : 100;
+                                    $progress = $isOut
+                                        ? 0
+                                        : ($inv->reorder_level > 0
+                                            ? min(100, max(0, ($inv->quantity / max($inv->reorder_level * 2, 1)) * 100))
+                                            : 100);
                                     $movement = $movementsByInventory->get($inv->id);
                                 @endphp
                                 <tr data-name="{{ strtolower($inv->product?->name ?? '') }}"
@@ -889,16 +981,23 @@
                                         <div class="product-meta">{{ $inv->product?->sku ?? 'SKU មិនមាន' }}@if($inv->product?->unit) &bull; ខ្នាត: {{ $unitLabels[$inv->product->unit] ?? $inv->product->unit }} @endif</div>
                                     </td>
                                     <td>{{ $inv->product?->category ?? 'មិនមាន' }}</td>
-                                    <td>{{ $inv->warehouse_location ?? 'មិនមាន' }}</td>
+                                    <td>{{ $inv->warehouse_location ?? '—' }}</td>
                                     <td class="text-center stock-cell">
-                                        <span class="stock-number" @unless(auth()->user()->isAuditor()) onclick="openQuickUpdate({{ $inv->id }}, {{ $inv->quantity }})" @endunless>
-                                            {{ number_format($inv->quantity) }}
-                                        </span>
-                                        @if($inv->product?->unit)
-                                            <span class="stock-unit">{{ $unitLabels[$inv->product->unit] ?? $inv->product->unit }}</span>
-                                        @endif
-                                        <div class="stock-progress {{ $progressClass }}">
-                                            <span style="width: {{ $progress }}%;"></span>
+                                        <div class="d-inline-flex flex-column align-items-center">
+                                            <button type="button" class="stock-pill-btn stock-pill-{{ $status }}"
+                                                @unless(auth()->user()->isAuditor()) onclick="openQuickUpdate({{ $inv->id }}, {{ $inv->quantity }})" @endunless
+                                                title="ចុចដើម្បីកែសម្រួលចំនួនស្តុក">
+                                                <span class="stock-val">{{ number_format($inv->quantity) }}</span>
+                                                @if($inv->product?->unit)
+                                                    <span class="stock-unit-tag">{{ $unitLabels[$inv->product->unit] ?? $inv->product->unit }}</span>
+                                                @endif
+                                                @unless(auth()->user()->isAuditor())
+                                                    <i class="fas fa-pen stock-edit-hint"></i>
+                                                @endunless
+                                            </button>
+                                            <div class="stock-progress {{ $progressClass }}">
+                                                <span style="width: {{ $isOut ? 100 : $progress }}%;"></span>
+                                            </div>
                                         </div>
                                     </td>
                                     @if($movementActive)
@@ -931,12 +1030,12 @@
                                             @unless(auth()->user()->isAuditor())
                                                 <button type="button" class="icon-action icon-restock"
                                                     onclick="openRestock({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'), {{ $inv->quantity }})"
-                                                    title="បន្ថែមចំនួនចូលស្តុក">
+                                                    title="បន្ថែមស្តុក">
                                                     <i class="fas fa-plus"></i>
                                                 </button>
                                                 <button type="button" class="icon-action icon-reduce"
                                                     onclick="openReduce({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'), {{ $inv->quantity }})"
-                                                    title="កាត់ចេញពីស្តុក">
+                                                    title="កាត់ស្តុក">
                                                     <i class="fas fa-minus"></i>
                                                 </button>
                                             @endunless
@@ -964,14 +1063,14 @@
 
         @else
             <div class="empty-state">
-               
-                <h3>{{ $movementActive ? 'មិនទាន់មានចលនាស្តុកសម្រាប់ថ្ងៃនេះ' : 'មិនទាន់មានស្តុកទំនិញ' }}</h3>
+                <i class="fas fa-boxes-stacked"></i>
+                <h3>{{ $movementActive ? 'មិនទាន់មានចលនាស្តុកសម្រាប់កាលបរិច្ឆេទនេះទេ' : 'មិនទាន់មានស្តុកទំនិញ' }}</h3>
                 <p>{{ $movementActive ? 'ពេលបង្កើត ឬកែការបញ្ជាទិញ ប្រព័ន្ធនឹងបង្ហាញទំនិញដែលត្រូវបានកាត់ចេញនៅទីនេះ' : 'ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញ' }}</p>
-                <!-- @unless(auth()->user()->isAuditor())
-                    <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary">
-                        បន្ថែមស្តុក
+                @unless(auth()->user()->isAuditor())
+                    <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary" style="margin-top: 14px;">
+                        <i class="fas fa-plus"></i> បន្ថែមស្តុក
                     </a>
-                @endunless -->
+                @endunless
             </div>
         @endif
     </div>
@@ -979,7 +1078,7 @@
     <div class="restock-overlay" id="restockOverlay" aria-hidden="true">
         <div class="restock-modal" role="dialog" aria-modal="true" aria-labelledby="restockTitle">
             <div class="restock-header">
-                <h3 class="restock-title" id="restockTitle">បន្ថែមចំនួនចូលស្តុក</h3>
+                <h3 class="restock-title" id="restockTitle">បន្ថែមស្តុក</h3>
 
             </div>
             <form method="POST" id="restockForm">
@@ -987,11 +1086,11 @@
                 <div class="restock-body">
                     <div class="restock-product">
                         <div class="restock-product-name" id="restockProductName">ទំនិញ</div>
-                        <div class="restock-product-meta">ចំនួនបច្ចុប្បន្ន: <span id="restockCurrentText">0</span></div>
+                        <div class="restock-product-meta">បច្ចុប្បន្ន: <span id="restockCurrentText">0</span></div>
                     </div>
 
                     <div class="restock-field">
-                        <label for="restockQuantity">ចំនួនដែលត្រូវបន្ថែម</label>
+                        <label for="restockQuantity">ចំនួនបន្ថែម</label>
                         <input type="number" min="1" step="1" name="quantity" id="restockQuantity" class="restock-input" autocomplete="off" required>
                         <div class="restock-error" id="restockError">សូមបញ្ចូលចំនួនធំជាង 0</div>
                     </div>
@@ -1005,15 +1104,15 @@
                             <i class="fas fa-arrow-right"></i>
                         </div>
                         <div class="restock-preview-card">
-                            <div class="restock-preview-label">បន្ទាប់ពីបន្ថែម</div>
+                            <div class="restock-preview-label">ក្រោយបន្ថែម</div>
                             <div class="restock-preview-value" id="restockNewValue">0</div>
                         </div>
                     </div>
 
                     <div class="restock-actions">
-                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeRestockModal()">Cancel</button>
+                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeRestockModal()">បោះបង់</button>
                         <button type="submit" class="inventory-btn inventory-btn-primary">
-                            <i class="fas fa-check"></i> Confirm
+                            <i class="fas fa-check"></i> រក្សាទុក
                         </button>
                     </div>
                 </div>
@@ -1024,20 +1123,20 @@
     <div class="restock-overlay" id="quickUpdateOverlay" aria-hidden="true">
         <div class="restock-modal" role="dialog" aria-modal="true" aria-labelledby="quickUpdateTitle">
             <div class="restock-header">
-                <h3 class="restock-title" id="quickUpdateTitle">កែសម្រួលចំនួនស្តុក</h3>
+                <h3 class="restock-title" id="quickUpdateTitle">កែស្តុក</h3>
             </div>
             <form method="POST" id="quickUpdateForm">
                 @csrf
                 <div class="restock-body">
                     <div class="restock-product">
                         <div class="restock-product-name" id="quickUpdateProductName">ទំនិញ</div>
-                        <div class="restock-product-meta">ចំនួនបច្ចុប្បន្ន: <span id="quickUpdateCurrentText">0</span></div>
+                        <div class="restock-product-meta">បច្ចុប្បន្ន: <span id="quickUpdateCurrentText">0</span></div>
                     </div>
 
                     <div class="restock-field">
-                        <label for="quickUpdateQuantity">ចំនួនស្តុកថ្មី</label>
+                        <label for="quickUpdateQuantity">ចំនួនថ្មី</label>
                         <input type="number" min="0" step="1" name="quantity" id="quickUpdateQuantity" class="restock-input" autocomplete="off" required>
-                        <div class="restock-error" id="quickUpdateError">សូមបញ្ចូលចំនួនត្រឹមត្រូវ (មិនអវិជ្ជមាន)</div>
+                        <div class="restock-error" id="quickUpdateError">សូមបញ្ចូលចំនួនត្រឹមត្រូវ</div>
                     </div>
 
                     <div class="restock-preview">
@@ -1059,12 +1158,12 @@
                     </div>
 
                     <div class="restock-field" style="margin-top: 14px;">
-                        <label for="quickUpdateNote">មូលហេតុ (មិនចាំបាច់)</label>
-                        <input type="text" name="note" id="quickUpdateNote" class="form-control" placeholder="ឧ. រាប់ស្តុកឡើងវិញ, ខូច, បាត់...">
+                        <label for="quickUpdateNote">មូលហេតុ</label>
+                        <input type="text" name="note" id="quickUpdateNote" class="form-control" placeholder="មូលហេតុ (បើមាន)...">
                     </div>
 
                     <div class="restock-actions">
-                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeQuickUpdateModal()">Cancel</button>
+                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeQuickUpdateModal()">បោះបង់</button>
                         <button type="submit" class="inventory-btn inventory-btn-primary">
                             <i class="fas fa-check"></i> រក្សាទុក
                         </button>
@@ -1077,18 +1176,18 @@
     <div class="restock-overlay" id="reduceOverlay" aria-hidden="true">
         <div class="restock-modal" role="dialog" aria-modal="true" aria-labelledby="reduceTitle">
             <div class="restock-header">
-                <h3 class="restock-title" id="reduceTitle">កាត់ចេញពីស្តុក</h3>
+                <h3 class="restock-title" id="reduceTitle">កាត់ស្តុក</h3>
             </div>
             <form method="POST" id="reduceForm">
                 @csrf
                 <div class="restock-body">
                     <div class="restock-product">
                         <div class="restock-product-name" id="reduceProductName">ទំនិញ</div>
-                        <div class="restock-product-meta">ចំនួនបច្ចុប្បន្ន: <span id="reduceCurrentText">0</span></div>
+                        <div class="restock-product-meta">បច្ចុប្បន្ន: <span id="reduceCurrentText">0</span></div>
                     </div>
 
                     <div class="restock-field">
-                        <label for="reduceQuantity">ចំនួនដែលត្រូវកាត់ចេញ</label>
+                        <label for="reduceQuantity">ចំនួនកាត់</label>
                         <input type="number" min="1" step="1" name="quantity" id="reduceQuantity" class="restock-input" autocomplete="off" required>
                         <div class="restock-error" id="reduceQuantityError">សូមបញ្ចូលចំនួនធំជាង 0</div>
                     </div>
@@ -1110,93 +1209,59 @@
                     <div class="restock-field" style="margin-top: 14px;">
                         <label>មូលហេតុ</label>
                         <div class="reason-chips" id="reduceReasonChips">
-                            <span class="reason-chip" data-reason="ខូច">ខូច (Damaged)</span>
-                            <span class="reason-chip" data-reason="បាត់">បាត់ (Lost)</span>
-                            <span class="reason-chip" data-reason="ការកែតម្រូវស្តុក">ការកែតម្រូវស្តុក (Recount)</span>
-                            <span class="reason-chip" data-reason="">ផ្សេងៗ (Other)</span>
+                            <span class="reason-chip" data-reason="ខូច">ខូច</span>
+                            <span class="reason-chip" data-reason="បាត់">បាត់</span>
+                            <span class="reason-chip" data-reason="កែតម្រូវ">កែតម្រូវ</span>
+                            <span class="reason-chip" data-reason="">ផ្សេងៗ</span>
                         </div>
-                        <input type="text" name="reason" id="reduceReason" class="form-control" placeholder="ឧ. ខូច, បាត់, ការកែតម្រូវស្តុក..." required>
+                        <input type="text" name="reason" id="reduceReason" class="form-control" placeholder="មូលហេតុ..." required>
                         <div class="restock-error" id="reduceReasonError">សូមបញ្ជាក់មូលហេតុ</div>
                     </div>
 
                     <div class="restock-actions">
-                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeReduceModal()">Cancel</button>
+                        <button type="button" class="inventory-btn inventory-btn-soft" onclick="closeReduceModal()">បោះបង់</button>
                         <button type="submit" class="inventory-btn inventory-btn-primary">
-                            <i class="fas fa-check"></i> រក្សាទុក
+                            <i class="fas fa-minus-circle"></i> កាត់ស្តុក
                         </button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-      <div class="pager-wrap">
+
+    <div class="pager-wrap">
         {{ $inventories->links('pagination::bootstrap-5') }}
     </div>
 @endsection
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('inventorySearch');
-            const statusFilter = document.getElementById('statusFilter');
-            const warehouseFilter = document.getElementById('warehouseFilter');
-            const tableBody = document.getElementById('inventoryTableBody');
-
-            if (!searchInput || !statusFilter || !warehouseFilter || !tableBody) return;
-
-            function filterTable() {
-                const search = searchInput.value.toLowerCase();
-                const status = statusFilter.value;
-                const warehouse = warehouseFilter.value;
-
-                tableBody.querySelectorAll('tr').forEach(row => {
-                    const rowName = row.dataset.name || '';
-                    const rowCategory = row.dataset.category || '';
-                    const rowStatus = row.dataset.status || '';
-                    const rowWarehouse = row.dataset.warehouse || '';
-                    const matchesSearch = !search || rowName.includes(search) || rowCategory.includes(search);
-                    const matchesStatus = !status || rowStatus === status;
-                    const matchesWarehouse = !warehouse || rowWarehouse === warehouse;
-
-                    row.style.display = matchesSearch && matchesStatus && matchesWarehouse ? '' : 'none';
-                });
-            }
-
-            searchInput.addEventListener('input', filterTable);
-            statusFilter.addEventListener('change', filterTable);
-            warehouseFilter.addEventListener('change', filterTable);
-            filterTable();
-        });
+        const inventoryBaseUrl = @js(url('inventory'));
 
         function handlePeriodChange(select) {
-            const dateDivider = document.getElementById('toolbarDateDivider');
-            const dateField = document.getElementById('toolbarDateField');
-            const dateInput = document.getElementById('toolbarDate');
+            const dateElements = document.querySelectorAll('.toolbar-date');
+            const fromInput = document.getElementById('toolbarFromDate');
+            const toInput = document.getElementById('toolbarToDate');
 
-            if (select.value === '') {
-                dateDivider.classList.add('show');
-                dateField.classList.add('show');
-                dateInput.focus();
+            if (select.value === 'custom') {
+                dateElements.forEach(el => el.classList.add('show'));
+                if (fromInput) fromInput.focus();
             } else {
-                dateInput.value = '';
+                dateElements.forEach(el => el.classList.remove('show'));
+                if (fromInput) fromInput.value = '';
+                if (toInput) toInput.value = '';
                 select.form.submit();
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const toolbarDate = document.getElementById('toolbarDate');
-            toolbarDate?.addEventListener('change', function () {
-                if (this.value) this.form.submit();
-            });
-        });
-
         function deleteInventory(id, name) {
             if (!confirm(`តើអ្នកពិតជាចង់លុបស្តុក "${name}" មែនទេ?`)) return;
 
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '/inventory/' + id;
-            form.innerHTML = '<input type="hidden" name="_token" value="' + document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') + '"><input type="hidden" name="_method" value="DELETE">';
+            form.action = inventoryBaseUrl + '/' + id;
+            form.innerHTML = '<input type="hidden" name="_token" value="' + (token || '') + '"><input type="hidden" name="_method" value="DELETE">';
             document.body.appendChild(form);
             form.submit();
         }
@@ -1210,7 +1275,7 @@
             const noteInput = document.getElementById('quickUpdateNote');
             const error = document.getElementById('quickUpdateError');
 
-            form.action = '/inventory/' + id + '/quick-update';
+            form.action = inventoryBaseUrl + '/' + id + '/quick-update';
             form.dataset.currentQty = currentQty;
             currentText.textContent = currentQty.toLocaleString();
             currentValue.textContent = currentQty.toLocaleString();
@@ -1264,13 +1329,14 @@
             const quantityError = document.getElementById('reduceQuantityError');
             const reasonError = document.getElementById('reduceReasonError');
 
-            form.action = '/inventory/' + id + '/reduce';
+            form.action = inventoryBaseUrl + '/' + id + '/reduce';
             form.dataset.currentQty = currentQty;
             productName.textContent = name;
             currentText.textContent = currentQty.toLocaleString();
             currentValue.textContent = currentQty.toLocaleString();
             newValue.textContent = currentQty.toLocaleString();
             quantityInput.value = '';
+            quantityInput.max = currentQty;
             reasonInput.value = '';
             quantityError.classList.remove('show');
             reasonError.classList.remove('show');
@@ -1298,7 +1364,7 @@
             const quantityInput = document.getElementById('restockQuantity');
             const error = document.getElementById('restockError');
 
-            form.action = '/inventory/' + id + '/restock';
+            form.action = inventoryBaseUrl + '/' + id + '/restock';
             form.dataset.currentQty = currentQty;
             productName.textContent = name;
             currentText.textContent = currentQty.toLocaleString();
@@ -1379,7 +1445,8 @@
             function updateReducePreview() {
                 const currentQty = parseInt(reduceForm.dataset.currentQty || '0', 10);
                 const removeQty = parseInt(reduceQuantityInput.value || '0', 10);
-                reduceNewValue.textContent = (currentQty - Math.max(removeQty || 0, 0)).toLocaleString();
+                const remaining = currentQty - (Number.isFinite(removeQty) ? removeQty : 0);
+                reduceNewValue.textContent = Math.max(0, remaining).toLocaleString();
                 reduceQuantityError.classList.remove('show');
             }
 
@@ -1403,10 +1470,16 @@
             });
 
             reduceForm?.addEventListener('submit', function (event) {
+                const currentQty = parseInt(reduceForm.dataset.currentQty || '0', 10);
                 const removeQty = parseInt(reduceQuantityInput.value, 10);
                 let hasError = false;
 
                 if (!Number.isInteger(removeQty) || removeQty <= 0) {
+                    reduceQuantityError.textContent = 'សូមបញ្ចូលចំនួនធំជាង 0';
+                    reduceQuantityError.classList.add('show');
+                    hasError = true;
+                } else if (removeQty > currentQty) {
+                    reduceQuantityError.textContent = 'ចំនួនដែលត្រូវកាត់ចេញមិនអាចលើសពីចំនួនក្នុងស្តុក (' + currentQty.toLocaleString() + ') ឡើយ';
                     reduceQuantityError.classList.add('show');
                     hasError = true;
                 }
@@ -1418,7 +1491,7 @@
 
                 if (hasError) {
                     event.preventDefault();
-                    if (!Number.isInteger(removeQty) || removeQty <= 0) {
+                    if (!Number.isInteger(removeQty) || removeQty <= 0 || removeQty > currentQty) {
                         reduceQuantityInput.focus();
                     } else {
                         reduceReasonInput.focus();

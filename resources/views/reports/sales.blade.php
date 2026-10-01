@@ -542,6 +542,82 @@
             </div>
         </div>
 
+        <!-- Product Sold & Returned Quantities Panel -->
+        <div class="panel">
+            <div class="panel-head" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-boxes-stacked"></i>
+                    <h3 class="panel-title">សង្ខេបការលក់ & បង្វិលត្រឡប់តាមមុខទំនិញ</h3>
+                </div>
+                <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 12px; font-weight: 700;">
+                    សរុប {{ $productStats->count() }} មុខ
+                </span>
+            </div>
+            <div class="panel-body p-0">
+                @if($productStats->isEmpty())
+                    <div class="empty-note">មិនទាន់មានទិន្នន័យការលក់ក្នុងចន្លោះពេលនេះទេ។</div>
+                @else
+                    <div class="table-responsive">
+                        <table class="table report-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px;">#</th>
+                                    <th>មុខទំនិញ </th>
+                                    <th class="text-center">ចំនួនលក់បាន </th>
+                                    <th class="text-center">ចំនួនបង្វិលត្រឡប់ </th>
+                                    <th class="text-center">ចំនួនលក់</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($productStats as $index => $item)
+                                    <tr class="{{ $index >= 10 ? 'extra-product-row d-none' : '' }}">
+                                        <td class="text-muted">{{ $index + 1 }}</td>
+                                        <td class="fw-bold">
+                                            @if($item->id == 13)
+                                                <span class="badge me-1" style="background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; font-size:11px;">S</span>
+                                            @elseif($item->id == 14)
+                                                <span class="badge me-1" style="background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; font-size:11px;">M</span>
+                                            @elseif($item->id == 15)
+                                                <span class="badge me-1" style="background:#f3e8ff; color:#7e22ce; border:1px solid #e9d5ff; font-size:11px;">L</span>
+                                            @endif
+                                            {{ $item->name }}
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge" style="background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; font-size: 13px; font-weight: 800; padding: 4px 10px;">
+                                                {{ number_format($item->sold_qty) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if($item->returned_qty > 0)
+                                                <span class="badge" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; font-size: 13px; font-weight: 800; padding: 4px 10px;">
+                                                    {{ number_format($item->returned_qty) }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted small">0</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-size: 13px; font-weight: 800; padding: 4px 10px;">
+                                                {{ number_format($item->net_qty) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if($productStats->count() > 10)
+                        <div class="p-2 text-center border-top bg-light">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnToggleProducts" onclick="toggleExtraProducts(this)">
+                                បង្ហាញទាំងអស់ ({{ $productStats->count() - 10 }} មុខទៀត)
+                            </button>
+                        </div>
+                    @endif
+                @endif
+            </div>
+        </div>
+
         <div class="panel">
             <div class="panel-head"><i class="fas fa-chart-column"></i>
                 <h3 class="panel-title">ចំណូលប្រចាំថ្ងៃ</h3>
@@ -554,100 +630,6 @@
                 @endif
             </div>
         </div>
-
-        <div class="content-grid">
-            <div class="panel">
-                <div class="panel-head"><i class="fas fa-pizza-slice"></i>
-                    <h3 class="panel-title">ទំនិញលក់បានច្រើន</h3>
-                </div>
-                <div class="panel-body">
-                    @if($productRevenue->count())
-                        @php $maxProductCount = $productRevenue->max('order_items_count') ?: 1; @endphp
-                        @foreach($productRevenue as $product)
-                            <div class="rank-row">
-                                <div>
-                                    <div class="rank-name">{{ $product->name }}</div>
-                                    <div class="rank-track">
-                                        <div class="rank-fill"
-                                            style="width: {{ max(2, round($product->order_items_count / $maxProductCount * 100, 1)) }}%">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="rank-value">{{ number_format($product->order_items_count) }}<span
-                                        class="u">កម្មង់</span></div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="empty-note">មិនទាន់មានទិន្នន័យ។</div>
-                    @endif
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-head"><i class="fas fa-money-check-dollar"></i>
-                    <h3 class="panel-title">វិធីបង់ប្រាក់</h3>
-                </div>
-                <div class="panel-body">
-                    @php $maxMethodKhr = collect($paymentMethodBreakdown)->max('khr') ?: 1; @endphp
-                    @foreach($paymentMethodBreakdown as $method)
-                        <div class="rank-row">
-                            <div>
-                                <div class="rank-name">{{ $method['label'] }}</div>
-                                <div class="rank-track">
-                                    <div class="rank-fill"
-                                        style="width: {{ max(2, round($method['khr'] / $maxMethodKhr * 100, 1)) }}%"></div>
-                                </div>
-                            </div>
-                            <div class="rank-value">
-                                ៛{{ number_format($method['khr'], 0) }}
-                                <span class="u">${{ number_format($method['usd'], 2) }}</span>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <div class="panel">
-            <div class="panel-head"><i class="fas fa-clock-rotate-left"></i>
-                <h3 class="panel-title">កម្មង់ថ្មីៗ</h3>
-            </div>
-            @if($recentOrders->count())
-                <div class="table-responsive">
-                    <table class="table report-table">
-                        <thead>
-                            <tr>
-                                <th>លេខកម្មង់</th>
-                                <th>អតិថិជន</th>
-                                <th>កាលបរិច្ឆេទ</th>
-
-                                <th class="text-end">តម្លៃ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($recentOrders as $order)
-                                @php $statusClass = 'status-' . $order->status; @endphp
-                                <tr>
-                                    <td>#{{ $order->id }}</td>
-                                    <td>{{ $order->customer?->name ?? '—' }}</td>
-                                    <td>{{ optional($order->order_date)->format('d/m/Y H:i') }}</td>
-
-                                    <td class="text-end">
-                                        <div class="money-stack">
-                                            <span class="khr">៛{{ number_format($order->totalKhr(), 0) }}</span>
-                                            <span class="usd">${{ number_format($order->total_amount, 2) }}</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="empty-note">មិនទាន់មានទិន្នន័យ។</div>
-            @endif
-        </div>
-
 
         <div class="panel">
             <div class="panel-head" style="justify-content:space-between;">

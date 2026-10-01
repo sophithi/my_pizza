@@ -580,10 +580,6 @@
                     <span class="date-placeholder">ដល់ថ្ងៃ</span>
                 </div>
 
-                <!-- <a href="{{ route('invoices.index') }}" class="invoice-btn invoice-btn-soft">
-                    <i class="fas fa-rotate-left"></i> សម្អាត
-                </a> -->
-
                 <a href="{{ route('invoices.export', request()->query()) }}" class="invoice-btn invoice-btn-export">
                     <i class="fas fa-file-excel"></i> ទាញយក
                 </a>

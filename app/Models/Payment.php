@@ -4,7 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property float $paid_amount
+ * @property float $paid_amount_khr
+ * @property \Carbon\Carbon $created_at
+ * @property-read Order|null $order
+ */
 class Payment extends Model
 {
     use HasFactory;
