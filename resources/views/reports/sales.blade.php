@@ -547,11 +547,11 @@
             <div class="panel-head" style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-boxes-stacked"></i>
-                    <h3 class="panel-title">សង្ខេបការលក់ & បង្វិលត្រឡប់តាមមុខទំនិញ</h3>
+                    <h3 class="panel-title">សង្ខេបការលក់ទំនិញ</h3>
                 </div>
-                <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 12px; font-weight: 700;">
+                <!-- <span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 12px; font-weight: 700;">
                     សរុប {{ $productStats->count() }} មុខ
-                </span>
+                </span> -->
             </div>
             <div class="panel-body p-0">
                 @if($productStats->isEmpty())
@@ -607,13 +607,6 @@
                         </table>
                     </div>
 
-                    @if($productStats->count() > 10)
-                        <div class="p-2 text-center border-top bg-light">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnToggleProducts" onclick="toggleExtraProducts(this)">
-                                បង្ហាញទាំងអស់ ({{ $productStats->count() - 10 }} មុខទៀត)
-                            </button>
-                        </div>
-                    @endif
                 @endif
             </div>
         </div>
