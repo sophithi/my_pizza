@@ -568,6 +568,7 @@
             box-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/readability.css') }}?v={{ filemtime(public_path('css/readability.css')) }}">
 </head>
 
 <body class="no-transition">

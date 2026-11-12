@@ -1,0 +1,155 @@
+/* Shared screen styles. Printed invoices and labels keep their own styling. */
+@media screen {
+    :root {
+        --ui-background: #edf1f5;
+        --ui-surface: #ffffff;
+        --ui-border: #b6c3d2;
+        --ui-text: #172337;
+        --ui-muted: #475569;
+        --ui-accent: #b93c0c;
+        --ui-shadow: 0 2px 7px rgb(15 23 42 / 7%);
+        --bs-secondary-color: #475569;
+    }
+
+    html, body, .main-content {
+        background-color: var(--ui-background);
+        color: var(--ui-text);
+    }
+
+    .main-content {
+        --border: var(--ui-border);
+        --muted: var(--ui-muted);
+        --text-muted: var(--ui-muted);
+        --text: var(--ui-text);
+        --surface: var(--ui-surface);
+        --accent: var(--ui-accent);
+        --accent-dark: #983008;
+        --accent-soft: #fff1e6;
+        --bg: var(--ui-background);
+    }
+
+    /* Name the structural cards explicitly so selected product tiles,
+       status badges and colored action buttons retain their state colors. */
+    .main-content :is(
+        .card, .stat-card, .analytics-card, .analytics-graph-card,
+        .filter-card, .inventory-table-card, .packing-summary-card,
+        .expense-card, .expense-form-card, .invoice-table-card,
+        .invoice-card, .invoice-filter-card, .delivery-card, .delivery-toolbar,
+        .customer-card, .customer-form-card, .customer-info-card,
+        .customer-table-card, .form-card, .info-card, .items-card,
+        .order-card, .checkout-card, .panel-card, .section-card,
+        .report-card, .report-panel, .sales-table-card,
+        .movement-filter-card, .movement-table-card, .show-header-card,
+        .kpi-card, .metric-card, .dash-panel, .orders-panel,
+        .sales-panel, .denom-card, .driver-select-card, .pd-card
+    ) {
+        border: 1px solid var(--ui-border) !important;
+        border-radius: 10px !important;
+        box-shadow: var(--ui-shadow) !important;
+    }
+
+    .main-content :is(.filter-card, .delivery-toolbar, .movement-filter-card, .invoice-filter-card) {
+        background-color: #f8fafc;
+    }
+
+    .main-content :is(.card-header, .modal-header, .modal-footer) {
+        border-color: var(--ui-border);
+    }
+
+    .main-content .text-muted,
+    .main-content :is(
+        .expense-subtitle, .invoice-subtitle, .inventory-subtitle,
+        .delivery-subtitle, .sales-subtitle, .report-subtitle,
+        .reports-subtitle, .form-subtitle, .show-subtitle,
+        .expense-date-label, .expense-stat-label, .packing-summary-label,
+        .stat-label, .metric-label, .kpi-label, .pay-stat-label
+    ) {
+        color: var(--ui-muted) !important;
+    }
+
+    .main-content :is(.form-label, .od-label, .field-label, .control-label) {
+        color: #334155;
+        font-weight: 600;
+        line-height: 1.65;
+    }
+
+    .main-content :is(.form-control, .form-select, .delivery-search),
+    .main-content .date-range input,
+    .main-content .date-field input,
+    .main-content .select2-container--default .select2-selection--single {
+        background-color: #fff;
+        border: 1px solid #8d9fb4;
+        color: var(--ui-text);
+        min-height: 40px;
+        border-radius: 6px;
+    }
+
+    .main-content input::placeholder,
+    .main-content textarea::placeholder {
+        color: #64748b;
+        opacity: 1;
+    }
+
+    .main-content :is(input, textarea, select):disabled,
+    .main-content :is(input, textarea)[readonly] {
+        background-color: #e9eef4;
+        color: #475569;
+    }
+
+    .main-content :is(.form-control, .form-select):focus {
+        border-color: #b93c0c;
+        box-shadow: 0 0 0 3px rgb(185 60 12 / 16%);
+    }
+
+    .main-content :is(a, button, input, select, textarea):focus-visible {
+        outline: 2px solid #1d4ed8;
+        outline-offset: 3px;
+    }
+
+    .main-content table {
+        --bs-table-color: #172337;
+        --bs-table-border-color: #d3dce6;
+        --bs-table-hover-bg: #edf4ff;
+    }
+
+    .main-content table thead th {
+        background-color: #e7edf4 !important;
+        color: #334155 !important;
+        border-bottom: 2px solid #a6b5c8 !important;
+        font-weight: 700;
+        line-height: 1.65;
+    }
+
+    .main-content table tbody td {
+        border-bottom-color: #d3dce6;
+    }
+
+    .main-content table tbody tr:hover > td {
+        background-color: #edf4ff;
+    }
+
+    .main-content :is(.quick-filter, .filter-btn) {
+        border-color: #8d9fb4;
+        color: #334155;
+        background-color: #fff;
+    }
+
+    .main-content :is(.quick-filter, .filter-btn, .quick-pill).active,
+    .main-content .filter-btn[aria-pressed="true"] {
+        background: #b93c0c !important;
+        border-color: #b93c0c !important;
+        color: #fff !important;
+    }
+
+    .main-content :is(.btn-primary, .invoice-btn-primary, .expense-btn-primary, .delivery-btn-primary) {
+        background: #b93c0c;
+        border-color: #b93c0c;
+        color: #fff;
+    }
+
+    .main-content :is(.btn-primary, .invoice-btn-primary, .expense-btn-primary, .delivery-btn-primary):hover {
+        background: #983008;
+        border-color: #983008;
+        color: #fff;
+    }
+}
