@@ -85,7 +85,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
         gap: 12px;
-        max-height: 560px;
+        max-height: 680px;
         overflow-y: auto;
         padding: 14px;
         background: var(--surface);
