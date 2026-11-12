@@ -396,6 +396,11 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
+        if (!$request->has('period')) {
+            $hasDateFilter = $request->filled('date_from') || $request->filled('date_to');
+            $request->merge(['period' => $hasDateFilter ? 'custom' : 'today']);
+        }
+
         [$dateFrom, $dateTo] = $this->resolveDateRange($request);
         $query      = $this->applyFilters($request);
         
