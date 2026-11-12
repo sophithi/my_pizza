@@ -163,11 +163,10 @@
 
         /* Nav labels */
         .sidebar .nav-label {
-            font-size: 11px;
-            color: #64748b;
-            padding: 16px 20px 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
+            font-size: 12.5px;
+            color: #94a3b8;
+            padding: 20px 22px 7px;
+            letter-spacing: 0.2px;
             font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
@@ -190,11 +189,11 @@
         }
 
         .sidebar .nav-link {
-            color: #cbd5e1;
-            padding: 10px 14px;
-            margin: 2px 12px;
+            color: #e2e8f0;
+            padding: 11px 14px;
+            margin: 3px 12px;
             border-radius: 10px;
-            font-size: 13.5px;
+            font-size: 14.5px;
             font-weight: 600;
             border-left: none;
             display: flex;
@@ -204,6 +203,13 @@
             white-space: nowrap;
             transition: all 0.15s ease;
             position: relative;
+            min-height: 44px;
+        }
+
+        .sidebar .nav-link:focus-visible,
+        .sidebar-collapse-btn:focus-visible {
+            outline: 2px solid #fdba74;
+            outline-offset: 2px;
         }
 
         .sidebar .nav-link:hover {
@@ -220,7 +226,7 @@
             color: #ffffff;
             background: linear-gradient(135deg, #ea580c, #c2410c);
             font-weight: 700;
-            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
+            box-shadow: 0 3px 10px rgba(234, 88, 12, 0.24);
         }
 
         .sidebar .nav-link i {
@@ -295,7 +301,7 @@
             transform: translateY(-50%) translateX(12px);
         }
 
-        .sidebar.collapsed .nav-link:hover {
+        .sidebar.collapsed .nav-link:not(.active):hover {
             background: rgba(234, 88, 12, 0.15);
         }
 
@@ -540,6 +546,27 @@
         #page-loading-bar.is-loading {
             opacity: 1;
         }
+
+        /* Keep content cards distinct from the light page background. */
+        .main-content .card {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
+        }
+
+        .main-content .card.border-0 {
+            border: 1px solid #cbd5e1 !important;
+        }
+
+        .main-content .card-header {
+            border-bottom-color: #dbe2ea;
+        }
+
+        .main-content :is(.stat-card, .analytics-card, .filter-card, .inventory-table-card, .packing-summary-card) {
+            border-top-color: #cbd5e1;
+            border-right-color: #cbd5e1;
+            border-bottom-color: #cbd5e1;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
+        }
     </style>
 </head>
 
@@ -595,9 +622,9 @@
                 <a href="/customers" class="nav-link {{ request()->is('customers*') ? 'active' : '' }}" data-tooltip="អតិថិជន">
                     <i class="fas fa-users"></i><span>អតិថិជន</span>
                 </a>
-                <a href="{{ route('customer-locations.index') }}" class="nav-link {{ request()->is('customer-locations*') ? 'active' : '' }}" data-tooltip="ទីតាំងអតិថិជន">
+                <!-- <a href="{{ route('customer-locations.index') }}" class="nav-link {{ request()->is('customer-locations*') ? 'active' : '' }}" data-tooltip="ទីតាំងអតិថិជន">
                     <i class="fas fa-map-marker-alt"></i><span>ទីតាំងអតិថិជននៅលើផែនទី</span>
-                </a>
+                </a> -->
                 <a href="/salespersons" class="nav-link {{ request()->is('salespersons*') ? 'active' : '' }}" data-tooltip="ភ្នាក់ងារលក់">
                     <i class="fas fa-user-tie"></i><span>ភ្នាក់ងារលក់</span>
                 </a>
@@ -605,10 +632,10 @@
 
             {{-- 3. Preparation & Delivery (ផ្នែករៀបចំ & ដឹកជញ្ជូន) --}}
             @if(!$isBoss && ($isAdmin || $isManager || $isStaff || $isInventory || $isOfficeStaff))
-                <div class="nav-label">រៀបចំ & ដឹកជញ្ជូន</div>
+                <div class="nav-label">{{ $isInventory ? 'ការងាររៀបចំ' : 'រៀបចំ & ដឹកជញ្ជូន' }}</div>
             @endif
             @if(!$isBoss && ($isAdmin || $isManager || $isStaff || $isInventory))
-                <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') ? 'active' : '' }}" data-tooltip="រៀបចំទំនិញ">
+                <a href="{{ route('packing.index') }}" class="nav-link {{ request()->is('packing*') ? 'active' : '' }}" data-tooltip="រៀបចំទំនិញ" title="រៀបចំទំនិញ" @if(request()->is('packing*')) aria-current="page" @endif>
                     <i class="fas fa-box-open"></i><span>រៀបចំទំនិញ</span>
                 </a>
             @endif
@@ -617,9 +644,9 @@
                 <a href="/deliveries" class="nav-link {{ (request()->is('deliveries') || request()->is('deliveries/*')) && !request()->is('deliveries/map*') ? 'active' : '' }}" data-tooltip="ការដឹកជញ្ជូន">
                     <i class="fas fa-truck"></i><span>ការដឹកជញ្ជូន</span>
                 </a>
-                <a href="{{ route('deliveries.map') }}" class="nav-link {{ request()->is('deliveries/map*') ? 'active' : '' }}" data-tooltip="ផែនទីដឹកជញ្ជូន">
+                <!-- <a href="{{ route('deliveries.map') }}" class="nav-link {{ request()->is('deliveries/map*') ? 'active' : '' }}" data-tooltip="ផែនទីដឹកជញ្ជូន">
                     <i class="fas fa-map-marked-alt"></i><span>ផែនទីដឹកជញ្ជូន</span>
-                </a>
+                </a> -->
             @endif
 
             {{-- 4. Invoicing & Finance (ផ្នែកគិតលុយ & ហិរញ្ញវត្ថុ) --}}
@@ -641,7 +668,7 @@
 
             {{-- 5. Products & Inventory (ផ្នែកទំនិញ & ស្តុក) --}}
             @if(!$isBoss && ($isAdminOrManager || $isOfficeStaff || $isAdmin || $isManager || $isStaff || $isInventory || $isAuditor))
-                <div class="nav-label">ទំនិញ & ស្តុក</div>
+                <div class="nav-label">{{ $isInventory ? 'ស្តុក និងរបាយការណ៍' : 'ទំនិញ & ស្តុក' }}</div>
             @endif
             @if(!$isBoss && ($isAdminOrManager || $isOfficeStaff))
                 <a href="/products" class="nav-link {{ request()->is('products*') ? 'active' : '' }}" data-tooltip="ទំនិញ">
@@ -651,12 +678,17 @@
 
             @if(!$isBoss && ($isAdmin || $isManager || $isStaff || $isInventory || $isAuditor))
                 <a href="{{ route('inventory.index', ['period' => 'today']) }}"
-                    class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}" data-tooltip="ស្តុកទំនិញ">
+                    class="nav-link {{ request()->is('inventory*') ? 'active' : '' }}" data-tooltip="ស្តុកទំនិញ" title="ស្តុកទំនិញ" @if(request()->is('inventory*')) aria-current="page" @endif>
                     <i class="fas fa-boxes"></i><span>ស្តុកទំនិញ</span>
                 </a>
             @endif
 
             {{-- 6. Reports & System (ផ្នែករបាយការណ៍ & គ្រប់គ្រង) --}}
+            @if($isInventory)
+                <a href="{{ route('reports.inventory') }}" class="nav-link {{ request()->is('reports/inventory') ? 'active' : '' }}" data-tooltip="របាយការណ៍ស្តុក" title="របាយការណ៍ស្តុក" @if(request()->is('reports/inventory')) aria-current="page" @endif>
+                    <i class="fas fa-chart-line"></i><span>របាយការណ៍ស្តុក</span>
+                </a>
+            @endif
             @if($isAdminOrManager || $isAuditor)
                 <div class="nav-label">របាយការណ៍ & ប្រព័ន្ធ</div>
                 <a href="{{ route('reports.dashboard') }}" class="nav-link {{ request()->is('reports*') ? 'active' : '' }}" data-tooltip="របាយការណ៍">

@@ -565,7 +565,7 @@
                                     <th>មុខទំនិញ </th>
                                     <th class="text-center">ចំនួនលក់បាន </th>
                                     <th class="text-center">ចំនួនបង្វិលត្រឡប់ </th>
-                                    <th class="text-center">ចំនួនលក់</th>
+                                    <th class="text-center">ចេញសរុប (លក់ + ថែម)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -585,6 +585,7 @@
                                         <td class="text-center">
                                             <span class="badge" style="background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; font-size: 13px; font-weight: 800; padding: 4px 10px;">
                                                 {{ number_format($item->sold_qty) }}
+                                                <small class="d-block">ថែម: {{ number_format($item->free_qty) }}</small>
                                             </span>
                                         </td>
                                         <td class="text-center">

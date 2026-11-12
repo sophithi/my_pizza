@@ -39,6 +39,7 @@ class AuthController extends Controller
 
         // Attempt to authenticate with the matching account.
         if ($user && Auth::attempt(['email' => $user->email, 'password' => $request->password])) {
+            $request->session()->regenerate();
             $user = Auth::user();
 
             // Record login activity

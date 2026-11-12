@@ -349,7 +349,7 @@ class ReportController extends Controller
 
         $soldProducts = $soldQuery
             ->groupBy('order_items.product_id', 'products.name', 'products.unit', 'products.sku', 'products.category')
-            ->selectRaw('order_items.product_id as id, products.name, products.unit, products.sku, products.category, SUM(order_items.quantity) as sold_qty, SUM(order_items.total_price) as total_revenue_usd')
+            ->selectRaw("order_items.product_id as id, products.name, products.unit, products.sku, products.category, SUM(CASE WHEN order_items.item_type = 'sale' THEN order_items.quantity ELSE 0 END) as sold_qty, SUM(CASE WHEN order_items.item_type = 'free' THEN order_items.quantity ELSE 0 END) as free_qty, SUM(order_items.total_price) as total_revenue_usd")
             ->get()
             ->keyBy('id');
 
@@ -377,7 +377,9 @@ class ReportController extends Controller
             $sold = (int) ($soldProducts[$product->id]->sold_qty ?? 0);
             $returned = (int) ($returnedProducts[$product->id]->returned_qty ?? 0);
             $revenue = (float) ($soldProducts[$product->id]->total_revenue_usd ?? 0);
-            $net = max(0, $sold - $returned);
+            $free = (int) ($soldProducts[$product->id]->free_qty ?? 0);
+            // Active order items already exclude deleted/returned orders.
+            $net = $sold + $free;
 
             return (object) [
                 'id' => $product->id,
@@ -386,6 +388,7 @@ class ReportController extends Controller
                 'unit' => $product->unit ?? 'pcs',
                 'category' => $product->category,
                 'sold_qty' => $sold,
+                'free_qty' => $free,
                 'returned_qty' => $returned,
                 'net_qty' => $net,
                 'revenue' => $revenue,
@@ -636,66 +639,54 @@ class ReportController extends Controller
      */
     public function inventory(Request $request)
     {
-        $totalProducts = Product::count();
-        $lowStockProducts = Inventory::whereRaw('quantity <= reorder_level')
-            ->with('product')
-            ->get();
-        $outOfStockCount = Inventory::where('quantity', '<=', 0)->count();
-        $totalInventoryValue = Inventory::query()
-            ->join('products', 'products.id', '=', 'inventories.product_id')
-            ->selectRaw('SUM(GREATEST(inventories.quantity, 0) * COALESCE(NULLIF(inventories.cost_per_unit, 0), products.price_usd, 0)) as total')
-            ->value('total') ?? 0;
-        // KHR ground truth mirrors the USD calc above, but reads products.price_khr
-        // (the stored KHR catalog price) instead of deriving it from price_usd.
-        $totalInventoryValueKhr = Inventory::query()
-            ->join('products', 'products.id', '=', 'inventories.product_id')
-            ->selectRaw(
-                'SUM(GREATEST(inventories.quantity, 0) * COALESCE(NULLIF(inventories.cost_per_unit, 0) * ?, products.price_khr, 0)) as total',
-                [self::EXCHANGE_RATE]
-            )
-            ->value('total') ?? 0;
-
-        // All inventory with stock status
-        $inventory = Inventory::with('product')
-            ->orderBy('quantity', 'asc')
-            ->paginate(20);
-
-        // Get period for display, and use it to scope the stock flow below
-        $period = $request->input('period', 'all');
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $dateRange = $this->getDateRange($period, $startDate, $endDate);
-
-        $stockMovementQuery = InventoryMovement::query()
-            ->join('inventories', 'inventory_movements.inventory_id', '=', 'inventories.id')
-            ->leftJoin('products', 'inventory_movements.product_id', '=', 'products.id')
-            ->groupBy('inventory_movements.inventory_id', 'products.name', 'products.unit', 'inventories.quantity')
-            ->selectRaw('products.name, products.unit, inventories.quantity as current_quantity')
-            ->selectRaw('SUM(CASE WHEN inventory_movements.quantity_change < 0 THEN ABS(inventory_movements.quantity_change) ELSE 0 END) as stock_out')
-            ->selectRaw('SUM(CASE WHEN inventory_movements.quantity_change > 0 THEN inventory_movements.quantity_change ELSE 0 END) as stock_in')
-            ->selectRaw('MAX(inventory_movements.created_at) as last_movement_at');
-
-        if ($dateRange['start']) {
-            $stockMovementQuery->whereDate('inventory_movements.created_at', '>=', $dateRange['start']);
+        $request->validate([
+            'period' => 'nullable|in:all,today,yesterday,week,month,year,custom',
+            'start_date' => 'nullable|required_if:period,custom|date',
+            'end_date' => 'nullable|required_if:period,custom|date|after_or_equal:start_date',
+            'product_id' => 'nullable|integer|exists:products,id',
+            'category' => 'nullable|string|max:255',
+            'export' => 'nullable|in:excel',
+        ]);
+        $period = $request->input('period', 'month');
+        $dateRange = $this->getDateRange($period, $request->start_date, $request->end_date);
+        $startDate = $dateRange['start'] ? Carbon::parse($dateRange['start'])->toDateString() : null;
+        $endDate = $dateRange['end'] ? Carbon::parse($dateRange['end'])->toDateString() : null;
+        $rows = app(\App\Services\InventoryReportService::class)->rows(
+            $startDate, $endDate, $request->integer('product_id') ?: null, $request->input('category')
+        );
+        $totals = collect(['received', 'sold', 'free', 'returned'])->mapWithKeys(fn ($key) => [$key => $rows->sum($key)]);
+        // Legacy movements combine sale/free, while current order items retain the split.
+        // Keep these order-date metrics distinct from the movement-date balance table.
+        $orderItems = OrderItem::whereIn('product_id', $rows->pluck('product_id'))
+            ->whereHas('order', function ($query) use ($startDate, $endDate) {
+                $query->where('status', '!=', 'cancelled')
+                    ->when($startDate, fn ($q) => $q->whereDate('order_date', '>=', $startDate))
+                    ->when($endDate, fn ($q) => $q->whereDate('order_date', '<=', $endDate));
+            });
+        $orderBreakdown = (clone $orderItems)->selectRaw("product_id, SUM(CASE WHEN item_type = 'sale' THEN quantity ELSE 0 END) as sold, SUM(CASE WHEN item_type = 'free' THEN quantity ELSE 0 END) as free")
+            ->groupBy('product_id')->get()->keyBy('product_id');
+        foreach ($rows as $row) {
+            $row->order_sold = (int) ($orderBreakdown->get($row->product_id)?->sold ?? 0);
+            $row->order_free = (int) ($orderBreakdown->get($row->product_id)?->free ?? 0);
+            $row->stock_out = $row->sold + $row->free + $row->unclassified;
         }
-        if ($dateRange['end']) {
-            $stockMovementQuery->whereDate('inventory_movements.created_at', '<=', $dateRange['end']);
+        $orderTotals = ['sold' => $rows->sum('order_sold'), 'free' => $rows->sum('order_free')];
+        if ($request->input('export') === 'excel') {
+            $spreadsheet = $this->createBrandedSpreadsheet('Inventory', 'Inventory movement report', 9);
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue('A4', ($startDate ?? 'All') . ' - ' . ($endDate ?? 'Now'));
+            $sheet->fromArray(['Product', 'Opening', 'Received', 'Order sold', 'Order free', 'Returned', 'Stock out', 'Adjustment', 'Unit'], null, 'A6');
+            foreach ($rows as $index => $row) {
+                $line = $index + 7;
+                $sheet->setCellValueExplicit('A' . $line, $row->name, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $sheet->fromArray([$row->opening, $row->received, $row->order_sold, $row->order_free, $row->returned, $row->stock_out, $row->adjustment], null, 'B' . $line);
+                $sheet->setCellValueExplicit('I' . $line, $row->unit, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            }
+            return $this->downloadSpreadsheet($spreadsheet, 'inventory-report-' . now()->format('Y-m-d') . '.xlsx');
         }
-
-        $stockMovement = $stockMovementQuery->orderByDesc('last_movement_at')->get();
-
-        return view('reports.inventory', compact(
-            'totalProducts',
-            'lowStockProducts',
-            'outOfStockCount',
-            'totalInventoryValue',
-            'totalInventoryValueKhr',
-            'inventory',
-            'stockMovement',
-            'period',
-            'startDate',
-            'endDate'
-        ));
+        $products = Product::orderBy('name')->get(['id', 'name']);
+        $categories = Product::whereNotNull('category')->distinct()->orderBy('category')->pluck('category');
+        return view('reports.inventory', compact('rows', 'totals', 'orderTotals', 'products', 'categories', 'period', 'startDate', 'endDate'));
     }
 
     /**

@@ -12,6 +12,10 @@ class DeliveryController extends Controller
 {
     public function index(Request $request)
     {
+        if (!$request->has('filter') && !$request->filled('start_date') && !$request->filled('end_date')) {
+            $request->merge(['filter' => 'today']);
+        }
+
         [$filter, $startDate, $endDate] = $this->resolveDateFilter($request);
 
         $deliveries = Delivery::withCount([

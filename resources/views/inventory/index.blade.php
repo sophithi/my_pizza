@@ -4,9 +4,10 @@
 
 @push('styles')
     <style>
-        :root,
+:root,
         .inventory-page,
         .restock-overlay {
+
             --accent: #e85d24;
             --accent-dark: #d94a10;
             --accent-soft: #fff7ed;
@@ -18,29 +19,37 @@
             --text: #0f172a;
             --warning: #d97706;
             --shadow: 0 12px 32px rgba(15, 23, 42, .07);
-        }
 
-        .inventory-header {
+}
+
+.inventory-header {
+
             align-items: flex-start;
             display: flex;
             gap: 16px;
             justify-content: space-between;
             margin-bottom: 18px;
-        }
 
-        .inventory-title {
+}
+
+.inventory-title {
+
             color: var(--text);
             font-size: 30px;
             font-weight: 900;
             margin: 0;
-        }
 
-        .inventory-subtitle {
+}
+
+.inventory-subtitle {
+
             color: var(--muted);
             margin: 6px 0 0;
-        }
 
-        .inventory-btn {
+}
+
+.inventory-btn {
+
             align-items: center;
             border: 0;
             border-radius: 8px;
@@ -53,46 +62,60 @@
             text-decoration: none;
             transition: background .15s ease, color .15s ease, transform .15s ease;
             white-space: nowrap;
-        }
 
-        .inventory-btn:hover {
+}
+
+.inventory-btn:hover {
+
             transform: translateY(-1px);
-        }
 
-        .inventory-btn-primary {
+}
+
+.inventory-btn-primary {
+
             background-color: #e85d24 !important;
             background: linear-gradient(135deg, #e85d24, #d94a10) !important;
             box-shadow: 0 10px 22px rgba(232, 93, 36, .22) !important;
             color: #ffffff !important;
             border: 0 !important;
-        }
 
-        .inventory-btn-primary:hover {
+}
+
+.inventory-btn-primary:hover {
+
             background-color: #d94a10 !important;
             background: linear-gradient(135deg, #d94a10, #b83d0c) !important;
             color: #ffffff !important;
-        }
 
-        .inventory-btn-soft {
+}
+
+.inventory-btn-soft {
+
             background: #f3f4f6;
             color: #374151;
-        }
 
-        .inventory-btn-soft:hover {
+}
+
+.inventory-btn-soft:hover {
+
             background: #e5e7eb;
             color: #111827;
-        }
 
-        .export-group {
+}
+
+.export-group {
+
             align-items: center;
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
             display: inline-flex;
             overflow: hidden;
-        }
 
-        .export-btn {
+}
+
+.export-btn {
+
             align-items: center;
             color: #374151;
             display: inline-flex;
@@ -102,105 +125,115 @@
             padding: 9px 14px;
             text-decoration: none;
             transition: background .15s ease, color .15s ease;
-        }
 
-        .export-btn:hover {
+}
+
+.export-btn:hover {
+
             background: #f3f4f6;
             color: #111827;
-        }
 
-        .inventory-stats {
-            display: grid;
-            gap: 16px;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            margin-bottom: 20px;
-        }
+}
 
-        .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            padding: 20px 18px;
-            position: relative;
-            transition: box-shadow .15s ease, transform .15s ease;
-        }
+.inventory-stats {
+display: grid;
+grid-template-columns: repeat(4, minmax(0, 1fr));
+}
 
-        .stat-card:hover {
+.stat-card {
+background: var(--surface);
+border: 1px solid var(--border);
+overflow: hidden;
+position: relative;
+transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.stat-card:hover {
+
             box-shadow: 0 16px 36px rgba(15, 23, 42, .1);
             transform: translateY(-1px);
-        }
 
-        .stat-card::before {
+}
+
+.stat-card::before {
+
             background: var(--accent);
             content: "";
             inset: 0 auto 0 0;
             position: absolute;
             width: 4px;
-        }
 
-        .stat-card.stat-success::before { background: var(--success); }
-        .stat-card.stat-warning::before { background: var(--warning); }
-        .stat-card.stat-danger::before { background: var(--danger); }
+}
 
-        .stat-label {
+.stat-card.stat-success::before {
+ background: var(--success);
+}
+
+.stat-card.stat-warning::before {
+ background: var(--warning);
+}
+
+.stat-card.stat-danger::before {
+ background: var(--danger);
+}
+
+.stat-label {
+
             color: var(--muted);
             font-size: 18px;
             font-weight: 900;
             letter-spacing: .3px;
             text-transform: uppercase;
-        }
 
-        .stat-value {
-            color: var(--text);
-            font-size: 32px;
-            font-weight: 900;
-            line-height: 1.2;
-            margin-top: 12px;
-        }
+}
 
-        .filter-card,
+.stat-value {
+color: var(--text);
+font-weight: 900;
+line-height: 1.2;
+}
+
+.filter-card,
         .inventory-table-card,
         .empty-state {
+
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
             box-shadow: var(--shadow);
-        }
 
-        .filter-card {
-            margin-bottom: 16px;
-            overflow: hidden;
-            padding: 0;
-        }
+}
 
-        .toolbar-row {
-            align-items: stretch;
-            display: flex;
-        }
+.filter-card {
+margin-bottom: 16px;
+}
 
-        .toolbar-field {
-            align-items: center;
-            display: flex;
-            flex-shrink: 0;
-            gap: 9px;
-            padding: 0 16px;
-        }
+.toolbar-row {
+display: flex;
+}
 
-        .toolbar-search {
-            flex: 1 1 auto;
-            min-width: 200px;
-        }
+.toolbar-field {
+align-items: center;
+display: flex;
+flex-shrink: 0;
+gap: 9px;
+}
 
-        .toolbar-field > i {
+.toolbar-search {
+min-width: 200px;
+}
+
+.toolbar-field > i {
+
             color: var(--muted);
             flex-shrink: 0;
             font-size: 13px;
-        }
 
-        .toolbar-field input,
+}
+
+.toolbar-field input,
         .toolbar-field select {
+
             background: transparent;
             border: 0;
             color: var(--text);
@@ -210,29 +243,27 @@
             outline: none;
             padding: 0;
             width: 100%;
-        }
 
-        .toolbar-field select {
+}
+
+.toolbar-field select {
+
             cursor: pointer;
-        }
 
-        .toolbar-date {
-            display: none;
-        }
+}
 
-        .toolbar-date.show {
-            display: flex;
-        }
+.toolbar-divider {
 
-        .toolbar-divider {
             align-self: center;
             background: var(--border);
             flex-shrink: 0;
             height: 26px;
             width: 1px;
-        }
 
-        .toolbar-search-btn {
+}
+
+.toolbar-search-btn {
+
             align-items: center;
             background: linear-gradient(135deg, var(--accent), var(--accent-dark));
             border: 0;
@@ -245,175 +276,70 @@
             justify-content: center;
             padding: 0 22px;
             white-space: nowrap;
-        }
 
-        .toolbar-search-btn:hover {
+}
+
+.toolbar-search-btn:hover {
+
             background: linear-gradient(135deg, var(--accent-dark), var(--accent-dark));
-        }
 
-        .inventory-table-card {
-            overflow: hidden;
-        }
+}
 
-        .inventory-table th {
-            background: #f8fafc;
-            border-bottom: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 900;
-            padding: 14px 16px;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
+.inventory-table-card {
+overflow: hidden;
+}
 
-        .inventory-table td {
-            border-bottom: 1px solid #edf0f4;
-            color: var(--text);
-            padding: 14px 16px;
-            vertical-align: middle;
-        }
+.inventory-table th {
+border-bottom: 1px solid var(--border);
+color: var(--muted);
+font-weight: 900;
+text-transform: uppercase;
+white-space: nowrap;
+}
 
-        .inventory-table tr:hover td {
+.inventory-table td {
+border-bottom: 1px solid #edf0f4;
+color: var(--text);
+vertical-align: middle;
+}
+
+.inventory-table tr:hover td {
+
             background: #fbfdff;
-        }
 
-        .inventory-table tr[data-status="out"] td:first-child {
+}
+
+.inventory-table tr[data-status="out"] td:first-child {
+
             border-left: 4px solid var(--danger);
-        }
 
-        .inventory-table tr[data-status="low"] td:first-child {
+}
+
+.inventory-table tr[data-status="low"] td:first-child {
+
             border-left: 4px solid var(--warning);
-        }
 
-        .stock-unit {
+}
+
+.stock-unit {
+
             color: var(--muted);
             font-size: 12px;
             font-weight: 700;
             margin-left: 3px;
-        }
 
-        .product-name {
-            font-weight: 900;
-        }
+}
 
-        .product-meta {
-            color: var(--muted);
-            font-size: 12px;
-            margin-top: 3px;
-        }
+.product-name {
+font-weight: 900;
+}
 
-        .stock-cell {
-            min-width: 155px;
-        }
+.product-meta {
+color: var(--muted);
+}
 
-        .stock-pill-btn {
-            align-items: center;
-            background: #f8fafc;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 999px;
-            cursor: pointer;
-            display: inline-flex;
-            gap: 5px;
-            justify-content: center;
-            padding: 5px 14px;
-            text-decoration: none;
-            transition: all .18s ease;
-        }
+.status-pill {
 
-        .stock-pill-btn:hover {
-            box-shadow: 0 4px 14px rgba(15, 23, 42, .08);
-            transform: translateY(-1px);
-        }
-
-        .stock-pill-btn.stock-pill-in {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-            color: #15803d;
-        }
-
-        .stock-pill-btn.stock-pill-in:hover {
-            background: #dcfce7;
-            border-color: #86efac;
-            color: #166534;
-        }
-
-        .stock-pill-btn.stock-pill-low {
-            background: #fffbeb;
-            border-color: #fde68a;
-            color: #b45309;
-        }
-
-        .stock-pill-btn.stock-pill-low:hover {
-            background: #fef3c7;
-            border-color: #fcd34d;
-            color: #92400e;
-        }
-
-        .stock-pill-btn.stock-pill-out {
-            background: #fef2f2;
-            border-color: #fecaca;
-            color: #dc2626;
-        }
-
-        .stock-pill-btn.stock-pill-out:hover {
-            background: #fee2e2;
-            border-color: #fca5a5;
-            color: #b91c1c;
-        }
-
-        .stock-val {
-            font-size: 16px;
-            font-weight: 900;
-            letter-spacing: -.3px;
-            line-height: 1;
-        }
-
-        .stock-unit-tag {
-            font-size: 11px;
-            font-weight: 800;
-            opacity: .85;
-            line-height: 1;
-        }
-
-        .stock-edit-hint {
-            font-size: 9.5px;
-            margin-left: 2px;
-            opacity: 0;
-            transition: opacity .15s ease, transform .15s ease;
-        }
-
-        .stock-pill-btn:hover .stock-edit-hint {
-            opacity: .75;
-            transform: scale(1.15);
-        }
-
-        .stock-progress {
-            background: #f1f5f9;
-            border-radius: 999px;
-            height: 5px;
-            margin: 6px auto 0;
-            max-width: 100px;
-            overflow: hidden;
-        }
-
-        .stock-progress span {
-            background: var(--success);
-            border-radius: inherit;
-            display: block;
-            height: 100%;
-            transition: width .3s ease;
-        }
-
-        .stock-progress.low span {
-            background: var(--warning);
-        }
-
-        .stock-progress.out span {
-            background: var(--danger);
-            opacity: .35;
-        }
-
-        .status-pill {
             align-items: center;
             border-radius: 999px;
             display: inline-flex;
@@ -422,57 +348,70 @@
             gap: 6px;
             padding: 6px 10px;
             white-space: nowrap;
-        }
 
-        .status-good {
+}
+
+.status-good {
+
             background: #d1fae5;
             color: #065f46;
-        }
 
-        .status-low {
+}
+
+.status-low {
+
             background: #fef3c7;
             color: #92400e;
-        }
 
-        .status-out {
+}
+
+.status-out {
+
             background: #fee2e2;
             color: #991b1b;
-        }
 
-        .movement-pill {
-            align-items: center;
-            border-radius: 999px;
-            display: inline-flex;
-            font-size: 12px;
-            font-weight: 900;
-            gap: 6px;
-            padding: 6px 10px;
-        }
+}
 
-        .movement-out {
+.movement-pill {
+align-items: center;
+border-radius: 999px;
+display: inline-flex;
+font-size: 12px;
+font-weight: 900;
+gap: 6px;
+padding: 6px 10px;
+}
+
+.movement-out {
+
             background: #fff7ed;
             color: #c2410c;
-        }
 
-        .movement-in {
+}
+
+.movement-in {
+
             background: #ecfdf5;
             color: #047857;
-        }
 
-        .movement-time {
+}
+
+.movement-time {
+
             color: var(--muted);
             font-size: 12px;
             font-weight: 700;
             margin-top: 5px;
-        }
 
-        .action-row {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
+}
 
-        .icon-action {
+.action-row {
+display: flex;
+justify-content: flex-end;
+}
+
+.icon-action {
+
             align-items: center;
             background: #eff6ff;
             border: 1px solid #dbeafe;
@@ -483,47 +422,63 @@
             justify-content: center;
             text-decoration: none;
             width: 34px;
-        }
 
-        .icon-action:hover {
+}
+
+.icon-action:hover {
+
             background: #dbeafe;
             color: #1d4ed8;
-        }
 
-        .icon-danger {
+}
+
+.icon-danger {
+
             background: #fef2f2;
             border-color: #fecaca;
             color: var(--danger);
-        }
 
-        .icon-danger:hover {
+}
+
+.icon-danger:hover {
+
             background: #fee2e2;
             color: #b91c1c;
-        }
 
-        .icon-restock {
+}
+
+.icon-restock {
+
             background: #ecfdf5;
             border-color: #bbf7d0;
             color: #047857;
-        }
 
-        .icon-restock:hover {
+}
+
+.icon-restock:hover {
+
             background: #d1fae5;
             color: #065f46;
-        }
 
-        .icon-reduce {
+}
+
+.icon-reduce {
+
             background: #fff7ed;
             border-color: #fed7aa;
             color: #c2410c;
-        }
 
-        .icon-reduce:hover {
+}
+
+.icon-reduce:hover {
+
             background: #ffedd5;
             color: #9a3412;
-        }
 
-        .restock-overlay {
+}
+
+.restock-overlay {
+
             --accent: #e85d24;
             --accent-dark: #d94a10;
             --accent-soft: #fff7ed;
@@ -539,22 +494,28 @@
             padding: 20px;
             position: fixed;
             z-index: 1100;
-        }
 
-        .restock-overlay.show {
+}
+
+.restock-overlay.show {
+
             display: flex;
-        }
 
-        .restock-modal {
+}
+
+.restock-modal {
+
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
             max-width: 440px;
             overflow: hidden;
             width: 100%;
-        }
 
-        .restock-header {
+}
+
+.restock-header {
+
             align-items: center;
             background-color: #e85d24 !important;
             background: linear-gradient(135deg, #e85d24, #d94a10) !important;
@@ -562,15 +523,19 @@
             display: flex;
             justify-content: space-between;
             padding: 16px 18px;
-        }
 
-        .restock-title {
+}
+
+.restock-title {
+
             font-size: 17px;
             font-weight: 900;
             margin: 0;
-        }
 
-        .restock-close {
+}
+
+.restock-close {
+
             align-items: center;
             background: rgba(255, 255, 255, .18);
             border: 0;
@@ -580,43 +545,55 @@
             height: 34px;
             justify-content: center;
             width: 34px;
-        }
 
-        .restock-body {
+}
+
+.restock-body {
+
             padding: 18px;
-        }
 
-        .restock-product {
+}
+
+.restock-product {
+
             background: #f8fafc;
             border: 1px solid var(--border);
             border-radius: 8px;
             margin-bottom: 14px;
             padding: 12px;
-        }
 
-        .restock-product-name {
+}
+
+.restock-product-name {
+
             color: var(--text);
             font-size: 16px;
             font-weight: 900;
-        }
 
-        .restock-product-meta {
+}
+
+.restock-product-meta {
+
             color: var(--muted);
             font-size: 12px;
             font-weight: 800;
             margin-top: 4px;
-        }
 
-        .restock-field label {
+}
+
+.restock-field label {
+
             color: var(--muted);
             display: block;
             font-size: 12px;
             font-weight: 900;
             margin-bottom: 7px;
             text-transform: uppercase;
-        }
 
-        .restock-input {
+}
+
+.restock-input {
+
             border: 1.5px solid #d9dee7;
             border-radius: 8px;
             color: var(--text);
@@ -626,90 +603,116 @@
             outline: none;
             padding: 10px 12px;
             width: 100%;
-        }
 
-        .restock-input:focus {
+}
+
+.restock-input:focus {
+
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(232, 93, 36, .13);
-        }
 
-        .restock-preview {
+}
+
+.restock-preview {
+
             align-items: center;
             display: grid;
             gap: 8px;
             grid-template-columns: 1fr auto 1fr;
             margin-top: 14px;
-        }
 
-        .restock-preview-card {
+}
+
+.restock-preview-card {
+
             background: #f8fafc;
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 10px;
             text-align: center;
-        }
 
-        .restock-preview-label {
+}
+
+.restock-preview-label {
+
             color: var(--muted);
             font-size: 11px;
             font-weight: 900;
             text-transform: uppercase;
-        }
 
-        .restock-preview-value {
+}
+
+.restock-preview-value {
+
             color: var(--text);
             font-size: 20px;
             font-weight: 900;
             margin-top: 2px;
-        }
 
-        .restock-preview-plus {
+}
+
+.restock-preview-plus {
+
             color: var(--accent);
             font-weight: 900;
-        }
 
-        .restock-actions {
+}
+
+.restock-actions {
+
             display: flex;
             gap: 10px;
             justify-content: flex-end;
             margin-top: 18px;
-        }
 
-        .restock-actions .inventory-btn-primary {
+}
+
+.restock-actions .inventory-btn-primary {
+
             background-color: #e85d24 !important;
             background: linear-gradient(135deg, #e85d24, #d94a10) !important;
             box-shadow: 0 8px 18px rgba(232, 93, 36, .22) !important;
             color: #ffffff !important;
             border: 0 !important;
             min-width: 110px;
-        }
 
-        .restock-actions .inventory-btn-primary:hover {
+}
+
+.restock-actions .inventory-btn-primary:hover {
+
             background-color: #d94a10 !important;
             background: linear-gradient(135deg, #d94a10, #b83d0c) !important;
             color: #ffffff !important;
-        }
 
-        .restock-error {
+}
+
+.restock-error {
+
             color: var(--danger);
             display: none;
             font-size: 12px;
             font-weight: 800;
             margin-top: 8px;
-        }
 
-        .restock-error.show {
+}
+
+.restock-error.show {
+
             display: block;
-        }
 
-        .reason-chips {
+}
+
+.reason-chips {
+
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
             margin-bottom: 8px;
-        }
 
-        .reason-chip {
+}
+
+.reason-chip {
+
             background: #f8fafc;
             border: 1px solid var(--border);
             border-radius: 999px;
@@ -718,89 +721,254 @@
             font-size: 12px;
             font-weight: 800;
             padding: 6px 12px;
-        }
 
-        .reason-chip:hover {
+}
+
+.reason-chip:hover {
+
             background: #f1f5f9;
-        }
 
-        .reason-chip.active {
+}
+
+.reason-chip.active {
+
             background: #ffedd5;
             border-color: #fdba74;
             color: #9a3412;
-        }
 
-        .empty-state {
+}
+
+.empty-state {
+
             padding: 64px 20px;
             text-align: center;
-        }
 
-        .empty-state i {
+}
+
+.empty-state i {
+
             color: var(--accent);
             font-size: 42px;
             margin-bottom: 14px;
-        }
 
-        .empty-state h3 {
+}
+
+.empty-state h3 {
+
             color: var(--text);
             font-size: 22px;
             font-weight: 900;
             margin-bottom: 8px;
-        }
 
-        .empty-state p {
+}
+
+.empty-state p {
+
             color: var(--muted);
             margin-bottom: 18px;
-        }
 
-        @media (max-width: 1100px) {
-            .inventory-stats {
+}
+
+@media (max-width: 1100px) {
+.inventory-stats {
+
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
 
-            .toolbar-row {
+}
+
+.toolbar-row {
+
                 flex-wrap: wrap;
-            }
 
-            .toolbar-field {
+}
+
+.toolbar-field {
+
                 border-bottom: 1px solid var(--border);
                 flex: 1 1 50%;
-            }
 
-            .toolbar-divider {
+}
+
+.toolbar-divider {
+
                 display: none;
-            }
 
-            .toolbar-search-btn {
+}
+
+.toolbar-search-btn {
+
                 border-radius: 0;
                 flex: 1 1 100%;
                 justify-content: center;
                 padding: 12px;
-            }
-        }
 
-        @media (max-width: 700px) {
-            .inventory-header {
+}
+}
+
+@media (max-width: 700px) {
+.inventory-header {
+
                 align-items: stretch;
                 flex-direction: column;
-            }
 
-            .inventory-stats {
+}
+
+.inventory-stats {
+
                 grid-template-columns: 1fr;
-            }
 
-            .toolbar-field {
+}
+
+.toolbar-field {
+
                 flex: 1 1 100%;
-            }
 
-            .inventory-btn {
+}
+
+.inventory-btn {
+
                 width: 100%;
-            }
-        }
 
-        .pager-wrap {
+}
+}
+
+.pager-wrap {
+
             margin-top: 16px;
-        }
+
+}
+
+.inventory-page .inventory-stats {
+ gap:12px; margin-bottom:20px;
+}
+
+.inventory-page .stat-card {
+ border-radius:12px; padding:18px 20px; box-shadow:0 3px 12px rgba(15,23,42,.035);
+}
+
+.inventory-page .stat-value {
+ font-size:27px; margin-top:8px; font-variant-numeric:tabular-nums;
+}
+
+.inventory-page .filter-card {
+ padding:12px; border-radius:12px; overflow:visible;
+}
+
+.inventory-page .toolbar-row {
+ flex-wrap:wrap; align-items:center; gap:10px;
+}
+
+.inventory-page .toolbar-row > .toolbar-divider {
+ display:none;
+}
+
+.inventory-page .toolbar-field {
+ min-width:145px; min-height:42px; padding:0 12px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc; flex:1 1 150px;
+}
+
+.inventory-page .toolbar-field:focus-within {
+ border-color:#f97316; box-shadow:0 0 0 3px #fff0e6; background:#fff;
+}
+
+.inventory-page .toolbar-search {
+ flex:2 1 240px;
+}
+
+.inventory-page .toolbar-field input,.inventory-page .toolbar-field select {
+ min-height:42px; font-size:13px; min-width:0;
+}
+
+.inventory-page .toolbar-date {
+ display:none;
+}
+
+.inventory-page .toolbar-date.show {
+ display:flex;
+}
+
+.inventory-page .toolbar-field:has(button) {
+ flex:0 0 auto; min-width:0; padding:0; background:none; border:0;
+}
+
+.inventory-page .inventory-table-card {
+ border-radius:12px; box-shadow:0 3px 12px rgba(15,23,42,.035);
+}
+
+.inventory-table-heading {
+ padding:16px 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid #e8edf3;
+}
+
+.inventory-table-heading h3 {
+ font-size:15px; font-weight:800; margin:0;
+}
+
+.inventory-table-heading span {
+ font-size:12px; color:#64748b;
+}
+
+.inventory-page .inventory-table th {
+ padding:13px 16px; font-size:12px; background:#f8fafc;
+}
+
+.inventory-page .inventory-table td {
+ padding:16px; font-size:13px;
+}
+
+.inventory-page .inventory-table tr[data-status="out"] td:first-child,
+        .inventory-page .inventory-table tr[data-status="low"] td:first-child {
+ border-left:0;
+}
+
+.inventory-page .product-name {
+ font-size:14px;
+}
+
+.inventory-page .product-meta {
+ margin-top:5px; font-size:11px;
+}
+
+.quantity-badge {
+ display:inline-block; min-width:62px; padding:6px 10px; border-radius:7px; font-size:14px; font-weight:800; font-variant-numeric:tabular-nums; background:#f1f5f9; color:#0f172a;
+}
+
+.quantity-badge.free {
+ background:#eff6ff; color:#2563eb;
+}
+
+.quantity-badge.zero {
+ background:transparent; color:#94a3b8; font-weight:500;
+}
+
+.inventory-page .action-row {
+ gap:6px; flex-wrap:nowrap;
+}
+
+.inventory-page .movement-pill {
+ font-variant-numeric:tabular-nums;
+}
+
+@media(max-width:700px) {
+.inventory-page .toolbar-search {
+ flex-basis:100%;
+}
+
+.inventory-page .toolbar-field {
+ flex-basis:calc(50% - 10px); min-width:0;
+}
+
+.inventory-page .inventory-table {
+ min-width:960px;
+}
+
+.inventory-table-heading {
+ align-items:flex-start;
+}
+}
+
+.inventory-page .icon-action:disabled {
+ opacity:.35; cursor:not-allowed; transform:none;
+}
+    @include('inventory.partials.modal-styles')
     </style>
 @endpush
 
@@ -828,7 +996,8 @@
     <div class="container-fluid py-4 inventory-page">
         <div class="inventory-header">
             <div>
-                <h2 class="inventory-title">ស្តុកទំនិញ</h2>
+                <h2 class="inventory-title">ផ្ទាំងវិភាគស្តុកទំនិញ</h2>
+                <p class="inventory-subtitle">Pizza Happy Family · តាមដានស្តុក និងចលនាទំនិញ</p>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <div class="export-group">
@@ -874,12 +1043,20 @@
             </div>
         </div>
 
+        @if($errors->any())
+            <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+        @endif
+        @include('inventory.partials.analytics')
+
         <div class="filter-card">
             <form id="inventoryFilters" method="GET" action="{{ route('inventory.index') }}">
+                <input type="hidden" name="chart_from" value="{{ $chartFrom }}">
+                <input type="hidden" name="chart_to" value="{{ $chartTo }}">
                 <div class="toolbar-row">
                     <div class="toolbar-field toolbar-search">
                         <i class="fas fa-search"></i>
                         <input type="search" name="search" id="inventorySearch" value="{{ request('search') }}" placeholder="ស្វែងរក..." autocomplete="off">
+                        <button type="submit" class="btn btn-sm" aria-label="ស្វែងរក"><i class="fas fa-arrow-right" style="color:#e85d24"></i></button>
                     </div>
 
                     <div class="toolbar-divider"></div>
@@ -910,7 +1087,7 @@
                     <div class="toolbar-field">
                         <i class="fas fa-calendar-day"></i>
                         <select id="periodSelect" name="period" onchange="handlePeriodChange(this)">
-                            <option value="everyday" {{ in_array($toolbarPeriod, ['everyday', 'all'], true) && !$hasDateRange ? 'selected' : '' }}>គ្រប់ទំនិញ</option>
+                            <option value="everyday" {{ in_array($toolbarPeriod, ['everyday', 'all'], true) && !$hasDateRange ? 'selected' : '' }}>គ្រប់ថ្ងៃ</option>
                             <option value="today" {{ $toolbarPeriod === 'today' ? 'selected' : '' }}>ថ្ងៃនេះ</option>
                             <option value="yesterday" {{ $toolbarPeriod === 'yesterday' ? 'selected' : '' }}>ម្សិលមិញ</option>
                             <option value="month" {{ $toolbarPeriod === 'month' ? 'selected' : '' }}>ខែនេះ</option>
@@ -933,6 +1110,9 @@
                         <span style="font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;">ដល់:</span>
                         <input type="date" name="to_date" id="toolbarToDate" value="{{ $toDateVal }}" title="ដល់ថ្ងៃ (To Date)">
                     </div>
+                    <div class="toolbar-field toolbar-date {{ $toolbarCustomDate ? 'show' : '' }}">
+                        <button type="submit" class="inventory-btn inventory-btn-primary">បង្ហាញ</button>
+                    </div>
 
                 </div>
             </form>
@@ -940,6 +1120,10 @@
 
         @if($inventories->count())
             <div class="inventory-table-card">
+                <div class="inventory-table-heading">
+                    <h3>បញ្ជីទំនិញ <span>· {{ number_format($inventories->total()) }} មុខ</span></h3>
+                    <span>លក់ / ថែម តាមថ្ងៃ Order</span>
+                </div>
                 <div class="table-responsive">
                     <table class="table inventory-table mb-0">
                         <thead>
@@ -947,7 +1131,9 @@
                                 <th>ទំនិញ</th>
                                 <th>ប្រភេទ</th>
                                 <th>ទីតាំង</th>
-                                <th class="text-center">ចំនួន</th>
+                                <th class="text-center">ស្តុកបច្ចុប្បន្ន</th>
+                                <th class="text-center" title="ចំនួនទំនិញលក់តាមថ្ងៃ Order">លក់</th>
+                                <th class="text-center" title="ចំនួនទំនិញថែមតាមថ្ងៃ Order">ថែម</th>
                                 @if($movementActive)
                                     <th class="text-center">ចលនា</th>
                                 @endif
@@ -982,24 +1168,9 @@
                                     </td>
                                     <td>{{ $inv->product?->category ?? 'មិនមាន' }}</td>
                                     <td>{{ $inv->warehouse_location ?? '—' }}</td>
-                                    <td class="text-center stock-cell">
-                                        <div class="d-inline-flex flex-column align-items-center">
-                                            <button type="button" class="stock-pill-btn stock-pill-{{ $status }}"
-                                                @unless(auth()->user()->isAuditor()) onclick="openQuickUpdate({{ $inv->id }}, {{ $inv->quantity }})" @endunless
-                                                title="ចុចដើម្បីកែសម្រួលចំនួនស្តុក">
-                                                <span class="stock-val">{{ number_format($inv->quantity) }}</span>
-                                                @if($inv->product?->unit)
-                                                    <span class="stock-unit-tag">{{ $unitLabels[$inv->product->unit] ?? $inv->product->unit }}</span>
-                                                @endif
-                                                @unless(auth()->user()->isAuditor())
-                                                    <i class="fas fa-pen stock-edit-hint"></i>
-                                                @endunless
-                                            </button>
-                                            <div class="stock-progress {{ $progressClass }}">
-                                                <span style="width: {{ $isOut ? 100 : $progress }}%;"></span>
-                                            </div>
-                                        </div>
-                                    </td>
+                                    <td class="text-center"><strong>{{ number_format($inv->quantity) }}</strong><span class="stock-unit">{{ $inv->product?->unitLabel() }}</span></td>
+                                    <td class="text-center"><span class="quantity-badge {{ ($orderQuantities->get($inv->product_id)?->sold ?? 0) == 0 ? 'zero' : '' }}">{{ number_format($orderQuantities->get($inv->product_id)?->sold ?? 0) }}</span></td>
+                                    <td class="text-center"><span class="quantity-badge free {{ ($orderQuantities->get($inv->product_id)?->free_qty ?? 0) == 0 ? 'zero' : '' }}">{{ number_format($orderQuantities->get($inv->product_id)?->free_qty ?? 0) }}</span></td>
                                     @if($movementActive)
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-2 flex-wrap">
@@ -1047,8 +1218,9 @@
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <button type="button" class="icon-action icon-danger"
+                                                    @disabled($inv->movements_exists || $productsWithOrders->contains($inv->product_id) || (int) $inv->quantity !== 0)
                                                     onclick="deleteInventory({{ $inv->id }}, @js($inv->product?->name ?? 'ទំនិញ'))"
-                                                    title="លុប">
+                                                    title="លុបបានតែស្តុកសូន្យ ដែលមិនមានប្រវត្តិ ឬការបញ្ជាទិញ">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             @endunless
@@ -1066,14 +1238,16 @@
                 <i class="fas fa-boxes-stacked"></i>
                 <h3>{{ $movementActive ? 'មិនទាន់មានចលនាស្តុកសម្រាប់កាលបរិច្ឆេទនេះទេ' : 'មិនទាន់មានស្តុកទំនិញ' }}</h3>
                 <p>{{ $movementActive ? 'ពេលបង្កើត ឬកែការបញ្ជាទិញ ប្រព័ន្ធនឹងបង្ហាញទំនិញដែលត្រូវបានកាត់ចេញនៅទីនេះ' : 'ចាប់ផ្តើមបង្កើតស្តុក ដើម្បីតាមដានចំនួនទំនិញ' }}</p>
-                @unless(auth()->user()->isAuditor())
+                <!-- @unless(auth()->user()->isAuditor())
                     <a href="{{ route('inventory.create') }}" class="inventory-btn inventory-btn-primary" style="margin-top: 14px;">
                         <i class="fas fa-plus"></i> បន្ថែមស្តុក
                     </a>
-                @endunless
+                @endunless -->
             </div>
         @endif
     </div>
+
+    @include('inventory.partials.activity')
 
     <div class="restock-overlay" id="restockOverlay" aria-hidden="true">
         <div class="restock-modal" role="dialog" aria-modal="true" aria-labelledby="restockTitle">
@@ -1237,6 +1411,19 @@
 @push('scripts')
     <script>
         const inventoryBaseUrl = @js(url('inventory'));
+
+        document.getElementById('inventoryFilters')?.addEventListener('submit', function (event) {
+            const from = document.getElementById('toolbarFromDate');
+            const to = document.getElementById('toolbarToDate');
+            const period = document.getElementById('periodSelect');
+            if (from.value || to.value) period.value = 'custom';
+            if (from.value && to.value && from.value > to.value) {
+                event.preventDefault();
+                to.setCustomValidity('ថ្ងៃបញ្ចប់ត្រូវនៅក្រោយ ឬស្មើថ្ងៃចាប់ផ្ដើម');
+                to.reportValidity();
+            }
+        });
+        document.getElementById('toolbarToDate')?.addEventListener('input', function () { this.setCustomValidity(''); });
 
         function handlePeriodChange(select) {
             const dateElements = document.querySelectorAll('.toolbar-date');

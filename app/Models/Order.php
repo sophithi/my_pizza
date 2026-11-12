@@ -18,6 +18,33 @@ class Order extends Model
 {
     use SoftDeletes;
 
+    public const PRINT_TEMPLATES = [
+        'family' => 'ភីហ្សា គ្រួសាររីករាយ',
+        'special' => 'Special Pizza',
+        'mayo' => 'ម៉ាយូនេស បន្ទាយឆ្មារ',
+        'tamon' => 'តាម៉ាន់មានជ័យ',
+    ];
+
+    public function invoicePrintRoute(): string
+    {
+        return match ($this->invoice_template) {
+            'special' => 'packing.customer_special',
+            'mayo' => 'packing.customer_mayo',
+            'tamon' => 'packing.customer_tamon',
+            default => 'packing.customer',
+        };
+    }
+
+    public function stickerPrintRoute(): string
+    {
+        return match ($this->invoice_template) {
+            'special' => 'packing.delivery_special',
+            'mayo' => 'packing.delivery_mayo',
+            'tamon' => 'packing.delivery_tamon',
+            default => 'packing.delivery_pizza',
+        };
+    }
+
     protected $fillable = [
         'customer_id',
         'delivery_id',
@@ -39,6 +66,8 @@ class Order extends Model
         'stock_deducted',
         'payment_status',
         'notes',
+        'invoice_template',
+        'sticker_template',
         'delivery_date',
         'deleted_by',
         'delete_reason',
@@ -110,7 +139,7 @@ class Order extends Model
      */
     public function paidItems()
     {
-        return $this->hasMany(OrderItem::class)->where('unit_price', '>', 0);
+        return $this->hasMany(OrderItem::class)->where('item_type', 'sale');
     }
 
     /**
@@ -118,7 +147,7 @@ class Order extends Model
      */
     public function freeItems()
     {
-        return $this->hasMany(OrderItem::class)->where('unit_price', '=', 0);
+        return $this->hasMany(OrderItem::class)->where('item_type', 'free');
     }
 
     /**

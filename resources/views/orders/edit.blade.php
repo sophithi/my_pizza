@@ -1559,52 +1559,6 @@
                             <div class="order-details-grid">
 
                                 <div class="od-field">
-                                    <label class="od-label"><i class="fas fa-money-bill-wave"></i> ការបង់ប្រាក់</label>
-                                    <select id="payment_status" name="payment_status" class="form-control od-select">
-                                        <option value="unpaid"  {{ old('payment_status', $order->payment_status) == 'unpaid'  ? 'selected' : '' }}>មិនទាន់បង់</option>
-                                        <option value="partial" {{ old('payment_status', $order->payment_status) == 'partial' ? 'selected' : '' }}>បង់មួយផ្នែក</option>
-                                        <option value="paid"    {{ old('payment_status', $order->payment_status) == 'paid'    ? 'selected' : '' }}>បានបង់</option>
-                                    </select>
-                                </div>
-
-                                <div class="od-field full-span" id="payment_method_field" style="display:none;">
-                                    <label class="od-label"><i class="fas fa-credit-card"></i> វិធីបង់ប្រាក់</label>
-
-                                    <!-- Selected Methods Display -->
-                                    <div id="selected_methods_display" style="margin-bottom: 12px; min-height: 40px;">
-                                        <div id="selected_methods_tags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-                                    </div>
-
-                                    <!-- Hidden inputs for payment methods -->
-                                    <input type="hidden" name="payment_method" id="payment_method" value="{{ old('payment_method', implode(' + ', $existingPaymentMethods)) }}">
-                                    <input type="hidden" id="payment_methods_array" value="{{ json_encode(old('payment_method') ? array_filter(array_map('trim', explode('+', old('payment_method')))) : $existingPaymentMethods) }}">
-
-                                    <!-- Payment Method Selection Grid -->
-                                    <div class="payment-methods-grid payment-multi-select">
-                                        <button type="button" class="payment-method-btn" data-method="Cash" title="លុយក្រៅ">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                            <span>លុយក្រៅ</span>
-                                            <span class="method-check" style="display:none;">✓</span>
-                                        </button>
-                                        <button type="button" class="payment-method-btn" data-method="ABA" title="ធនាគារ ABA">
-                                            <i class="fas fa-university"></i>
-                                            <span>ABA</span>
-                                            <span class="method-check" style="display:none;">✓</span>
-                                        </button>
-                                        <button type="button" class="payment-method-btn" data-method="ACLEDA" title="ធនាគារ ACLEDA">
-                                            <i class="fas fa-university"></i>
-                                            <span>ACLEDA</span>
-                                            <span class="method-check" style="display:none;">✓</span>
-                                        </button>
-                                        <button type="button" class="payment-method-btn" data-method="Wing" title="Wing Money">
-                                            <i class="fas fa-university"></i>
-                                            <span>Wing</span>
-                                            <span class="method-check" style="display:none;">✓</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="od-field">
                                     <label class="od-label"><i class="fas fa-truck"></i> ការដឹកជញ្ជូន <span class="req-tag">(ចាំបាច់)</span></label>
                                     <div class="delivery-combo">
                                         <select id="delivery_select" name="delivery_id" class="form-control od-select" required>
@@ -1633,6 +1587,15 @@
                                 <div class="od-field" id="taxi_phone_field" style="display:none;">
                                     <label class="od-label"><i class="fas fa-phone"></i> លេខទូរស័ព្ទតាក់ស៊ី</label>
                                     <input type="text" id="taxi_phone" name="taxi_phone" class="form-control" value="{{ old('taxi_phone', $order->taxi_phone ?? '') }}">
+                                </div>
+
+                                <div class="od-field full-span">
+                                    <label class="od-label" for="invoice_template"><i class="fas fa-receipt"></i> ប្រភេទវិក្កយបត្រ និងស្លាកបិទកេស</label>
+                                    <select name="invoice_template" id="invoice_template" class="form-control od-select">
+                                        @foreach(\App\Models\Order::PRINT_TEMPLATES as $key => $label)
+                                            <option value="{{ $key }}" @selected(old('invoice_template', $order->invoice_template ?? 'family') === $key)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="od-field full-span">
@@ -2045,125 +2008,6 @@
         // Pre-populate cart with existing order items
         populateExistingCart();
 
-        // Payment method visibility and multi-select (mirrors orders/create.blade.php),
-        // pre-selected from the order's existing payment record so edited Cash/ABA/etc.
-        // choices are visible instead of appearing blank.
-        (function() {
-            const paymentStatusSelect = document.getElementById('payment_status');
-            const paymentMethodField = document.getElementById('payment_method_field');
-            const paymentMethodInput = document.getElementById('payment_method');
-            const paymentMethodsArray = document.getElementById('payment_methods_array');
-            const selectedMethodsDisplay = document.getElementById('selected_methods_tags');
-            const paymentMethodBtns = document.querySelectorAll('.payment-method-btn');
-
-            const methodIcons = {
-                'Cash': 'fa-money-bill-wave',
-                'ABA': 'fa-university',
-                'ACLEDA': 'fa-university',
-                'Wing': 'fa-mobile-alt'
-            };
-
-            const methodLabels = {
-                'Cash': 'លុយក្រៅ',
-                'ABA': 'ABA',
-                'ACLEDA': 'ACLEDA',
-                'Wing': 'Wing'
-            };
-
-            let selectedMethods = [];
-            try {
-                const stored = JSON.parse(paymentMethodsArray.value || '[]');
-                if (Array.isArray(stored)) {
-                    selectedMethods = stored;
-                }
-            } catch (e) {}
-
-            function updatePaymentMethodsDisplay() {
-                selectedMethodsDisplay.innerHTML = '';
-
-                if (selectedMethods.length === 0) {
-                    selectedMethodsDisplay.innerHTML = '<div style="color: #9ca3af; font-size: 13px;">វិធីបង់ប្រាក់មិនបានជ្រើសរើស</div>';
-                    return;
-                }
-
-                selectedMethods.forEach((method) => {
-                    const tag = document.createElement('div');
-                    tag.className = 'method-tag';
-                    tag.innerHTML = `
-                        <i class="fas ${methodIcons[method]}"></i>
-                        <span>${methodLabels[method]}</span>
-                        <span class="method-tag-close" onclick="removePaymentMethod('${method}')" title="ដក">×</span>
-                    `;
-                    selectedMethodsDisplay.appendChild(tag);
-                });
-            }
-
-            window.removePaymentMethod = function(method) {
-                selectedMethods = selectedMethods.filter(m => m !== method);
-                updatePaymentSelection();
-                updatePaymentMethodsDisplay();
-            };
-
-            function updatePaymentSelection() {
-                paymentMethodInput.value = selectedMethods.join(' + ');
-                paymentMethodsArray.value = JSON.stringify(selectedMethods);
-
-                paymentMethodBtns.forEach(btn => {
-                    const method = btn.getAttribute('data-method');
-                    const check = btn.querySelector('.method-check');
-                    if (selectedMethods.includes(method)) {
-                        btn.classList.add('active');
-                        check.style.display = 'flex';
-                    } else {
-                        btn.classList.remove('active');
-                        check.style.display = 'none';
-                    }
-                });
-            }
-
-            function togglePaymentMethod(clearIfHidden) {
-                if (paymentStatusSelect.value === 'paid') {
-                    paymentMethodField.style.display = 'block';
-                    paymentMethodInput.setAttribute('required', 'required');
-                } else {
-                    paymentMethodField.style.display = 'none';
-                    paymentMethodInput.removeAttribute('required');
-                    if (clearIfHidden) {
-                        selectedMethods = [];
-                        updatePaymentSelection();
-                        updatePaymentMethodsDisplay();
-                    }
-                }
-            }
-
-            paymentMethodBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const method = this.getAttribute('data-method');
-
-                    if (selectedMethods.includes(method)) {
-                        selectedMethods = selectedMethods.filter(m => m !== method);
-                    } else {
-                        selectedMethods.push(method);
-                    }
-
-                    updatePaymentSelection();
-                    updatePaymentMethodsDisplay();
-                });
-            });
-
-            if (paymentStatusSelect) {
-                paymentStatusSelect.addEventListener('change', function() {
-                    togglePaymentMethod(true);
-                });
-                // Initial render: keep the pre-loaded selection if already paid,
-                // only clear it when the loaded status isn't paid.
-                togglePaymentMethod(false);
-            }
-
-            updatePaymentSelection();
-            updatePaymentMethodsDisplay();
-        })();
     });
 
     /**

@@ -1391,7 +1391,7 @@
                 <h4 class="product-section-title">
                     សូមជ្រើសរើសទំនិញ
                 </h4>
-
+<!-- 
                 <div class="product-tools">
                     <div class="product-search">
                         <i class="fas fa-search"></i>
@@ -1400,7 +1400,7 @@
                     <div class="product-count">
                         <span id="visibleProductCount">{{ $products->count() }}</span> / {{ $products->count() }}
                     </div>
-                </div>
+                </div> -->
 
                 <div class="products-grid" id="productsGrid">
                     @forelse($products as $product)
@@ -1431,7 +1431,7 @@
                         </div>
                         @if($product->allow_custom_price)
                             <div style="font-size: 10px; color: var(--accent); font-weight: 700; margin-top: 4px;">
-                                <i class="fas fa-tag" style="font-size:9px;"></i> តម្លៃកំណត់ផ្ទាល់
+                                 តម្លៃកំណត់ផ្ទាល់
                             </div>
                         @endif
                     </div>
@@ -1520,6 +1520,15 @@
                                     <label class="od-label"><i class="fas fa-phone"></i> លេខទូរស័ព្ទតាក់ស៊ី</label>
                                     <input type="text" id="taxi_phone" name="taxi_phone" class="form-control"
                                         value="{{ old('taxi_phone') }}" placeholder="បញ្ចូលលេខទូរស័ព្ទ taxi">
+                                </div>
+
+                                <div class="od-field full-span">
+                                    <label class="od-label" for="invoice_template"><i class="fas fa-receipt"></i> ប្រភេទវិក្កយបត្រ និងស្លាកបិទកេស</label>
+                                    <select name="invoice_template" id="invoice_template" class="form-control od-select">
+                                        @foreach(\App\Models\Order::PRINT_TEMPLATES as $key => $label)
+                                            <option value="{{ $key }}" @selected(old('invoice_template', 'family') === $key)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="od-field full-span">
@@ -2217,112 +2226,6 @@
         });
     }
 
-    // Payment method visibility and multi-select
-    document.addEventListener('DOMContentLoaded', function() {
-        const paymentStatusSelect = document.getElementById('payment_status');
-        const paymentMethodField = document.getElementById('payment_method_field');
-        const paymentMethodInput = document.getElementById('payment_method');
-        const paymentMethodsArray = document.getElementById('payment_methods_array');
-        const selectedMethodsDisplay = document.getElementById('selected_methods_tags');
-        const paymentMethodBtns = document.querySelectorAll('.payment-method-btn');
-
-        const methodIcons = {
-            'Cash': 'fa-money-bill-wave',
-            'ABA': 'fa-university',
-            'ACLEDA': 'fa-university',
-            'Wing': 'fa-mobile-alt'
-        };
-
-        const methodLabels = {
-            'Cash': 'ប្រាក់សម្រាប់',
-            'ABA': 'ABA',
-            'ACLEDA': 'ACLEDA',
-            'Wing': 'Wing'
-        };
-
-        let selectedMethods = [];
-
-        function updatePaymentMethodsDisplay() {
-            selectedMethodsDisplay.innerHTML = '';
-
-            if (selectedMethods.length === 0) {
-                selectedMethodsDisplay.innerHTML = '<div style="color: #9ca3af; font-size: 13px;">វិធីបង់ប្រាក់មិនបានជ្រើសរើស</div>';
-                return;
-            }
-
-            selectedMethods.forEach((method, index) => {
-                const tag = document.createElement('div');
-                tag.className = 'method-tag';
-                tag.innerHTML = `
-                    <i class="fas ${methodIcons[method]}"></i>
-                    <span>${methodLabels[method]}</span>
-                    <span class="method-tag-close" onclick="removePaymentMethod('${method}')" title="ដក">×</span>
-                `;
-                selectedMethodsDisplay.appendChild(tag);
-            });
-        }
-
-        window.removePaymentMethod = function(method) {
-            selectedMethods = selectedMethods.filter(m => m !== method);
-            updatePaymentSelection();
-            updatePaymentMethodsDisplay();
-        };
-
-        function updatePaymentSelection() {
-            const methodString = selectedMethods.join(' + ');
-            paymentMethodInput.value = methodString;
-            paymentMethodsArray.value = JSON.stringify(selectedMethods);
-
-            paymentMethodBtns.forEach(btn => {
-                const method = btn.getAttribute('data-method');
-                const check = btn.querySelector('.method-check');
-                if (selectedMethods.includes(method)) {
-                    btn.classList.add('active');
-                    check.style.display = 'flex';
-                } else {
-                    btn.classList.remove('active');
-                    check.style.display = 'none';
-                }
-            });
-        }
-
-        function togglePaymentMethod() {
-            if (paymentStatusSelect.value === 'paid') {
-                paymentMethodField.style.display = 'block';
-                paymentMethodInput.setAttribute('required', 'required');
-            } else {
-                paymentMethodField.style.display = 'none';
-                paymentMethodInput.removeAttribute('required');
-                selectedMethods = [];
-                updatePaymentSelection();
-                updatePaymentMethodsDisplay();
-            }
-        }
-
-        // Button selection handlers - Toggle on click
-        paymentMethodBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const method = this.getAttribute('data-method');
-
-                if (selectedMethods.includes(method)) {
-                    selectedMethods = selectedMethods.filter(m => m !== method);
-                } else {
-                    selectedMethods.push(method);
-                }
-
-                updatePaymentSelection();
-                updatePaymentMethodsDisplay();
-            });
-        });
-
-        if (paymentStatusSelect) {
-            paymentStatusSelect.addEventListener('change', togglePaymentMethod);
-            togglePaymentMethod();
-        }
-
-        updatePaymentMethodsDisplay();
-    });
 </script>
 @endpush
 

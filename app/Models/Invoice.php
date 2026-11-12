@@ -26,6 +26,8 @@ class Invoice extends Model
         'packing_sent_at',
         'packing_first_sent_at',
         'packing_completed_at',
+        'packing_completed_by',
+        'packing_checklist',
         'printed_at',
         'notes',
         'deleted_by',
@@ -43,6 +45,7 @@ class Invoice extends Model
         'packing_sent_at' => 'datetime',
         'packing_first_sent_at' => 'datetime',
         'packing_completed_at' => 'datetime',
+        'packing_checklist' => 'array',
         'printed_at' => 'datetime',
     ];
 
@@ -59,6 +62,27 @@ class Invoice extends Model
     /**
      * Get the user who deleted this invoice.
      */
+    public function packingCompletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'packing_completed_by');
+    }
+
+    public function packingChecklistComplete(): bool
+    {
+        $items = $this->order?->items;
+        if (!$items || $items->isEmpty()) {
+            return false;
+        }
+
+        $checklist = $this->packing_checklist ?? [];
+        foreach ($items as $item) {
+            if (empty($checklist['items'][$item->id])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

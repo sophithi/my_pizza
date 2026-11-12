@@ -23,6 +23,11 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
+        if (!$request->has('period')) {
+            $hasDateFilter = $request->filled('start_date') || $request->filled('end_date') || $request->filled('date');
+            $request->merge(['period' => $hasDateFilter ? 'custom' : 'today']);
+        }
+
         $query = $this->filteredInvoiceQuery($request)->withCount('items');
         $statsQuery = $this->filteredInvoiceQuery($request);
 
@@ -344,9 +349,18 @@ class InvoiceController extends Controller
 
     public function printIndex(Request $request)
     {
-        $query = Invoice::with(['order', 'order.customer']);
+        $filters = $request->validate([
+            'period' => 'nullable|in:today,yesterday,month,year,custom',
+            'from_date' => 'nullable|date|required_if:period,custom',
+            'to_date' => 'nullable|date|required_if:period,custom|after_or_equal:from_date',
+            'date' => 'nullable|date',
+            'status' => 'nullable|in:pending,completed',
+            'search' => 'nullable|string|max:100',
+        ]);
+
+        $query = Invoice::with(['order', 'order.customer', 'packingCompletedBy']);
         $query->whereNotNull('packing_sent_at');
-        $period = $request->get('period');
+        $period = $filters['period'] ?? null;
 
         if ($period === 'today') {
             $query->whereDate('packing_sent_at', today());
@@ -356,20 +370,40 @@ class InvoiceController extends Controller
             $query->whereMonth('packing_sent_at', now()->month)->whereYear('packing_sent_at', now()->year);
         } elseif ($period === 'year') {
             $query->whereYear('packing_sent_at', now()->year);
-        } elseif ($request->filled('date')) {
-            $query->whereDate('packing_sent_at', $request->date);
+        } elseif ($period === 'custom') {
+            $query->whereDate('packing_sent_at', '>=', $filters['from_date'])
+                ->whereDate('packing_sent_at', '<=', $filters['to_date']);
+        } elseif (!empty($filters['date'])) {
+            $query->whereDate('packing_sent_at', $filters['date']);
         }
         // If no period or date filter provided, default to today's invoices.
-        if (!$period && !$request->filled('date')) {
+        if (!$period && empty($filters['date'])) {
             $period = 'today';
             $query->whereDate('packing_sent_at', today());
         }
+
+        if (!empty($filters['search'])) {
+            $search = trim($filters['search']);
+            $query->where(function ($query) use ($search) {
+                $query->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('order.customer', fn ($customer) => $customer->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        if (($filters['status'] ?? null) === 'pending') {
+            $query->whereNull('packing_completed_at');
+        } elseif (($filters['status'] ?? null) === 'completed') {
+            $query->whereNotNull('packing_completed_at');
+        }
+
+        $packingPendingCount = (clone $query)->whereNull('packing_completed_at')->count();
+        $packingCompletedCount = (clone $query)->whereNotNull('packing_completed_at')->count();
 
         $invoices = $query->orderByDesc('packing_sent_at')
             ->orderByDesc('id')
             ->paginate(15)
             ->withQueryString();
-        return view('packing.index', compact('invoices'));
+        return view('packing.index', compact('invoices', 'packingPendingCount', 'packingCompletedCount'));
     }
 
     public function sendToPacking(Invoice $invoice)
@@ -391,13 +425,84 @@ class InvoiceController extends Controller
             ->with('packing_refresh_url', route('packing.index', ['period' => 'today']));
     }
 
-    public function markPackingCompleted(Invoice $invoice)
+    public function markPackingCompleted(Request $request, Invoice $invoice)
     {
-        if (!$invoice->packing_completed_at) {
-            $invoice->update(['packing_completed_at' => now()]);
+        DB::transaction(function () use ($invoice) {
+            $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
+            if (!$invoice->packing_sent_at || $invoice->status === 'cancelled'
+                || !$invoice->order || $invoice->order->trashed() || $invoice->order->status === 'cancelled') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'packing' => 'ត្រូវផ្ញើវិក្កយបត្រដែលមានសុពលភាពចូល Packing ជាមុនសិន។',
+                ]);
+            }
+            if (!$invoice->packing_completed_at) {
+                if (!$invoice->packingChecklistComplete()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'packing' => 'សូមធីកទំនិញលក់ និងទំនិញថែមទាំងអស់ មុនបញ្ចប់។',
+                    ]);
+                }
+                $invoice->update(['packing_completed_at' => now(), 'packing_completed_by' => auth()->id()]);
+            }
+        });
+
+        if ($request->expectsJson()) {
+            return response()->json(['completed' => true]);
         }
 
         return back()->with('success', 'បានរៀបចំរួចរាល់');
+    }
+
+    public function updatePackingChecklist(Request $request, Invoice $invoice)
+    {
+        $data = $request->validate([
+            'kind' => 'required|in:item,step',
+            'key' => 'required|string|max:50',
+            'checked' => 'required|boolean',
+            'revision' => 'required|string',
+        ]);
+
+        DB::transaction(function () use ($invoice, $data) {
+            $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
+            $order = $invoice->order;
+            if (!$invoice->packing_sent_at || $invoice->status === 'cancelled'
+                || !$order || $order->trashed() || $order->status === 'cancelled'
+                || $invoice->packing_completed_at) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'packing' => 'វិក្កយបត្រនេះមិនអាចធីកការរៀបចំបានទេ។',
+                ]);
+            }
+
+            abort_unless($invoice->packing_sent_at->format('Y-m-d H:i:s') === $data['revision'], 409,
+                'ទិន្នន័យរៀបចំបានផ្លាស់ប្តូរ។ សូមផ្ទុកទំព័រឡើងវិញ។');
+
+            if ($data['kind'] === 'item') {
+                if (!preg_match('/^[1-9][0-9]*$/', $data['key'])
+                    || !$order->items()->whereKey((int) $data['key'])->exists()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'key' => 'ទំនិញនេះមិនស្ថិតក្នុង Order ទេ។',
+                    ]);
+                }
+                $section = 'items';
+            } else {
+                if (!in_array($data['key'], ['prepared', 'quality', 'ready'], true)) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'key' => 'ជំហានរៀបចំនេះមិនត្រឹមត្រូវ។',
+                    ]);
+                }
+                $section = 'steps';
+            }
+
+            $checklist = $invoice->packing_checklist ?? [];
+            $checklist[$section] = $checklist[$section] ?? [];
+            if ($data['checked']) {
+                $checklist[$section][$data['key']] = true;
+            } else {
+                unset($checklist[$section][$data['key']]);
+            }
+            $invoice->update(['packing_checklist' => $checklist]);
+        });
+
+        return response()->json(['saved' => true]);
     }
 
     /**
@@ -451,6 +556,7 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
+        abort_if(auth()->user()->isStaffInventory(), 403);
         return view('invoices.edit', compact('invoice'));
     }
 
@@ -459,6 +565,7 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, Invoice $invoice)
     {
+        abort_if(auth()->user()->isStaffInventory(), 403);
         $validated = $request->validate([
             'due_date' => 'nullable|date|after:invoice_date',
             'status' => 'required|in:draft,sent,paid,cancelled',
@@ -495,6 +602,8 @@ class InvoiceController extends Controller
         $deleteReason = $request->input('delete_reason') ?? $request->input('reason');
 
         DB::transaction(function () use ($invoice, $deleteReason) {
+            Order::withTrashed()->whereKey($invoice->order_id)->lockForUpdate()->firstOrFail();
+            $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
             $invoice->update([
                 'deleted_by' => auth()->id(),
                 'delete_reason' => $deleteReason,
@@ -502,6 +611,7 @@ class InvoiceController extends Controller
             $invoice->delete();
 
             if ($order = $invoice->order) {
+                app(\App\Services\OrderStockService::class)->restore($order);
                 $order->update([
                     'deleted_by' => auth()->id(),
                     'delete_reason' => $deleteReason,
@@ -642,6 +752,8 @@ class InvoiceController extends Controller
         $invoice = Invoice::onlyTrashed()->findOrFail($id);
 
         DB::transaction(function () use ($invoice) {
+            Order::withTrashed()->whereKey($invoice->order_id)->lockForUpdate()->firstOrFail();
+            $invoice = Invoice::onlyTrashed()->lockForUpdate()->findOrFail($invoice->id);
             $invoice->restore();
             $invoice->update([
                 'deleted_by' => null,
@@ -649,6 +761,7 @@ class InvoiceController extends Controller
             ]);
 
             if ($order = Order::withTrashed()->find($invoice->order_id)) {
+                app(\App\Services\OrderStockService::class)->deduct($order);
                 $order->restore();
                 $order->update([
                     'deleted_by' => null,
@@ -686,7 +799,13 @@ class InvoiceController extends Controller
         $invoice->load('order.customer.salesperson', 'order.delivery', 'order.items.product', 'order.items.delivery');
         // Return to the filtered invoice list the user came from, if provided
         $backUrl = $this->resolveReturnUrl(route('invoices.index'));
-        return view('packing.sticker-customer', compact('invoice', 'backUrl'));
+        $view = match ($invoice->order?->invoice_template) {
+            'special' => 'packing.sticker-specail_pizza',
+            'mayo' => 'packing.sticker-customer_mayo',
+            'tamon' => 'packing.sticker-customer_tamon',
+            default => 'packing.sticker-customer',
+        };
+        return view($view, compact('invoice', 'backUrl'));
     }
 
     /**
@@ -821,7 +940,13 @@ class InvoiceController extends Controller
         try {
             $invoice->load('order.customer', 'order.delivery', 'order.items.product', 'order.items.delivery');
             
-            $pdf = Pdf::loadView('packing.sticker-customer', [
+            $view = match ($invoice->order?->invoice_template) {
+                'special' => 'packing.sticker-specail_pizza',
+                'mayo' => 'packing.sticker-customer_mayo',
+                'tamon' => 'packing.sticker-customer_tamon',
+                default => 'packing.sticker-customer',
+            };
+            $pdf = Pdf::loadView($view, [
                 'invoice' => $invoice,
                 'backUrl' => null,
             ])->setPaper('a5', 'portrait');

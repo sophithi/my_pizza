@@ -387,8 +387,8 @@
             </div>
             <input type="hidden" name="filter" id="deliveryFilterInput" value="{{ $filter ?? '' }}">
             <div class="date-filter">
-                <button type="button" class="filter-btn" data-filter="today">ថ្ងៃនេះ</button>
-                <button type="button" class="filter-btn" data-filter="yesterday">ម្សិលមិញ</button>
+                <button type="button" class="filter-btn {{ $filter === 'today' ? 'bg-warning' : '' }}" data-filter="today" aria-pressed="{{ $filter === 'today' ? 'true' : 'false' }}">ថ្ងៃនេះ</button>
+                <button type="button" class="filter-btn {{ $filter === 'yesterday' ? 'bg-warning' : '' }}" data-filter="yesterday" aria-pressed="{{ $filter === 'yesterday' ? 'true' : 'false' }}">ម្សិលមិញ</button>
                 <button type="button" class="filter-btn" id="clearDateFilter">Clear</button>
             </div>
             <div class="date-range">
@@ -431,12 +431,6 @@
                                 </td>
                                 <td>
                                     <div class="actions">
-                                        <button type="button" class="action-btn" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;" title="QR Code សម្រាប់អ្នកដឹកនេះ" onclick="showDriverQrModal({{ $delivery->id }}, '{{ addslashes($delivery->delivery_name) }}')">
-                                            <i class="fas fa-qrcode"></i> QR
-                                        </button>
-                                        <a href="{{ route('deliveries.map', ['delivery_id' => $delivery->id]) }}" class="action-btn" style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;" title="មើលលើផែនទីដឹកជញ្ជូន">
-                                            <i class="fas fa-map-marked-alt"></i> ផែនទី
-                                        </a>
                                         <button type="button" class="action-btn action-view"
                                             onclick="toggleDetail(this, 'detail-{{ $delivery->id }}')">
                                             <i class="fas fa-eye"></i> View

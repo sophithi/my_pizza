@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->timestamp('printed_at')->nullable()->after('packing_completed_at');
+            if (!Schema::hasColumn('invoices', 'printed_at')) {
+                $table->timestamp('printed_at')->nullable()->after('packing_completed_at');
+            }
         });
     }
 

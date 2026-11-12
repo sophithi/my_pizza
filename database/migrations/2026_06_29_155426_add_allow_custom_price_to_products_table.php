@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-          Schema::table('products', function (Blueprint $table) {
-        $table->boolean('allow_custom_price')->default(false);
-    });
+        if (!Schema::hasColumn('products', 'allow_custom_price')) {
+            Schema::table('products', function (Blueprint $table) {
+                $table->boolean('allow_custom_price')->default(false);
+            });
+        }
     }
 
     /**

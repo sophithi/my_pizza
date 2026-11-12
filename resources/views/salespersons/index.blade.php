@@ -262,7 +262,7 @@
     <div class="container-fluid py-4 sales-page">
         <div class="sales-header">
             <div>
-                <h2 class="sales-title">ភ្នាក់ងារលក់ (Salespeople)</h2>
+                <h2 class="sales-title">ភ្នាក់ងារលក់ </h2>
                 <p class="sales-subtitle">គ្រប់គ្រងគណនីភ្នាក់ងារលក់ និងតាមដានចំនួនអតិថិជនដែលពួកគេគ្រប់គ្រង។</p>
             </div>
             <div>

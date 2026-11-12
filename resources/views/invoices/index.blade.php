@@ -531,7 +531,12 @@
         </div>
 
         <form method="GET" action="{{ route('invoices.index') }}" class="filter-card" id="invoiceFilter">
+            <input type="hidden" name="period" value="{{ request('period', 'today') }}">
             <div class="quick-filters">
+                <a href="{{ route('invoices.index', ['period' => 'all']) }}"
+                    class="quick-filter {{ request('period') === 'all' ? 'active' : '' }}">
+                    <i class="fas fa-calendar"></i> ទាំងអស់
+                </a>
                 <a href="{{ route('invoices.index', ['period' => 'today']) }}"
                     class="quick-filter {{ request('period') === 'today' ? 'active' : '' }}">
                     <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
@@ -682,7 +687,7 @@
                                             title="ព្រីន ">
                                             <i class="fas fa-print"></i>
                                         </a>
-                                        @if ($invoice->status !== 'paid' && !auth()->user()->isAuditor())
+                                        @if ($invoice->status !== 'paid' && !auth()->user()->isAuditor() && !auth()->user()->isStaffInventory())
                                             <a href="{{ route('invoices.edit', $invoice) }}" class="icon-action icon-edit"
                                                 title="កែប្រែ">
                                                 <i class="fas fa-edit"></i>
@@ -742,7 +747,12 @@
                 }
 
                 controls.forEach(function (control) {
-                    control.addEventListener('change', submit);
+                    control.addEventListener('change', function () {
+                        if (control.name === 'start_date' || control.name === 'end_date') {
+                            form.querySelector('input[name="period"]').value = 'custom';
+                        }
+                        submit();
+                    });
                 });
 
                 dateFields.forEach(function (dateField) {

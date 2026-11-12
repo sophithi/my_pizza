@@ -12,7 +12,6 @@
         }
 
         body {
-            font-family: Arial, "Noto Sans Khmer", sans-serif;
             font-size: 11px;
             color: #111;
             padding: 28px;
@@ -114,6 +113,7 @@
             font-size: 9px;
             color: #999;
         }
+    @include('reports.partials.print-styles')
     </style>
 </head>
 

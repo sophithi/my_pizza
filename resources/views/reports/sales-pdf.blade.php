@@ -18,10 +18,8 @@
         }
 
         body {
-            font-family: Arial, "Noto Sans Khmer", sans-serif;
             font-size: 12px;
             color: #1f2937;
-            line-height: 1.5;
         }
 
         .header {
@@ -187,6 +185,7 @@
             padding-top: 12px;
             text-align: center;
         }
+    @include('reports.partials.print-styles')
     </style>
 </head>
 
@@ -233,7 +232,7 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td class="text-center cell-invoice">
                         {{ $row->order->invoice?->invoice_number ?? ('#' . $row->order->id) }}</td>
-                    <td class="cell-customer">{{ $row->order->customer?->name ?? '—' }}</td>
+                    <td class="text-center">{{ $row->order->customer?->name ?? '—' }}</td>
                     <td class="text-center">{{ optional($row->order->order_date)->format('d/m/Y') }}</td>
                     <td class="text-price">៛{{ number_format($row->khr, 0) }}</td>
                     <td class="text-price">${{ number_format($row->usd, 2) }}</td>

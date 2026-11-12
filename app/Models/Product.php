@@ -26,13 +26,28 @@ class Product extends Model
         'price_usd' => 'decimal:2',
     ];
 
+    public function unitLabel(): string
+    {
+        return [
+            'kg' => 'គីឡូក្រាម',
+            'g' => 'ក្រាម',
+            'L' => 'លីត្រ',
+            'ml' => 'កំប៉ុង',
+            'pcs' => 'បន្ទះ',
+            'bag' => 'ដើម',
+            'box1' => 'កេស',
+            'box2' => 'ប្រអប់',
+            'pack' => 'កញ្ចប់',
+        ][$this->unit] ?? (string) $this->unit;
+    }
+
     public function imageUrl(): ?string
     {
         if (!$this->image) {
             return null;
         }
 
-        return route('products.image', ['filename' => ltrim($this->image, '/')]);
+        return route('products.image', ['filename' => ltrim($this->image, '/')], false);
     }
 
     /**

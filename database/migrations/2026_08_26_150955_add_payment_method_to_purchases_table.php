@@ -9,7 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('purchases', function (Blueprint $table) {
-            $table->string('payment_method')->default('cash')->after('status'); // cash, bank
+            if (!Schema::hasColumn('purchases', 'payment_method')) {
+                $table->string('payment_method')->default('cash')->after('status');
+            } // cash, bank
         });
     }
 

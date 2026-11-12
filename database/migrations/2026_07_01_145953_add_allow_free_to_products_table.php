@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-        $table->boolean('allow_free')->default(false)->after('allow_custom_price');
-    });
+        if (!Schema::hasColumn('products', 'allow_free')) {
+            Schema::table('products', function (Blueprint $table) {
+                $table->boolean('allow_free')->default(false)->after('allow_custom_price');
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-         Schema::table('products', function (Blueprint $table) {
-        $table->dropColumn('allow_free');
-    });
+        if (Schema::hasColumn('products', 'allow_free')) {
+            Schema::table('products', function (Blueprint $table) {
+                $table->dropColumn('allow_free');
+            });
+        }
     }
 };

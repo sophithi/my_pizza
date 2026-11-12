@@ -12,11 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->string('delete_reason', 500)->nullable()->after('deleted_by');
+            if (!Schema::hasColumn('invoices', 'delete_reason')) {
+                $table->string('delete_reason', 500)->nullable()->after('deleted_by');
+            }
         });
 
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('delete_reason', 500)->nullable()->after('deleted_by');
+            if (!Schema::hasColumn('orders', 'delete_reason')) {
+                $table->string('delete_reason', 500)->nullable()->after('deleted_by');
+            }
         });
     }
 

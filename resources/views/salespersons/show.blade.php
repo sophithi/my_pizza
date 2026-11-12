@@ -4,28 +4,34 @@
 
 @push('styles')
     <style>
-        .page-wrap {
+.page-wrap {
+
             max-width: 1400px;
             margin: 0 auto;
-        }
 
-        /* Header */
-        .page-header {
+}
+
+.page-wrap .page-header {
+
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 20px;
             gap: 12px;
-        }
 
-        .page-title {
+}
+
+.page-wrap .page-title {
+
             font-size: 24px;
             font-weight: 800;
             color: #0f172a;
             margin: 0;
-        }
 
-        .btn-back {
+}
+
+.page-wrap .btn-back {
+
             background: #fff;
             border: 1px solid #e2e8f0;
             color: #475569;
@@ -38,16 +44,19 @@
             align-items: center;
             gap: 6px;
             transition: all .15s;
-        }
 
-        .btn-back:hover {
+}
+
+.page-wrap .btn-back:hover {
+
             background: #f8fafc;
             color: #0f172a;
             border-color: #cbd5e1;
-        }
 
-        /* Info Card */
-        .person-card {
+}
+
+.page-wrap .person-card {
+
             background: #fff;
             border-radius: 12px;
             border: 1px solid #e2e8f0;
@@ -58,15 +67,19 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-        }
 
-        .person-left {
+}
+
+.page-wrap .person-left {
+
             display: flex;
             align-items: center;
             gap: 16px;
-        }
 
-        .person-avatar {
+}
+
+.page-wrap .person-avatar {
+
             width: 56px;
             height: 56px;
             border-radius: 50%;
@@ -77,9 +90,11 @@
             justify-content: center;
             font-size: 24px;
             font-weight: 800;
-        }
 
-        .person-name {
+}
+
+.page-wrap .person-name {
+
             font-size: 20px;
             font-weight: 800;
             color: #0f172a;
@@ -87,56 +102,70 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
 
-        .person-meta {
+}
+
+.page-wrap .person-meta {
+
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
             font-size: 13.5px;
             color: #64748b;
-        }
 
-        /* Status & Badges */
-        .status-badge {
+}
+
+.page-wrap .status-badge {
+
             display: inline-flex;
             align-items: center;
             font-size: 11.5px;
             font-weight: 700;
             padding: 3px 8px;
             border-radius: 999px;
-        }
 
-        .status-badge.active {
+}
+
+.page-wrap .status-badge.active {
+
             background: #dcfce7;
             color: #166534;
-        }
 
-        .status-badge.inactive {
+}
+
+.page-wrap .status-badge.inactive {
+
             background: #fee2e2;
             color: #991b1b;
-        }
 
-        .channel-tag {
+}
+
+.page-wrap .channel-tag {
+
             font-size: 11px;
             font-weight: 700;
             padding: 2px 7px;
             border-radius: 4px;
             display: inline-block;
-        }
 
-        .channel-tag.facebook {
+}
+
+.page-wrap .channel-tag.facebook {
+
             background: #e7f3ff;
             color: #0a66c2;
-        }
 
-        .channel-tag.telegram {
+}
+
+.page-wrap .channel-tag.telegram {
+
             background: #e0f7ff;
             color: #0088cc;
-        }
 
-        /* Filter Bar */
-        .filter-bar {
+}
+
+.page-wrap .filter-bar {
+
             background: #fff;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
@@ -147,15 +176,19 @@
             justify-content: space-between;
             gap: 12px;
             flex-wrap: wrap;
-        }
 
-        .filter-tabs {
+}
+
+.page-wrap .filter-tabs {
+
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
-        }
 
-        .filter-tab {
+}
+
+.page-wrap .filter-tab {
+
             font-size: 12.5px;
             font-weight: 700;
             padding: 6px 14px;
@@ -165,83 +198,105 @@
             color: #475569;
             background: #fff;
             transition: all .15s;
-        }
 
-        .filter-tab:hover {
+}
+
+.page-wrap .filter-tab:hover {
+
             background: #f8fafc;
             color: #0f172a;
-        }
 
-        .filter-tab.active {
+}
+
+.page-wrap .filter-tab.active {
+
             background: #e85d24;
             border-color: #e85d24;
             color: #fff;
-        }
 
-        /* KPI Row (3 boxes) */
-        .kpi-row {
+}
+
+.page-wrap .kpi-row {
+
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-bottom: 18px;
-        }
 
-        @media (max-width: 768px) {
-            .kpi-row {
+}
+
+@media (max-width: 768px) {
+.page-wrap .kpi-row {
+
                 grid-template-columns: 1fr;
-            }
-        }
 
-        .kpi-box {
+}
+}
+
+.page-wrap .kpi-box {
+
             background: #fff;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             padding: 14px 18px;
-        }
 
-        .kpi-box-label {
+}
+
+.page-wrap .kpi-box-label {
+
             font-size: 12px;
             font-weight: 700;
             color: #64748b;
             margin-bottom: 4px;
-        }
 
-        .kpi-box-val {
+}
+
+.page-wrap .kpi-box-val {
+
             font-size: 20px;
             font-weight: 800;
             color: #0f172a;
-        }
 
-        .kpi-box-val.accent {
+}
+
+.page-wrap .kpi-box-val.accent {
+
             color: #e85d24;
-        }
 
-        /* Tables & Cards */
-        .panel-card {
+}
+
+.page-wrap .panel-card {
+
             background: #fff;
             border-radius: 10px;
             border: 1px solid #e2e8f0;
             overflow: hidden;
             margin-bottom: 20px;
-        }
 
-        .panel-head {
+}
+
+.page-wrap .panel-head {
+
             padding: 14px 18px;
             border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #fafafa;
-        }
 
-        .panel-title {
+}
+
+.page-wrap .panel-title {
+
             font-size: 15px;
             font-weight: 800;
             color: #0f172a;
             margin: 0;
-        }
 
-        .btn-toggle-panel {
+}
+
+.page-wrap .btn-toggle-panel {
+
             font-size: 12px;
             font-weight: 700;
             color: #64748b;
@@ -251,20 +306,26 @@
             padding: 4px 10px;
             cursor: pointer;
             text-decoration: none;
-        }
 
-        .btn-toggle-panel:hover {
+}
+
+.page-wrap .btn-toggle-panel:hover {
+
             color: #0f172a;
             background: #f8fafc;
-        }
 
-        .clean-table {
+}
+
+.page-wrap .clean-table {
+
             width: 100%;
             border-collapse: collapse;
             font-size: 13.5px;
-        }
 
-        .clean-table th {
+}
+
+.page-wrap .clean-table th {
+
             background: #f8fafc;
             color: #475569;
             font-weight: 800;
@@ -273,25 +334,32 @@
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
             white-space: nowrap;
-        }
 
-        .clean-table td {
+}
+
+.page-wrap .clean-table td {
+
             padding: 12px 14px;
             color: #334155;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
-        }
 
-        .clean-table tbody tr:hover {
+}
+
+.page-wrap .clean-table tbody tr:hover {
+
             background-color: #f8fafc;
-        }
 
-        .clean-table tbody tr:last-child td {
+}
+
+.page-wrap .clean-table tbody tr:last-child td {
+
             border-bottom: none;
-        }
 
-        /* Size Qty Badges */
-        .size-qty {
+}
+
+.page-wrap .size-qty {
+
             display: inline-block;
             min-width: 28px;
             text-align: center;
@@ -299,39 +367,51 @@
             font-size: 13px;
             padding: 2px 6px;
             border-radius: 6px;
-        }
 
-        .size-qty.s {
+}
+
+.page-wrap .size-qty.s {
+
             background: #f0fdf4;
             color: #15803d;
             border: 1px solid #dcfce7;
-        }
 
-        .size-qty.m {
+}
+
+.page-wrap .size-qty.m {
+
             background: #eff6ff;
             color: #1d4ed8;
             border: 1px solid #dbeafe;
-        }
 
-        .size-qty.l {
+}
+
+.page-wrap .size-qty.l {
+
             background: #faf5ff;
             color: #7e22ce;
             border: 1px solid #f3e8ff;
-        }
 
-        .size-qty.total {
+}
+
+.page-wrap .size-qty.total {
+
             background: #fff7ed;
             color: #c2410c;
             border: 1px solid #ffedd5;
             font-size: 13.5px;
-        }
 
-        .size-qty.zero {
+}
+
+.page-wrap .size-qty.zero {
+
             color: #94a3b8;
             font-weight: normal;
-        }
 
-        .badge-qty {
+}
+
+.page-wrap .badge-qty {
+
             background: #f1f5f9;
             color: #0f172a;
             font-weight: 800;
@@ -339,9 +419,11 @@
             padding: 3px 8px;
             border-radius: 6px;
             display: inline-block;
-        }
 
-        .btn-edit-main {
+}
+
+.page-wrap .btn-edit-main {
+
             background: #e85d24;
             color: #fff;
             font-weight: 700;
@@ -350,14 +432,18 @@
             border-radius: 8px;
             text-decoration: none;
             transition: all .15s;
-        }
 
-        .btn-edit-main:hover {
+}
+
+.page-wrap .btn-edit-main:hover {
+
             background: #d04b16;
             color: #fff;
-        }
 
-        .btn-view-icon {
+}
+
+.page-wrap .btn-view-icon {
+
             color: #64748b;
             padding: 5px 8px;
             border-radius: 6px;
@@ -367,14 +453,17 @@
             font-size: 12px;
             font-weight: 700;
             display: inline-block;
-        }
 
-        .btn-view-icon:hover {
+}
+
+.page-wrap .btn-view-icon:hover {
+
             color: #e85d24;
             border-color: #fed7aa;
             background: #fff7ed;
-        }
-    </style>
+
+}
+</style>
 @endpush
 
 @section('content')
@@ -452,8 +541,9 @@
                 <div class="kpi-box-val">{{ number_format($totalPeriodOrders ?? 0) }} ដង</div>
             </div>
             <div class="kpi-box">
-                <div class="kpi-box-label">នំសរុប (S+M+L)</div>
+                <div class="kpi-box-label">លក់ / ថែម (S+M+L)</div>
                 <div class="kpi-box-val accent">{{ number_format($totalPizzasSold ?? 0) }} នំ</div>
+                <div class="small text-primary">ថែម {{ number_format($totalPizzasFree) }} នំ</div>
             </div>
         </div>
 
@@ -479,8 +569,9 @@
                             <thead>
                                 <tr>
                                     <th style="width: 50px;">#</th>
-                                    <th>ទំហំនំ (Pizza Size)</th>
+                                    <th>ទំហំខ្នាតនំភីហ្សា (Pizza Size)</th>
                                     <th class="text-center">ចំនួនលក់សរុប</th>
+                                    <th class="text-center">ថែម</th>
                                     <th class="text-center">អតិថិជនបានទិញ</th>
                                 </tr>
                             </thead>
@@ -504,6 +595,7 @@
                                                 {{ number_format($item->total_qty) }} នំ
                                             </span>
                                         </td>
+                                        <td class="text-center text-primary">{{ number_format($item->free_qty) }}</td>
                                         <td class="text-center">
                                             <span class="text-muted">{{ number_format($item->customer_count) }} នាក់</span>
                                         </td>
@@ -531,14 +623,14 @@
                         <tr>
                             <th>អតិថិជន</th>
                             <th>ប្រភេទ</th>
-                            <th>លេខទូរស័ព្ទ</th>
-                            <th>ទីតាំង</th>
+                            <!-- <th>លេខទូរស័ព្ទ</th>
+                            <th>ទីតាំង</th> -->
                             <th class="text-center">កុម្ម៉ង់</th>
                             <th class="text-center" title="នំតូចខ្នាត (S 15cm)">នំតូច (S)</th>
                             <th class="text-center" title="នំកណ្តាលខ្នាត (M 20cm)">នំកណ្តាល (M)</th>
                             <th class="text-center" title="នំធំខ្នាត (L 25cm)">នំធំ (L)</th>
                             <th class="text-center" title="នំសរុបទាំងអស់">នំសរុប</th>
-                            <th class="text-center">ស្ថានភាព</th>
+                            <!-- <th class="text-center">ស្ថានភាព</th> -->
                             <th class="text-center" style="width: 50px;">មើល</th>
                         </tr>
                     </thead>
@@ -549,6 +641,9 @@
                                 $qtyM = $customerPizzas[$customer->id][14] ?? 0;
                                 $qtyL = $customerPizzas[$customer->id][15] ?? 0;
                                 $totalPizza = $qtyS + $qtyM + $qtyL;
+                                $freeS = $customerFreePizzas[$customer->id][13] ?? 0;
+                                $freeM = $customerFreePizzas[$customer->id][14] ?? 0;
+                                $freeL = $customerFreePizzas[$customer->id][15] ?? 0;
                             @endphp
                             <tr>
                                 <td class="fw-bold">
@@ -565,8 +660,8 @@
                                         <span class="text-muted small">—</span>
                                     @endif
                                 </td>
-                                <td><span class="text-muted">{{ $customer->phone ?? '—' }}</span></td>
-                                <td><span class="text-muted small">{{ $customer->city ?? $customer->address ?? '—' }}</span></td>
+                                <!-- <td><span class="text-muted">{{ $customer->phone ?? '—' }}</span></td> -->
+                                <!-- <td><span class="text-muted small">{{ $customer->city ?? $customer->address ?? '—' }}</span></td> -->
                                 <td class="text-center">
                                     <span class="badge-qty">{{ number_format($customer->orders_count) }}</span>
                                 </td>
@@ -576,6 +671,7 @@
                                     @else
                                         <span class="size-qty zero">—</span>
                                     @endif
+                                    <small class="d-block text-primary">ថែម {{ number_format($freeS) }}</small>
                                 </td>
                                 <td class="text-center">
                                     @if($qtyM > 0)
@@ -583,6 +679,7 @@
                                     @else
                                         <span class="size-qty zero">—</span>
                                     @endif
+                                    <small class="d-block text-primary">ថែម {{ number_format($freeM) }}</small>
                                 </td>
                                 <td class="text-center">
                                     @if($qtyL > 0)
@@ -590,6 +687,7 @@
                                     @else
                                         <span class="size-qty zero">—</span>
                                     @endif
+                                    <small class="d-block text-primary">ថែម {{ number_format($freeL) }}</small>
                                 </td>
                                 <td class="text-center">
                                     @if($totalPizza > 0)
@@ -597,8 +695,9 @@
                                     @else
                                         <span class="size-qty zero">0</span>
                                     @endif
+                                    <small class="d-block text-primary">ថែម {{ number_format($freeS + $freeM + $freeL) }}</small>
                                 </td>
-                                <td class="text-center">
+                                <!-- <td class="text-center">
                                     @if($customer->status == 'active')
                                         <span class="status-badge active">សកម្ម</span>
                                     @elseif($customer->status == 'inactive')
@@ -606,7 +705,7 @@
                                     @else
                                         <span class="text-muted small">{{ $customer->status ?? '—' }}</span>
                                     @endif
-                                </td>
+                                </td> -->
                                 <td class="text-center">
                                     <a href="{{ route('customers.show', $customer) }}" class="btn-view-icon" title="មើលព័ត៌មាន">
                                         មើល

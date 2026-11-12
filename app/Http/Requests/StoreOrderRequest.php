@@ -22,6 +22,12 @@ class StoreOrderRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    protected function prepareForValidation(): void
+    {
+        $decoded = json_decode((string) $this->input('order_items', '[]'), true);
+        $this->merge(['validated_items' => $decoded]);
+    }
+
     public function rules(): array
     {
         return [
@@ -37,26 +43,20 @@ class StoreOrderRequest extends FormRequest
             'delivery_fee_khr' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'in:pending,processing,completed,cancelled',
-            'payment_status' => 'in:unpaid,partial,paid',
-            'payment_method' => ['nullable', function ($attribute, $value, $fail) {
-                if (!$value) {
-                    return;
-                }
-
-                $allowed = ['Cash', 'ABA', 'ACLEDA', 'Wing'];
-                $methods = array_filter(array_map('trim', explode('+', $value)));
-
-                foreach ($methods as $method) {
-                    if (!in_array($method, $allowed, true)) {
-                        $fail('The selected payment method is invalid.');
-                        return;
-                    }
-                }
-            }],
             'notes' => 'nullable|string',
+            'invoice_template' => 'nullable|in:family,special,mayo,tamon',
             'order_items' => 'required|json',
+            'validated_items' => 'required|array|min:1',
+            'validated_items.*' => 'required|array',
+            'validated_items.*.product_id' => 'required|integer|exists:products,id',
+            'validated_items.*.quantity' => 'required|integer|min:1',
+            'validated_items.*.unit_price' => 'required|numeric|min:0',
+            'validated_items.*.unit_price_khr' => 'nullable|numeric|min:0',
+            'validated_items.*.total_price' => 'required|numeric|min:0',
+            'validated_items.*.discount_percent' => 'nullable|numeric|between:0,100',
+            'validated_items.*.is_custom_price' => 'nullable|boolean',
             'free_products' => 'nullable|array',
-            'free_products.*.product_id' => 'nullable|exists:products,id',
+            'free_products.*.product_id' => 'nullable|exists:products,id,allow_free,1',
             'free_products.*.qty' => 'nullable|integer|min:1',
         ];
     }

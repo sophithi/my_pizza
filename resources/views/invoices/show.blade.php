@@ -448,12 +448,12 @@
                         </form>
                     @endif
                 @endif
-                @if($invoice->order && !auth()->user()->isAuditor())
+                @if($invoice->order && !auth()->user()->isAuditor() && !auth()->user()->isStaffInventory())
                     <a href="{{ route('orders.edit', $invoice->order) }}" class="invoice-btn invoice-btn-soft">
                         <i class="fas fa-shopping-cart"></i> កែបញ្ជាទិញ
                     </a>
                 @endif
-                @if($invoice->status !== 'paid' && !auth()->user()->isAuditor())
+                @if($invoice->status !== 'paid' && !auth()->user()->isAuditor() && !auth()->user()->isStaffInventory())
                     <a href="{{ route('invoices.edit', $invoice) }}" class="invoice-btn invoice-btn-soft">
                         <i class="fas fa-file-invoice"></i> កែវិក្ក័យបត្រ
                     </a>

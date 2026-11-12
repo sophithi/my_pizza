@@ -19,10 +19,22 @@ class InventoryController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'chart_from' => 'nullable|date_format:Y-m-d|before_or_equal:today',
+            'chart_to' => 'nullable|date_format:Y-m-d|after_or_equal:chart_from|before_or_equal:today',
+            'chart_product_id' => 'nullable|integer|exists:products,id',
+        ]);
+        $chartTo = $request->input('chart_to') ?: now()->toDateString();
+        $chartFrom = $request->input('chart_from') ?: \Carbon\Carbon::parse($chartTo)->subDays(29)->toDateString();
+        if (\Carbon\Carbon::parse($chartFrom)->diffInDays(\Carbon\Carbon::parse($chartTo), false) < 0
+            || \Carbon\Carbon::parse($chartFrom)->diffInDays(\Carbon\Carbon::parse($chartTo)) > 366) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['chart_from' => 'សូមជ្រើសរយៈពេលមិនលើសពី ៣៦៦ ថ្ងៃ។']);
+        }
+        $analytics = app(\App\Services\InventoryAnalyticsService::class)->dashboard($chartFrom, $chartTo, $request->filled('chart_product_id') ? (int) $request->input('chart_product_id') : null);
         $statsRecord = Inventory::toBase()->selectRaw("
             COUNT(*) as total,
-            COUNT(CASE WHEN quantity > reorder_level THEN 1 END) as in_stock,
-            COUNT(CASE WHEN quantity > 0 AND quantity <= reorder_level THEN 1 END) as low_stock,
+            COUNT(CASE WHEN quantity > 0 AND quantity > COALESCE(reorder_level, 0) THEN 1 END) as in_stock,
+            COUNT(CASE WHEN quantity > 0 AND quantity <= COALESCE(reorder_level, 0) THEN 1 END) as low_stock,
             COUNT(CASE WHEN quantity <= 0 THEN 1 END) as out_stock
         ")->first();
 
@@ -39,7 +51,7 @@ class InventoryController extends Controller
         $hasDateRange = (bool) ($fromDate || $toDate);
         $movementDate = $this->movementDateFromRequest($request);
         $hasMovementFilter = $hasDateRange || $movementDate || in_array($period, ['month', 'year'], true);
-        $query = Inventory::with('product');
+        $query = Inventory::with('product')->withExists('movements');
 
         if ($request->filled('search')) {
             $search = $request->get('search');
@@ -56,9 +68,9 @@ class InventoryController extends Controller
             if ($request->get('status') === 'out') {
                 $query->where('quantity', '<=', 0);
             } elseif ($request->get('status') === 'low') {
-                $query->whereRaw('quantity > 0 AND quantity <= reorder_level');
+                $query->whereRaw('quantity > 0 AND quantity <= COALESCE(reorder_level, 0)');
             } elseif ($request->get('status') === 'in') {
-                $query->whereRaw('quantity > reorder_level');
+                $query->whereRaw('quantity > 0 AND quantity > COALESCE(reorder_level, 0)');
             }
         }
 
@@ -100,6 +112,24 @@ class InventoryController extends Controller
         }
 
         $inventories = $query->paginate(15)->withQueryString();
+        $productsWithOrders = \App\Models\OrderItem::whereIn('product_id', $inventories->pluck('product_id'))
+            ->distinct()->pluck('product_id');
+        $orderQuantities = \App\Models\OrderItem::whereIn('product_id', $inventories->pluck('product_id'))
+            ->whereHas('order', function ($orders) use ($fromDate, $toDate, $movementDate, $period) {
+                $orders->where('status', '!=', 'cancelled');
+                if ($fromDate || $toDate) {
+                    if ($fromDate) $orders->whereDate('order_date', '>=', $fromDate);
+                    if ($toDate) $orders->whereDate('order_date', '<=', $toDate);
+                } elseif ($movementDate) {
+                    $orders->whereDate('order_date', $movementDate);
+                } elseif ($period === 'month') {
+                    $orders->whereMonth('order_date', now()->month)->whereYear('order_date', now()->year);
+                } elseif ($period === 'year') {
+                    $orders->whereYear('order_date', now()->year);
+                }
+            })
+            ->selectRaw("product_id, SUM(CASE WHEN item_type = 'sale' THEN quantity ELSE 0 END) as sold, SUM(CASE WHEN item_type = 'free' THEN quantity ELSE 0 END) as free_qty")
+            ->groupBy('product_id')->get()->keyBy('product_id');
         $movementsByInventory = $this->movementsByInventory($request);
 
         // Distinct warehouse locations across ALL inventory (not just the current
@@ -110,7 +140,7 @@ class InventoryController extends Controller
             ->orderBy('warehouse_location')
             ->pluck('warehouse_location');
 
-        return view('inventory.index', compact('inventories', 'stats', 'movementDate', 'movementsByInventory', 'warehouses', 'fromDate', 'toDate'));
+        return view('inventory.index', compact('inventories', 'productsWithOrders', 'orderQuantities', 'stats', 'movementDate', 'movementsByInventory', 'warehouses', 'fromDate', 'toDate', 'analytics', 'chartFrom', 'chartTo'));
     }
 
     /**
@@ -143,11 +173,6 @@ class InventoryController extends Controller
     public function show(Request $request, Inventory $inventory)
     {
         $inventory->load('product');
-
-        $totalIn = (int) $inventory->movements()->where('quantity_change', '>', 0)->sum('quantity_change');
-        $totalOut = (int) abs($inventory->movements()->where('quantity_change', '<', 0)->sum('quantity_change'));
-        $netChange = $totalIn - $totalOut;
-        $totalTransactions = $inventory->movements()->count();
 
         $movementsQuery = $inventory->movements()->with(['user', 'order'])->latest('id');
 
@@ -189,9 +214,37 @@ class InventoryController extends Controller
             $movementsQuery->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
         }
 
+        $totalIn = (int) (clone $movementsQuery)->where('quantity_change', '>', 0)->sum('quantity_change');
+        $totalOut = abs((int) (clone $movementsQuery)->where('quantity_change', '<', 0)->sum('quantity_change'));
+        $netChange = $totalIn - $totalOut;
+        $totalTransactions = (clone $movementsQuery)->count();
+        // Count current order items once, never repeated deduction/edit movements.
+        $items = \App\Models\OrderItem::where('product_id', $inventory->product_id)
+            ->whereHas('order', function ($query) use ($request, $fromDate, $toDate) {
+                $query->where('status', '!=', 'cancelled');
+                if ($fromDate || $toDate) {
+                    if ($fromDate) $query->whereDate('order_date', '>=', $fromDate);
+                    if ($toDate) $query->whereDate('order_date', '<=', $toDate);
+                } elseif ($request->input('period') === 'today') {
+                    $query->whereDate('order_date', today());
+                } elseif ($request->input('period') === 'yesterday') {
+                    $query->whereDate('order_date', today()->subDay());
+                } elseif ($request->input('period') === 'month') {
+                    $query->whereMonth('order_date', now()->month)->whereYear('order_date', now()->year);
+                }
+            });
+        $saleQty = (int) (clone $items)->where('item_type', 'sale')->sum('quantity');
+        $freeQty = (int) (clone $items)->where('item_type', 'free')->sum('quantity');
+
+        if (in_array($request->input('item_type'), ['sale', 'free'], true)) {
+            $movementsQuery->where('item_type', $request->input('item_type'));
+        } elseif ($request->input('item_type') === 'unclassified') {
+            $movementsQuery->whereNull('item_type')->whereIn('type', ['order_deduct', 'order_adjust', 'order_restore']);
+        }
+
         $movements = $movementsQuery->paginate(15)->withQueryString();
 
-        return view('inventory.show', compact('inventory', 'movements', 'totalIn', 'totalOut', 'netChange', 'totalTransactions'));
+        return view('inventory.show', compact('inventory', 'movements', 'totalIn', 'totalOut', 'netChange', 'totalTransactions', 'saleQty', 'freeQty'));
     }
 
     /**
@@ -208,6 +261,7 @@ class InventoryController extends Controller
     public function update(UpdateInventoryRequest $request, Inventory $inventory)
     {
         DB::transaction(function () use ($request, $inventory) {
+            $inventory = Inventory::lockForUpdate()->findOrFail($inventory->id);
             $validated = $request->validated();
             $before = (int) $inventory->quantity;
             $inventory->update($validated);
@@ -226,7 +280,21 @@ class InventoryController extends Controller
      */
     public function destroy(Inventory $inventory)
     {
-        $inventory->delete();
+        DB::transaction(function () use ($inventory) {
+            $inventory = Inventory::lockForUpdate()->findOrFail($inventory->id);
+            if ($inventory->movements()->exists()
+                || \App\Models\OrderItem::where('product_id', $inventory->product_id)->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'inventory' => 'មិនអាចលុបស្តុកដែលមានប្រវត្តិចលនា ឬមានការបញ្ជាទិញពាក់ព័ន្ធបានទេ។ សូមប្រើការកែតម្រូវស្តុក។',
+                ]);
+            }
+            if ((int) $inventory->quantity !== 0) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'inventory' => 'មិនអាចលុបស្តុកដែលមានចំនួនមិនស្មើសូន្យបានទេ។',
+                ]);
+            }
+            $inventory->delete();
+        });
         return redirect()->route('inventory.index')->with('success', 'បានលុបស្តុកទំនិញដោយជោគជ័យ។');
     }
 
@@ -244,6 +312,7 @@ class InventoryController extends Controller
         $note = trim($validated['note'] ?? '') ?: 'Quick stock update';
 
         DB::transaction(function () use ($inventory, $quantity, $note) {
+            $inventory = Inventory::lockForUpdate()->findOrFail($inventory->id);
             $before = (int) $inventory->quantity;
             $after = $quantity;
             $inventory->update(['quantity' => $after]);
@@ -265,6 +334,7 @@ class InventoryController extends Controller
         $addedQuantity = (int) $validated['quantity'];
 
         DB::transaction(function () use ($inventory, $addedQuantity) {
+            $inventory = Inventory::lockForUpdate()->findOrFail($inventory->id);
             $before = (int) $inventory->quantity;
             $inventory->increment('quantity', $addedQuantity);
             $after = (int) $inventory->fresh()->quantity;
@@ -292,7 +362,11 @@ class InventoryController extends Controller
         }
 
         DB::transaction(function () use ($inventory, $removedQuantity, $reason) {
+            $inventory = Inventory::lockForUpdate()->findOrFail($inventory->id);
             $before = (int) $inventory->quantity;
+            if ($removedQuantity > $before) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['quantity' => 'Insufficient stock. Please refresh and try again.']);
+            }
             $inventory->decrement('quantity', $removedQuantity);
             $after = (int) $inventory->fresh()->quantity;
 

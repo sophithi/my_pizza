@@ -8,6 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        foreach (Schema::getForeignKeys('customers') as $foreignKey) {
+            if ($foreignKey['columns'] === ['salesperson_id']
+                && $foreignKey['foreign_table'] === 'salespersons') {
+                return;
+            }
+        }
+
         Schema::table('customers', function (Blueprint $table) {
             // Drop old foreign key constraint pointing to users
             $table->dropForeign(['salesperson_id']);

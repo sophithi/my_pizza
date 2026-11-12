@@ -92,10 +92,11 @@ class SalespersonController extends Controller
 
         $productSummary = (clone $productSalesQuery)
             ->groupBy('order_items.product_id', 'products.name', 'products.unit', 'products.image', 'products.sku')
-            ->selectRaw('order_items.product_id as id, products.name, products.unit, products.image, products.sku, SUM(order_items.quantity) as total_qty, COUNT(DISTINCT customers.id) as customer_count, SUM(order_items.total_price) as total_usd')
-            ->orderByRaw("FIELD(order_items.product_id, 13, 14, 15)")
+            ->selectRaw('order_items.product_id as id, products.name, products.unit, products.image, products.sku, SUM(CASE WHEN order_items.item_type = \'sale\' THEN order_items.quantity ELSE 0 END) as total_qty, SUM(CASE WHEN order_items.item_type = \'free\' THEN order_items.quantity ELSE 0 END) as free_qty, COUNT(DISTINCT customers.id) as customer_count, SUM(order_items.total_price) as total_usd')
+            ->orderBy('order_items.product_id')
             ->get();
 
+        $totalPizzasFree = $productSummary->sum('free_qty');
         $totalPizzasSold = $productSummary->sum('total_qty');
         $totalPizzaSalesUsd = $productSummary->sum('total_usd');
 
@@ -141,12 +142,13 @@ class SalespersonController extends Controller
         // 3. For paginated customers, load S, M, L pizza quantities
         $customerIds = $customers->pluck('id');
         $customerPizzas = [];
+        $customerFreePizzas = [];
 
         if ($customerIds->isNotEmpty()) {
             $itemsQuery = OrderItem::query()
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
                 ->whereIn('orders.customer_id', $customerIds)
-                ->whereIn('order_items.product_id', $targetIds)
+                    ->whereIn('order_items.product_id', $targetIds)
                 ->where('orders.status', '!=', 'cancelled')
                 ->whereNull('orders.deleted_at');
 
@@ -159,11 +161,12 @@ class SalespersonController extends Controller
 
             $items = $itemsQuery
                 ->groupBy('orders.customer_id', 'order_items.product_id')
-                ->selectRaw('orders.customer_id, order_items.product_id, SUM(order_items.quantity) as qty')
+                ->selectRaw('orders.customer_id, order_items.product_id, SUM(CASE WHEN order_items.item_type = \'sale\' THEN order_items.quantity ELSE 0 END) as qty, SUM(CASE WHEN order_items.item_type = \'free\' THEN order_items.quantity ELSE 0 END) as free_qty')
                 ->get();
 
             foreach ($items as $item) {
                 $customerPizzas[$item->customer_id][$item->product_id] = (int) $item->qty;
+                $customerFreePizzas[$item->customer_id][$item->product_id] = (int) $item->free_qty;
             }
         }
 
@@ -172,6 +175,8 @@ class SalespersonController extends Controller
             'customers',
             'productSummary',
             'totalPizzasSold',
+            'totalPizzasFree',
+            'customerFreePizzas',
             'totalPizzaSalesUsd',
             'totalPeriodOrders',
             'customerPizzas',

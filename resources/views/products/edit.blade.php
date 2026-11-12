@@ -1,16 +1,15 @@
 @extends('layouts.app')
 
-@section('title', isset($product) ? 'Edit Product' : 'Create Product')
+@section('title', isset($product) ? 'កែប្រែទំនិញ' : 'បន្ថែមទំនិញ')
 
 @section('content')
 
-    <div class="row">
-        <div class="col-md-8">
+    @include('products.partials.edit-style')
+    <div class="product-editor">
+        <div class="pe-heading"><div><a href="{{ isset($product) ? route('products.show', $product) : route('products.index') }}" class="pe-back"><i class="fas fa-arrow-left"></i> ត្រឡប់</a><h2>{{ isset($product) ? 'កែប្រែទំនិញ' : 'បន្ថែមទំនិញ' }}</h2></div><span class="pe-sku">{{ $product->sku ?? 'Pizza Happy Family' }}</span></div>
+        <div>
             <div class="card border-0 shadow-sm" style="border-radius:12px">
                 <div class="card-body" style="padding:28px">
-                    <h3 style="font-size:20px;font-weight:700;color:#1a1d29;margin-bottom:24px">
-                        {{ isset($product) ? 'Edit Product' : 'Create New Product' }}
-                    </h3>
 
                     @if ($errors->any())
                         <div class="alert alert-danger">
@@ -27,27 +26,30 @@
                         @csrf
                         @if(isset($product)) @method('PUT') @endif
 
+                        <div class="pe-grid"><section class="pe-section">
+                        <h3><i class="fas fa-box"></i> ព័ត៌មានទំនិញ</h3>
                         {{-- Product Name --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Product Name <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold">ឈ្មោះទំនិញ <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                value="{{ old('name', $product->name ?? '') }}" placeholder="e.g. Mozzarella Cheese 1kg">
+                                value="{{ old('name', $product->name ?? '') }}" placeholder="ឈ្មោះទំនិញ" required>
                             @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         {{-- SKU --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">SKU <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold">កូដទំនិញ <span class="text-danger">*</span></label>
                             <input type="text" name="sku" class="form-control @error('sku') is-invalid @enderror"
                                 value="{{ old('sku', $product->sku ?? '') }}" placeholder="e.g. MOZ-1KG">
                             @error('sku') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
+                        <h3 class="pe-divider"><i class="fas fa-coins"></i> តម្លៃលក់</h3>
                         {{-- Price USD + KHR --}}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Price (KHR)</label>
+                                    <label class="form-label fw-semibold">តម្លៃរៀល (KHR)</label>
                                     <div class="input-group">
                                         <span class="input-group-text">៛</span>
                                         <input type="number" name="price_khr" id="price_khr" step="1" min="0"
@@ -61,7 +63,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Price (USD) <span
+                                    <label class="form-label fw-semibold">តម្លៃដុល្លារ (USD) <span
                                             class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
@@ -76,30 +78,34 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <h3 class="pe-divider"><i class="fas fa-sliders-h"></i> ជម្រើសទំនិញ</h3>
+                        <div class="form-group pe-toggle">
                          <label>
+                             <input type="hidden" name="allow_custom_price" value="0">
                              <input type="checkbox" name="allow_custom_price" value="1" {{ old('allow_custom_price', $product->allow_custom_price ?? false) ? 'checked' : '' }}>
-                            អនុញ្ញាតកំណត់តម្លៃថ្មី (Custom Price)
+                            អនុញ្ញាតកែតម្លៃ
                             </label>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group pe-toggle">
                          <label>
+                             <input type="hidden" name="allow_free" value="0">
                              <input type="checkbox" name="allow_free" value="1" {{ old('allow_free', $product->allow_free ?? false) ? 'checked' : '' }}>
-                                ទំនិញអាចfree (allow free)
+                                អនុញ្ញាតថែម
                              </label>
                         </div>
                        
+                        <h3 class="pe-divider"><i class="fas fa-layer-group"></i> ប្រភេទ និងការផ្គត់ផ្គង់</h3>
                         {{-- Category + Unit --}}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Category <span
+                                    <label class="form-label fw-semibold">ប្រភេទ <span
                                             class="text-danger">*</span></label>
                                     <input type="text" name="category"
                                         class="form-control @error('category') is-invalid @enderror"
                                         value="{{ old('category', $product->category ?? '') }}"
-                                        placeholder="e.g. Cheese, Flour, Sauce">
+                                        placeholder="ប្រភេទទំនិញ">
                                     @error('category') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
@@ -135,36 +141,38 @@
 
                         {{-- Supplier --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Supplier</label>
+                            <label class="form-label fw-semibold">អ្នកផ្គត់ផ្គង់</label>
                             <input type="text" name="supplier" class="form-control"
-                                value="{{ old('supplier', $product->supplier ?? '') }}" placeholder="e.g. Dairy Fresh Ltd.">
+                                value="{{ old('supplier', $product->supplier ?? '') }}" placeholder="ឈ្មោះអ្នកផ្គត់ផ្គង់">
                         </div>
 
+                        </section><aside class="pe-section pe-media">
+                        <h3><i class="fas fa-image"></i> រូបភាពទំនិញ</h3>
+                        <div class="pe-image-preview"><img id="productImagePreview" src="{{ isset($product) ? $product->imageUrl() : '' }}" alt="រូបភាពទំនិញ" @if(empty($product?->image)) hidden @endif><span id="productImagePlaceholder" @if(!empty($product?->image)) hidden @endif><i class="fas fa-image"></i><small id="productImageMessage" class="d-block mt-3">មិនទាន់មានរូបភាព</small></span></div>
                         {{-- Image --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Product Image</label>
-                            <input type="file" name="image" class="form-control" accept="image/*">
-                            @if(isset($product) && $product->image)
-                                <small class="text-muted mt-1 d-block">Current: {{ basename($product->image) }}</small>
-                            @endif
+                            <label class="form-label fw-semibold">ជ្រើសរើសរូបភាព</label>
+                            <input type="file" id="productImageInput" name="image" class="form-control" accept="image/*">
+                            <small class="text-muted d-block mt-2">ទំហំអតិបរមា 2 MB</small>
                         </div>
 
                         {{-- Description --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Description</label>
+                            <label class="form-label fw-semibold">បរិយាយ</label>
                             <textarea name="description" class="form-control" rows="3"
-                                placeholder="Optional product description...">{{ old('description', $product->description ?? '') }}</textarea>
+                                placeholder="ព័ត៌មានបន្ថែម...">{{ old('description', $product->description ?? '') }}</textarea>
                         </div>
 
+                        </aside></div>
                         {{-- Buttons --}}
-                        <div class="d-flex gap-2 mt-4">
+                        <div class="d-flex gap-2 pe-footer">
                             <button type="submit" class="btn"
                                 style="background:#e85d24;color:#fff;padding:10px 24px;border-radius:6px;font-weight:600">
-                                {{ isset($product) ? 'Update Product' : 'Create Product' }}
+                                <i class="fas fa-check me-2"></i> រក្សាទុក
                             </button>
-                            <a href="{{ route('products.index') }}" class="btn btn-outline-secondary"
+                            <a href="{{ isset($product) ? route('products.show', $product) : route('products.index') }}" class="btn btn-outline-secondary"
                                 style="padding:10px 24px;border-radius:6px;font-weight:600">
-                                Cancel
+                                បោះបង់
                             </a>
                         </div>
 

@@ -87,8 +87,9 @@ class OrderController extends Controller
                 'delivery_fee_usd' => $deliveryFeeUsd,
                 'total_amount' => $totalAmount,
                 'status' => $validated['status'] ?? 'pending',
-                'payment_status' => $validated['payment_status'] ?? 'unpaid',
                 'notes' => $validated['notes'] ?? null,
+                'invoice_template' => $validated['invoice_template'] ?? 'family',
+                'sticker_template' => $validated['invoice_template'] ?? 'family',
             ]);
 
             // Create order items
@@ -96,6 +97,7 @@ class OrderController extends Controller
                 \App\Models\OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
+                    'item_type' => 'sale',
                     'delivery_id' => $delivery?->id,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
@@ -114,6 +116,7 @@ class OrderController extends Controller
                 \App\Models\OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $freeProduct['product_id'],
+                    'item_type' => 'free',
                     'delivery_id' => $delivery?->id,
                     'quantity' => (int) $freeProduct['qty'],
                     'unit_price' => 0,
@@ -132,56 +135,10 @@ class OrderController extends Controller
                 'delivery_fee_khr' => $order->delivery_fee_khr,
                 'delivery_fee_usd' => $order->delivery_fee_usd,
                 'total_amount' => $order->total_amount,
-                'status' => $order->payment_status === 'paid' ? 'paid' : 'draft',
+                'status' => 'draft',
                 'notes' => $order->notes ?? null,
             ]);
             $invoiceNumber = $invoice->invoice_number;
-
-            // Create payment record if order is marked as paid
-            if (($validated['payment_status'] ?? 'unpaid') === 'paid') {
-                $methodStr = $validated['payment_method'] ?? 'Cash';
-                $methods = array_values(array_filter(array_map('trim', explode('+', $methodStr ?: 'Cash'))));
-                if (empty($methods)) {
-                    $methods = ['Cash'];
-                }
-
-                $payment = \App\Models\Payment::create([
-                    'order_id' => $order->id,
-                    'customer_name' => $order->customer?->name ?? 'Walk-in Customer',
-                    'order_date' => $order->order_date,
-                    'total_amount' => $order->total_amount,
-                    'total_amount_khr' => $order->totalKhr(),
-                    'paid_amount' => $order->total_amount,
-                    'paid_amount_khr' => $order->totalKhr(),
-                    'method' => implode(' + ', $methods),
-                    'status' => 'paid',
-                ]);
-
-                // Sync created_at to order_date
-                if ($order->order_date) {
-                    $payment->created_at = \Carbon\Carbon::parse($order->order_date);
-                    $payment->save();
-                }
-
-                $splitCount = count($methods);
-                $perMethodUsd = round($order->total_amount / $splitCount, 2);
-                $lines = [];
-
-                foreach ($methods as $i => $m) {
-                    $isLast = ($i === $splitCount - 1);
-                    $lineUsd = $isLast ? ($order->total_amount - ($perMethodUsd * ($splitCount - 1))) : $perMethodUsd;
-                    $payment->lines()->create([
-                        'method' => $m,
-                        'currency' => 'USD',
-                        'amount_original' => $lineUsd,
-                        'amount_usd' => $lineUsd,
-                        'exchange_rate' => 4000,
-                    ]);
-                    $lines[] = sprintf("%s: $%.2f USD", $m, $lineUsd);
-                }
-
-                $payment->update(['notes' => 'Paid: ' . implode(' + ', $lines)]);
-            }
 
             return [$order, $invoiceNumber, $warnings];
         });
@@ -300,12 +257,11 @@ class OrderController extends Controller
         $packingRelevantChanged = false;
 
         DB::transaction(function () use ($order, $validated, $delivery, $boxQty, $smallPackQty, $bigPackQty, $deliveryFeeKhr, $deliveryFeeUsd, $subtotal, $discountAmount, $totalAmount, $totalKhr, $orderItems, &$packingRelevantChanged) {
+            $order = Order::lockForUpdate()->findOrFail($order->id);
             $wasStockDeducted = (bool) $order->stock_deducted;
+            $stockBefore = app(\App\Services\OrderStockService::class)->snapshot($order);
             $originalItemsSignature = $this->itemsSignature($order->items()->get(['product_id', 'quantity', 'unit_price', 'discount_percent']));
 
-            if ($wasStockDeducted) {
-                $this->restoreInventoryForOrder($order);
-            }
 
             $order->update([
                 'customer_id' => $validated['customer_id'],
@@ -320,65 +276,11 @@ class OrderController extends Controller
                 'delivery_fee_khr' => $deliveryFeeKhr,
                 'delivery_fee_usd' => $deliveryFeeUsd,
                 'total_amount' => $totalAmount,
-                'payment_status' => $validated['payment_status'] ?? $order->payment_status,
                 'notes' => $validated['notes'] ?? null,
-                'stock_deducted' => false,
+                'invoice_template' => $validated['invoice_template'] ?? $order->invoice_template ?? 'family',
+                'sticker_template' => $validated['invoice_template'] ?? $order->invoice_template ?? 'family',
+                'stock_deducted' => $wasStockDeducted,
             ]);
-
-            // Keep the payment record's method in sync with what was chosen on
-            // this form, mirroring how store() records it when an order is first
-            // marked paid — otherwise an edited Cash/ABA/etc. selection is silently
-            // discarded and the edit form has nothing to show next time. Uses the
-            // $totalKhr computed above (not $order->totalKhr()) because the items
-            // relation may already be cached with the pre-edit items at this point
-            // (loaded by restoreInventoryForOrder() above when stock was deducted).
-            if (($validated['payment_status'] ?? $order->payment_status) === 'paid') {
-                $methodStr = $validated['payment_method'] ?? 'Cash';
-                $methods = array_values(array_filter(array_map('trim', explode('+', $methodStr ?: 'Cash'))));
-                if (empty($methods)) {
-                    $methods = ['Cash'];
-                }
-
-                $payment = \App\Models\Payment::updateOrCreate(
-                    ['order_id' => $order->id],
-                    [
-                        'customer_name' => $order->customer?->name ?? 'Walk-in Customer',
-                        'order_date' => $order->order_date,
-                        'total_amount' => $totalAmount,
-                        'total_amount_khr' => $totalKhr,
-                        'paid_amount' => $totalAmount,
-                        'paid_amount_khr' => $totalKhr,
-                        'method' => implode(' + ', $methods),
-                        'status' => 'paid',
-                    ]
-                );
-
-                if ($order->order_date) {
-                    $payment->created_at = \Carbon\Carbon::parse($order->order_date);
-                    $payment->save();
-                }
-
-                // If lines don't exist or methods changed, sync lines
-                $splitCount = count($methods);
-                $perMethodUsd = round($totalAmount / $splitCount, 2);
-                $payment->lines()->delete();
-                $lines = [];
-
-                foreach ($methods as $i => $m) {
-                    $isLast = ($i === $splitCount - 1);
-                    $lineUsd = $isLast ? ($totalAmount - ($perMethodUsd * ($splitCount - 1))) : $perMethodUsd;
-                    $payment->lines()->create([
-                        'method' => $m,
-                        'currency' => 'USD',
-                        'amount_original' => $lineUsd,
-                        'amount_usd' => $lineUsd,
-                        'exchange_rate' => 4000,
-                    ]);
-                    $lines[] = sprintf("%s: $%.2f USD", $m, $lineUsd);
-                }
-
-                $payment->update(['notes' => 'Paid: ' . implode(' + ', $lines)]);
-            }
 
             $order->items()->delete();
 
@@ -386,6 +288,7 @@ class OrderController extends Controller
                 \App\Models\OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
+                    'item_type' => 'sale',
                     'delivery_id' => $delivery?->id,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
@@ -404,6 +307,7 @@ class OrderController extends Controller
                 \App\Models\OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $freeProduct['product_id'],
+                    'item_type' => 'free',
                     'delivery_id' => $delivery?->id,
                     'quantity' => (int) $freeProduct['qty'],
                     'unit_price' => 0,
@@ -412,7 +316,7 @@ class OrderController extends Controller
             }
 
             if ($wasStockDeducted) {
-                $this->deductInventoryForOrder($order->fresh('items.product'));
+                app(\App\Services\OrderStockService::class)->reconcile($order, $stockBefore);
             }
 
             $newItemsSignature = $this->itemsSignature($order->items()->get(['product_id', 'quantity', 'unit_price', 'discount_percent']));
@@ -426,9 +330,6 @@ class OrderController extends Controller
                     'delivery_fee_khr' => $order->delivery_fee_khr,
                     'delivery_fee_usd' => $order->delivery_fee_usd,
                     'total_amount' => $order->total_amount,
-                    'status' => $order->invoice->status === 'cancelled'
-                        ? 'cancelled'
-                        : ($order->payment_status === 'paid' ? 'paid' : 'draft'),
                     'notes' => $order->notes ?? null,
                 ];
 
@@ -439,12 +340,15 @@ class OrderController extends Controller
                 if ($packingRelevantChanged) {
                     $invoiceUpdate['packing_sent_at'] = null;
                     $invoiceUpdate['packing_completed_at'] = null;
+                    $invoiceUpdate['packing_completed_by'] = null;
+                    $invoiceUpdate['packing_checklist'] = null;
                 }
 
                 $order->invoice->update($invoiceUpdate);
             }
         });
 
+        $order->refresh();
         $message = 'Order updated successfully.';
         if ($order->invoice && $packingRelevantChanged) {
             $message .= ' Please send it to packing again.';
@@ -476,6 +380,7 @@ class OrderController extends Controller
         $deleteReason = $request->input('delete_reason') ?? $request->input('reason');
 
         DB::transaction(function () use ($order, $deleteReason) {
+            $order = Order::lockForUpdate()->findOrFail($order->id);
             $this->restoreInventoryForOrder($order);
 
             // Order and invoice are always trashed/restored as a pair (see
@@ -590,84 +495,11 @@ class OrderController extends Controller
 
     private function deductInventoryForOrder(Order $order): array
     {
-        if ($order->stock_deducted) {
-            return [];
-        }
-
-        $order->loadMissing('items.product');
-        $warnings = [];
-        $quantitiesByProduct = $order->items
-            ->groupBy('product_id')
-            ->map(fn($items) => (int) $items->sum('quantity'));
-
-        foreach ($quantitiesByProduct as $productId => $quantity) {
-            $inventory = Inventory::where('product_id', $productId)->lockForUpdate()->first();
-            if (!$inventory) {
-                continue;
-            }
-
-            $before = (int) $inventory->quantity;
-            $inventory->decrement('quantity', $quantity);
-            $remaining = (int) $inventory->fresh()->quantity;
-            $this->recordInventoryMovement($inventory, $order, 'order_deduct', -$quantity, $before, $remaining);
-            $productName = $order->items->firstWhere('product_id', $productId)?->product?->name ?? 'Product';
-
-            if ($remaining < 0) {
-                $warnings[] = $productName . ' ស្តុកអស់ (នៅសល់: ' . $remaining . ')';
-            } elseif ($remaining <= (int) $inventory->reorder_level) {
-                $warnings[] = $productName . ' ស្តុកជិតអស់ (នៅសល់: ' . $remaining . ')';
-            }
-        }
-
-        $order->update(['stock_deducted' => true]);
-
-        return $warnings;
+        return app(\App\Services\OrderStockService::class)->deduct($order);
     }
 
     private function restoreInventoryForOrder(Order $order): void
     {
-        if (!$order->stock_deducted) {
-            return;
-        }
-
-        $order->loadMissing('items');
-        $quantitiesByProduct = $order->items
-            ->groupBy('product_id')
-            ->map(fn($items) => (int) $items->sum('quantity'));
-
-        foreach ($quantitiesByProduct as $productId => $quantity) {
-            $inventory = Inventory::where('product_id', $productId)->lockForUpdate()->first();
-            if ($inventory) {
-                $before = (int) $inventory->quantity;
-                $inventory->increment('quantity', $quantity);
-                $after = (int) $inventory->fresh()->quantity;
-                $this->recordInventoryMovement($inventory, $order, 'order_restore', $quantity, $before, $after);
-            }
-        }
-
-        $order->update(['stock_deducted' => false]);
-    }
-
-    private function recordInventoryMovement(
-        Inventory $inventory,
-        Order $order,
-        string $type,
-        int $quantityChange,
-        int $quantityBefore,
-        int $quantityAfter
-    ): void {
-        InventoryMovement::create([
-            'inventory_id' => $inventory->id,
-            'product_id' => $inventory->product_id,
-            'order_id' => $order->id,
-            'user_id' => auth()->id(),
-            'type' => $type,
-            'quantity_change' => $quantityChange,
-            'quantity_before' => $quantityBefore,
-            'quantity_after' => $quantityAfter,
-            'note' => $type === 'order_deduct'
-                ? 'Stock deducted by order #' . $order->id
-                : 'Stock restored by order edit/delete #' . $order->id,
-        ]);
+        app(\App\Services\OrderStockService::class)->restore($order);
     }
 }

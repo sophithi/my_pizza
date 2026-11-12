@@ -16,10 +16,15 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $products = Product::with('inventory')->paginate(15);
-        return view('products.index', compact('products'));
+        $products = Product::with('inventory')
+            ->when($request->filled('search') && is_string($request->search), fn ($q) => $q->where(fn ($q) => $q->where('name', 'like', '%' . $request->search . '%')->orWhere('sku', 'like', '%' . $request->search . '%')))
+            ->when($request->filled('category') && is_string($request->category), fn ($q) => $q->where('category', $request->category))
+            ->orderBy('id')->paginate(15)->withQueryString();
+        $categories = Product::whereNotNull('category')->where('category', '!=', '')->distinct()->orderBy('category')->pluck('category');
+        $productStats = Product::toBase()->selectRaw('COUNT(*) as total, SUM(CASE WHEN allow_custom_price = 1 THEN 1 ELSE 0 END) as custom_count, SUM(CASE WHEN allow_free = 1 THEN 1 ELSE 0 END) as free_count')->first();
+        return view('products.index', compact('products', 'categories', 'productStats'));
     }
 
     /**
@@ -81,8 +86,11 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load('inventory', 'orderItems');
-        return view('products.show', compact('product'));
+        $product->load('inventory');
+        $orderTotals = $product->orderItems()->whereHas('order', fn ($query) => $query->where('status', '!=', 'cancelled'))
+            ->selectRaw("SUM(CASE WHEN item_type = 'sale' THEN quantity ELSE 0 END) as sold, SUM(CASE WHEN item_type = 'free' THEN quantity ELSE 0 END) as free_qty")
+            ->first();
+        return view('products.show', compact('product', 'orderTotals'));
     }
 
     /**
@@ -125,6 +133,12 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        // Deleting a product cascades to its inventory and movement history.
+        if ($product->inventory()->exists() || $product->orderItems()->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'product' => 'មិនអាចលុបទំនិញដែលមានស្តុក ឬការបញ្ជាទិញពាក់ព័ន្ធបានទេ។',
+            ]);
+        }
         // Delete image if it exists
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);

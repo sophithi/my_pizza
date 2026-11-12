@@ -587,7 +587,9 @@ class PaymentController extends Controller
             $cumulativeKhr = $existing->sum(fn($item) => (float) ($item->paid_amount_khr ?: 0)) + $paidKhr;
             if ($cumulativeKhr > (float) $data['total_amount_khr']) {
                 $remainingKhr = max(0, (float) $data['total_amount_khr'] - $existing->sum(fn($item) => (float) ($item->paid_amount_khr ?: 0)));
-                abort(422, 'Additional payment cannot exceed the remaining balance of ' . number_format($remainingKhr, 0) . ' KHR.');
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'payment_lines' => 'ចំនួនបង់បន្ថែមលើសប្រាក់នៅសល់ ' . number_format($remainingKhr, 0) . '៛។',
+                ]);
             }
             $data['status'] = $this->resolveStatus((float) $data['total_amount_khr'], $cumulativeKhr);
 

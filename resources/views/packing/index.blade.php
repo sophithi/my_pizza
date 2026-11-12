@@ -4,6 +4,66 @@
 
 @push('styles')
     <style>
+        .packing-summary-card {
+            align-items: center;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            display: flex;
+            gap: 14px;
+            height: 100%;
+            padding: 18px 20px;
+        }
+
+        .packing-summary-card.pending {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .packing-summary-card.completed {
+            border-left: 4px solid #10b981;
+        }
+
+        .packing-summary-card.total {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .packing-summary-icon {
+            align-items: center;
+            background: #fffbeb;
+            border-radius: 10px;
+            color: #b45309;
+            display: flex;
+            flex: 0 0 42px;
+            font-size: 18px;
+            height: 42px;
+            justify-content: center;
+        }
+
+        .packing-summary-card.completed .packing-summary-icon {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .packing-summary-card.total .packing-summary-icon {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .packing-summary-label {
+            color: #64748b;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .packing-summary-value {
+            color: #111827;
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-top: 3px;
+        }
+
         .packing-new-badge {
             align-items: center;
             background: #dcfce7;
@@ -11,7 +71,7 @@
             border-radius: 999px;
             color: #047857;
             display: inline-flex;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 800;
             gap: 5px;
             margin-left: 8px;
@@ -26,7 +86,7 @@
             border-radius: 999px;
             color: #b45309;
             display: inline-flex;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 800;
             gap: 5px;
             margin-left: 8px;
@@ -37,7 +97,7 @@
         .packing-sent-time {
             color: #6b7280;
             display: block;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 600;
             margin-top: 3px;
         }
@@ -47,11 +107,12 @@
             align-items: center;
             border-radius: 999px;
             display: inline-flex;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 800;
             gap: 7px;
-            min-height: 32px;
-            padding: 6px 12px;
+            min-height: 38px;
+            padding: 8px 14px;
+            text-decoration: none;
             white-space: nowrap;
         }
 
@@ -92,10 +153,10 @@
             border-radius: 8px;
             color: #6c757d;
             display: inline-flex;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             gap: 7px;
-            padding: 8px 16px;
+            padding: 10px 16px;
             text-decoration: none;
             transition: all .2s;
         }
@@ -110,16 +171,30 @@
             align-items: center;
             display: flex;
             gap: 8px;
-            margin-left: auto;
+            flex-wrap: wrap;
         }
 
-        .packing-date-filter input[type="date"] {
+        .packing-date-filter input,
+        .packing-date-filter select {
             border: 1.5px solid #e9ecef;
             border-radius: 8px;
             color: #1a1d29;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
-            padding: 8px 14px;
+            padding: 10px 14px;
+        }
+
+        .packing-date-filter label {
+            align-items: center;
+            color: #64748b;
+            display: inline-flex;
+            font-size: 15px;
+            font-weight: 700;
+            gap: 6px;
+        }
+
+        .packing-date-filter input[type="search"] {
+            min-width: 170px;
         }
 
         .packing-date-filter button {
@@ -128,16 +203,28 @@
             border-radius: 8px;
             color: #fff;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
-            padding: 8px 14px;
+            padding: 10px 14px;
+        }
+
+        .packing-filter-reset {
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 8px;
+            text-decoration: none;
+        }
+
+        .packing-filter-reset:hover {
+            color: #e85d24;
         }
 
         .packing-table th {
             background: #f8fafc;
             border-bottom: 1px solid #e5e7eb;
             color: #64748b;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 800;
             padding: 14px 16px;
             text-transform: uppercase;
@@ -145,6 +232,8 @@
         }
 
         .packing-table td {
+            font-size: 15px;
+            line-height: 1.5;
             padding: 14px 16px;
             vertical-align: middle;
         }
@@ -159,7 +248,7 @@
             border-radius: 6px;
             color: #fff;
             display: inline-flex;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             justify-content: center;
             margin-right: 6px;
@@ -263,8 +352,15 @@
         }
 
         /* ===== STICKER MODAL DESIGN ===== */
+        .modal-dialog.sticker-modal-dialog {
+            width: min(960px, calc(100vw - 32px));
+            max-width: 960px;
+            margin: 12px auto;
+        }
+
         .sticker-modal-content {
-            height: 85vh;
+            height: min(88vh, 900px);
+            height: min(88dvh, 900px);
             border-radius: 14px;
             overflow: hidden;
             border: none;
@@ -293,7 +389,7 @@
 
         .sticker-modal-header .modal-title {
             color: #1a1d29;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 800;
             margin: 0;
             overflow: hidden;
@@ -411,6 +507,9 @@
 @endpush
 
 @section('content')
+    @if($errors->any())
+        <div class="alert alert-danger mx-3 mt-3" role="alert">{{ $errors->first() }}</div>
+    @endif
     <div class="container-fluid py-4">
         @if(session('success'))
             <div class="alert alert-success border-0 shadow-sm" style="border-radius: 10px;">
@@ -421,43 +520,84 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <h2 style="font-size:28px;font-weight:600;color:#333;margin:0;">រៀបចំទំនិញ</h2>
+                    <h2 style="font-size:30px;font-weight:700;color:#333;margin:0;">រៀបចំទំនិញ</h2>
                 </div>
             </div>
         </div>
         <!-- Date Filter -->
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
             <div class="card-body" style="padding: 16px 24px;">
-                <form method="GET" action="{{ route('packing.index') }}" id="packingFilter"
-                    style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-
-                    <input type="hidden" name="period" id="periodInput" value="{{ request('period') }}">
-
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
                     <div class="packing-filters">
-                        <a href="{{ route('packing.index', ['period' => 'today']) }}"
-                            class="packing-filter {{ request('period') === 'today' ? 'active' : '' }}">
+                        <a href="{{ route('packing.index', array_merge(request()->only('status', 'search'), ['period' => 'today'])) }}"
+                            class="packing-filter {{ request('period', 'today') === 'today' && !request()->filled('date') ? 'active' : '' }}">
                             <i class="fas fa-calendar-day"></i> ថ្ងៃនេះ
                         </a>
-                        <a href="{{ route('packing.index', ['period' => 'yesterday']) }}"
+                        <a href="{{ route('packing.index', array_merge(request()->only('status', 'search'), ['period' => 'yesterday'])) }}"
                             class="packing-filter {{ request('period') === 'yesterday' ? 'active' : '' }}">
                             <i class="fas fa-calendar-minus"></i> ម្សិលមិញ
                         </a>
-                        <a href="{{ route('packing.index', ['period' => 'month']) }}"
+                        <a href="{{ route('packing.index', array_merge(request()->only('status', 'search'), ['period' => 'month'])) }}"
                             class="packing-filter {{ request('period') === 'month' ? 'active' : '' }}">
                             <i class="fas fa-calendar-alt"></i> ខែនេះ
                         </a>
                     </div>
+                </div>
 
-                    <div class="packing-date-filter">
-                        <input type="date" name="date" value="{{ request('date') }}" placeholder="សូមជ្រើសរើសថ្ងៃខែ">
-                        <button type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
+                @php
+                    $selectedPeriod = request('period', 'today');
+                    $defaultFrom = match ($selectedPeriod) {
+                        'yesterday' => now()->subDay()->toDateString(),
+                        'month' => now()->startOfMonth()->toDateString(),
+                        'year' => now()->startOfYear()->toDateString(),
+                        default => now()->toDateString(),
+                    };
+                @endphp
+                <form method="GET" action="{{ route('packing.index') }}" id="packingFilter" class="packing-date-filter">
+                    <input type="hidden" name="period" value="custom">
+                    <input type="search" name="search" value="{{ request('search') }}" placeholder="វិក្កយបត្រ ឬអតិថិជន" aria-label="ស្វែងរកវិក្កយបត្រ ឬអតិថិជន">
+                    <select name="status" aria-label="ស្ថានភាពរៀបចំ">
+                        <option value="">ស្ថានភាពទាំងអស់</option>
+                        <option value="pending" @selected(request('status') === 'pending')>មិនទាន់រៀបចំ</option>
+                        <option value="completed" @selected(request('status') === 'completed')>រៀបចំរួច</option>
+                    </select>
+                    <label>ពី <input type="date" name="from_date" value="{{ request('from_date', request('date', $defaultFrom)) }}" required></label>
+                    <label>ដល់ <input type="date" name="to_date" value="{{ request('to_date', request('date', now()->toDateString())) }}" required></label>
+                    <button type="submit"><i class="fas fa-search"></i> បង្ហាញ</button>
+                    <a href="{{ route('packing.index', ['period' => 'today']) }}" class="packing-filter-reset">សម្អាត</a>
                 </form>
             </div>
         </div>
 
+        <div class="row g-3 mb-4" aria-label="ចំនួនការងាររៀបចំទំនិញ">
+            <div class="col-12 col-md-4">
+                <div class="packing-summary-card pending">
+                    <span class="packing-summary-icon"><i class="fas fa-clock" aria-hidden="true"></i></span>
+                    <div>
+                        <div class="packing-summary-label">មិនទាន់រៀបចំ</div>
+                        <div class="packing-summary-value">{{ number_format($packingPendingCount) }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="packing-summary-card completed">
+                    <span class="packing-summary-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
+                    <div>
+                        <div class="packing-summary-label">រៀបចំរួច</div>
+                        <div class="packing-summary-value">{{ number_format($packingCompletedCount) }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="packing-summary-card total">
+                    <span class="packing-summary-icon"><i class="fas fa-file-invoice" aria-hidden="true"></i></span>
+                    <div>
+                        <div class="packing-summary-label">សរុបវិក្កយបត្រ</div>
+                        <div class="packing-summary-value">{{ number_format($packingPendingCount + $packingCompletedCount) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-12">
@@ -511,77 +651,25 @@
                                                         </span>
                                                         <span class="packing-sent-time">
                                                             {{ $invoice->packing_completed_at->setTimezone('Asia/Phnom_Penh')->format('h:i A') }}
+                                                            @if($invoice->packingCompletedBy)
+                                                                · {{ $invoice->packingCompletedBy->name }}
+                                                            @endif
                                                         </span>
                                                     @else
-                                                        <form method="POST" action="{{ route('packing.complete', $invoice) }}"
-                                                            class="m-0">
-                                                            @csrf
-                                                            <button type="submit" class="packing-complete-btn">
-                                                                <i class="far fa-square"></i> បញ្ជាក់
-                                                            </button>
-                                                        </form>
+                                                        <a href="{{ route('packing.prep', $invoice) }}" class="packing-complete-btn sticker-modal-link"
+                                                            data-title="រៀបចំទំនិញ — {{ $invoice->invoice_number }}">
+                                                            <i class="fas fa-clipboard-check"></i> បន្តរៀបចំ
+                                                        </a>
                                                     @endif
                                                 </td>
                                                 <td class="text-end">
-                                                    <div class="dropdown d-inline-block">
-                                                        <button type="button" class="packing-action-btn dark dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                                            បិតលើកេស
-                                                        </button>
-                                                        <ul class="dropdown-menu dropdown-menu-end">
-                                                            <li>
-                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.delivery_pizza', $invoice) }}" data-title="បិតលើកេស — {{ $invoice->invoice_number }} — ភីហ្សា គ្រួសាររីករាយ">
-                                                                    ភីហ្សា គ្រួសាររីករាយ
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.delivery_special', $invoice) }}" data-title="បិតលើកេស — {{ $invoice->invoice_number }} — Special Pizza">
-                                                                    Special Pizza
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.delivery_mayo', $invoice) }}" data-title="បិតលើកេស — {{ $invoice->invoice_number }} — ម៉ាយូនេស បន្ទាយឆ្មា">
-                                                                    ម៉ាយូនេស បន្ទាយឆ្មា
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.delivery_tamon', $invoice) }}" data-title="បិតលើកេស — {{ $invoice->invoice_number }} — ម៉ាយូនេស តាមាន់មានជ័យ">
-                                                                    ម៉ាយូនេស តាមាន់មានជ័យ
-                                                                </a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+                                                    <a href="{{ route($invoice->order->stickerPrintRoute(), $invoice) }}" class="packing-action-btn dark sticker-modal-link"
+                                                        data-title="បិតលើកេស — {{ $invoice->invoice_number }} — {{ \App\Models\Order::PRINT_TEMPLATES[$invoice->order->invoice_template ?? 'family'] ?? \App\Models\Order::PRINT_TEMPLATES['family'] }}">បិតលើកេស</a>
                                                     <a href="{{ route('packing.prep', $invoice) }}" class="packing-action-btn dark sticker-modal-link" data-title="រៀបចំទំនិញ — {{ $invoice->invoice_number }}">
                                                         រៀបចំទំនិញ
                                                     </a>
-                                                    <div class="dropdown d-inline-block">
-                                                        <button type="button" class="packing-action-btn primary dropdown-toggle"
-                                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                                            វិក្ក័យបត្រភ្ញៀវ
-                                                        </button>
-                                                        <ul class="dropdown-menu dropdown-menu-end">
-                                                            <li>
-                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.customer', $invoice) }}" data-title="វិក្ក័យបត្រភ្ញៀវ — {{ $invoice->invoice_number }} — ភីហ្សា គ្រួសាររីករាយ">
-                                                                    ភីហ្សា គ្រួសាររីករាយ
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.customer_special', $invoice) }}" data-title="វិក្ក័យបត្រភ្ញៀវ — {{ $invoice->invoice_number }} — Special Pizza">
-                                                                    Special Pizza
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.customer_mayo', $invoice) }}" data-title="វិក្ក័យបត្រភ្ញៀវ — {{ $invoice->invoice_number }} — ម៉ាយូនេស បន្ទាយឆ្មា">
-                                                                    ម៉ាយូនេស បន្ទាយឆ្មា
-                                                                </a>
-                                                            </li>
-                                                               <li>
-                                                                <a class="dropdown-item sticker-modal-link" href="{{ route('packing.customer_tamon', $invoice) }}" data-title="វិក្ក័យបត្រភ្ញៀវ — {{ $invoice->invoice_number }} — តាមាន់មានជ័យ">
-                                                                    តាមាន់មានជ័យ
-                                                                </a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+                                                    <a href="{{ route($invoice->order->invoicePrintRoute(), $invoice) }}" class="packing-action-btn primary sticker-modal-link"
+                                                        data-title="វិក្ក័យបត្រភ្ញៀវ — {{ $invoice->invoice_number }} — {{ \App\Models\Order::PRINT_TEMPLATES[$invoice->order->invoice_template ?? 'family'] ?? \App\Models\Order::PRINT_TEMPLATES['family'] }}">វិក្ក័យបត្រភ្ញៀវ</a>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -593,7 +681,7 @@
                                 {{ $invoices->links('pagination::bootstrap-5') }}
                             </div>
                         @else
-                            <p style="color:#666;">មិនទាន់មានវិក្ក័យបត្រ.</p>
+                            <p style="color:#666;font-size:16px;line-height:1.6;">មិនទាន់មានវិក្ក័យបត្រ.</p>
                         @endif
                     </div>
                 </div>
@@ -605,8 +693,8 @@
 
 @push('modals')
   
-    <div class="modal fade" id="stickerModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal fade" id="stickerModal" tabindex="-1" aria-labelledby="stickerModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered sticker-modal-dialog">
             <div class="modal-content sticker-modal-content">
                 <div class="modal-header sticker-modal-header">
                     <div class="sticker-modal-title-wrap">
@@ -620,16 +708,16 @@
                         <a href="#" target="_blank" id="stickerOpenNewTab" class="sticker-modal-btn" title="បើកទំព័រថ្មី">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
-                        <!-- <button type="button" class="sticker-modal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <button type="button" class="sticker-modal-close" data-bs-dismiss="modal" aria-label="បិទ">
                             <i class="fas fa-xmark"></i>
-                        </button> -->
+                        </button>
                     </div>
                 </div>
                 <div class="modal-body p-0 sticker-modal-body">
                     <div class="sticker-modal-loading" id="stickerModalLoading">
                         <div class="sticker-modal-spinner"></div>
                     </div>
-                    <iframe id="stickerModalIframe" src="about:blank" class="sticker-modal-iframe"></iframe>
+                    <iframe id="stickerModalIframe" src="about:blank" class="sticker-modal-iframe" title="បញ្ជីរៀបចំទំនិញ"></iframe>
                 </div>
             </div>
         </div>
@@ -769,6 +857,9 @@
                     loadSticker(event.data.url, event.data.title);
                 } else if (event.data.action === 'close') {
                     stickerModal?.hide();
+                } else if (event.data.action === 'completed') {
+                    stickerModal?.hide();
+                    window.location.reload();
                 }
             });
         })();

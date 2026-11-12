@@ -11,6 +11,9 @@ class PurchaseController extends Controller
 
     public function index(Request $request)
     {
+        $defaultDate = $request->input('date', today()->toDateString());
+        $fromDate = $request->input('from_date', $defaultDate);
+        $toDate = $request->input('to_date', $defaultDate);
         $query = Purchase::query();
 
         if ($request->filled('search')) {
@@ -26,8 +29,12 @@ class PurchaseController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('date')) {
-            $query->whereDate('purchase_date', $request->date);
+        if ($fromDate) {
+            $query->whereDate('purchase_date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate('purchase_date', '<=', $toDate);
         }
 
         $statsQuery = clone $query;
@@ -42,7 +49,7 @@ class PurchaseController extends Controller
         $purchases = $query->latest('purchase_date')->latest()->paginate(15)->withQueryString();
         $exchangeRate = self::EXCHANGE_RATE_KHR;
 
-        return view('purchases.index', compact('purchases', 'stats', 'exchangeRate'));
+        return view('purchases.index', compact('purchases', 'stats', 'exchangeRate', 'fromDate', 'toDate'));
     }
 
     public function create()

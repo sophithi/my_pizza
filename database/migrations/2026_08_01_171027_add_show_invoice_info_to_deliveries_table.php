@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('deliveries', function (Blueprint $table) {
-            $table->boolean('show_invoice_info')->default(true)->after('delivery_desc');
+            if (!Schema::hasColumn('deliveries', 'show_invoice_info')) {
+                $table->boolean('show_invoice_info')->default(true)->after('delivery_desc');
+            }
         });
     }
 

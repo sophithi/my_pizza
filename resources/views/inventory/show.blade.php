@@ -4,9 +4,10 @@
 
 @push('styles')
     <style>
-        :root,
+:root,
         .inventory-show-page,
         .restock-overlay {
+
             --accent: #e85d24;
             --accent-dark: #d94a10;
             --accent-soft: #fff7ed;
@@ -20,78 +21,80 @@
             --warning: #d97706;
             --shadow: 0 10px 30px rgba(15, 23, 42, .06);
             --radius: 12px;
-        }
 
-        .show-container {
-            max-width: 1320px;
-            margin: 0 auto;
-            padding: 20px 16px 40px;
-        }
+}
 
-        /* ── Breadcrumb ── */
-        .breadcrumb-nav {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--muted);
-            margin-bottom: 16px;
-        }
+.show-container {
+margin: 0 auto;
+padding: 20px 16px 40px;
+}
 
-        .breadcrumb-nav a {
+.breadcrumb-nav {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 13px;
+font-weight: 700;
+color: var(--muted);
+}
+
+.breadcrumb-nav a {
+
             color: var(--muted);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 6px;
             transition: color .15s ease;
-        }
 
-        .breadcrumb-nav a:hover {
+}
+
+.breadcrumb-nav a:hover {
+
             color: var(--accent);
-        }
 
-        .breadcrumb-nav .crumb-sep {
+}
+
+.breadcrumb-nav .crumb-sep {
+
             color: #cbd5e1;
-        }
 
-        .breadcrumb-nav .crumb-current {
+}
+
+.breadcrumb-nav .crumb-current {
+
             color: var(--text);
             font-weight: 900;
-        }
 
-        /* ── Header ── */
-        .show-header-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 20px 24px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
+}
 
-        .header-title-group {
+.show-header-card {
+background: var(--surface);
+border: 1px solid var(--border);
+margin-bottom: 20px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+}
+
+.header-title-group {
+
             display: flex;
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
-        }
 
-        .show-header-title {
-            color: var(--text);
-            font-size: 24px;
-            font-weight: 900;
-            margin: 0;
-            line-height: 1.2;
-        }
+}
 
-        .show-header-sub {
+.show-header-title {
+color: var(--text);
+font-weight: 900;
+margin: 0;
+}
+
+.show-header-sub {
+
             color: var(--muted);
             font-size: 13px;
             font-weight: 600;
@@ -100,85 +103,100 @@
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
-        }
 
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+}
 
-        .btn-action {
-            align-items: center;
-            border: 0;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            font-size: 13px;
-            font-weight: 800;
-            gap: 7px;
-            justify-content: center;
-            min-height: 38px;
-            padding: 8px 16px;
-            text-decoration: none;
-            transition: all .15s ease;
-            white-space: nowrap;
-        }
+.header-actions {
+display: flex;
+align-items: center;
+}
 
-        .btn-action:hover {
+.btn-action {
+align-items: center;
+border: 0;
+cursor: pointer;
+display: inline-flex;
+font-size: 13px;
+font-weight: 800;
+gap: 7px;
+justify-content: center;
+padding: 8px 16px;
+text-decoration: none;
+transition: all .15s ease;
+white-space: nowrap;
+}
+
+.btn-action:hover {
+
             transform: translateY(-1px);
-        }
 
-        .btn-primary-action {
+}
+
+.btn-primary-action {
+
             background-color: #e85d24 !important;
             background: linear-gradient(135deg, #e85d24, #d94a10) !important;
             box-shadow: 0 8px 18px rgba(232, 93, 36, .22) !important;
             color: #ffffff !important;
             border: 0 !important;
-        }
 
-        .btn-primary-action:hover {
+}
+
+.btn-primary-action:hover {
+
             background-color: #d94a10 !important;
             background: linear-gradient(135deg, #d94a10, #b83d0c) !important;
             color: #ffffff !important;
-        }
 
-        .btn-restock-action {
+}
+
+.btn-restock-action {
+
             background: #ecfdf5;
             border: 1px solid #a7f3d0;
             color: #047857;
-        }
 
-        .btn-restock-action:hover {
+}
+
+.btn-restock-action:hover {
+
             background: #d1fae5;
             color: #065f46;
-        }
 
-        .btn-reduce-action {
+}
+
+.btn-reduce-action {
+
             background: #fff7ed;
             border: 1px solid #fed7aa;
             color: #c2410c;
-        }
 
-        .btn-reduce-action:hover {
+}
+
+.btn-reduce-action:hover {
+
             background: #ffedd5;
             color: #9a3412;
-        }
 
-        .btn-soft-action {
+}
+
+.btn-soft-action {
+
             background: #f1f5f9;
             border: 1px solid #e2e8f0;
             color: #334155;
-        }
 
-        .btn-soft-action:hover {
+}
+
+.btn-soft-action:hover {
+
             background: #e2e8f0;
             color: #0f172a;
-        }
 
-        /* ── Status badge ── */
-        .status-pill {
+}
+
+.status-pill {
+
             align-items: center;
             border-radius: 999px;
             display: inline-flex;
@@ -187,24 +205,32 @@
             gap: 6px;
             padding: 5px 12px;
             white-space: nowrap;
-        }
 
-        .status-good {
+}
+
+.status-good {
+
             background: #d1fae5;
             color: #065f46;
-        }
 
-        .status-low {
+}
+
+.status-low {
+
             background: #fef3c7;
             color: #92400e;
-        }
 
-        .status-out {
+}
+
+.status-out {
+
             background: #fee2e2;
             color: #991b1b;
-        }
 
-        .meta-tag {
+}
+
+.meta-tag {
+
             align-items: center;
             background: #f8fafc;
             border: 1px solid var(--border);
@@ -215,25 +241,17 @@
             font-weight: 800;
             gap: 6px;
             padding: 4px 10px;
-        }
 
-        /* ── Grid Layouts ── */
-        .overview-grid {
-            display: grid;
-            grid-template-columns: 340px 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
+}
 
-        .card-custom {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
+.card-custom {
+background: var(--surface);
+border: 1px solid var(--border);
+overflow: hidden;
+}
 
-        .card-custom-header {
+.card-custom-header {
+
             align-items: center;
             background: #f8fafc;
             border-bottom: 1px solid var(--border);
@@ -244,287 +262,85 @@
             gap: 8px;
             justify-content: space-between;
             padding: 14px 20px;
-        }
 
-        .card-custom-header i {
+}
+
+.card-custom-header i {
+
             color: var(--accent);
-        }
 
-        .card-custom-body {
+}
+
+.card-custom-body {
+
             padding: 20px;
-        }
 
-        /* ── Product Card ── */
-        .product-preview-wrap {
-            align-items: center;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            display: flex;
-            height: 220px;
-            justify-content: center;
-            margin-bottom: 16px;
-            overflow: hidden;
-            position: relative;
-        }
+}
 
-        .product-preview-wrap img {
-            height: 100%;
-            object-fit: cover;
-            width: 100%;
-        }
+.kpi-grid {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+margin-bottom: 24px;
+}
 
-        .product-no-img {
-            color: #cbd5e1;
+.kpi-card {
+background: var(--surface);
+border: 1px solid var(--border);
+display: flex;
+flex-direction: column;
+justify-content: center;
+}
+
+.kpi-content {
+
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
 
-        .product-no-img i {
-            font-size: 42px;
-        }
+}
 
-        .product-no-img span {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--muted);
-        }
+.kpi-label {
+font-weight: 800;
+letter-spacing: .2px;
+}
 
-        .prop-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 9px 0;
-            border-bottom: 1px solid var(--border-light);
-            font-size: 13px;
-        }
+.kpi-value {
+color: var(--text);
+font-weight: 900;
+margin-top: 2px;
+}
 
-        .prop-row:last-child {
-            border-bottom: none;
-        }
+.movement-filter-card {
+border: 1px solid var(--border);
+border-radius: var(--radius) var(--radius) 0 0;
+border-bottom: 1px solid var(--border);
+}
 
-        .prop-label {
-            color: var(--muted);
-            font-weight: 700;
-        }
+.movement-filter-row {
+display: flex;
+flex-wrap: wrap;
+}
 
-        .prop-val {
-            color: var(--text);
-            font-weight: 800;
-            text-align: right;
-        }
+.m-filter-field {
+align-items: center;
+background: #f8fafc;
+border: 1px solid var(--border);
+border-radius: 8px;
+display: flex;
+gap: 8px;
+padding: 0 12px;
+}
 
-        /* ── Stock Health Hero ── */
-        .hero-stock-banner {
-            align-items: center;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 20px 24px;
-        }
+.m-filter-field i {
 
-        .stock-main-stat {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stock-main-label {
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: .3px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .stock-main-pill {
-            align-items: baseline;
-            cursor: pointer;
-            display: inline-flex;
-            gap: 8px;
-            text-decoration: none;
-            transition: transform .15s ease;
-        }
-
-        .stock-main-pill:hover {
-            transform: translateY(-1px);
-        }
-
-        .stock-main-value {
-            font-size: 40px;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        .stock-main-unit {
-            color: var(--muted);
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .stock-reorder-stat {
-            text-align: right;
-        }
-
-        .stock-reorder-label {
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: .3px;
-            text-transform: uppercase;
-        }
-
-        .stock-reorder-value {
-            color: var(--text);
-            font-size: 20px;
-            font-weight: 900;
-            margin-top: 4px;
-        }
-
-        .progress-bar-section {
-            margin-bottom: 22px;
-        }
-
-        .progress-bar-head {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
-
-        .progress-bar-track {
-            background: #f1f5f9;
-            border-radius: 999px;
-            height: 8px;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        .progress-bar-fill {
-            background: var(--success);
-            border-radius: inherit;
-            height: 100%;
-            transition: width .4s ease;
-        }
-
-        .progress-bar-fill.low {
-            background: var(--warning);
-        }
-
-        .progress-bar-fill.out {
-            background: var(--danger);
-            opacity: .4;
-            width: 100% !important;
-        }
-
-        .stat-grid-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        .stat-box {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 14px;
-        }
-
-        .stat-box-label {
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .stat-box-val {
-            color: var(--text);
-            font-size: 18px;
-            font-weight: 900;
-            margin-top: 4px;
-        }
-
-        /* ── KPI Strip ── */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .kpi-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 16px 20px;
-        }
-
-        .kpi-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .kpi-label {
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: .2px;
-        }
-
-        .kpi-value {
-            color: var(--text);
-            font-size: 22px;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-top: 2px;
-        }
-
-        /* ── Filter Toolbar ── */
-        .movement-filter-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius) var(--radius) 0 0;
-            border-bottom: 1px solid var(--border);
-            padding: 14px 18px;
-        }
-
-        .movement-filter-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .m-filter-field {
-            align-items: center;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            display: flex;
-            gap: 8px;
-            height: 38px;
-            padding: 0 12px;
-        }
-
-        .m-filter-field i {
             color: var(--muted);
             font-size: 13px;
             flex-shrink: 0;
-        }
 
-        .m-filter-field input,
+}
+
+.m-filter-field input,
         .m-filter-field select {
+
             background: transparent;
             border: 0;
             color: var(--text);
@@ -533,22 +349,18 @@
             height: 100%;
             outline: none;
             width: 100%;
-        }
 
-        .m-filter-search {
+}
+
+.m-filter-search {
+
             flex: 1 1 200px;
             min-width: 180px;
-        }
 
-        .m-filter-date {
-            display: none;
-        }
+}
 
-        .m-filter-date.show {
-            display: flex;
-        }
+.m-btn-filter {
 
-        .m-btn-filter {
             align-items: center;
             background: linear-gradient(135deg, var(--accent), var(--accent-dark));
             border: 0;
@@ -562,75 +374,79 @@
             height: 38px;
             padding: 0 16px;
             white-space: nowrap;
-        }
 
-        .m-btn-reset {
-            align-items: center;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            color: var(--muted);
-            cursor: pointer;
-            display: inline-flex;
-            font-size: 13px;
-            font-weight: 800;
-            gap: 6px;
-            height: 38px;
-            padding: 0 14px;
-            text-decoration: none;
-            transition: all .15s ease;
-            white-space: nowrap;
-        }
+}
 
-        .m-btn-reset:hover {
+.m-btn-reset {
+align-items: center;
+background: #f1f5f9;
+border: 1px solid #e2e8f0;
+color: var(--muted);
+cursor: pointer;
+display: inline-flex;
+font-size: 13px;
+font-weight: 800;
+gap: 6px;
+height: 38px;
+text-decoration: none;
+transition: all .15s ease;
+white-space: nowrap;
+}
+
+.m-btn-reset:hover {
+
             background: #e2e8f0;
             color: var(--text);
             transform: translateY(-1px);
-        }
 
-        /* ── Movements Table ── */
-        .movement-table-card {
+}
+
+.movement-table-card {
+
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 0 0 var(--radius) var(--radius);
             box-shadow: var(--shadow);
             overflow: hidden;
             margin-bottom: 24px;
-        }
 
-        .movement-table {
+}
+
+.movement-table {
+
             margin-bottom: 0;
             width: 100%;
-        }
 
-        .movement-table th {
-            background: #f8fafc;
-            border-bottom: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 900;
-            padding: 12px 18px;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
+}
 
-        .movement-table td {
-            border-bottom: 1px solid var(--border-light);
-            color: var(--text);
-            font-size: 13px;
-            padding: 13px 18px;
-            vertical-align: middle;
-        }
+.movement-table th {
+border-bottom: 1px solid var(--border);
+color: var(--muted);
+font-weight: 900;
+text-transform: uppercase;
+white-space: nowrap;
+}
 
-        .movement-table tr:last-child td {
+.movement-table td {
+border-bottom: 1px solid var(--border-light);
+color: var(--text);
+font-size: 13px;
+}
+
+.movement-table tr:last-child td {
+
             border-bottom: none;
-        }
 
-        .movement-table tr:hover td {
+}
+
+.movement-table tr:hover td {
+
             background: #fbfdff;
-        }
 
-        .m-type-pill {
+}
+
+.m-type-pill {
+
             align-items: center;
             border-radius: 999px;
             display: inline-flex;
@@ -639,59 +455,71 @@
             gap: 6px;
             padding: 4px 10px;
             white-space: nowrap;
-        }
 
-        .m-type-deduct { background: #fee2e2; color: #991b1b; }
-        .m-type-restock { background: #d1fae5; color: #065f46; }
-        .m-type-reduce { background: #fff7ed; color: #c2410c; }
-        .m-type-adjust { background: #eff6ff; color: #1e40af; }
-        .m-type-restore { background: #f0fdf4; color: #166534; }
-        .m-type-create { background: #faf5ff; color: #6b21a8; }
+}
 
-        .delta-tag {
-            font-size: 14px;
-            font-weight: 900;
-            white-space: nowrap;
-        }
+.m-type-deduct {
+ background: #fee2e2; color: #991b1b;
+}
 
-        .delta-in { color: #059669; }
-        .delta-out { color: #dc2626; }
+.m-type-restock {
+ background: #d1fae5; color: #065f46;
+}
 
-        .balance-flow {
-            align-items: center;
-            color: var(--muted);
-            display: inline-flex;
-            font-size: 12.5px;
-            font-weight: 700;
-            gap: 6px;
-        }
+.m-type-reduce {
+ background: #fff7ed; color: #c2410c;
+}
 
-        .balance-flow strong {
+.m-type-adjust {
+ background: #eff6ff; color: #1e40af;
+}
+
+.m-type-restore {
+ background: #f0fdf4; color: #166534;
+}
+
+.m-type-create {
+ background: #faf5ff; color: #6b21a8;
+}
+
+.delta-tag {
+font-weight: 900;
+white-space: nowrap;
+}
+
+.balance-flow {
+align-items: center;
+color: var(--muted);
+display: inline-flex;
+font-size: 12.5px;
+font-weight: 700;
+gap: 6px;
+}
+
+.balance-flow strong {
+
             color: var(--text);
             font-weight: 900;
-        }
 
-        .order-link {
-            color: var(--accent);
-            font-weight: 800;
-            text-decoration: none;
-        }
+}
 
-        .order-link:hover {
-            text-decoration: underline;
-        }
+.order-link {
+font-weight: 800;
+}
 
-        .user-tag {
+.user-tag {
+
             align-items: center;
             color: var(--muted);
             display: inline-flex;
             font-size: 12px;
             font-weight: 700;
             gap: 5px;
-        }
 
-        /* ── Modals & Overlay ── */
-        .restock-overlay {
+}
+
+.restock-overlay {
+
             align-items: center;
             background: rgba(15, 23, 42, .45);
             display: none;
@@ -700,22 +528,28 @@
             padding: 20px;
             position: fixed;
             z-index: 1100;
-        }
 
-        .restock-overlay.show {
+}
+
+.restock-overlay.show {
+
             display: flex;
-        }
 
-        .restock-modal {
+}
+
+.restock-modal {
+
             background: #fff;
             border-radius: 10px;
             box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
             max-width: 440px;
             overflow: hidden;
             width: 100%;
-        }
 
-        .restock-header {
+}
+
+.restock-header {
+
             align-items: center;
             background-color: #e85d24 !important;
             background: linear-gradient(135deg, #e85d24, #d94a10) !important;
@@ -723,49 +557,63 @@
             display: flex;
             justify-content: space-between;
             padding: 16px 18px;
-        }
 
-        .restock-title {
+}
+
+.restock-title {
+
             font-size: 17px;
             font-weight: 900;
             margin: 0;
-        }
 
-        .restock-body {
+}
+
+.restock-body {
+
             padding: 18px;
-        }
 
-        .restock-product {
+}
+
+.restock-product {
+
             background: #f8fafc;
             border: 1px solid var(--border);
             border-radius: 8px;
             margin-bottom: 14px;
             padding: 12px;
-        }
 
-        .restock-product-name {
+}
+
+.restock-product-name {
+
             color: var(--text);
             font-size: 15px;
             font-weight: 900;
-        }
 
-        .restock-product-meta {
+}
+
+.restock-product-meta {
+
             color: var(--muted);
             font-size: 12px;
             font-weight: 800;
             margin-top: 4px;
-        }
 
-        .restock-field label {
+}
+
+.restock-field label {
+
             color: var(--muted);
             display: block;
             font-size: 12px;
             font-weight: 900;
             margin-bottom: 7px;
             text-transform: uppercase;
-        }
 
-        .restock-input {
+}
+
+.restock-input {
+
             border: 1.5px solid #d9dee7;
             border-radius: 8px;
             color: var(--text);
@@ -775,70 +623,90 @@
             outline: none;
             padding: 10px 12px;
             width: 100%;
-        }
 
-        .restock-input:focus {
+}
+
+.restock-input:focus {
+
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(232, 93, 36, .13);
-        }
 
-        .restock-preview {
+}
+
+.restock-preview {
+
             align-items: center;
             display: grid;
             gap: 8px;
             grid-template-columns: 1fr auto 1fr;
             margin-top: 14px;
-        }
 
-        .restock-preview-card {
+}
+
+.restock-preview-card {
+
             background: #f8fafc;
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 10px;
             text-align: center;
-        }
 
-        .restock-preview-label {
+}
+
+.restock-preview-label {
+
             color: var(--muted);
             font-size: 11px;
             font-weight: 900;
             text-transform: uppercase;
-        }
 
-        .restock-preview-value {
+}
+
+.restock-preview-value {
+
             color: var(--text);
             font-size: 18px;
             font-weight: 900;
             margin-top: 2px;
-        }
 
-        .restock-actions {
+}
+
+.restock-actions {
+
             display: flex;
             gap: 10px;
             justify-content: flex-end;
             margin-top: 18px;
-        }
 
-        .restock-error {
+}
+
+.restock-error {
+
             color: var(--danger);
             display: none;
             font-size: 12px;
             font-weight: 800;
             margin-top: 8px;
-        }
 
-        .restock-error.show {
+}
+
+.restock-error.show {
+
             display: block;
-        }
 
-        .reason-chips {
+}
+
+.reason-chips {
+
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
             margin-bottom: 8px;
-        }
 
-        .reason-chip {
+}
+
+.reason-chip {
+
             background: #f8fafc;
             border: 1px solid var(--border);
             border-radius: 999px;
@@ -847,61 +715,196 @@
             font-size: 12px;
             font-weight: 800;
             padding: 5px 12px;
-        }
 
-        .reason-chip:hover {
+}
+
+.reason-chip:hover {
+
             background: #f1f5f9;
-        }
 
-        .reason-chip.active {
+}
+
+.reason-chip.active {
+
             background: #ffedd5;
             border-color: #fdba74;
             color: #9a3412;
-        }
 
-        /* ── Responsive ── */
-        @media (max-width: 1024px) {
-            .overview-grid {
-                grid-template-columns: 1fr;
-            }
+}
 
-            .kpi-grid {
+@media (max-width: 1024px) {
+.kpi-grid {
+
                 grid-template-columns: repeat(2, 1fr);
-            }
-        }
 
-        @media (max-width: 680px) {
-            .show-header-card {
+}
+}
+
+@media (max-width: 680px) {
+.show-header-card {
+
                 flex-direction: column;
                 align-items: stretch;
-            }
 
-            .header-actions {
+}
+
+.header-actions {
+
                 width: 100%;
-            }
 
-            .btn-action {
+}
+
+.btn-action {
+
                 flex: 1 1 auto;
-            }
 
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
+}
 
-            .hero-stock-banner {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 14px;
-            }
+.m-filter-field {
 
-            .stock-reorder-stat {
-                text-align: left;
-            }
-
-            .m-filter-field {
                 flex: 1 1 100%;
-            }
-        }
+
+}
+}
+
+.inventory-show-page .show-container {
+ max-width:1400px;
+}
+
+.inventory-show-page .breadcrumb-nav {
+ margin-bottom:14px;
+}
+
+.inventory-show-page .show-header-card {
+ border-radius:12px; padding:22px; box-shadow:0 3px 12px rgba(15,23,42,.035); gap:18px;
+}
+
+.inventory-show-page .show-header-title {
+ font-size:24px; line-height:1.5;
+}
+
+.inventory-show-page .header-actions {
+ gap:8px; flex-wrap:wrap;
+}
+
+.inventory-show-page .btn-action {
+ min-height:38px; border-radius:8px;
+}
+
+.inventory-show-page .kpi-grid {
+ gap:12px; margin:18px 0 22px;
+}
+
+.inventory-show-page .kpi-card {
+ padding:18px 20px; border-radius:12px; box-shadow:0 3px 12px rgba(15,23,42,.035);
+}
+
+.inventory-show-page .kpi-label {
+ font-size:12px; color:#64748b;
+}
+
+.inventory-show-page .kpi-value {
+ font-size:25px; line-height:1.5; font-variant-numeric:tabular-nums;
+}
+
+.inventory-show-page .card-custom {
+ border-radius:12px!important; box-shadow:0 3px 12px rgba(15,23,42,.035)!important;
+}
+
+.inventory-show-page .movement-filter-card {
+ padding:14px 18px; background:#fff;
+}
+
+.inventory-show-page .movement-filter-row {
+ gap:10px; align-items:center;
+}
+
+.inventory-show-page .m-filter-field {
+ flex:1 1 170px; min-width:140px; height:42px; border-color:#e2e8f0;
+}
+
+.inventory-show-page .m-filter-field:focus-within {
+ border-color:#f97316; box-shadow:0 0 0 3px #fff0e6; background:#fff;
+}
+
+.inventory-show-page .m-filter-date {
+ display:none;
+}
+
+.inventory-show-page .m-filter-date.show {
+ display:flex;
+}
+
+.inventory-show-page .m-btn-reset {
+ min-height:42px; padding:0 14px; border-radius:8px;
+}
+
+.inventory-show-page .movement-table th {
+ padding:13px 18px; background:#f8fafc; font-size:12px;
+}
+
+.inventory-show-page .movement-table td {
+ padding:16px 18px; vertical-align:middle;
+}
+
+.inventory-show-page .movement-table tbody tr:hover {
+ background:#fafbfc;
+}
+
+.inventory-show-page .delta-tag {
+ display:inline-block; min-width:58px; padding:5px 9px; border-radius:7px; font-size:14px; font-variant-numeric:tabular-nums;
+}
+
+.inventory-show-page .delta-in {
+ background:#ecfdf5; color:#059669;
+}
+
+.inventory-show-page .delta-out {
+ background:#fff7ed; color:#c2410c;
+}
+
+.inventory-show-page .balance-flow {
+ font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+
+.inventory-show-page .order-link {
+ color:#ea580c; text-decoration:none; padding:4px 7px; border-radius:5px; background:#fff7ed;
+}
+
+.inventory-show-page .order-link:hover {
+ text-decoration:underline;
+}
+
+@media(max-width:700px) {
+.inventory-show-page .show-header-card {
+ padding:16px;
+}
+
+.inventory-show-page .show-header-title {
+ font-size:20px;
+}
+
+.inventory-show-page .header-actions {
+ width:100%;
+}
+
+.inventory-show-page .header-actions .btn-action {
+ flex:1; justify-content:center;
+}
+
+.inventory-show-page .kpi-grid {
+ grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.inventory-show-page .movement-table {
+ min-width:820px;
+}
+
+.inventory-show-page .m-filter-field {
+ flex-basis:calc(50% - 10px); min-width:0;
+}
+}
+    @include('inventory.partials.modal-styles')
     </style>
 @endpush
 
@@ -958,6 +961,7 @@
                 'quick_adjust' => ['កែស្តុក', 'm-type-adjust'],
                 'stock_restock' => ['បន្ថែមស្តុក', 'm-type-restock'],
                 'stock_reduce' => ['កាត់ស្តុក', 'm-type-reduce'],
+                'order_adjust' => ['កែចំនួនការបញ្ជាទិញ', 'm-type-adjust'],
                 'order_deduct' => ['ការបញ្ជាទិញ', 'm-type-deduct'],
                 'order_restore' => ['បញ្ចូលវិញ', 'm-type-restore'],
             ];
@@ -1035,153 +1039,25 @@
                     </div>
                 </div>
 
-                {{-- ── Overview Grid (Product + Stock Details) ── --}}
-                <div class="overview-grid">
-
-                    {{-- Left Card: Product Info --}}
-                    <div class="card-custom">
-                        <div class="card-custom-header">
-                            <span>ព័ត៌មានទំនិញ</span>
-                            <span class="meta-tag" style="background:#fff;">{{ $unit }}</span>
-                        </div>
-                        <div class="card-custom-body">
-                            <div class="product-preview-wrap">
-                                @if($inventory->product->imageUrl())
-                                    <img src="{{ $inventory->product->imageUrl() }}" alt="{{ $inventory->product->name }}">
-                                @else
-                                    <div class="product-no-img">
-                                        <i class="fas fa-image"></i>
-                                        <span>គ្មានរូបភាព</span>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <div class="prop-row">
-                                <span class="prop-label">ឈ្មោះ</span>
-                                <span class="prop-val">{{ $inventory->product->name }}</span>
-                            </div>
-                            <div class="prop-row">
-                                <span class="prop-label">តម្លៃ KHR</span>
-                                <span class="prop-val text-success">៛{{ number_format($inventory->product->price_khr ?? 0) }}</span>
-                            </div>
-                            <div class="prop-row">
-                                <span class="prop-label">តម្លៃ USD</span>
-                                <span class="prop-val">${{ number_format($inventory->product->price_usd ?? 0, 2) }}</span>
-                            </div>
-                            @if($inventory->cost_per_unit)
-                                <div class="prop-row">
-                                    <span class="prop-label">តម្លៃដើម</span>
-                                    <span class="prop-val">${{ number_format($inventory->cost_per_unit, 2) }}</span>
-                                </div>
-                            @endif
-                            @if($inventory->product->supplier)
-                                <div class="prop-row">
-                                    <span class="prop-label">អ្នកផ្គត់ផ្គង់</span>
-                                    <span class="prop-val">{{ $inventory->product->supplier }}</span>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    {{-- Right Card: Stock Health & Metrics --}}
-                    <div class="card-custom">
-                        <div class="card-custom-header">
-                            <span>ស្ថានភាពស្តុក</span>
-                            @unless(auth()->user()->isAuditor())
-                                <button type="button" class="btn-action btn-soft-action" style="padding:4px 10px;min-height:30px;font-size:12px;"
-                                    onclick="openQuickUpdate({{ $inventory->id }}, {{ $inventory->quantity }})">
-                                    កែស្តុក
-                                </button>
-                            @endunless
-                        </div>
-                        <div class="card-custom-body">
-                            {{-- Hero stock display banner --}}
-                            <div class="hero-stock-banner">
-                                <div class="stock-main-stat">
-                                    <span class="stock-main-label">ចំនួនក្នុងស្តុក</span>
-                                    <div class="stock-main-pill" @unless(auth()->user()->isAuditor()) onclick="openQuickUpdate({{ $inventory->id }}, {{ $inventory->quantity }})" title="ចុចដើម្បីកែប្រែចំនួន" @endunless>
-                                        <span class="stock-main-value" style="color: {{ $isOut ? 'var(--danger)' : ($isLow ? 'var(--warning)' : 'var(--text)') }};">
-                                            {{ number_format($inventory->quantity) }}
-                                        </span>
-                                        <span class="stock-main-unit">{{ $unit }}</span>
-                                    </div>
-                                </div>
-                                <div class="stock-reorder-stat">
-                                    <span class="stock-reorder-label">កម្រិតជិតអស់</span>
-                                    <div class="stock-reorder-value">{{ number_format($inventory->reorder_level) }} <span style="font-size:14px;color:var(--muted);font-weight:700;">{{ $unit }}</span></div>
-                                </div>
-                            </div>
-
-                            {{-- Progress bar --}}
-                            <div class="progress-bar-section">
-                                <div class="progress-bar-head">
-                                    <span>កម្រិតសុវត្ថិភាព</span>
-                                    <span>{{ $pct }}%</span>
-                                </div>
-                                <div class="progress-bar-track">
-                                    <div class="progress-bar-fill {{ $progressClass }}" style="width: {{ $isOut ? 100 : $pct }}%;"></div>
-                                </div>
-                            </div>
-
-                            {{-- 2-column detailed stats --}}
-                            <div class="stat-grid-2col">
-                                <div class="stat-box">
-                                    <div class="stat-box-label">សរុប USD</div>
-                                    <div class="stat-box-val text-success">${{ number_format($stockValueUsd, 2) }}</div>
-                                </div>
-                                <div class="stat-box">
-                                    <div class="stat-box-label">សរុប KHR</div>
-                                    <div class="stat-box-val text-primary">៛{{ number_format($stockValueKhr) }}</div>
-                                </div>
-                                <div class="stat-box">
-                                    <div class="stat-box-label">ទីតាំង</div>
-                                    <div class="stat-box-val">{{ $inventory->warehouse_location ?? '—' }}</div>
-                                </div>
-                                <div class="stat-box">
-                                    <div class="stat-box-label">បញ្ចូលចុងក្រោយ</div>
-                                    <div class="stat-box-val" style="font-size:14px;">
-                                        {{ $inventory->last_restocked ? $inventory->last_restocked->format('d/m/Y') : ($inventory->updated_at ? $inventory->updated_at->format('d/m/Y') : '—') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                {{-- ── 4 KPI Statistics Strip ── --}}
+                {{-- Compact stock summary --}}
                 <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-content">
-                            <span class="kpi-label">ស្តុកចូល</span>
-                            <span class="kpi-value text-success">+{{ number_format($totalIn) }}</span>
-                        </div>
-                    </div>
-
-                    <div class="kpi-card">
-                        <div class="kpi-content">
-                            <span class="kpi-label">ស្តុកចេញ</span>
-                            <span class="kpi-value text-danger">-{{ number_format($totalOut) }}</span>
-                        </div>
-                    </div>
-
-                    <div class="kpi-card">
-                        <div class="kpi-content">
-                            <span class="kpi-label">ចលនាសុទ្ធ</span>
-                            <span class="kpi-value" style="color: {{ $netChange >= 0 ? '#059669' : '#dc2626' }};">
-                                {{ $netChange >= 0 ? '+' : '' }}{{ number_format($netChange) }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="kpi-card">
-                        <div class="kpi-content">
-                            <span class="kpi-label">ប្រតិបត្តិការ</span>
-                            <span class="kpi-value">{{ number_format($totalTransactions) }}</span>
-                        </div>
-                    </div>
+                    <div class="kpi-card"><div class="kpi-content">
+                        <span class="kpi-label">ចូលសរុប</span>
+                        <span class="kpi-value text-success">{{ number_format($totalIn) }}</span>
+                    </div></div>
+                    <div class="kpi-card"><div class="kpi-content">
+                        <span class="kpi-label">ចេញសរុប</span>
+                        <span class="kpi-value text-danger">{{ number_format($totalOut) }}</span>
+                    </div></div>
+                    <div class="kpi-card"><div class="kpi-content">
+                        <span class="kpi-label">លក់ក្នុង Order</span>
+                        <span class="kpi-value">{{ number_format($saleQty) }}</span>
+                    </div></div>
+                    <div class="kpi-card"><div class="kpi-content">
+                        <span class="kpi-label">ថែមក្នុង Order</span>
+                        <span class="kpi-value text-primary">{{ number_format($freeQty) }}</span>
+                    </div></div>
                 </div>
-
                 {{-- ── Movements Filter & Table Section ── --}}
                 <div class="card-custom" style="box-shadow: var(--shadow); border-radius: var(--radius); overflow: hidden;">
 
@@ -1193,7 +1069,7 @@
                     </div>
 
                     @php
-                        $hasFilter = !empty(request('type')) || !empty(request('period')) || !empty(request('search')) || $hasDateRange;
+                        $hasFilter = !empty(request('item_type')) || !empty(request('type')) || !empty(request('period')) || !empty(request('search')) || $hasDateRange;
                     @endphp
 
                     {{-- Filter Form --}}
@@ -1202,7 +1078,15 @@
                             <div class="movement-filter-row">
 
                                 <div class="m-filter-field">
-                                    <select name="type" onchange="this.form.submit()">
+                                    <select name="item_type" aria-label="លក់ ឬថែម" onchange="this.form.submit()">
+                                        <option value="">លក់ និងថែមទាំងអស់</option>
+                                        <option value="sale" @selected(request('item_type') === 'sale')>លក់</option>
+                                        <option value="free" @selected(request('item_type') === 'free')>ថែម</option>
+                                        <option value="unclassified" @selected(request('item_type') === 'unclassified')>មិនបានបែងចែក</option>
+                                    </select>
+                                </div>
+                                <div class="m-filter-field">
+                                    <select name="type" aria-label="ប្រភេទចលនា" onchange="this.form.submit()">
                                         <option value="">គ្រប់ប្រភេទ</option>
                                         <option value="in" {{ request('type') === 'in' ? 'selected' : '' }}>ចូល (+)</option>
                                         <option value="out" {{ request('type') === 'out' ? 'selected' : '' }}>ចេញ (-)</option>
@@ -1217,7 +1101,7 @@
                                 </div>
 
                                 <div class="m-filter-field">
-                                    <select id="movementPeriodSelect" name="period" onchange="handleMovementPeriodChange(this)">
+                                    <select id="movementPeriodSelect" name="period" aria-label="កាលបរិច្ឆេទ" onchange="handleMovementPeriodChange(this)">
                                         <option value="" {{ empty(request('period')) && !$hasDateRange ? 'selected' : '' }}>គ្រប់ពេល</option>
                                         <option value="today" {{ request('period') === 'today' ? 'selected' : '' }}>ថ្ងៃនេះ</option>
                                         <option value="yesterday" {{ request('period') === 'yesterday' ? 'selected' : '' }}>ម្សិលមិញ</option>
@@ -1270,7 +1154,7 @@
                                         </td>
                                         <td>
                                             <span class="m-type-pill {{ $typeClass }}">
-                                                {{ $typeText }}
+                                                {{ $typeText }} {{ $m->item_type === "sale" ? "(លក់)" : ($m->item_type === "free" ? "(ថែម)" : "") }}
                                             </span>
                                         </td>
                                         <td class="text-center">
@@ -1287,16 +1171,32 @@
                                             </div>
                                         </td>
                                         <td>
+                                            @php
+                                                $reasonText = match ($m->type) {
+                                                    'order_deduct' => 'កាត់ស្តុកតាមការបញ្ជាទិញ',
+                                                    'order_restore' => 'បញ្ចូលស្តុកវិញពីការបញ្ជាទិញ',
+                                                    'order_adjust' => 'កែចំនួនទំនិញក្នុងការបញ្ជាទិញ',
+                                                    'stock_create' => 'បង្កើតស្តុកដំបូង',
+                                                    'stock_restock' => 'បន្ថែមទំនិញចូលស្តុក',
+                                                    'stock_reduce' => $m->note ?: 'កាត់ទំនិញចេញពីស្តុក',
+                                                    'manual_adjust' => $m->note ?: 'កែតម្រូវស្តុកដោយដៃ',
+                                                    'quick_adjust' => $m->note ?: 'កែចំនួនស្តុក',
+                                                    default => $m->note ?: 'មិនមានមូលហេតុ',
+                                                };
+                                            @endphp
+                                            <div style="font-weight:600;color:var(--text);margin-bottom:5px;">{{ $reasonText }}</div>
+                                            @if(in_array($m->item_type, ['sale', 'free']))
+                                                <div class="small mb-1 {{ $m->item_type === 'free' ? 'text-primary' : 'text-muted' }}">
+                                                    {{ $m->item_type === 'free' ? 'ទំនិញថែម' : 'ទំនិញលក់' }}៖ {{ number_format(abs($m->quantity_change)) }} {{ $unit }}
+                                                </div>
+                                            @elseif(in_array($m->type, ['order_deduct', 'order_restore', 'order_adjust']))
+                                                <div class="small text-muted mb-1">ប្រវត្តិចាស់មិនបានបែងចែកលក់/ថែម</div>
+                                            @endif
                                             @if($m->order_id)
                                                 <div>
                                                     <a href="{{ route('orders.show', $m->order_id) }}" class="order-link">
                                                         #{{ $m->order_id }}
                                                     </a>
-                                                </div>
-                                            @endif
-                                            @if($m->note && $m->note !== ('Stock deducted by order #' . $m->order_id))
-                                                <div style="color:var(--muted);font-size:12px;font-weight:600;margin-top:2px;">
-                                                    {{ $m->note }}
                                                 </div>
                                             @endif
                                         </td>

@@ -9,8 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->softDeletes();
-            $table->foreignId('deleted_by')->nullable()->after('deleted_at')->constrained('users')->nullOnDelete();
+            if (!Schema::hasColumn('invoices', 'deleted_at')) {
+                $table->softDeletes();
+            }
+            if (!Schema::hasColumn('invoices', 'deleted_by')) {
+                $table->foreignId('deleted_by')->nullable()->after('deleted_at')->constrained('users')->nullOnDelete();
+            }
         });
     }
 

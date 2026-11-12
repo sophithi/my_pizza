@@ -378,6 +378,9 @@
     $exchangeRate = 4000;
 @endphp
     <div class="container-fluid py-4">
+        @if($errors->any())
+            <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
+        @endif
 
         {{-- Page Header --}}
         <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
@@ -717,6 +720,7 @@
                     <input type="hidden" name="payment_id" id="form_payment_id">
                     <input type="hidden" name="source_order_id" id="form_source_order_id">
                     <div class="modal-body">
+                        <div id="paymentFormError" class="alert alert-danger d-none" role="alert"></div>
                         <div class="mb-3">
                             <label class="form-label small text-muted">ឈ្មោះអតិថិជន</label>
                             <input type="text" name="customer_name" id="f_customer_name" class="form-control"
@@ -773,6 +777,7 @@
                             <div id="previousPaymentSummary" class="alert alert-info py-2 small d-none">
                                 <div class="fw-bold">បានបង់ពីមុន</div>
                                 <div id="previousPaymentSummaryText"></div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="fillRemainingPayment()">បង់ចំនួននៅសល់</button>
                             </div>
                             <div class="payment-summary-box">
                                 <div class="d-flex justify-content-between">
@@ -813,6 +818,7 @@
         const paymentModal = document.getElementById('paymentModal');
         let syncingCurrency = false;
         let paymentLines = [];
+        let previousPaidKhr = 0;
         const paymentMethods = ['Cash', 'ABA', 'ACLEDA', 'Wing', 'Other'];
 
         function usdToKhr(usd) {
@@ -840,8 +846,8 @@
         }
 
         function updateStatusBadge() {
-            const total = parseFloat(document.getElementById('f_total').value) || 0;
-            const paid = parseFloat(document.getElementById('f_paid').value) || 0;
+            const total = parseFloat(document.getElementById('f_total_khr').value) || 0;
+            const paid = previousPaidKhr + currentPaymentKhr();
             const badge = document.getElementById('statusBadge');
             badge.className = 'badge rounded-pill px-3 ';
             if (paid <= 0) { badge.classList.add('badge-pending'); badge.textContent = 'មិនទាន់បង់'; }
@@ -873,6 +879,19 @@
             return line.currency === 'KHR' ? (Number(line.amount || 0) / EXCHANGE_RATE) : Number(line.amount || 0);
         }
 
+        function currentPaymentKhr() {
+            return paymentLines.reduce((sum, line) => sum + (line.currency === 'KHR'
+                ? Number(line.amount || 0)
+                : Math.round(Number(line.amount || 0) * EXCHANGE_RATE)), 0);
+        }
+
+        function fillRemainingPayment() {
+            const totalKhr = Number(document.getElementById('f_total_khr').value) || 0;
+            const remainingKhr = Math.max(0, totalKhr - previousPaidKhr);
+            paymentLines = [{ method: paymentLines[0]?.method || 'Cash', currency: 'KHR', amount: remainingKhr }];
+            renderPaymentLines();
+        }
+
         function renderPaymentLines(rebuild = true) {
             const wrap = document.getElementById('paymentLines');
             if (rebuild) {
@@ -898,13 +917,13 @@
             // Anchor both balances to totalKhr (ground truth) instead of letting the USD side
             // do its own totalUsd - paidUsd subtraction, otherwise a payment that exactly
             // clears the KHR total can still show a few leftover cents owed in USD.
-            const balanceKhr = Math.max(0, totalKhr - usdToKhr(paidUsd));
-            const paidKhr = totalKhr - balanceKhr;
+            const paidKhr = previousPaidKhr + currentPaymentKhr();
+            const balanceKhr = Math.max(0, totalKhr - paidKhr);
             const balanceUsd = balanceKhr / EXCHANGE_RATE;
 
             document.getElementById('f_paid').value = paidUsd.toFixed(2);
             document.getElementById('paidSummaryKhr').textContent = paidKhr.toLocaleString();
-            document.getElementById('paidSummaryUsd').textContent = paidUsd.toFixed(2);
+            document.getElementById('paidSummaryUsd').textContent = (paidKhr / EXCHANGE_RATE).toFixed(2);
             document.getElementById('balanceSummaryKhr').textContent = balanceKhr.toLocaleString();
             document.getElementById('balanceSummaryUsd').textContent = balanceUsd.toFixed(2);
             document.getElementById('payment_lines_input').value = JSON.stringify(paymentLines);
@@ -927,6 +946,8 @@
         function resetModal() {
             document.getElementById('paymentModalLabel').textContent = 'កត់ត្រាការទូទាត់អតិថិជន';
             document.getElementById('paymentForm').action = '{{ route("payments.store") }}';
+            previousPaidKhr = 0;
+            document.getElementById('paymentFormError').classList.add('d-none');
             document.getElementById('form_method').value = 'POST';
             document.getElementById('form_payment_id').value = '';
             document.getElementById('f_additional_payment').value = '0';
@@ -955,6 +976,8 @@
             document.getElementById('form_method').value = additional ? 'POST' : (isEdit ? 'PUT' : 'POST');
             document.getElementById('form_payment_id').value = additional ? '' : (payment.payment_id || '');
             document.getElementById('f_additional_payment').value = additional ? '1' : '0';
+            previousPaidKhr = additional ? Number(payment.paid_amount_khr || 0) : 0;
+            document.getElementById('paymentFormError').classList.add('d-none');
             document.getElementById('previousPaymentSummary').classList.toggle('d-none', !additional);
             if (additional) {
                 document.getElementById('previousPaymentSummaryText').textContent =
@@ -1023,7 +1046,20 @@
             document.body.style.removeProperty('padding-right');
         });
 
-        document.getElementById('paymentForm')?.addEventListener('submit', function () {
+        document.getElementById('paymentForm')?.addEventListener('submit', function (event) {
+            const error = document.getElementById('paymentFormError');
+            error.classList.add('d-none');
+            if (document.getElementById('f_additional_payment').value === '1') {
+                const totalKhr = Number(document.getElementById('f_total_khr').value) || 0;
+                const remainingKhr = Math.max(0, totalKhr - previousPaidKhr);
+                if (currentPaymentKhr() > remainingKhr) {
+                    event.preventDefault();
+                    error.textContent = `ចំនួនបង់បន្ថែមលើសប្រាក់នៅសល់ ${remainingKhr.toLocaleString()}៛។`;
+                    error.classList.remove('d-none');
+                    error.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    return;
+                }
+            }
             const btn = this.querySelector('button[type="submit"]');
             if (!btn) return;
             btn.disabled = true;

@@ -12,6 +12,7 @@ class InventoryMovement extends Model
         'order_id',
         'user_id',
         'type',
+        'item_type',
         'quantity_change',
         'quantity_before',
         'quantity_after',

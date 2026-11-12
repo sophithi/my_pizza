@@ -93,7 +93,7 @@
 
         .expense-filter {
             display: grid;
-            grid-template-columns: minmax(220px, 1fr) 180px 180px auto;
+            grid-template-columns: minmax(180px, 1fr) 160px 180px 180px auto;
             gap: 10px;
             padding: 14px;
             margin-bottom: 16px;
@@ -104,6 +104,17 @@
             border-color: #d9dee7;
             border-radius: 6px;
             min-height: 42px;
+        }
+
+        .expense-date-label {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .expense-filter {
+            align-items: end;
         }
 
         .expense-table {
@@ -261,8 +272,14 @@
                 <option value="received" {{ request('status') === 'received' ? 'selected' : '' }}>បានទូទាត់</option>
                 <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>បានលុប</option>
             </select>
-            <input type="date" name="date" class="form-control" value="{{ request('date') }}"
-                placeholder="ជ្រើសរើសកាលបរិច្ឆេទ" aria-label="ជ្រើសរើសកាលបរិច្ឆេទ" autocomplete="off">
+            <div>
+                <label for="from_date" class="expense-date-label">ចាប់ពី</label>
+                <input type="date" id="from_date" name="from_date" class="form-control" value="{{ $fromDate }}" autocomplete="off">
+            </div>
+            <div>
+                <label for="to_date" class="expense-date-label">រហូតដល់</label>
+                <input type="date" id="to_date" name="to_date" class="form-control" value="{{ $toDate }}" autocomplete="off">
+            </div>
             <button class="expense-btn expense-btn-primary" type="submit">
                 <i class="fas fa-search"></i> ស្វែងរក
             </button>
@@ -335,7 +352,7 @@
                         </tbody>
                     </table>
                 </div>
-            @elseif(request('search') || (request('status') && request('status') !== 'all') || request('date'))
+            @elseif(request('search') || (request('status') && request('status') !== 'all') || $fromDate || $toDate)
                 <div class="expense-empty">
                     <h5 class="mb-2">មិនមានលទ្ធផលត្រូវនឹងលក្ខខណ្ឌស្វែងរក</h5>
                     <p class="text-muted mb-0">សាកល្បងផ្លាស់ប្តូរលក្ខខណ្ឌស្វែងរក ឬសម្អាតតម្រង។</p>

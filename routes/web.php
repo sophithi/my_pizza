@@ -189,9 +189,11 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
-        Route::resource('invoices', InvoiceController::class)->only(['edit', 'update']);
         Route::post('invoices/{invoice}/toggle-printed', [InvoiceController::class, 'togglePrinted'])->name('invoices.toggle-printed');
     });
+
+    Route::resource('invoices', InvoiceController::class)->only(['edit', 'update'])->middleware('role:admin,manager,staff');
+    Route::get('reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory')->middleware('role:admin,manager,staff_inventory,auditor');
 
     // Invoice viewing/printing/export — read-only, includes auditor
     Route::middleware('role:admin,manager,staff,staff_inventory,auditor')->group(function () {
@@ -204,6 +206,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,manager,staff,staff_inventory')->group(function () {
         Route::get('packing/index', [InvoiceController::class, 'printIndex'])->name('packing.index');
         Route::post('packing/{invoice}/complete', [InvoiceController::class, 'markPackingCompleted'])->name('packing.complete');
+        Route::patch('packing/{invoice}/checklist', [InvoiceController::class, 'updatePackingChecklist'])->name('packing.checklist');
         Route::get('packing/{invoice}/prep', [InvoiceController::class, 'stickerPrep'])->name('packing.prep');
         Route::get('packing/{invoice}/ready', [InvoiceController::class, 'stickerReady'])->name('packing.delivery_pizza');
         Route::get('packing/{invoice}/special', [InvoiceController::class, 'stickerSpecial'])->name('packing.delivery_special');
@@ -234,7 +237,7 @@ Route::middleware('auth')->group(function () {
         Route::get('customers/export/excel', [CustomerController::class, 'exportExcel'])->name('customers.export.excel');
         Route::get('customers/export/pdf', [CustomerController::class, 'exportPdf'])->name('customers.export.pdf');
 
-        // Customer Locations / Google Map Management CRUD
+    //     // Customer Locations / Google Map Management CRUD
         Route::get('customer-locations', [CustomerLocationController::class, 'index'])->name('customer-locations.index');
         Route::get('customer-locations/get-road-route', [CustomerLocationController::class, 'getRoadRoute'])->name('customer-locations.road-route');
         Route::post('customer-locations', [CustomerLocationController::class, 'store'])->name('customer-locations.store');
@@ -260,7 +263,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,manager,auditor')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/daily', [ReportController::class, 'daily'])->name('daily');
-            Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');
             Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
         });
     });
