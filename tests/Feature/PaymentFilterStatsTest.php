@@ -63,6 +63,54 @@ class PaymentFilterStatsTest extends TestCase
         $this->assertSame(122.5, $result['ABA']['usd']);
     }
 
+    public function test_legacy_usd_line_uses_saved_khr_without_changing_the_receipt(): void
+    {
+        $payment = new \App\Models\Payment(['paid_amount_khr' => 87500, 'paid_amount' => 21.88]);
+        $payment->setRelation('lines', collect([(object) [
+            'method' => 'ABA', 'currency' => 'USD', 'amount_original' => 21.88,
+            'amount_usd' => 21.88, 'exchange_rate' => 4000,
+        ]]));
+        $before = serialize($payment->toArray());
+        $result = (new \ReflectionMethod(PaymentController::class, 'buildMethodBreakdownFromPayments'))
+            ->invoke(new PaymentController(), collect([$payment]), 'ABA');
+        $this->assertSame(87500.0, $result['ABA']['khr']);
+        $this->assertSame(21.875, $result['ABA']['usd']);
+        $this->assertSame($before, serialize($payment->toArray()));
+    }
+
+    public function test_legacy_mixed_currencies_keep_original_khr_and_allocate_only_the_remainder(): void
+    {
+        $payment = new \App\Models\Payment(['paid_amount_khr' => 190000]);
+        $payment->setRelation('lines', collect([
+            (object) ['method' => 'Cash', 'currency' => 'KHR', 'amount_original' => 150000, 'amount_usd' => 37.5, 'exchange_rate' => 4000],
+            (object) ['method' => 'ABA', 'currency' => 'USD', 'amount_original' => 10, 'amount_usd' => 10, 'exchange_rate' => 4000],
+        ]));
+        $build = new \ReflectionMethod(PaymentController::class, 'buildMethodBreakdownFromPayments');
+        $all = $build->invoke(new PaymentController(), collect([$payment]));
+        $this->assertSame(150000.0, $all['Cash']['khr']);
+        $this->assertSame(40000.0, $all['ABA']['khr']);
+        $this->assertSame(190000.0, array_sum(array_column($all, 'khr')));
+        $aba = $build->invoke(new PaymentController(), collect([$payment]), 'ABA');
+        $this->assertSame(0.0, $aba['Cash']['khr']);
+        $this->assertSame(40000.0, $aba['ABA']['khr']);
+    }
+
+    public function test_multiple_legacy_usd_methods_preserve_exact_total_and_recorded_rate_weights(): void
+    {
+        $payment = new \App\Models\Payment(['paid_amount_khr' => 64999]);
+        $payment->setRelation('lines', collect([
+            (object) ['method' => 'Cash', 'currency' => 'KHR', 'amount_original' => 5000, 'exchange_rate' => 4000],
+            (object) ['method' => 'ABA', 'currency' => 'USD', 'amount_original' => 10, 'exchange_rate' => 2000],
+            (object) ['method' => 'Wing', 'currency' => 'USD', 'amount_original' => 10, 'exchange_rate' => 4000],
+        ]));
+        $result = (new \ReflectionMethod(PaymentController::class, 'buildMethodBreakdownFromPayments'))
+            ->invoke(new PaymentController(), collect([$payment]));
+        $this->assertSame(5000.0, $result['Cash']['khr']);
+        $this->assertSame(19999.0, $result['ABA']['khr']);
+        $this->assertSame(40000.0, $result['Wing']['khr']);
+        $this->assertSame(64999.0, array_sum(array_column($result, 'khr')));
+    }
+
     public function test_payment_input_keeps_integer_khr_and_derives_usd_after_summing(): void
     {
         $controller = new PaymentController();

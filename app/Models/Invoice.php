@@ -10,21 +10,6 @@ class Invoice extends Model
 {
     use SoftDeletes;
 
-    protected static function booted(): void
-    {
-        static::updated(function (Invoice $invoice) {
-            app(\App\Services\PackingDispatchService::class)->recordChanges($invoice);
-        });
-        static::deleted(function (Invoice $invoice) {
-            app(\App\Services\PackingDispatchService::class)->archivePending($invoice);
-        });
-    }
-
-    public function packingDispatches()
-    {
-        return $this->hasMany(PackingDispatch::class);
-    }
-
     protected $fillable = [
         'order_id',
         'invoice_number',
@@ -91,6 +76,32 @@ class Invoice extends Model
         return $this->packing_sent_at
             ? $this->packing_sent_at->format('Y-m-d H:i:s') . ':' . ($this->packing_revision ?? 0)
             : null;
+    }
+
+    public function markPackingEdited(): void
+    {
+        if (!$this->packing_sent_at) {
+            return;
+        }
+        $revision = $this->packing_revision + 1;
+        if (\Illuminate\Support\Facades\Schema::hasColumns('invoices', ['packing_edited', 'packing_revision'])) {
+            $this->update(['packing_edited' => true, 'packing_revision' => $revision]);
+        } else {
+            $checklist = $this->packing_checklist ?? [];
+            $checklist['_packing_edited'] = true;
+            $checklist['_packing_revision'] = $revision;
+            $this->update(['packing_checklist' => $checklist]);
+        }
+    }
+
+    public function getPackingEditedAttribute($value): bool
+    {
+        return (bool) $value || (bool) ($this->packing_checklist['_packing_edited'] ?? false);
+    }
+
+    public function getPackingRevisionAttribute($value): int
+    {
+        return max((int) $value, (int) ($this->packing_checklist['_packing_revision'] ?? 0));
     }
 
     public function packingChecklistComplete(): bool

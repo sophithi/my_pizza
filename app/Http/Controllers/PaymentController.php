@@ -344,16 +344,12 @@ class PaymentController extends Controller
                 continue;
             }
 
-            foreach ($lines as $line) {
+            $lineAmountsKhr = $this->reportingLineAmountsKhr($payment);
+            foreach ($lines->values() as $index => $line) {
                 $method = is_array($line) ? ($line['method'] ?? 'Other') : ($line->method ?? 'Other');
-                $currency = is_array($line) ? ($line['currency'] ?? 'KHR') : ($line->currency ?? 'KHR');
-                $amountOriginal = is_array($line) ? (float) ($line['amount_original'] ?? 0) : (float) ($line->amount_original ?? 0);
 
                 $key = array_key_exists($method, $methodLabels) ? $method : 'Other';
-                if ($currency !== 'KHR') {
-                    throw new \RuntimeException('Normalize historical receipts using payments:normalize-khr before reporting.');
-                }
-                $khr = $amountOriginal;
+                $khr = $lineAmountsKhr[$index];
 
                 $breakdown[$key]['usd'] += $khr / self::EXCHANGE_RATE;
                 $breakdown[$key]['khr'] += $khr;
@@ -372,6 +368,43 @@ class PaymentController extends Controller
         }
 
         return $breakdown;
+    }
+
+    private function reportingLineAmountsKhr(Payment $payment): array
+    {
+        $amounts = [];
+        $usdWeights = [];
+        $knownKhr = 0.0;
+        foreach ($payment->lines->values() as $index => $line) {
+            $original = (float) data_get($line, 'amount_original', 0);
+            if (strtoupper((string) data_get($line, 'currency', 'KHR')) === 'KHR') {
+                $amounts[$index] = $original;
+                $knownKhr += $original;
+            } else {
+                $rate = (float) data_get($line, 'exchange_rate', 0);
+                if ($rate <= 0) {
+                    $rate = (float) ($payment->exchange_rate ?: self::EXCHANGE_RATE);
+                }
+                $usdWeights[$index] = max(0, $original * $rate);
+            }
+        }
+
+        // Older databases may still have USD receipt lines. Keep their original
+        // currency untouched and attribute the remaining persisted KHR total to
+        // those lines. Recorded USD amounts/rates are allocation weights only;
+        // rounded display USD never becomes the source of the KHR total.
+        $remainingKhr = max(0.0, (float) $payment->paid_amount_khr - $knownKhr);
+        $weightTotal = array_sum($usdWeights);
+        $lastIndex = array_key_last($usdWeights);
+        foreach ($usdWeights as $index => $weight) {
+            $share = $index === $lastIndex ? $remainingKhr
+                : ($weightTotal > 0 ? floor($remainingKhr * $weight / $weightTotal) : 0.0);
+            $amounts[$index] = (float) $share;
+            $remainingKhr -= $share;
+            $weightTotal -= $weight;
+        }
+
+        return $amounts;
     }
 
     private function periodLabel(Request $request): string

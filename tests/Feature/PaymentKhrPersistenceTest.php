@@ -111,4 +111,22 @@ class PaymentKhrPersistenceTest extends TestCase
             DB::disableQueryLog();
         }
     }
+
+    public function test_legacy_database_can_open_payments_and_pdf_without_normalization(): void
+    {
+        Schema::create('deliveries', function ($t) { $t->id(); $t->string('delivery_name'); $t->softDeletes(); });
+        $controller = new PaymentController();
+        $controller->store($this->paymentRequest(87500));
+        DB::table('payment_lines')->update(['currency' => 'USD', 'amount_original' => 21.88]);
+        $request = Request::create('/payments', 'GET', [
+            'period' => 'custom', 'date_from' => '2026-11-13', 'date_to' => '2026-11-13', 'method' => 'ABA',
+        ]);
+        $index = $controller->index($request)->getData();
+        $pdf = $controller->exportPdf($request)->getData();
+        $this->assertSame(87500.0, $index['stats']['collected_khr']);
+        $this->assertSame(87500.0, $index['stats']['method_breakdown']['ABA']['khr']);
+        $this->assertSame(87500.0, $pdf['stats']['method_breakdown']['ABA']['khr']);
+        $this->assertDatabaseHas('payment_lines', ['currency' => 'USD', 'amount_original' => 21.88]);
+        $this->assertSame(87500.0, (float) Payment::first()->paid_amount_khr);
+    }
 }

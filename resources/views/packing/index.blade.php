@@ -634,9 +634,9 @@
                                                 <td>{{ $invoice->order?->customer?->name ?? 'N/A' }}</td>
                                                 <td>{{ $invoice->invoice_date->translatedFormat('M d, Y') }}</td>
                                                 <td>
-                                                    {{ $invoice->packing_display_sent_at?->setTimezone('Asia/Phnom_Penh')->format('h:i A') ?? 'N/A' }}
+                                                    {{ $invoice->packing_sent_at?->setTimezone('Asia/Phnom_Penh')->format('h:i A') ?? 'N/A' }}
                                                     <span
-                                                        class="packing-sent-time">{{ $invoice->packing_display_sent_at?->diffForHumans() }}</span>
+                                                        class="packing-sent-time">{{ $invoice->packing_sent_at?->diffForHumans() }}</span>
                                                 </td>
                                                 <td>
                                                     @if($invoice->packing_completed_at)

@@ -333,7 +333,7 @@ class OrderController extends Controller
 
                 $order->invoice->update($invoiceUpdate);
                 if ($packingRelevantChanged) {
-                    app(\App\Services\PackingDispatchService::class)->markEdited($order->invoice);
+                    $order->invoice->markPackingEdited();
                 }
             }
         });

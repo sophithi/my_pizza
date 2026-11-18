@@ -50,7 +50,6 @@ class OrderStockTest extends TestCase
             $t->id(); $t->unsignedBigInteger('order_id'); $t->unsignedBigInteger('product_id');
             $t->string('item_type'); $t->integer('quantity'); $t->timestamps();
         });
-        (require database_path('migrations/2026_11_18_000001_create_packing_dispatches_table.php'))->up();
         (require database_path('migrations/2026_11_18_000002_add_packing_edit_marker_to_invoices_table.php'))->up();
         Schema::create('inventories', function (Blueprint $t) {
             $t->id(); $t->unsignedBigInteger('product_id')->unique(); $t->integer('quantity'); $t->timestamps();
@@ -132,7 +131,6 @@ class OrderStockTest extends TestCase
         $order->invoice()->create(['invoice_number' => 'INV-101', 'packing_sent_at' => '2026-10-20 10:00:00']);
         $order->invoice()->create(['invoice_number' => 'INV-102', 'packing_sent_at' => '2026-10-21 10:00:00', 'packing_completed_at' => '2026-10-21 11:00:00']);
         $order->invoice()->create(['invoice_number' => 'INV-103', 'packing_sent_at' => '2026-10-22 10:00:00']);
-        $this->artisan('packing:backfill-dispatches', ['--apply' => true])->assertSuccessful();
 
         $controller = app(\App\Http\Controllers\InvoiceController::class);
         $request = \Illuminate\Http\Request::create('/packing/index', 'GET', [
