@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
-use App\Models\User;
 use App\Models\Salesperson;
 use App\Traits\ExportableSpreadsheet;
 use Illuminate\Http\Request;

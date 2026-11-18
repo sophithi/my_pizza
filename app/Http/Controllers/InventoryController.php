@@ -9,7 +9,6 @@ use App\Http\Requests\UpdateInventoryRequest;
 use App\Traits\ExportableSpreadsheet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use PhpOffice\PhpSpreadsheet\Style\DataType;
 
 class InventoryController extends Controller
 {

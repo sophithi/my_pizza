@@ -503,6 +503,8 @@
                 <input type="hidden" name="period" value="custom">
                 @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
                 @if(request('search')) <input type="hidden" name="search" value="{{ request('search') }}"> @endif
+                @if(request('delivery_id')) <input type="hidden" name="delivery_id" value="{{ request('delivery_id') }}"> @endif
+                @if(request('method')) <input type="hidden" name="method" value="{{ request('method') }}"> @endif
                 <label class="small text-muted mb-0">ពីថ្ងៃទី</label>
                 <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-control form-control-sm"
                     style="width:160px">
@@ -532,7 +534,7 @@
                 @endforeach
             </ul>
             <form method="GET" action="{{ route('payments.index') }}" class="d-flex gap-2 align-items-center">
-                @foreach(request()->except(['search', 'delivery_id', 'method']) as $k => $v)
+                @foreach(request()->except(['search', 'delivery_id', 'method', 'page']) as $k => $v)
                     <input type="hidden" name="{{ $k }}" value="{{ $v }}">
                 @endforeach
                 <label class="small text-muted mb-0">Delivery</label>
@@ -754,12 +756,12 @@
                                     <div class="col">
                                         <label class="form-label small text-muted">KHR (៛)</label>
                                         <input type="number" id="f_total_khr" class="form-control" step="1" min="0"
-                                            placeholder="0" oninput="syncTotalFromKhr()">
+                                            placeholder="0" readonly>
                                     </div>
                                     <div class="col">
                                         <label class="form-label small text-muted">USD ($)</label>
                                         <input type="number" name="total_amount" id="f_total" class="form-control" step="0.01"
-                                            min="0" placeholder="0.00" oninput="syncTotalFromUsd()" required>
+                                            min="0" placeholder="0.00" readonly>
                                     </div>
                                 </div>
                                 <input type="hidden" name="exchange_rate" id="f_exchange_rate" value="{{ $exchangeRate }}">
@@ -816,33 +818,13 @@
     <script>
         const EXCHANGE_RATE = {{ $exchangeRate }};
         const paymentModal = document.getElementById('paymentModal');
-        let syncingCurrency = false;
+
         let paymentLines = [];
         let previousPaidKhr = 0;
         const paymentMethods = ['Cash', 'ABA', 'ACLEDA', 'Wing', 'Other'];
 
-        function usdToKhr(usd) {
-            return Math.round((parseFloat(usd) || 0) * EXCHANGE_RATE);
-        }
-
         function khrToUsd(khr) {
             return ((parseFloat(khr) || 0) / EXCHANGE_RATE).toFixed(2);
-        }
-
-        function syncTotalFromUsd() {
-            if (syncingCurrency) return;
-            syncingCurrency = true;
-            document.getElementById('f_total_khr').value = usdToKhr(document.getElementById('f_total').value);
-            syncingCurrency = false;
-            renderPaymentLines(false);
-        }
-
-        function syncTotalFromKhr() {
-            if (syncingCurrency) return;
-            syncingCurrency = true;
-            document.getElementById('f_total').value = khrToUsd(document.getElementById('f_total_khr').value);
-            syncingCurrency = false;
-            renderPaymentLines(false);
         }
 
         function updateStatusBadge() {
@@ -875,14 +857,8 @@
             renderPaymentLines(key !== 'amount');
         }
 
-        function lineAmountUsd(line) {
-            return line.currency === 'KHR' ? (Number(line.amount || 0) / EXCHANGE_RATE) : Number(line.amount || 0);
-        }
-
         function currentPaymentKhr() {
-            return paymentLines.reduce((sum, line) => sum + (line.currency === 'KHR'
-                ? Number(line.amount || 0)
-                : Math.round(Number(line.amount || 0) * EXCHANGE_RATE)), 0);
+            return paymentLines.reduce((sum, line) => sum + Number(line.amount || 0), 0);
         }
 
         function fillRemainingPayment() {
@@ -901,18 +877,15 @@
                             <select class="form-select form-select-sm" onchange="updatePaymentLine(${index}, 'method', this.value)">
                                 ${paymentMethods.map(method => `<option value="${method}" ${line.method === method ? 'selected' : ''}>${method}</option>`).join('')}
                             </select>
-                            <select class="form-select form-select-sm" onchange="updatePaymentLine(${index}, 'currency', this.value)">
-                                <option value="KHR" ${line.currency === 'KHR' ? 'selected' : ''}>KHR</option>
-                                <option value="USD" ${line.currency === 'USD' ? 'selected' : ''}>USD</option>
-                            </select>
-                            <input type="number" class="form-control form-control-sm" min="0" step="${line.currency === 'KHR' ? '1' : '0.01'}" value="${line.amount || ''}" placeholder="ទឹកប្រាក់" oninput="updatePaymentLine(${index}, 'amount', this.value)">
+                            <span class="form-control form-control-sm bg-light">KHR (៛)</span>
+                            <input type="number" class="form-control form-control-sm" min="0" step="1" value="${line.amount || ''}" placeholder="ទឹកប្រាក់" oninput="updatePaymentLine(${index}, 'amount', this.value)">
                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePaymentLine(${index})"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
                 `).join('');
             }
 
-            const paidUsd = paymentLines.reduce((sum, line) => sum + lineAmountUsd(line), 0);
+            const paidUsd = currentPaymentKhr() / EXCHANGE_RATE;
             const totalKhr = parseFloat(document.getElementById('f_total_khr').value) || 0;
             // Anchor both balances to totalKhr (ground truth) instead of letting the USD side
             // do its own totalUsd - paidUsd subtraction, otherwise a payment that exactly
@@ -976,7 +949,8 @@
             document.getElementById('form_method').value = additional ? 'POST' : (isEdit ? 'PUT' : 'POST');
             document.getElementById('form_payment_id').value = additional ? '' : (payment.payment_id || '');
             document.getElementById('f_additional_payment').value = additional ? '1' : '0';
-            previousPaidKhr = additional ? Number(payment.paid_amount_khr || 0) : 0;
+            previousPaidKhr = additional ? Number(payment.paid_amount_khr || 0)
+                : Math.max(0, Number(payment.paid_amount_khr || 0) - Number(payment.installment_paid_amount_khr || 0));
             document.getElementById('paymentFormError').classList.add('d-none');
             document.getElementById('previousPaymentSummary').classList.toggle('d-none', !additional);
             if (additional) {
@@ -993,8 +967,8 @@
                 ? getLocalDateString()
                 : (payment.payment_date ? getLocalDateString(new Date(payment.payment_date)) : getLocalDateString());
             
-            document.getElementById('f_total').value = payment.total_amount;
-            document.getElementById('f_total_khr').value = payment.total_amount_khr || usdToKhr(payment.total_amount);
+            document.getElementById('f_total_khr').value = payment.total_amount_khr;
+            document.getElementById('f_total').value = khrToUsd(payment.total_amount_khr);
             document.getElementById('f_notes').value = payment.notes || '';
             document.getElementById('f_method').value = payment.method === '—' ? 'Cash' : payment.method;
             
@@ -1009,18 +983,19 @@
                 }));
             } else if (payment.paid_amount > 0 && payment.method && payment.method.includes('+')) {
                 const methods = payment.method.split('+').map(m => m.trim()).filter(Boolean);
-                const splitAmount = (parseFloat(payment.paid_amount) || 0) / (methods.length || 1);
-                paymentLines = methods.map(m => ({
+                const paidKhr = Number(payment.paid_amount_khr || 0);
+                const splitAmount = Math.floor(paidKhr / methods.length);
+                paymentLines = methods.map((m, index) => ({
                     method: paymentMethods.includes(m) ? m : 'Other',
                     currency: 'KHR',
-                    amount: Number(splitAmount.toFixed(2))
+                    amount: splitAmount + (index === 0 ? paidKhr - splitAmount * methods.length : 0)
                 }));
             } else if (payment.paid_amount > 0) {
                 const singleMethod = payment.method === '—' ? 'Cash' : payment.method;
                 paymentLines = [{
                     method: paymentMethods.includes(singleMethod) ? singleMethod : 'Cash',
                     currency: 'KHR',
-                    amount: payment.paid_amount || 0
+                    amount: payment.paid_amount_khr || 0
                 }];
             } else {
                 paymentLines = [];
@@ -1049,7 +1024,7 @@
         document.getElementById('paymentForm')?.addEventListener('submit', function (event) {
             const error = document.getElementById('paymentFormError');
             error.classList.add('d-none');
-            if (document.getElementById('f_additional_payment').value === '1') {
+            {
                 const totalKhr = Number(document.getElementById('f_total_khr').value) || 0;
                 const remainingKhr = Math.max(0, totalKhr - previousPaidKhr);
                 if (currentPaymentKhr() > remainingKhr) {

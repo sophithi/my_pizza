@@ -593,7 +593,7 @@
                     <span class="packing-summary-icon"><i class="fas fa-file-invoice" aria-hidden="true"></i></span>
                     <div>
                         <div class="packing-summary-label">សរុបវិក្កយបត្រ</div>
-                        <div class="packing-summary-value">{{ number_format($packingPendingCount + $packingCompletedCount) }}</div>
+                        <div class="packing-summary-value">{{ number_format($packingTotalCount) }}</div>
                     </div>
                 </div>
             </div>
@@ -621,13 +621,7 @@
                                             <tr class="{{ $invoice->packing_completed_at ? 'packing-row-completed' : '' }}">
                                                 <td>
                                                     {{ $invoice->invoice_number }}
-                                                    @php
-                                                      
-                                                        $isEditedResend = $invoice->packing_first_sent_at
-                                                            && $invoice->packing_sent_at
-                                                            && !$invoice->packing_first_sent_at->equalTo($invoice->packing_sent_at);
-                                                    @endphp
-                                                    @if(!$invoice->packing_completed_at && $isEditedResend)
+                                                    @if($invoice->packing_edited)
                                                         <span class="packing-edited-badge">
                                                             <i class="fas fa-pen"></i> បានកែវិក្ក័យបត្រ
                                                         </span>
@@ -640,9 +634,9 @@
                                                 <td>{{ $invoice->order?->customer?->name ?? 'N/A' }}</td>
                                                 <td>{{ $invoice->invoice_date->translatedFormat('M d, Y') }}</td>
                                                 <td>
-                                                    {{ $invoice->packing_sent_at?->setTimezone('Asia/Phnom_Penh')->format('h:i A') ?? 'N/A' }}
+                                                    {{ $invoice->packing_display_sent_at?->setTimezone('Asia/Phnom_Penh')->format('h:i A') ?? 'N/A' }}
                                                     <span
-                                                        class="packing-sent-time">{{ $invoice->packing_sent_at?->diffForHumans() }}</span>
+                                                        class="packing-sent-time">{{ $invoice->packing_display_sent_at?->diffForHumans() }}</span>
                                                 </td>
                                                 <td>
                                                     @if($invoice->packing_completed_at)
@@ -663,6 +657,7 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-end">
+
                                                     <a href="{{ route($invoice->order->stickerPrintRoute(), $invoice) }}" class="packing-action-btn dark sticker-modal-link"
                                                         data-title="បិតលើកេស — {{ $invoice->invoice_number }} — {{ \App\Models\Order::PRINT_TEMPLATES[$invoice->order->invoice_template ?? 'family'] ?? \App\Models\Order::PRINT_TEMPLATES['family'] }}">បិតលើកេស</a>
                                                     <a href="{{ route('packing.prep', $invoice) }}" class="packing-action-btn dark sticker-modal-link" data-title="រៀបចំទំនិញ — {{ $invoice->invoice_number }}">
@@ -670,6 +665,7 @@
                                                     </a>
                                                     <a href="{{ route($invoice->order->invoicePrintRoute(), $invoice) }}" class="packing-action-btn primary sticker-modal-link"
                                                         data-title="វិក្ក័យបត្រភ្ញៀវ — {{ $invoice->invoice_number }} — {{ \App\Models\Order::PRINT_TEMPLATES[$invoice->order->invoice_template ?? 'family'] ?? \App\Models\Order::PRINT_TEMPLATES['family'] }}">វិក្ក័យបត្រភ្ញៀវ</a>
+
                                                 </td>
                                             </tr>
                                         @endforeach

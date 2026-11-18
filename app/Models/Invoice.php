@@ -10,6 +10,21 @@ class Invoice extends Model
 {
     use SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::updated(function (Invoice $invoice) {
+            app(\App\Services\PackingDispatchService::class)->recordChanges($invoice);
+        });
+        static::deleted(function (Invoice $invoice) {
+            app(\App\Services\PackingDispatchService::class)->archivePending($invoice);
+        });
+    }
+
+    public function packingDispatches()
+    {
+        return $this->hasMany(PackingDispatch::class);
+    }
+
     protected $fillable = [
         'order_id',
         'invoice_number',
@@ -28,6 +43,8 @@ class Invoice extends Model
         'packing_completed_at',
         'packing_completed_by',
         'packing_checklist',
+        'packing_edited',
+        'packing_revision',
         'printed_at',
         'notes',
         'deleted_by',
@@ -46,6 +63,8 @@ class Invoice extends Model
         'packing_first_sent_at' => 'datetime',
         'packing_completed_at' => 'datetime',
         'packing_checklist' => 'array',
+        'packing_edited' => 'boolean',
+        'packing_revision' => 'integer',
         'printed_at' => 'datetime',
     ];
 
@@ -65,6 +84,13 @@ class Invoice extends Model
     public function packingCompletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'packing_completed_by');
+    }
+
+    public function packingRevision(): ?string
+    {
+        return $this->packing_sent_at
+            ? $this->packing_sent_at->format('Y-m-d H:i:s') . ':' . ($this->packing_revision ?? 0)
+            : null;
     }
 
     public function packingChecklistComplete(): bool

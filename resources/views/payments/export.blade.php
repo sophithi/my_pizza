@@ -61,9 +61,9 @@ header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
             @php $exchangeRate = 4000; $totalUsd = 0; $totalKhr = 0; $paidUsd = 0; $paidKhr = 0; @endphp
             @forelse($payments as $payment)
                 @php
-                    $itemTotalKhr = $payment->total_amount_khr ?? ($payment->total_amount ?? 0) * $exchangeRate;
-                    $itemPaidKhr = $payment->paid_amount_khr ?? ($payment->paid_amount ?? 0) * $exchangeRate;
-                    $itemBalanceKhr = $payment->balance_khr ?? ($payment->balance ?? 0) * $exchangeRate;
+                    $itemTotalKhr = $payment->total_amount_khr;
+                    $itemPaidKhr = $payment->paid_amount_khr;
+                    $itemBalanceKhr = $payment->balance_khr;
                     $totalUsd += $payment->total_amount ?? 0;
                     $totalKhr += $itemTotalKhr;
                     $paidUsd += $payment->paid_amount ?? 0;

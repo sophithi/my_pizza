@@ -402,7 +402,7 @@
                         kind: input.dataset.kind,
                         key: input.dataset.key,
                         checked,
-                        revision: @json($invoice->packing_sent_at?->format('Y-m-d H:i:s'))
+                        revision: @json($invoice->packingRevision())
                     })
                 });
                 if (!response.ok) {

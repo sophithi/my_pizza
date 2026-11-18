@@ -357,67 +357,70 @@ class InvoiceController extends Controller
             'status' => 'nullable|in:pending,completed',
             'search' => 'nullable|string|max:100',
         ]);
+        $period = $filters['period'] ?? (empty($filters['date']) ? 'today' : null);
+        $dateFilter = function ($query) use ($filters, $period) {
+            if ($period === 'today') {
+                $query->whereDate('sent_at', today());
+            } elseif ($period === 'yesterday') {
+                $query->whereDate('sent_at', today()->subDay());
+            } elseif ($period === 'month') {
+                $query->whereMonth('sent_at', now()->month)->whereYear('sent_at', now()->year);
+            } elseif ($period === 'year') {
+                $query->whereYear('sent_at', now()->year);
+            } elseif ($period === 'custom') {
+                $query->whereDate('sent_at', '>=', $filters['from_date'])->whereDate('sent_at', '<=', $filters['to_date']);
+            } elseif (!empty($filters['date'])) {
+                $query->whereDate('sent_at', $filters['date']);
+            }
+        };
 
-        $query = Invoice::with(['order', 'order.customer', 'packingCompletedBy']);
-        $query->whereNotNull('packing_sent_at');
-        $period = $filters['period'] ?? null;
-
-        if ($period === 'today') {
-            $query->whereDate('packing_sent_at', today());
-        } elseif ($period === 'yesterday') {
-            $query->whereDate('packing_sent_at', today()->subDay());
-        } elseif ($period === 'month') {
-            $query->whereMonth('packing_sent_at', now()->month)->whereYear('packing_sent_at', now()->year);
-        } elseif ($period === 'year') {
-            $query->whereYear('packing_sent_at', now()->year);
-        } elseif ($period === 'custom') {
-            $query->whereDate('packing_sent_at', '>=', $filters['from_date'])
-                ->whereDate('packing_sent_at', '<=', $filters['to_date']);
-        } elseif (!empty($filters['date'])) {
-            $query->whereDate('packing_sent_at', $filters['date']);
-        }
-        // If no period or date filter provided, default to today's invoices.
-        if (!$period && empty($filters['date'])) {
-            $period = 'today';
-            $query->whereDate('packing_sent_at', today());
-        }
-
+        // Show the current invoice once. The ledger is retained only to preserve
+        // the actual days it was sent; editing does not remove it from packing.
+        $query = Invoice::with(['order.customer', 'packingCompletedBy', 'packingDispatches' => $dateFilter])
+            ->whereNotNull('packing_sent_at')->where('status', '!=', 'cancelled')
+            ->whereHas('order', fn($q) => $q->whereNull('orders.deleted_at')->where('status', '!=', 'cancelled'))
+            ->whereHas('packingDispatches', $dateFilter);
         if (!empty($filters['search'])) {
             $search = trim($filters['search']);
-            $query->where(function ($query) use ($search) {
-                $query->where('invoice_number', 'like', "%{$search}%")
-                    ->orWhereHas('order.customer', fn ($customer) => $customer->where('name', 'like', "%{$search}%"));
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('order.customer', fn($customer) => $customer->where('name', 'like', "%{$search}%"));
             });
         }
-
         if (($filters['status'] ?? null) === 'pending') {
             $query->whereNull('packing_completed_at');
         } elseif (($filters['status'] ?? null) === 'completed') {
             $query->whereNotNull('packing_completed_at');
         }
-
         $packingPendingCount = (clone $query)->whereNull('packing_completed_at')->count();
         $packingCompletedCount = (clone $query)->whereNotNull('packing_completed_at')->count();
-
-        $invoices = $query->orderByDesc('packing_sent_at')
-            ->orderByDesc('id')
-            ->paginate(15)
-            ->withQueryString();
-        return view('packing.index', compact('invoices', 'packingPendingCount', 'packingCompletedCount'));
+        $packingTotalCount = (clone $query)->count();
+        $latestSent = \App\Models\PackingDispatch::selectRaw('MAX(sent_at)')->whereColumn('invoice_id', 'invoices.id');
+        $dateFilter($latestSent);
+        $invoices = $query->orderByDesc($latestSent)->orderByDesc('id')->paginate(15)->withQueryString();
+        $invoices->getCollection()->each(function ($invoice) {
+            $invoice->packing_display_sent_at = $invoice->packingDispatches->max('sent_at');
+        });
+        return view('packing.index', compact('invoices', 'packingPendingCount', 'packingCompletedCount', 'packingTotalCount'));
     }
-
     public function sendToPacking(Invoice $invoice)
     {
-        if (!$invoice->packing_sent_at) {
-            $sentAt = now();
-            $invoice->update([
-                'packing_sent_at' => $sentAt,
-                // Never overwritten again — lets packing/index tell a brand-new
-                // send apart from a resend that followed an order edit.
-                'packing_first_sent_at' => $invoice->packing_first_sent_at ?? $sentAt,
-            ]);
-            $invoice->loadMissing('order.customer', 'order.invoice');
-        }
+        DB::transaction(function () use ($invoice) {
+            // Match the lock order used when editing an order so a dispatch
+            // cannot capture an order halfway through an edit.
+            $order = Order::withTrashed()->lockForUpdate()->find($invoice->order_id);
+            $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
+            $invoice->setRelation('order', $order);
+            abort_if($invoice->status === 'cancelled' || !$order
+                || $order->trashed() || $order->status === 'cancelled', 422);
+            if (!$invoice->packing_sent_at) {
+                $sentAt = now();
+                $invoice->update([
+                    'packing_sent_at' => $sentAt,
+                    'packing_first_sent_at' => $invoice->packing_first_sent_at ?? $sentAt,
+                ]);
+            }
+        });
 
         return redirect()
             ->route('invoices.show', $invoice)
@@ -472,7 +475,7 @@ class InvoiceController extends Controller
                 ]);
             }
 
-            abort_unless($invoice->packing_sent_at->format('Y-m-d H:i:s') === $data['revision'], 409,
+            abort_unless($invoice->packingRevision() === $data['revision'], 409,
                 'ទិន្នន័យរៀបចំបានផ្លាស់ប្តូរ។ សូមផ្ទុកទំព័រឡើងវិញ។');
 
             if ($data['kind'] === 'item') {

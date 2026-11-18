@@ -1,0 +1,21 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('invoices', function (Blueprint $table) {
+            $table->boolean('packing_edited')->default(false);
+            $table->unsignedInteger('packing_revision')->default(0);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('invoices', fn(Blueprint $table) => $table->dropColumn(['packing_edited', 'packing_revision']));
+    }
+};

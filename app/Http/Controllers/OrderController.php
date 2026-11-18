@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Inventory;
-use App\Models\InventoryMovement;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
@@ -260,7 +258,7 @@ class OrderController extends Controller
             $order = Order::lockForUpdate()->findOrFail($order->id);
             $wasStockDeducted = (bool) $order->stock_deducted;
             $stockBefore = app(\App\Services\OrderStockService::class)->snapshot($order);
-            $originalItemsSignature = $this->itemsSignature($order->items()->get(['product_id', 'quantity', 'unit_price', 'discount_percent']));
+            $originalItemsSignature = $this->itemsSignature($order->items()->get(['product_id', 'quantity', 'unit_price', 'unit_price_khr', 'discount_percent']));
 
 
             $order->update([
@@ -319,8 +317,8 @@ class OrderController extends Controller
                 app(\App\Services\OrderStockService::class)->reconcile($order, $stockBefore);
             }
 
-            $newItemsSignature = $this->itemsSignature($order->items()->get(['product_id', 'quantity', 'unit_price', 'discount_percent']));
-            $packingRelevantChanged = $order->wasChanged(['customer_id', 'delivery_id', 'taxi_phone', 'small_pack_qty', 'big_pack_qty', 'notes'])
+            $newItemsSignature = $this->itemsSignature($order->items()->get(['product_id', 'quantity', 'unit_price', 'unit_price_khr', 'discount_percent']));
+            $packingRelevantChanged = $order->wasChanged(['customer_id', 'delivery_id', 'taxi_phone', 'small_pack_qty', 'big_pack_qty', 'notes', 'order_date', 'invoice_template', 'sticker_template'])
                 || $originalItemsSignature !== $newItemsSignature;
 
             if ($order->invoice) {
@@ -333,25 +331,17 @@ class OrderController extends Controller
                     'notes' => $order->notes ?? null,
                 ];
 
-                // Only pull the invoice out of the packing queue when something a
-                // packer would actually see (items, delivery, pack qty, notes...)
-                // changed — a payment-status or order-date-only edit shouldn't
-                // silently drop an already-packed invoice off packing/index.
-                if ($packingRelevantChanged) {
-                    $invoiceUpdate['packing_sent_at'] = null;
-                    $invoiceUpdate['packing_completed_at'] = null;
-                    $invoiceUpdate['packing_completed_by'] = null;
-                    $invoiceUpdate['packing_checklist'] = null;
-                }
-
                 $order->invoice->update($invoiceUpdate);
+                if ($packingRelevantChanged) {
+                    app(\App\Services\PackingDispatchService::class)->markEdited($order->invoice);
+                }
             }
         });
 
         $order->refresh();
         $message = 'Order updated successfully.';
-        if ($order->invoice && $packingRelevantChanged) {
-            $message .= ' Please send it to packing again.';
+        if ($order->invoice?->packing_edited && $packingRelevantChanged) {
+            $message .= ' The packing invoice is marked as edited.';
         }
 
         return redirect()
@@ -366,7 +356,7 @@ class OrderController extends Controller
     private function itemsSignature(\Illuminate\Support\Collection $items): string
     {
         return $items
-            ->map(fn($item) => "{$item->product_id}:{$item->quantity}:{$item->unit_price}:{$item->discount_percent}")
+            ->map(fn($item) => "{$item->product_id}:{$item->quantity}:{$item->unit_price}:{$item->unit_price_khr}:{$item->discount_percent}")
             ->sort()
             ->values()
             ->implode('|');

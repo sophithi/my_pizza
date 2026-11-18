@@ -28,10 +28,23 @@ class PaymentController extends Controller
         } elseif ($period === 'month') {
             return [$today->copy()->startOfMonth()->toDateString(), $today->copy()->endOfMonth()->toDateString()];
         } elseif ($period === 'custom') {
+            $request->validate([
+                'date_from' => 'nullable|date_format:Y-m-d',
+                'date_to' => 'nullable|date_format:Y-m-d',
+            ]);
             $from = $request->date_from ? Carbon::parse($request->date_from)->toDateString() : null;
             $to   = $request->date_to ? Carbon::parse($request->date_to)->toDateString() : null;
+            if (!$from && !$to) {
+                $from = $to = $today->toDateString();
+            }
             if ($from && !$to) $to = $from;
             if ($to && !$from) $from = $to;
+            if ($to < $from) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'date_to' => 'The end date must be on or after the start date.',
+                ]);
+            }
+            $request->merge(['date_from' => $from, 'date_to' => $to]);
             return [$from, $to];
         }
 
@@ -42,6 +55,10 @@ class PaymentController extends Controller
     {
         $query = Order::with([
             'customer',
+            // totalKhr() reads both relations for every row, including stats and
+            // exports. Loading them here avoids two extra queries per order.
+            'items',
+            'invoice',
             'payments' => fn($q) => $q->with('lines')->latest('id'),
         ]);
 
@@ -76,7 +93,10 @@ class PaymentController extends Controller
 
         // Payment method filter
         if ($method = $request->get('method')) {
-            $query->whereHas('payments', function ($q) use ($method) {
+            $query->whereHas('payments', function ($q) use ($method, $dateFrom, $dateTo) {
+                if ($dateFrom && $dateTo) {
+                    $q->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
+                }
                 if ($method === 'other') {
                     $q->where('method', 'not like', '%Cash%')
                         ->where('method', 'not like', '%ABA%')
@@ -114,10 +134,10 @@ class PaymentController extends Controller
         $settledDate = null;
         $hasInstallments = $payments->count() > 1;
 
-        $totalAmount = (float) $order->total_amount;
         $totalAmountKhr = (float) $order->totalKhr();
-        $paidAmount = $payments->sum(fn($item) => (float) $item->paid_amount);
+        $totalAmount = $totalAmountKhr / self::EXCHANGE_RATE;
         $paidAmountKhr = $payments->sum(fn($item) => (float) ($item->paid_amount_khr ?: 0));
+        $paidAmount = $paidAmountKhr / self::EXCHANGE_RATE;
         if ($payments->isEmpty() && $order->payment_status === 'paid') {
             $paidAmount = $totalAmount;
             $paidAmountKhr = $totalAmountKhr;
@@ -147,13 +167,13 @@ class PaymentController extends Controller
             $displayDate = $payment?->created_at ?? $order->order_date;
         }
 
-        $balance = max(0, $totalAmount - (float) $paidAmount);
         $balanceKhr = max(0, (float) $totalAmountKhr - (float) $paidAmountKhr);
+        $balance = $balanceKhr / self::EXCHANGE_RATE;
         $periodPaidAmount = null;
         $periodPaidAmountKhr = null;
         if ($dateFrom && $dateTo) {
-            $periodPaidAmount = $periodPayments->sum(fn($item) => (float) $item->paid_amount);
             $periodPaidAmountKhr = $periodPayments->sum(fn($item) => (float) ($item->paid_amount_khr ?: 0));
+            $periodPaidAmount = $periodPaidAmountKhr / self::EXCHANGE_RATE;
         }
 
         $lines = ($paidAmount > 0 && $payment) ? ($payment->lines?->map(fn($line) => [
@@ -203,6 +223,7 @@ class PaymentController extends Controller
             'total_amount_khr' => (float) $totalAmountKhr,
             'paid_amount' => min($totalAmount, (float) $paidAmount),
             'paid_amount_khr' => (float) $paidAmountKhr,
+            'installment_paid_amount_khr' => (float) ($payment?->paid_amount_khr ?? 0),
             'period_paid_amount' => $periodPaidAmount,
             'period_paid_amount_khr' => $periodPaidAmountKhr,
             'balance' => $balance,
@@ -224,16 +245,17 @@ class PaymentController extends Controller
         ];
     }
 
-    private function buildStatsFromRows($all, ?string $dateFrom = null, ?string $dateTo = null): array
+    private function buildStatsFromRows($all, ?string $dateFrom = null, ?string $dateTo = null, ?string $method = null): array
     {
+        // Use the same orders as the table, including delivery, method and search filters.
+        // Load every installment rather than only the latest payment shown on a row.
+        $paymentQuery = Payment::with('lines')
+            ->whereIn('order_id', $all->pluck('source_order_id')->unique());
         if ($dateFrom && $dateTo) {
-            $periodPayments = Payment::with('lines')
-                ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-                ->get();
-            $methodBreakdown = $this->buildMethodBreakdownFromPayments($periodPayments);
-        } else {
-            $methodBreakdown = $this->buildMethodBreakdown($all);
+            $paymentQuery->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
         }
+        $periodPayments = $paymentQuery->get();
+        $methodBreakdown = $this->buildMethodBreakdownFromPayments($periodPayments, $method);
 
         $oldDebtRows = $all->where('is_old_debt', true);
         $currentRows = $all->filter(function ($row) {
@@ -247,6 +269,23 @@ class PaymentController extends Controller
         $oldDebtCollectedKhr = (float) $oldDebtRows->sum(fn($row) =>
             $dateFrom && $dateTo ? ($row->period_paid_amount_khr ?? 0) : $row->paid_amount_khr
         );
+
+        // Collection totals describe receipts in the selected period and method;
+        // balances and paid/unpaid counts still describe the complete orders.
+        if (($dateFrom && $dateTo) || $method) {
+            $currentIds = $currentRows->pluck('source_order_id');
+            $oldDebtIds = $oldDebtRows->pluck('source_order_id');
+            $currentBreakdown = $this->buildMethodBreakdownFromPayments(
+                $periodPayments->whereIn('order_id', $currentIds), $method
+            );
+            $debtBreakdown = $this->buildMethodBreakdownFromPayments(
+                $periodPayments->whereIn('order_id', $oldDebtIds), $method
+            );
+            $collected = (float) array_sum(array_column($currentBreakdown, 'usd'));
+            $collectedKhr = (float) array_sum(array_column($currentBreakdown, 'khr'));
+            $oldDebtCollected = (float) array_sum(array_column($debtBreakdown, 'usd'));
+            $oldDebtCollectedKhr = (float) array_sum(array_column($debtBreakdown, 'khr'));
+        }
 
         $currentOutstanding = (float) $currentRows->sum('balance');
         $currentOutstandingKhr = (float) $currentRows->sum('balance_khr');
@@ -269,7 +308,7 @@ class PaymentController extends Controller
         ];
     }
 
-    private function buildMethodBreakdownFromPayments($payments): array
+    private function buildMethodBreakdownFromPayments($payments, ?string $methodFilter = null): array
     {
         $methodLabels = [
             'Cash'   => 'លុយក្រៅ',
@@ -285,7 +324,7 @@ class PaymentController extends Controller
         $breakdown['Other'] = ['label' => 'ផ្សេងៗ', 'usd' => 0.0, 'khr' => 0.0];
 
         foreach ($payments as $payment) {
-            if ((float) $payment->paid_amount <= 0) {
+            if ((float) $payment->paid_amount_khr <= 0) {
                 continue;
             }
 
@@ -300,82 +339,36 @@ class PaymentController extends Controller
                     }
                 }
 
-                $breakdown[$matchedKey]['usd'] += (float) $payment->paid_amount;
-                $breakdown[$matchedKey]['khr'] += (float) ($payment->paid_amount_khr ?: ($payment->paid_amount * self::EXCHANGE_RATE));
+                $breakdown[$matchedKey]['usd'] += (float) $payment->paid_amount_khr / self::EXCHANGE_RATE;
+                $breakdown[$matchedKey]['khr'] += (float) $payment->paid_amount_khr;
                 continue;
             }
 
             foreach ($lines as $line) {
                 $method = is_array($line) ? ($line['method'] ?? 'Other') : ($line->method ?? 'Other');
-                $currency = is_array($line) ? ($line['currency'] ?? 'USD') : ($line->currency ?? 'USD');
+                $currency = is_array($line) ? ($line['currency'] ?? 'KHR') : ($line->currency ?? 'KHR');
                 $amountOriginal = is_array($line) ? (float) ($line['amount_original'] ?? 0) : (float) ($line->amount_original ?? 0);
-                $amountUsd = is_array($line) ? (float) ($line['amount_usd'] ?? 0) : (float) ($line->amount_usd ?? 0);
-                $rate = is_array($line) ? (float) ($line['exchange_rate'] ?? self::EXCHANGE_RATE) : (float) ($line->exchange_rate ?? self::EXCHANGE_RATE);
 
                 $key = array_key_exists($method, $methodLabels) ? $method : 'Other';
-                $khr = $currency === 'KHR'
-                    ? $amountOriginal
-                    : round($amountUsd * $rate);
-
-                $breakdown[$key]['usd'] += $amountUsd;
-                $breakdown[$key]['khr'] += $khr;
-            }
-        }
-
-        return $breakdown;
-    }
-
-    private function buildMethodBreakdown($all): array
-    {
-        $methodLabels = [
-            'Cash'   => 'លុយក្រៅ',
-            'ABA'    => 'ABA Bank',
-            'ACLEDA' => 'ACLEDA Bank',
-            'Wing'   => 'Wing',
-        ];
-
-        $breakdown = [];
-        foreach ($methodLabels as $key => $label) {
-            $breakdown[$key] = ['label' => $label, 'usd' => 0.0, 'khr' => 0.0];
-        }
-        $breakdown['Other'] = ['label' => 'ផ្សេងៗ', 'usd' => 0.0, 'khr' => 0.0];
-
-        foreach ($all as $row) {
-            if ($row->paid_amount <= 0) {
-                continue;
-            }
-
-            $lines = $row->lines;
-
-            if (count($lines) === 0) {
-                $matchedKey = 'Other';
-                foreach ($methodLabels as $key => $label) {
-                    if (str_contains($row->method, $key)) {
-                        $matchedKey = $key;
-                        break;
-                    }
+                if ($currency !== 'KHR') {
+                    throw new \RuntimeException('Normalize historical receipts using payments:normalize-khr before reporting.');
                 }
+                $khr = $amountOriginal;
 
-                $breakdown[$matchedKey]['usd'] += $row->paid_amount;
-                $breakdown[$matchedKey]['khr'] += $row->paid_amount_khr;
-                continue;
-            }
-
-            foreach ($lines as $line) {
-                $method = is_array($line) ? ($line['method'] ?? 'Other') : ($line->method ?? 'Other');
-                $currency = is_array($line) ? ($line['currency'] ?? 'USD') : ($line->currency ?? 'USD');
-                $amountOriginal = is_array($line) ? (float) ($line['amount_original'] ?? 0) : (float) ($line->amount_original ?? 0);
-                $amountUsd = is_array($line) ? (float) ($line['amount_usd'] ?? 0) : (float) ($line->amount_usd ?? 0);
-                $rate = is_array($line) ? (float) ($line['exchange_rate'] ?? self::EXCHANGE_RATE) : (float) ($line->exchange_rate ?? self::EXCHANGE_RATE);
-
-                $key = array_key_exists($method, $methodLabels) ? $method : 'Other';
-                $khr = $currency === 'KHR'
-                    ? $amountOriginal
-                    : round($amountUsd * $rate);
-
-                $breakdown[$key]['usd'] += $amountUsd;
+                $breakdown[$key]['usd'] += $khr / self::EXCHANGE_RATE;
                 $breakdown[$key]['khr'] += $khr;
             }
+        }
+
+        if ($methodFilter) {
+            $selectedKey = $methodFilter === 'other' ? 'Other' : $methodFilter;
+            foreach ($breakdown as $key => &$amounts) {
+                if ($key !== $selectedKey) {
+                    $amounts['usd'] = 0.0;
+                    $amounts['khr'] = 0.0;
+                }
+            }
+            unset($amounts);
         }
 
         return $breakdown;
@@ -420,7 +413,7 @@ class PaymentController extends Controller
             });
         }
 
-        $stats      = $this->buildStatsFromRows($allRows, $dateFrom, $dateTo);
+        $stats      = $this->buildStatsFromRows($allRows, $dateFrom, $dateTo, $request->get('method'));
         $deliveries = Delivery::orderBy('delivery_name')->get();
 
         // Paginate manually from collection
@@ -523,6 +516,11 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
+        return \Illuminate\Support\Facades\DB::transaction(fn() => $this->storePayment($request));
+    }
+
+    private function storePayment(Request $request)
+    {
         $order = $this->resolveOrder($request);
 
         $data = $request->validate([
@@ -539,12 +537,12 @@ class PaymentController extends Controller
         ]);
 
         $lines = $this->parsePaymentLines($request);
-        $paidUsd = collect($lines)->sum('amount_usd');
         $paidKhr = $this->sumLinesKhr($lines);
+        $paidUsd = round($paidKhr / self::EXCHANGE_RATE, 2);
         $data['paid_amount'] = $paidUsd;
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
-        $data['total_amount'] = $order->total_amount;
+        $data['total_amount'] = round($order->totalKhr() / self::EXCHANGE_RATE, 2);
         $data['total_amount_khr'] = $order->totalKhr();
         $data['paid_amount_khr'] = $paidKhr;
 
@@ -553,32 +551,9 @@ class PaymentController extends Controller
         $data['exchange_rate'] = $avgExchangeRate;
 
         // Generate payment notes showing what was paid in each currency
-        $paymentNotes = $this->generatePaymentNotes($lines, $avgExchangeRate);
+        $paymentNotes = $this->generatePaymentNotes($lines);
         if ($paymentNotes) {
             $data['notes'] = $paymentNotes;
-        }
-
-        // Check for overpayment with exchange rate tolerance
-        $overage = (float) $data['paid_amount'] - (float) $data['total_amount'];
-        if ($overage > 0) {
-            // Check if payment includes multiple currencies (more lenient tolerance)
-            $hasMultipleCurrencies = count(collect($lines)->pluck('currency')->unique()) > 1;
-
-            // Allow generous overage tolerance for exchange rate fluctuations
-            if ($hasMultipleCurrencies) {
-                // For multi-currency: 15% or $100 USD (whichever is smaller)
-                $tolerance = min((float) $data['total_amount'] * 0.15, 100);
-            } else {
-                // For single currency: 10% or $50 USD
-                $tolerance = min((float) $data['total_amount'] * 0.10, 50);
-            }
-
-            if ($overage > $tolerance) {
-                abort(422, "Paid amount cannot exceed order total by more than \${$tolerance}. Overage: \${$overage}");
-            } else {
-                // Store note about overpayment for display in payment table
-                $data['exchange_rate_notes'] = "Overpaid: +\${$overage} (within tolerance)";
-            }
         }
 
         // Auto-set status — compare in KHR (ground truth) so per-line USD rounding
@@ -586,6 +561,12 @@ class PaymentController extends Controller
         // an exactly-paid order stuck at "partial".
         $data['status'] = $this->resolveStatus($data['total_amount_khr'], $paidKhr);
         $data['method'] = $this->summarizeMethods($lines);
+        $this->validatePaidKhr($paidKhr, (float) $data['total_amount_khr']);
+        if (!$request->boolean('additional_payment') && $order->payments()->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'payment_lines' => 'Please edit an existing installment or add a new payment.',
+            ]);
+        }
 
         if ($request->boolean('additional_payment')) {
             $existing = $order->payments()->get();
@@ -666,6 +647,11 @@ class PaymentController extends Controller
 
     public function update(Request $request, Payment $payment)
     {
+        return \Illuminate\Support\Facades\DB::transaction(fn() => $this->updatePayment($request, $payment));
+    }
+
+    private function updatePayment(Request $request, Payment $payment)
+    {
         $order = $this->resolveOrder($request, $payment->order_id);
 
         $data = $request->validate([
@@ -682,12 +668,12 @@ class PaymentController extends Controller
         ]);
 
         $lines = $this->parsePaymentLines($request);
-        $paidUsd = collect($lines)->sum('amount_usd');
         $paidKhr = $this->sumLinesKhr($lines);
+        $paidUsd = round($paidKhr / self::EXCHANGE_RATE, 2);
         $data['paid_amount'] = $paidUsd;
         $data['customer_name'] = $order->customer?->name ?? $data['customer_name'] ?? 'Walk-in Customer';
         $data['order_id'] = $order->id;
-        $data['total_amount'] = $order->total_amount;
+        $data['total_amount'] = round($order->totalKhr() / self::EXCHANGE_RATE, 2);
         $data['total_amount_khr'] = $order->totalKhr();
         $data['paid_amount_khr'] = $paidKhr;
 
@@ -696,37 +682,17 @@ class PaymentController extends Controller
         $data['exchange_rate'] = $avgExchangeRate;
 
         // Generate payment notes showing what was paid in each currency
-        $paymentNotes = $this->generatePaymentNotes($lines, $avgExchangeRate);
+        $paymentNotes = $this->generatePaymentNotes($lines);
         if ($paymentNotes) {
             $data['notes'] = $paymentNotes;
-        }
-
-        // Check for overpayment with exchange rate tolerance
-        $overage = (float) $data['paid_amount'] - (float) $data['total_amount'];
-        if ($overage > 0) {
-            // Check if payment includes multiple currencies (more lenient tolerance)
-            $hasMultipleCurrencies = count(collect($lines)->pluck('currency')->unique()) > 1;
-
-            // Allow generous overage tolerance for exchange rate fluctuations
-            if ($hasMultipleCurrencies) {
-                // For multi-currency: 15% or $100 USD (whichever is smaller)
-                $tolerance = min((float) $data['total_amount'] * 0.15, 100);
-            } else {
-                // For single currency: 10% or $50 USD
-                $tolerance = min((float) $data['total_amount'] * 0.10, 50);
-            }
-
-            if ($overage > $tolerance) {
-                abort(422, "Paid amount cannot exceed order total by more than \${$tolerance}. Overage: \${$overage}");
-            } else {
-                // Store note about overpayment for display in payment table
-                $data['exchange_rate_notes'] = "Overpaid: +\${$overage} (within tolerance)";
-            }
         }
 
         // Auto-set status — compare in KHR (ground truth), see store() for why.
         $data['status']      = $this->resolveStatus($data['total_amount_khr'], $paidKhr);
         $data['method'] = $this->summarizeMethods($lines);
+        $otherPaidKhr = (float) $order->payments()->where('id', '!=', $payment->id)->sum('paid_amount_khr');
+        $this->validatePaidKhr($paidKhr + $otherPaidKhr, (float) $data['total_amount_khr']);
+        $data['status'] = $this->resolveStatus((float) $data['total_amount_khr'], $paidKhr + $otherPaidKhr);
 
         if ($paidKhr <= 0) {
             $payment->lines()->delete();
@@ -780,8 +746,9 @@ class PaymentController extends Controller
 
     public function exportExcel(Request $request)
     {
+        [$dateFrom, $dateTo] = $this->resolveDateRange($request);
         $payments = $this->applyFilters($request)->get()
-            ->map(fn($order) => $this->mapOrderToPaymentRow($order));
+            ->map(fn($order) => $this->mapOrderToPaymentRow($order, $dateFrom, $dateTo));
         $periodLabel = $this->periodLabel($request);
 
         return view('payments.export', compact('payments', 'periodLabel'));
@@ -794,7 +761,7 @@ class PaymentController extends Controller
         [$dateFrom, $dateTo] = $this->resolveDateRange($request);
         $query       = $this->applyFilters($request);
         $payments    = $query->get()->map(fn($order) => $this->mapOrderToPaymentRow($order, $dateFrom, $dateTo));
-        $stats       = $this->buildStatsFromRows($payments, $dateFrom, $dateTo);
+        $stats       = $this->buildStatsFromRows($payments, $dateFrom, $dateTo, $request->get('method'));
         $periodLabel = $this->periodLabel($request);
         $statusLabel = match ($request->get('status', 'all')) {
             'paid'    => 'បានបង់',
@@ -816,17 +783,18 @@ class PaymentController extends Controller
         return 'partial';
     }
 
-    // Sums the real KHR amount of each line (KHR lines as-is, USD lines converted),
-    // instead of round-tripping the already-rounded USD total back through the
-    // exchange rate — that round trip invents/loses a few KHR and can misfire the
-    // paid/partial status on an exactly-paid order.
+    private function validatePaidKhr(float $paidKhr, float $totalKhr): void
+    {
+        if ($paidKhr > $totalKhr) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'payment_lines' => 'Payment exceeds the invoice balance in KHR.',
+            ]);
+        }
+    }
+
     private function sumLinesKhr(array $lines): float
     {
-        return round(collect($lines)->sum(function ($line) {
-            return $line['currency'] === 'KHR'
-                ? $line['amount_original']
-                : round($line['amount_original'] * $line['exchange_rate']);
-        }), 2);
+        return (float) array_sum(array_column($lines, 'amount_original'));
     }
 
     private function resolveOrder(Request $request, ?int $fallbackOrderId = null): Order
@@ -840,45 +808,43 @@ class PaymentController extends Controller
 
         abort_unless($sourceOrderId, 422, 'Please select a valid order.');
 
-        return Order::with('customer')->findOrFail($sourceOrderId);
+        return Order::with('customer')->lockForUpdate()->findOrFail($sourceOrderId);
     }
 
     private function parsePaymentLines(Request $request): array
     {
-        $exchangeRate = (float) $request->input('exchange_rate', self::EXCHANGE_RATE);
-        $rawLines = json_decode($request->input('payment_lines', '[]'), true);
-
-        if (!is_array($rawLines) || empty($rawLines)) {
-            $amount = (float) $request->input('paid_amount', 0);
-
-            return $amount > 0 ? [[
+        $data = $request->validate([
+            'payment_lines' => 'nullable|json',
+            'paid_amount_khr' => 'nullable|integer|min:0',
+        ]);
+        $rawLines = json_decode($data['payment_lines'] ?? '[]', true);
+        if ($rawLines === []) {
+            if (!$request->filled('paid_amount_khr') && (float) $request->input('paid_amount', 0) > 0) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'payment_lines' => 'Please enter the original amount in KHR.',
+                ]);
+            }
+            $rawLines = [[
                 'method' => $request->input('method', 'Cash'),
-                'currency' => 'USD',
-                'amount_original' => $amount,
-                'amount_usd' => $amount,
-                'exchange_rate' => $exchangeRate,
-            ]] : [];
+                'currency' => 'KHR',
+                'amount' => $data['paid_amount_khr'] ?? 0,
+            ]];
         }
+        $validated = validator(['lines' => $rawLines], [
+            'lines' => 'required|array',
+            'lines.*' => 'required|array',
+            'lines.*.method' => 'required|in:Cash,ABA,ACLEDA,Wing,Other',
+            'lines.*.currency' => 'sometimes|in:KHR',
+            'lines.*.amount' => 'required|integer|min:0',
+        ])->validate();
 
-        return collect($rawLines)
-            ->map(function ($line) use ($exchangeRate) {
-                $currency = strtoupper($line['currency'] ?? 'USD') === 'KHR' ? 'KHR' : 'USD';
-                $amountOriginal = max(0, (float) ($line['amount'] ?? 0));
-                $amountUsd = $currency === 'KHR'
-                    ? round($amountOriginal / $exchangeRate, 2)
-                    : round($amountOriginal, 2);
-
-                return [
-                    'method' => $line['method'] ?? 'Cash',
-                    'currency' => $currency,
-                    'amount_original' => $amountOriginal,
-                    'amount_usd' => $amountUsd,
-                    'exchange_rate' => $exchangeRate,
-                ];
-            })
-            ->filter(fn($line) => $line['amount_original'] > 0)
-            ->values()
-            ->all();
+        return collect($validated['lines'])->map(fn($line) => [
+            'method' => $line['method'],
+            'currency' => 'KHR',
+            'amount_original' => (int) $line['amount'],
+            'amount_usd' => round((int) $line['amount'] / self::EXCHANGE_RATE, 2),
+            'exchange_rate' => self::EXCHANGE_RATE,
+        ])->filter(fn($line) => $line['amount_original'] > 0)->values()->all();
     }
 
     private function summarizeMethods(array $lines): string
@@ -890,7 +856,7 @@ class PaymentController extends Controller
         return collect($lines)->pluck('method')->unique()->join(' + ');
     }
 
-    private function generatePaymentNotes(array $lines, float $exchangeRate): ?string
+    private function generatePaymentNotes(array $lines): ?string
     {
         if (empty($lines)) {
             return null;
